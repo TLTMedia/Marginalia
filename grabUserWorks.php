@@ -1,4 +1,4 @@
-<?
+<?php
 $user = $_GET['folder'];
 
 $userWorks = "users/$user/works/*";
@@ -9,10 +9,8 @@ $allWorks = array();
 
 foreach($works as $work)
 {
-  $workPath = split("/",$work);
+  $workPath = split("/", $work);
   $workName = $workPath[3];
-  $workName = substr($workName, 0, -4);
-  array_push($allWorks,$workName);
+  array_push($allWorks, $workName);
 }
 print json_encode($allWorks);
-?>

@@ -12,3 +12,107 @@
 [13-Feb-2019 19:55:26] PHP Notice:  Undefined property: stdClass::$comCreator in /home1/tltsecure/apache2/htdocs/marginaliacss/remove.php on line 33
 [13-Feb-2019 19:55:26] PHP Notice:  Undefined variable: userdir in /home1/tltsecure/apache2/htdocs/marginaliacss/remove.php on line 58
 [13-Feb-2019 19:55:26] PHP Notice:  Undefined variable: userdir in /home1/tltsecure/apache2/htdocs/marginaliacss/remove.php on line 84
+[13-Feb-2019 17:06:10] PHP Warning:  file_put_contents(users/ikleiman/tmp/TestDoc.docx) [<a href='function.file-put-contents'>function.file-put-contents</a>]: failed to open stream: No such file or directory in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 42
+[13-Feb-2019 17:12:06] PHP Catchable fatal error:  Object of class stdClass could not be converted to string in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 14
+[15-Feb-2019 14:42:43] PHP Notice:  Undefined index: data in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 7
+[15-Feb-2019 14:42:43] PHP Notice:  Trying to get property of non-object in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 8
+[15-Feb-2019 14:42:43] PHP Notice:  Trying to get property of non-object in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 9
+[15-Feb-2019 14:42:43] PHP Notice:  Trying to get property of non-object in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 10
+[15-Feb-2019 14:42:43] PHP Notice:  Trying to get property of non-object in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 11
+[15-Feb-2019 14:42:43] PHP Warning:  file_put_contents(users//tmp/.docx) [<a href='function.file-put-contents'>function.file-put-contents</a>]: failed to open stream: No such file or directory in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 44
+[15-Feb-2019 14:48:24] PHP Notice:  Undefined index: data in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 7
+[15-Feb-2019 14:48:24] PHP Notice:  Trying to get property of non-object in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 8
+[15-Feb-2019 14:48:24] PHP Notice:  Trying to get property of non-object in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 9
+[15-Feb-2019 14:48:24] PHP Notice:  Trying to get property of non-object in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 10
+[15-Feb-2019 14:48:24] PHP Notice:  Trying to get property of non-object in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 11
+[15-Feb-2019 14:48:24] PHP Warning:  file_put_contents(users//tmp/.docx) [<a href='function.file-put-contents'>function.file-put-contents</a>]: failed to open stream: No such file or directory in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 44
+[15-Feb-2019 14:51:18] PHP Notice:  Undefined index: data in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 10
+[15-Feb-2019 14:51:18] PHP Notice:  Trying to get property of non-object in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 11
+[15-Feb-2019 14:51:18] PHP Notice:  Trying to get property of non-object in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 12
+[15-Feb-2019 14:51:18] PHP Notice:  Trying to get property of non-object in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 13
+[15-Feb-2019 14:51:18] PHP Notice:  Trying to get property of non-object in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 14
+[15-Feb-2019 14:51:18] PHP Warning:  file_put_contents(users//tmp/.docx) [<a href='function.file-put-contents'>function.file-put-contents</a>]: failed to open stream: No such file or directory in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 47
+[15-Feb-2019 14:56:22] PHP Notice:  Undefined index: data in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 10
+[15-Feb-2019 14:56:22] PHP Notice:  Trying to get property of non-object in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 11
+[15-Feb-2019 14:56:22] PHP Notice:  Trying to get property of non-object in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 12
+[15-Feb-2019 14:56:22] PHP Notice:  Trying to get property of non-object in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 13
+[15-Feb-2019 14:56:22] PHP Notice:  Trying to get property of non-object in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 14
+[15-Feb-2019 14:56:22] PHP Warning:  file_put_contents(users//tmp/.docx) [<a href='function.file-put-contents'>function.file-put-contents</a>]: failed to open stream: No such file or directory in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 47
+[15-Feb-2019 14:58:38] PHP Notice:  Undefined index: data in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 10
+[15-Feb-2019 14:58:38] PHP Notice:  Trying to get property of non-object in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 11
+[15-Feb-2019 14:58:38] PHP Notice:  Trying to get property of non-object in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 12
+[15-Feb-2019 14:58:38] PHP Notice:  Trying to get property of non-object in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 13
+[15-Feb-2019 14:58:38] PHP Notice:  Trying to get property of non-object in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 14
+[15-Feb-2019 14:58:38] PHP Warning:  file_put_contents(users//tmp/.docx) [<a href='function.file-put-contents'>function.file-put-contents</a>]: failed to open stream: No such file or directory in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 47
+[15-Feb-2019 15:00:05] PHP Notice:  Undefined index: file in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 10
+[15-Feb-2019 15:00:05] PHP Notice:  Trying to get property of non-object in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 11
+[15-Feb-2019 15:00:05] PHP Notice:  Trying to get property of non-object in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 13
+[15-Feb-2019 15:00:05] PHP Notice:  Trying to get property of non-object in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 14
+[15-Feb-2019 15:00:05] PHP Notice:  Trying to get property of non-object in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 15
+[15-Feb-2019 15:00:05] PHP Warning:  file_put_contents(users//tmp/.docx) [<a href='function.file-put-contents'>function.file-put-contents</a>]: failed to open stream: No such file or directory in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 48
+[15-Feb-2019 15:00:34] PHP Warning:  json_decode() expects parameter 1 to be string, array given in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 10
+[15-Feb-2019 15:00:34] PHP Notice:  Trying to get property of non-object in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 11
+[15-Feb-2019 15:00:34] PHP Notice:  Trying to get property of non-object in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 13
+[15-Feb-2019 15:00:34] PHP Notice:  Trying to get property of non-object in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 14
+[15-Feb-2019 15:00:34] PHP Notice:  Trying to get property of non-object in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 15
+[15-Feb-2019 15:00:34] PHP Warning:  file_put_contents(users//tmp/.docx) [<a href='function.file-put-contents'>function.file-put-contents</a>]: failed to open stream: No such file or directory in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 48
+[15-Feb-2019 15:01:27] PHP Notice:  Trying to get property of non-object in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 11
+[15-Feb-2019 15:01:27] PHP Notice:  Trying to get property of non-object in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 13
+[15-Feb-2019 15:01:27] PHP Notice:  Trying to get property of non-object in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 14
+[15-Feb-2019 15:01:27] PHP Notice:  Trying to get property of non-object in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 15
+[15-Feb-2019 15:01:27] PHP Warning:  file_put_contents(users//tmp/.docx) [<a href='function.file-put-contents'>function.file-put-contents</a>]: failed to open stream: No such file or directory in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 48
+[15-Feb-2019 15:01:50] PHP Notice:  Trying to get property of non-object in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 13
+[15-Feb-2019 15:01:50] PHP Notice:  Trying to get property of non-object in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 14
+[15-Feb-2019 15:01:50] PHP Notice:  Trying to get property of non-object in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 15
+[15-Feb-2019 15:01:50] PHP Warning:  file_put_contents(users//tmp/Something.docx.docx) [<a href='function.file-put-contents'>function.file-put-contents</a>]: failed to open stream: No such file or directory in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 48
+[15-Feb-2019 15:03:00] PHP Notice:  Trying to get property of non-object in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 13
+[15-Feb-2019 15:03:00] PHP Notice:  Trying to get property of non-object in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 14
+[15-Feb-2019 15:03:00] PHP Notice:  Trying to get property of non-object in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 15
+[15-Feb-2019 15:03:00] PHP Warning:  file_put_contents(users//tmp/Something.docx) [<a href='function.file-put-contents'>function.file-put-contents</a>]: failed to open stream: No such file or directory in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 48
+[15-Feb-2019 15:12:30] PHP Notice:  Trying to get property of non-object in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 13
+[15-Feb-2019 15:12:30] PHP Notice:  Trying to get property of non-object in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 14
+[15-Feb-2019 15:12:30] PHP Notice:  Trying to get property of non-object in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 15
+[15-Feb-2019 15:12:30] PHP Warning:  file_put_contents(users//tmp/Something.docx) [<a href='function.file-put-contents'>function.file-put-contents</a>]: failed to open stream: No such file or directory in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 48
+[15-Feb-2019 15:23:58] PHP Notice:  Undefined variable: content in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 32
+[15-Feb-2019 15:26:04] PHP Notice:  Undefined variable: content in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 35
+[15-Feb-2019 15:28:11] PHP Notice:  Undefined variable: content in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 37
+[15-Feb-2019 15:41:54] PHP Notice:  Undefined variable: file in /home1/tltsecure/apache2/htdocs/marginaliacss/saveInput.php on line 47
+[15-Feb-2019 15:44:31] PHP Warning:  file_get_contents(users/ikleiman@stonybrook.edu:/works/Something..txt) [<a href='function.file-get-contents'>function.file-get-contents</a>]: failed to open stream: No such file or directory in /home1/tltsecure/apache2/htdocs/marginaliacss/grabUserWorkText.php on line 9
+[15-Feb-2019 20:44:40] PHP Notice:  Undefined variable: localAdmin in /home1/tltsecure/apache2/htdocs/marginaliacss/isAdmin.php on line 10
+[15-Feb-2019 20:44:40] PHP Notice:  Undefined property: stdClass::$timeID in /home1/tltsecure/apache2/htdocs/marginaliacss/remove.php on line 31
+[15-Feb-2019 20:44:40] PHP Notice:  Undefined property: stdClass::$comCreator in /home1/tltsecure/apache2/htdocs/marginaliacss/remove.php on line 33
+[15-Feb-2019 20:44:40] PHP Notice:  Undefined variable: userdir in /home1/tltsecure/apache2/htdocs/marginaliacss/remove.php on line 58
+[15-Feb-2019 20:44:40] PHP Notice:  Undefined variable: userdir in /home1/tltsecure/apache2/htdocs/marginaliacss/remove.php on line 84
+[15-Feb-2019 15:48:06] PHP Warning:  file_get_contents(users/ikleiman@stonybrook.edu:/works/Something.) [<a href='function.file-get-contents'>function.file-get-contents</a>]: failed to open stream: No such file or directory in /home1/tltsecure/apache2/htdocs/marginaliacss/grabUserWorkText.php on line 14
+[15-Feb-2019 15:49:59] PHP Warning:  file_get_contents(users/ikleiman@stonybrook.edu:/works/Something.) [<a href='function.file-get-contents'>function.file-get-contents</a>]: failed to open stream: No such file or directory in /home1/tltsecure/apache2/htdocs/marginaliacss/grabUserWorkText.php on line 14
+[15-Feb-2019 15:50:42] PHP Warning:  file_get_contents(users/ikleiman@stonybrook.edu/works/Something.) [<a href='function.file-get-contents'>function.file-get-contents</a>]: failed to open stream: No such file or directory in /home1/tltsecure/apache2/htdocs/marginaliacss/grabUserWorkText.php on line 16
+[15-Feb-2019 21:09:24] PHP Notice:  Undefined variable: localAdmin in /home1/tltsecure/apache2/htdocs/marginaliacss/isAdmin.php on line 10
+[15-Feb-2019 21:09:24] PHP Notice:  Undefined property: stdClass::$timeID in /home1/tltsecure/apache2/htdocs/marginaliacss/remove.php on line 31
+[15-Feb-2019 21:09:24] PHP Notice:  Undefined property: stdClass::$comCreator in /home1/tltsecure/apache2/htdocs/marginaliacss/remove.php on line 33
+[15-Feb-2019 21:09:24] PHP Notice:  Undefined variable: userdir in /home1/tltsecure/apache2/htdocs/marginaliacss/remove.php on line 58
+[15-Feb-2019 21:09:24] PHP Notice:  Undefined variable: userdir in /home1/tltsecure/apache2/htdocs/marginaliacss/remove.php on line 84
+[15-Feb-2019 21:09:28] PHP Notice:  Undefined variable: localAdmin in /home1/tltsecure/apache2/htdocs/marginaliacss/isAdmin.php on line 10
+[15-Feb-2019 21:09:28] PHP Notice:  Undefined property: stdClass::$timeID in /home1/tltsecure/apache2/htdocs/marginaliacss/remove.php on line 31
+[15-Feb-2019 21:09:28] PHP Notice:  Undefined property: stdClass::$comCreator in /home1/tltsecure/apache2/htdocs/marginaliacss/remove.php on line 33
+[15-Feb-2019 21:09:28] PHP Notice:  Undefined variable: userdir in /home1/tltsecure/apache2/htdocs/marginaliacss/remove.php on line 58
+[15-Feb-2019 21:09:28] PHP Notice:  Undefined variable: userdir in /home1/tltsecure/apache2/htdocs/marginaliacss/remove.php on line 84
+[15-Feb-2019 21:11:25] PHP Notice:  Undefined variable: localAdmin in /home1/tltsecure/apache2/htdocs/marginaliacss/isAdmin.php on line 10
+[15-Feb-2019 21:11:25] PHP Notice:  Undefined property: stdClass::$timeID in /home1/tltsecure/apache2/htdocs/marginaliacss/remove.php on line 31
+[15-Feb-2019 21:11:25] PHP Notice:  Undefined property: stdClass::$comCreator in /home1/tltsecure/apache2/htdocs/marginaliacss/remove.php on line 33
+[15-Feb-2019 21:11:25] PHP Notice:  Undefined variable: userdir in /home1/tltsecure/apache2/htdocs/marginaliacss/remove.php on line 58
+[15-Feb-2019 21:11:25] PHP Notice:  Undefined variable: userdir in /home1/tltsecure/apache2/htdocs/marginaliacss/remove.php on line 84
+[15-Feb-2019 21:11:41] PHP Notice:  Undefined variable: localAdmin in /home1/tltsecure/apache2/htdocs/marginaliacss/isAdmin.php on line 10
+[15-Feb-2019 21:11:41] PHP Notice:  Undefined property: stdClass::$timeID in /home1/tltsecure/apache2/htdocs/marginaliacss/remove.php on line 31
+[15-Feb-2019 21:11:41] PHP Notice:  Undefined property: stdClass::$comCreator in /home1/tltsecure/apache2/htdocs/marginaliacss/remove.php on line 33
+[15-Feb-2019 21:11:41] PHP Notice:  Undefined variable: userdir in /home1/tltsecure/apache2/htdocs/marginaliacss/remove.php on line 58
+[15-Feb-2019 21:11:41] PHP Notice:  Undefined variable: userdir in /home1/tltsecure/apache2/htdocs/marginaliacss/remove.php on line 84
+[15-Feb-2019 21:23:47] PHP Notice:  Undefined variable: localAdmin in /home1/tltsecure/apache2/htdocs/marginaliacss/isAdmin.php on line 10
+[15-Feb-2019 21:23:47] PHP Notice:  Undefined property: stdClass::$timeID in /home1/tltsecure/apache2/htdocs/marginaliacss/remove.php on line 31
+[15-Feb-2019 21:23:47] PHP Notice:  Undefined property: stdClass::$comCreator in /home1/tltsecure/apache2/htdocs/marginaliacss/remove.php on line 33
+[15-Feb-2019 21:23:47] PHP Notice:  Undefined variable: userdir in /home1/tltsecure/apache2/htdocs/marginaliacss/remove.php on line 58
+[15-Feb-2019 21:23:47] PHP Notice:  Undefined variable: userdir in /home1/tltsecure/apache2/htdocs/marginaliacss/remove.php on line 84
+[15-Feb-2019 21:27:10] PHP Notice:  Undefined variable: localAdmin in /home1/tltsecure/apache2/htdocs/marginaliacss/isAdmin.php on line 10
+[15-Feb-2019 21:27:10] PHP Notice:  Undefined property: stdClass::$timeID in /home1/tltsecure/apache2/htdocs/marginaliacss/remove.php on line 31
+[15-Feb-2019 21:27:10] PHP Notice:  Undefined property: stdClass::$comCreator in /home1/tltsecure/apache2/htdocs/marginaliacss/remove.php on line 33
+[15-Feb-2019 21:27:10] PHP Notice:  Undefined variable: userdir in /home1/tltsecure/apache2/htdocs/marginaliacss/remove.php on line 58
+[15-Feb-2019 21:27:10] PHP Notice:  Undefined variable: userdir in /home1/tltsecure/apache2/htdocs/marginaliacss/remove.php on line 84

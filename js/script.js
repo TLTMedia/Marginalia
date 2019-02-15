@@ -169,11 +169,11 @@ function createUserSelectScreen() {
       });
       var add_FileInput = $("<input/>", {
         type: "file",
-        accept: ".docx,.doc"
+        accept: ".docx"
       });
       var add_FileLabel = $("<span/>", {
         id: "fileName",
-        text: "*.doc"
+        text: "*.docx"
       });
 
       add_FileButton.append(add_FileInput);
@@ -250,6 +250,7 @@ function createUserSelectScreen() {
         } else if (name.length < 2) {
           alert("Please no name smaller than 2 characters");
         } else {
+          //console.log(fileToSave);
           saveLit(name, fileToSave);
         }
 
@@ -966,7 +967,7 @@ function buildHTMLFile(litContents, litName) {
   preText.hide();
   //litContents = litContents.replace(/\n\n/g, "\n");
   //litContents = litContents.replace(/\n/g, "<br/>");
-  preText.text(litContents);
+  preText.html(litContents);
 
   litDiv.append(metaChar, metaName, link, script, preText);
   $("#text").append(litDiv);
@@ -974,7 +975,6 @@ function buildHTMLFile(litContents, litName) {
 
 function getLitContents(userChosen, textChosen) {
   var dataString = JSON.stringify({
-    thisUser: user.getUserNetID(),
     userFolder: userChosen,
     work: textChosen
   });
@@ -1316,19 +1316,35 @@ function fillUserPrivateList(nameArray) {
 */
 function saveLit(litname, litFile)
 {
-  console.log(litname,"\n",litFile);
-  var dataString = JSON.stringify({
-    wordFile: litFile,
-    wordName: litname,
-    userFolder: user.getUserNetID(),
-    isModerated: $("#privateCheck").is('.is-checked')
-  });
-
-  $.post("saveInput.php", {
-    data: dataString
+  var formData = new FormData();
+  formData.append("file", litFile);
+  formData.append("litname", litname);
+  formData.append("moderated", $("#privateCheck").is('.is-checked'));
+  console.log(formData);
+  $.ajax({
+    url: "saveInput.php",
+    type: "POST",
+    data: formData,
+    async: false,
+    cache: false,
+    contentType: false,
+    processData: false
   }).done(function(data) {
     alert("File Add Success");
   });
+  // console.log(litname,"\n",litFile);
+  // var dataString = JSON.stringify({
+  //   wordFile: litFile,
+  //   wordName: litname,
+  //   userFolder: user.getUserNetID(),
+  //   isModerated: $("#privateCheck").is('.is-checked')
+  // });
+  //
+  // $.post("saveInput.php", {
+  //   data: dataString
+  // }).done(function(data) {
+  //   alert("File Add Success");
+  // });
 
 }
 
