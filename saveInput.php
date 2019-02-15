@@ -44,6 +44,3 @@ system($execString);
 if (!unlink($tmpFile)) {
     echo "Error deleting user tmp file: $tmpFile";
 }
-
-//file_put_contents("users/$folder/works/$name".".docx", $content);
-//print json_encode($content);
