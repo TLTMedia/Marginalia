@@ -116,3 +116,26 @@
 [15-Feb-2019 21:27:10] PHP Notice:  Undefined property: stdClass::$comCreator in /home1/tltsecure/apache2/htdocs/marginaliacss/remove.php on line 33
 [15-Feb-2019 21:27:10] PHP Notice:  Undefined variable: userdir in /home1/tltsecure/apache2/htdocs/marginaliacss/remove.php on line 58
 [15-Feb-2019 21:27:10] PHP Notice:  Undefined variable: userdir in /home1/tltsecure/apache2/htdocs/marginaliacss/remove.php on line 84
+[15-Feb-2019 23:23:58] PHP Warning:  mkdir() [<a href='function.mkdir'>function.mkdir</a>]: No such file or directory in /home1/tltsecure/apache2/htdocs/marginaliacss/save.php on line 73
+[15-Feb-2019 23:23:58] PHP Warning:  mkdir() [<a href='function.mkdir'>function.mkdir</a>]: No such file or directory in /home1/tltsecure/apache2/htdocs/marginaliacss/save.php on line 78
+[15-Feb-2019 23:23:58] PHP Warning:  mkdir() [<a href='function.mkdir'>function.mkdir</a>]: No such file or directory in /home1/tltsecure/apache2/htdocs/marginaliacss/save.php on line 83
+[15-Feb-2019 23:23:58] PHP Warning:  file_put_contents(users/ikleiman@stonybrook.edu/works_data/Something.html/Something.html_data/ikleiman/5c674a0e/5c674a0e_comment) [<a href='function.file-put-contents'>function.file-put-contents</a>]: failed to open stream: No such file or directory in /home1/tltsecure/apache2/htdocs/marginaliacss/save.php on line 87
+[15-Feb-2019 23:25:51] PHP Warning:  mkdir() [<a href='function.mkdir'>function.mkdir</a>]: No such file or directory in /home1/tltsecure/apache2/htdocs/marginaliacss/save.php on line 73
+[15-Feb-2019 23:25:51] PHP Warning:  mkdir() [<a href='function.mkdir'>function.mkdir</a>]: No such file or directory in /home1/tltsecure/apache2/htdocs/marginaliacss/save.php on line 78
+[15-Feb-2019 23:25:51] PHP Warning:  mkdir() [<a href='function.mkdir'>function.mkdir</a>]: No such file or directory in /home1/tltsecure/apache2/htdocs/marginaliacss/save.php on line 83
+[15-Feb-2019 23:25:51] PHP Warning:  file_put_contents(users/ikleiman@stonybrook.edu/works_data/Something.html/Something.html_data/ikleiman/5c674a7f/5c674a7f_comment) [<a href='function.file-put-contents'>function.file-put-contents</a>]: failed to open stream: No such file or directory in /home1/tltsecure/apache2/htdocs/marginaliacss/save.php on line 87
+[15-Feb-2019 23:55:19] PHP Notice:  Undefined variable: localAdmin in /home1/tltsecure/apache2/htdocs/marginaliacss/isAdmin.php on line 10
+[15-Feb-2019 23:55:19] PHP Notice:  Undefined property: stdClass::$timeID in /home1/tltsecure/apache2/htdocs/marginaliacss/remove.php on line 31
+[15-Feb-2019 23:55:19] PHP Notice:  Undefined property: stdClass::$comCreator in /home1/tltsecure/apache2/htdocs/marginaliacss/remove.php on line 33
+[15-Feb-2019 23:55:19] PHP Notice:  Undefined variable: userdir in /home1/tltsecure/apache2/htdocs/marginaliacss/remove.php on line 58
+[15-Feb-2019 23:55:19] PHP Notice:  Undefined variable: userdir in /home1/tltsecure/apache2/htdocs/marginaliacss/remove.php on line 84
+[15-Feb-2019 23:55:29] PHP Notice:  Undefined variable: localAdmin in /home1/tltsecure/apache2/htdocs/marginaliacss/isAdmin.php on line 10
+[15-Feb-2019 23:55:29] PHP Notice:  Undefined property: stdClass::$timeID in /home1/tltsecure/apache2/htdocs/marginaliacss/remove.php on line 31
+[15-Feb-2019 23:55:29] PHP Notice:  Undefined property: stdClass::$comCreator in /home1/tltsecure/apache2/htdocs/marginaliacss/remove.php on line 33
+[15-Feb-2019 23:55:29] PHP Notice:  Undefined variable: userdir in /home1/tltsecure/apache2/htdocs/marginaliacss/remove.php on line 58
+[15-Feb-2019 23:55:29] PHP Notice:  Undefined variable: userdir in /home1/tltsecure/apache2/htdocs/marginaliacss/remove.php on line 84
+[15-Feb-2019 23:55:41] PHP Notice:  Undefined variable: localAdmin in /home1/tltsecure/apache2/htdocs/marginaliacss/isAdmin.php on line 10
+[15-Feb-2019 23:55:41] PHP Notice:  Undefined property: stdClass::$timeID in /home1/tltsecure/apache2/htdocs/marginaliacss/remove.php on line 31
+[15-Feb-2019 23:55:41] PHP Notice:  Undefined property: stdClass::$comCreator in /home1/tltsecure/apache2/htdocs/marginaliacss/remove.php on line 33
+[15-Feb-2019 23:55:41] PHP Notice:  Undefined variable: userdir in /home1/tltsecure/apache2/htdocs/marginaliacss/remove.php on line 58
+[15-Feb-2019 23:55:41] PHP Notice:  Undefined variable: userdir in /home1/tltsecure/apache2/htdocs/marginaliacss/remove.php on line 84

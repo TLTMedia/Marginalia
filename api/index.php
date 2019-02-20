@@ -31,6 +31,9 @@ switch ($method) {
 	case 'workData':
 		new WorkDetails($eppn, $params);
 		break;
+	/**
+	 * Default case when no endpoint is matched
+	 */
 	default:
 		printf("Unknown endpoint");
 		break;
