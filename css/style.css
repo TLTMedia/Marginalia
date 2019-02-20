@@ -383,9 +383,9 @@ html {
   display: block;
   display: inline-block;*/
   word-wrap:normal;
-  font-size: .5rem;
+  font-size: .8rem;
   text-align: center;
-  width: 4rem;
+  /* width: 4rem; */
 }
 
 #inputTextName {
