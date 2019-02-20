@@ -335,10 +335,10 @@ html {
 }
 
 #userButton {
-  font-size: .5rem;
+  font-size: .8rem;
   font-style: normal;
   text-align: center;
-  width: 4rem;
+  /* width: 4rem; */
   /* position: relative; */
   /* display: block; */
   /* display: inline-block; */
