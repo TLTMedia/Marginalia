@@ -466,7 +466,8 @@ text[inputtype='inputFile'] {
 
 #textForm {
   border-style: solid;
-  border-color: #CA99FA;
+  /* border-color: #CA99FA; */
+  border-color: #4db6ac;
   border-width: 1px;
   resize: vertical;
   width: 100%;
@@ -609,7 +610,8 @@ div[id='textSpace'] {
 }
 
 .mdl-radio__inner-circle {
-  color: #CA99FA;
+  /* color: #CA99FA; */
+  color: #4db6ac;
 }
 
 .choiceList {
@@ -993,7 +995,8 @@ div[class^='approve_'] {
 
 .ui-dialog {
   border-style: solid;
-  border-color: #CA99FA;
+  /* border-color: #CA99FA; */
+  border-color: #4db6ac;
   border-width: 1px;
   /* left:675px !important; */
 }
@@ -1004,7 +1007,8 @@ div[class^='approve_'] {
 
 .ui-dialog-titlebar {
   text-align: center;
-  background-color: #CA99FA;
+  /* background-color: #CA99FA; */
+  background-color: #4db6ac;
 }
 
 .ui-dialog-buttonpane {
