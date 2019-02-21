@@ -361,13 +361,12 @@ function fillUserPrivateList(nameArray) {
   Saves the uploaded word file so that it can be exported
   into an html file that can be loaded for our use
 */
-function saveLit(litname, litFile)
-{
+function saveLit(litname, moderated, litFile) {
   var formData = new FormData();
   formData.append("file", litFile);
   formData.append("litname", litname);
-  formData.append("moderated", $("#privateCheck").is('.is-checked'));
-  console.log(formData);
+  formData.append("moderated", moderated);
+
   $.ajax({
     url: "saveInput.php",
     type: "POST",
@@ -377,22 +376,8 @@ function saveLit(litname, litFile)
     contentType: false,
     processData: false
   }).done(function(data) {
-    alert("File Add Success");
+    alert("File uploaded successfully");
   });
-  // console.log(litname,"\n",litFile);
-  // var dataString = JSON.stringify({
-  //   wordFile: litFile,
-  //   wordName: litname,
-  //   userFolder: user.getUserNetID(),
-  //   isModerated: $("#privateCheck").is('.is-checked')
-  // });
-  //
-  // $.post("saveInput.php", {
-  //   data: dataString
-  // }).done(function(data) {
-  //   alert("File Add Success");
-  // });
-
 }
 
 
