@@ -1,72 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
-<!--
-Author: Thomas Clarke - TLL Programmer/Developer
-Contact: thomasjclarke1998@gmail.com
-
-"Good HTML is short HTML"
--->
-
 <head>
   <meta charset="UTF-8">
   <title>Marginalia</title>
   <meta name="description" content="DESCRIPTION">
-
-  <!-- CSS Styles -->
-
   <link rel="stylesheet" type="text/css" media="only screen" href="css/style.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
   <link rel="stylesheet" href="https://code.getmdl.io/1.0.6/material.indigo-pink.min.css">
   <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.teal-yellow.min.css" />
-
   <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
   <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
   <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.js"></script>
-
   <!-- JS Scripts -->
   <!--[if lt IE 9]>
     <script src="https://cdn.jsdelivr.net/html5shiv/3.7.3/html5shiv.min.js"></script>
   <![endif]-->
-
-
-
   <script src="https://cdnjs.cloudflare.com/ajax/libs/rangy/1.3.0/rangy-core.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/rangy/1.3.0/rangy-classapplier.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/rangy/1.3.0/rangy-serializer.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/rangy/1.3.0/rangy-textrange.min.js"></script>
-
-
   <script src="ckeditor/ckeditor.js"></script>
   <script src="ckeditor/adapters/jquery.js"></script>
 
-  <script src='js/rangyHelpers.js'></script>
-  <script src='js/comments.js'></script>
-  <script src='js/script.js'></script>
+  <script src="js/rangyHelpers.js"></script>
+  <script src="js/comments.js"></script>
+  <!-- TODO: Below... -->
+  <script src="js/script.js"></script>
+  <script src="js/gui.js"></script>
+  <script src="js/dynamicStyling.js"></script>
 
-  <!-- Makes sure that users dont insinctivley save or select all on this page -->
-  <script>
-    document.onkeydown = function(e) {
-      if (e.ctrlKey || e.metaKey) {
-        if (e.keyCode === 83) {
-          alert("Saving this website has been Disabled");
-          e.preventDefault();
-          e.stopPropagation();
-        } else if (e.keyCode === 65) {
-          alert("It would be unwise to select all this text");
-          e.preventDefault();
-          e.stopPropagation();
-        }
-      }
-    }
-  </script>
-  <!-- Makes sure that users dont insinctivley save or select all on this page -->
-
+  <script src="js/keyboardOverwrites.js"></script>
 </head>
 
 <body>
   <div class="content">
 
-    <div class="header">
+    <div id="header">
+        <!-- <div class="headerTab headerHome" onClick="window.location.reload()">Home</div> -->
+        <div class="headerTab headerUpload" id="litadd">Add Literature</div>
     </div>
     <div id="firstPage">
       <div id="cardbox" class="introBoxes">
@@ -74,6 +45,7 @@ Contact: thomasjclarke1998@gmail.com
         <div class="titleText">
           Marginalia
         </div>
+
         <div id="addLitBase"></div>
         <div id="nonTitleContent">
 
@@ -89,21 +61,20 @@ Contact: thomasjclarke1998@gmail.com
               USERS
               <button id="pickUser" class="mdl-button mdl-js-button mdl-button--icon">
                 <span class="material-icons">more_vert</span>
-            </button>
-            <span class="userSelector"></span>
+              </button>
+            <span id="userSelector"></span>
             </span>
 
             <span class="userFiles" visible="false"> LITERATURE
               <button id="pickLit" class="mdl-button mdl-js-button mdl-button--icon">
                 <span class="material-icons">more_vert</span>
-            </button>
-
+              </button>
             </span>
           </div>
 
-          <button id="litadd" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored">
+          <!-- <button id="litadd" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored">
             Add Literature
-          </button>
+          </button> -->
         </div>
       </div>
       <!-- cardbox end -->

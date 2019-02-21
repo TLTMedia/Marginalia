@@ -29,7 +29,7 @@ html {
   height: 100%;
 }
 
-.header {
+#header {
   background-color: #4db6ac;
   width: 100%;
   height: 5rem;
@@ -37,6 +37,32 @@ html {
   background-repeat: no-repeat;
   background-position: 4% 50%;
   background-size: 18% 80%;
+  z-index: 1;
+}
+
+.headerTab {
+    z-index: 2;
+    cursor: pointer;
+    font-size: 1rem;
+    position: absolute;
+    color: rgba(255, 255, 255, 1.0);
+    font-weight: normal;
+    border-bottom: 1px solid rgba(255, 255, 255, 1.0);
+    transition: border-bottom-width 0.1s ease-in-out;
+}
+
+.headerTab:hover {
+    border-bottom-width: 2px;
+}
+
+#goBack {
+    display: inline-block;
+    cursor: pointer;
+    margin-bottom: 0px;
+}
+
+.nameContainer {
+    display: none;
 }
 
 .introBoxes {
@@ -84,12 +110,6 @@ html {
 .chosenFile {
   font-weight: bold;
   font-size: .60rem;
-}
-
-#litadd {
-  width: 32.5%;
-  font-size: .5rem;
-  margin-top: 2%;
 }
 
 #addLitBase {
@@ -194,7 +214,7 @@ html {
     height: auto;
     margin: auto;
   }
-  .header {
+  #header {
     background-position: 4% 50%;
     background-size: 33% 100%;
     width: auto;
@@ -687,6 +707,7 @@ button[id^="removePrivateName_"]:hover {
 }
 
 .typeSelector ul {
+  top: calc(5rem + 24px);
   right: 0;
   list-style-type: none;
   margin: 0;
@@ -1048,9 +1069,6 @@ input[type="file"] {
   width: 60% !important;
 }
 
-#add_nameInput {
-  width: 60% !important;
-}
 .privateContainer
 {
   padding-top:3%;
@@ -1066,3 +1084,9 @@ input[type="file"] {
   }
   100% {
     -webkit-transform: rotat
+  }
+}
+
+#userSelector {
+    font-style: italic;
+}
