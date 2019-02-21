@@ -1,4 +1,4 @@
-users/
-!/users/ikleiman@stonybrook.edu/*
+users/*
+!users/ikleiman@stonybrook.edu/*
 ._*
 PHP_errors.log
