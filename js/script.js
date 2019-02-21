@@ -356,28 +356,36 @@ function fillUserPrivateList(nameArray) {
 
 
 
-// Saves the uploaded word file
 /*
-  Saves the uploaded word file so that it can be exported
-  into an html file that can be loaded for our use
+    Uploads the user's .docx file...
+    @var litname : the name the file should be saved as on the server
+    @var private : true/false specifies whether it's a private file
+        if true, file is hidden from other users; only visible to self
+    @var litfile : file object data ... (the file data to upload)
 */
-function saveLit(litname, moderated, litFile) {
-  var formData = new FormData();
-  formData.append("file", litFile);
-  formData.append("litname", litname);
-  formData.append("moderated", moderated);
+function saveLit(litname, private, litFile) {
+    var formData = new FormData();
+    formData.append("file", litFile);
+    formData.append("litname", litname);
+    formData.append("private", private);
 
-  $.ajax({
-    url: "saveInput.php",
-    type: "POST",
-    data: formData,
-    async: false,
-    cache: false,
-    contentType: false,
-    processData: false
-  }).done(function(data) {
-    alert("File uploaded successfully");
-  });
+    $.ajax({
+        url: "saveInput.php",
+        type: "POST",
+        data: formData,
+        async: false,
+        cache: false,
+        contentType: false,
+        processData: false
+    }).done(function(data) {
+        if (data.status == 'success') {
+            alert("File upload successful.");
+        } else {
+            alert("File upload failure. " + data);
+        }
+    }).fail(function(data) {
+        alert("File upload failure. " + data);
+    });
 }
 
 

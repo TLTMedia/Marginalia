@@ -1,14 +1,17 @@
 <?php
+// TODO: $private & || $moderated functionality...
+
 // This will save the given data as new text files with their new names
 
 // Necessary to prevent timezone error b/c invalid php.ini config
 // https://stackoverflow.com/questions/16765158/date-it-is-not-safe-to-rely-on-the-systems-timezone-settings
 date_default_timezone_set('America/New_York');
+header('Content-Type: application/json');
 
 $eppn = $_SERVER['eppn'];
 $data = $_FILES['file'];
 $name = $_POST['litname'];
-$moderated = $_POST['moderated'];
+$private = $_POST['private'];
 
 // Check if every necessary folder and file exists
 $userFolder = "users/$eppn";
@@ -27,7 +30,7 @@ if (!file_exists("$userFolder/works_data/$name")) {
     file_put_contents("$userFolder/${eppn}_whitelist", $eppn);
 }
 
-if ($moderated) {
+if ($private) {
     file_put_contents("$userFolder/works_data/$name/moderatedPage", $eppn);
 }
 
@@ -42,5 +45,7 @@ system($execString);
 
 // Cleanup (remove the tmp file)
 if (!unlink($tmpFile)) {
-    echo "Error deleting user tmp file: $tmpFile";
+    echo json_encode(array("status" => "error", "message" => "Error deleting user tmp file: $tmpFile"));
 }
+
+echo json_encode(array("status" => "success"));
