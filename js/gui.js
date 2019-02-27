@@ -1,7 +1,7 @@
 $(window).ready(function() {
     $("#litadd").on("click", function(evt) {
-        $("#addLitBase").load("parts/upload.html", function() {
-            $(this).show();
+        $("#addLitBase").load("parts/upload.htm", function() {
+            $(this).fadeIn();
 
             $("#nonTitleContent").hide();
 
