@@ -23,12 +23,14 @@ class Users
      */
     public function getCurrentUser()
     {
-        $user = json_decode("{}");
         $user->firstname = $_SERVER['nickname'];
         $user->lastname = $_SERVER['sn'];
         $user->netid = $_SERVER['eppn'];
 
-        return json_encode($user);
+        return json_encode(array(
+            "status" => "ok",
+            "data" => $user
+        ));
     }
 
     /**
@@ -44,6 +46,27 @@ class Users
             array_push($allWorks, $workName . ".html");
         }
 
-        return json_encode($allWorks);
+        return json_encode(array(
+            "status" => "ok",
+            "data" => $allWorks
+        ));
+    }
+
+    /**
+     * Grab user work data...
+     */
+    public function getUserWork($pathOfWork)
+    {
+        if (!file_exists($pathOfWork)) {
+            return json_encode(array(
+                "status" => "error",
+                "message" => "work does not exist"
+            ));
+        }
+
+        return json_encode(array(
+            "status" => "ok",
+            "data" => file_get_contents($pathOfWork)
+        ));
     }
 }

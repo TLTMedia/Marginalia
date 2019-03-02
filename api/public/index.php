@@ -93,10 +93,30 @@ $app->get('/remove_permission/:work/:user', function ($work, $user) use ($app) {
  * Get a list of the logged in users' works
  */
 $app->get('/get_works', function () use ($app) {
-     require '../Actions/Users.php';
-     $user = new Users;
-     echo $user->getUserWorks();
- });
+    require '../Actions/Users.php';
+    $user = new Users;
+    echo $user->getUserWorks();
+});
+
+/**
+ * Get a users' work file data
+ */
+$app->get('/get_work/:work', function ($work) use ($app) {
+    require '../Actions/Users.php';
+    $user = new Users;
+    $workFullPath = "../../users/" . $_SERVER['eppn'] . "/works_data/" . $work . "/" . $work . ".html";
+    echo $user->getUserWork($workFullPath);
+});
+
+/**
+ * Get the comments for a users' work
+ */
+$app->get('/get_comments/:work', function ($work) use ($app) {
+    require '../Actions/Users.php';
+    $user = new Users;
+    $workFullPath = "../../users/" . $_SERVER['eppn'] . "/works_data/" . $work . "/" . $work . ".html";
+    echo $user->getUserWork($workFullPath);
+});
 
 // Run app
 $app->run();
