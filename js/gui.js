@@ -60,7 +60,35 @@ function createUserSelectScreen() {
   });
 
   selector.append(usersItems);
+  // const userList = apiRequest('get_users', 'GET');
 
+  // // Add all users Folders
+  // var length = data.length;
+  // var rows = 0;
+  // while (length >= 1) {
+  //   length -= 3;
+  //   rows++;
+  // }
+
+  // for (var userNum in data) {
+  //   var userItem = $("<li/>", {
+  //     text: data[userNum],
+  //     class: "mdl-menu__item userButton",
+  //     click: function(evt) {
+  //       $(".userFiles").show();
+  //       userFolderSelected = $(this).text();
+  //       $(".chosenUser").text(userFolderSelected + ":");
+  //       $(".chosenFile").text("");
+  //       $("#worksButtons").remove();
+  //       readWhiteList();
+  //       createLitSelectorScreen();
+  //     }
+  //   });
+  //   usersItems.append(userItem);
+  // }
+
+  // componentHandler.upgradeElement($('#usersItems')[0]);
+  // $(".userFiles").hide();
   $.get("grabUsers.php", function(data) {
     // Add all users Folders
     var length = data.length;
