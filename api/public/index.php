@@ -89,6 +89,14 @@ $app->get('/remove_permission/:work/:user', function ($work, $user) use ($app) {
     echo $permissions->removePermission($workFullPath, $user);
 });
 
+/**
+ * Get a list of the logged in users' works
+ */
+$app->get('/get_works', function () use ($app) {
+     require '../Actions/Users.php';
+     $user = new Users;
+     echo $user->getUserWorks();
+ });
 
 // Run app
 $app->run();

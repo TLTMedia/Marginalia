@@ -30,4 +30,20 @@ class Users
 
         return json_encode($user);
     }
+
+    /**
+     * Returns a list of the users works
+     */
+    public function getUserWorks()
+    {
+        // holds an array of all the works in the user's(eppn) directory
+        $allWorks = array();
+
+        foreach(glob("../../users/" . $_SERVER['eppn'] . "/works_data/*") as $work) {
+            $workName = substr($work, strrpos($work, '/') + 1);
+            array_push($allWorks, $workName . ".html");
+        }
+
+        return json_encode($allWorks);
+    }
 }
