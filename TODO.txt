@@ -1,0 +1,24 @@
+loadComments.php => api/../get_current_user
+grabUsers.php => api/../get_users
+grabWhitelist.php => ... should be on works/work# level... (permission for individual works... not for their entire works directory)
+
+
+DONE (old):
+    - loadComments.php [NOTE: this never loaded comments, just some info on the logged in user]
+    - grabUsers.php
+    - grabWhitelist.php [NOTE: ... permissions at a work-level directory...]
+    - grabUserWorks.php
+    - grabModeratedPages.php [NOTE: I think this can be backend...]
+    - grabUserWorkText.php
+    - load.php [NOTE: this needs an overhaul...]
+
+MISC:
+    - Change annotation header box color to same as the blue one
+    - Top right box should say "filter by"...
+    - Remove the ".HTML" when choosing documents (UI)
+    - Make width bigger to see your email address
+    - See if she can design a better annotation box
+    - Scaling/Mobile Friendly (Bootstrap, custom color SCSS theme?)
+    - Cancel button for annotations too
+    - Private top right to personal
+    - Unapproved or approved comments... Professor approves them
