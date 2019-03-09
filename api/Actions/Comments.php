@@ -8,14 +8,14 @@ class Comments
      */
     public function saveComment($workAuthor, $workName, $replyTo, $replyHash, $commenterName, $startIndex, $endIndex, $commentText, $commentType)
     {
-        $visibility = $this->userOnModList("$workAuthor/works/$workName", $commenterName);
+        $visibility = $this->userOnModList(__PATH__ . "$workAuthor/works/$workName", $commenterName);
 
         $lowestCommentPath = __PATH__ . "$workAuthor/works/$workName/data/threads/$commenterName";
         if (!is_dir($lowestCommentPath)) {
             mkdir($lowestCommentPath);
         }
-        $unixTime = time();
-        $newCommentPath = $lowestCommentPath . "/" . $unixTime;
+
+        $newCommentPath = $lowestCommentPath . "/" . time();
         if (!is_dir($newCommentPath)) {
             mkdir($newCommentPath);
         }
@@ -36,6 +36,7 @@ class Comments
 
     /**
      * Get visible comments and related info to them for a specific work belonging to a user
+     * ... helper function to a recursive function?
      */
     public function getComments($author, $work)
     {
