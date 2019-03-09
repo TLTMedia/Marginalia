@@ -11,10 +11,8 @@ $data = json_decode($_GET['data']);
 $userFolder = $data -> userFolder;
 $work = $data -> work;
 
-$sourceFile = "users/$eppn/works/$work";
+$sourceFile = "users/$eppn/works/$work/index.html";
 
 $text = file_get_contents($sourceFile);
 
 print $text;
-
-return $text;

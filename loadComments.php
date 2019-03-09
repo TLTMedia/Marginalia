@@ -6,4 +6,3 @@ $user->netid=$_SERVER['cn'];
 // $data= json_decode(file_get_contents("dummyData.json"));
 $data->user =$user;
 print json_encode($data);
-?>
