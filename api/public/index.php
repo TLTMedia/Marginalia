@@ -7,6 +7,8 @@ date_default_timezone_set('America/New_York');
 
 require '../vendor/autoload.php';
 
+define("__PATH__", "../../users/");
+
 // Prepare app
 $app = new \Slim\Slim(array(
     'templates.path' => '../templates',
@@ -65,7 +67,7 @@ $app->get('/get_current_user', function () use ($app) {
 $app->get('/get_permissions_list/:work', function ($work) use ($app) {
     require '../Actions/Permissions.php';
     $permissions = new Permissions;
-    $workFullPath = "../../users/" . $_SERVER['eppn'] . "/works_data/" . $work;
+    $workFullPath = __PATH__ . $_SERVER['eppn'] . "/works/" . $work;
     echo $permissions->getPermissionsList($workFullPath);
 });
 
@@ -75,7 +77,7 @@ $app->get('/get_permissions_list/:work', function ($work) use ($app) {
 $app->get('/add_permission/:work/:user', function ($work, $user) use ($app) {
     require '../Actions/Permissions.php';
     $permissions = new Permissions;
-    $workFullPath = "../../users/" . $_SERVER['eppn'] . "/works_data/" . $work;
+    $workFullPath = __PATH__ . $_SERVER['eppn'] . "/works/" . $work;
     echo $permissions->addPermission($workFullPath, $user);
 });
 
@@ -85,7 +87,7 @@ $app->get('/add_permission/:work/:user', function ($work, $user) use ($app) {
 $app->get('/remove_permission/:work/:user', function ($work, $user) use ($app) {
     require '../Actions/Permissions.php';
     $permissions = new Permissions;
-    $workFullPath = "../../users/" . $_SERVER['eppn'] . "/works_data/" . $work;
+    $workFullPath = __PATH__ . $_SERVER['eppn'] . "/works/" . $work;
     echo $permissions->removePermission($workFullPath, $user);
 });
 
@@ -104,19 +106,53 @@ $app->get('/get_works', function () use ($app) {
 $app->get('/get_work/:work', function ($work) use ($app) {
     require '../Actions/Users.php';
     $user = new Users;
-    $workFullPath = "../../users/" . $_SERVER['eppn'] . "/works_data/" . $work . "/" . $work . ".html";
+    $workFullPath = __PATH__ . $_SERVER['eppn'] . "/works/" . $work . "/" . $work . ".html";
     echo $user->getUserWork($workFullPath);
 });
 
 /**
- * Get the comments for a users' work
+ * Save a comment on a work
  */
-$app->get('/get_comments/:work', function ($work) use ($app) {
-    require '../Actions/Users.php';
-    $user = new Users;
-    $workFullPath = "../../users/" . $_SERVER['eppn'] . "/works_data/" . $work . "/" . $work . ".html";
-    echo $user->getUserWork($workFullPath);
+$app->post('/save_comments/', function () use ($app) {
+    $json = $app->request->getBody();
+    $data = json_decode($json, true);
+
+    if (!array_intersect(array_keys($data), array('author', 'work', 'replyTo', 'replyHash', 'startIndex', 'endIndex', 'commentText', 'commentType')) == array_keys($data)) {
+        echo json_encode(array(
+            "status" => "error",
+            "message" => "missing a parameter"
+        ));
+        return;
+    }
+
+    require '../Actions/Comments.php';
+    $comments = new Comments;
+
+    echo $comments->saveComment(
+        $data['author'],
+        $data['work'],
+        $data['replyTo'],
+        $data['replyHash'],
+        $_SERVER['eppn'],
+        $data['startIndex'],
+        $data['endIndex'],
+        $data['commentText'],
+        $data['commentType']
+    );
 });
+
+/**
+ * Get visible comments of a work
+ */
+// $app->get('/get_comments/:author/:work', function ($author, $work) use ($app) {
+//     require '../Actions/Comments.php';
+//     $comments = new Comments;
+//
+//     echo $comments->getComments(
+//         $author,
+//         $work,
+//     );
+// });
 
 // Run app
 $app->run();

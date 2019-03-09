@@ -104,7 +104,7 @@ class Permissions
      * No padding/extra json garbage for user friendliness...
      * purely return data
      */
-    private function getRawPermissionsList($pathOfWork)
+    public function getRawPermissionsList($pathOfWork)
     {
         // $pathOfWork = ../../users/ikleiman@stonybrook.edu/works_data/Something
         $filePath = $pathOfWork . "/permissions.json";

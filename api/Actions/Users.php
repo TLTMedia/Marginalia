@@ -41,7 +41,7 @@ class Users
         // holds an array of all the works in the user's(eppn) directory
         $allWorks = array();
 
-        foreach(glob("../../users/" . $_SERVER['eppn'] . "/works_data/*") as $work) {
+        foreach(glob("../../users/" . $_SERVER['eppn'] . "/works/*") as $work) {
             $workName = substr($work, strrpos($work, '/') + 1);
             array_push($allWorks, $workName . ".html");
         }
