@@ -144,15 +144,15 @@ $app->post('/save_comments/', function () use ($app) {
 /**
  * Get visible comments of a work
  */
-// $app->get('/get_comments/:author/:work', function ($author, $work) use ($app) {
-//     require '../Actions/Comments.php';
-//     $comments = new Comments;
-//
-//     echo $comments->getComments(
-//         $author,
-//         $work,
-//     );
-// });
+$app->get('/get_comments/:author/:work', function ($author, $work) use ($app) {
+    require '../Actions/Comments.php';
+    $comments = new Comments;
+
+    echo $comments->getComments(
+        $author,
+        $work
+    );
+});
 
 // Run app
 $app->run();

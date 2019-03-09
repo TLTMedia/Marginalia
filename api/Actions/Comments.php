@@ -40,7 +40,55 @@ class Comments
      */
     public function getComments($author, $work)
     {
+        try {
+            $commentFilePaths = $this->getCommentFilesRecursively($author, $work);
+        } catch(Exception $e) {
+            return json_encode(array(
+                "status" => "error",
+                "message" => "unable to get comments",
+                "raw_exception" => $e->getMessage()
+            ));
+        }
 
+        return json_encode(array(
+            "status" => "ok",
+            "data" => $commentFilePaths
+        ));
+    }
+
+    /**
+     * Builds the JSON content of comment files - given an array of file paths
+     */
+    private function buildCommentJsonFromPaths(&$commentFilePaths)
+    {
+        
+    }
+
+    /**
+     * Recursive starter function... returns an array of all the file paths to comment.json files that're associated with $author and $work
+     */
+    private function getCommentFilesRecursively($author, $work)
+    {
+        $initialFiles = array();
+        return $this->getCommentFilesRecursivelyHelper(__PATH__ . "$author/works/$work/data/threads", $initialFiles);
+    }
+
+    /**
+     * Recursive helper function in getting the comment-file paths for a specified 'thread' directory path
+     */
+    private function getCommentFilesRecursivelyHelper($thread, &$commentsList)
+    {
+        $files = array_diff(scandir($thread), array('.', '..'));
+        foreach ($files as $userPost) {
+            $timestampedDirs = array_diff(scandir("$thread/$userPost"), array('.', '..'));
+            foreach ($timestampedDirs as $timestampedDir) {
+                array_push($commentsList, "$thread/$userPost/$timestampedDir/comment.json");
+                if (is_dir("$thread/$userPost/$timestampedDir/threads")) {
+                    $this->getCommentFilesRecursivelyHelper("$thread/$userPost/$timestampedDir/threads", $commentsList);
+                }
+            }
+        }
+        return $commentsList;
     }
 
     // private function recursiveGetComments(&$commentStack, $)
