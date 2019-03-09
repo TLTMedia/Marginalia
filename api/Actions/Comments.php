@@ -52,7 +52,7 @@ class Comments
 
         return json_encode(array(
             "status" => "ok",
-            "data" => $commentFilePaths
+            "data" => $this->buildCommentJsonFromPaths($commentFilePaths)
         ));
     }
 
@@ -61,7 +61,58 @@ class Comments
      */
     private function buildCommentJsonFromPaths(&$commentFilePaths)
     {
-        
+        usort($commentFilePaths, 'self::sortByLengthInc');
+        $comments = array();
+
+        foreach ($commentFilePaths as $filePath) {
+            $jsonData = json_decode(file_get_contents($filePath));
+            $jsonData->path = $filePath;
+            $jsonData->threads = array();
+
+            // TODO: How can I do this recursively??
+            // This is incomplete and will only nest up to 4 times.
+            // Just a physical, coded, working example to help think about how to do it recursively...
+            if (($amt = $this->pathIsContinuation($filePath, $comments)) == -1) {
+                array_push($comments, $jsonData);
+            } else {
+                if (($amt2 = $this->pathIsContinuation($filePath, $comments[$amt]->threads)) == -1) {
+                    array_push($comments[$amt]->threads, $jsonData);
+                } else {
+                    if (($amt3 = $this->pathIsContinuation($filePath, $comments[$amt]->threads[$amt2]->threads)) == -1) {
+                        array_push($comments[$amt]->threads[$amt2]->threads, $jsonData);
+                    } else {
+                        if (($amt4 = $this->pathIsContinuation($filePath, $comments[$amt]->threads[$amt2]->threads[$amt3]->threads)) == -1) {
+                            array_push($comments[$amt]->threads[$amt2]->threads[$amt3]->threads, $jsonData);
+                        } else {
+                            //
+                        }
+                    }
+                }
+            }
+        }
+
+        return $comments;
+    }
+
+    /**
+     * Checks if the $path is inside $array, {NOT!!!!} if the entire length of $path is covered by a value in $array...
+     * Rather, if the $path is a continuation of any of the existing arrays...
+     */
+    private function pathIsContinuation($path, &$array)
+    {
+        usort($array, 'self::sortByLengthDec');
+        $count = 0;
+        foreach ($array as $somePath) {
+            $truncatedPath = substr($somePath->path, 0, strrpos($somePath->path, '/'));
+            // maybe use preg_match ? ... I don't think it's necessary,... but maybe when comment nesting gets extremely large it'd cause issues with strrpos?
+            if (strpos($path, $truncatedPath) !== FALSE) {
+                return $count;
+            }
+
+            ++$count;
+        }
+
+        return -1;
     }
 
     /**
@@ -79,22 +130,36 @@ class Comments
     private function getCommentFilesRecursivelyHelper($thread, &$commentsList)
     {
         $files = array_diff(scandir($thread), array('.', '..'));
+
         foreach ($files as $userPost) {
             $timestampedDirs = array_diff(scandir("$thread/$userPost"), array('.', '..'));
+
             foreach ($timestampedDirs as $timestampedDir) {
                 array_push($commentsList, "$thread/$userPost/$timestampedDir/comment.json");
+
                 if (is_dir("$thread/$userPost/$timestampedDir/threads")) {
                     $this->getCommentFilesRecursivelyHelper("$thread/$userPost/$timestampedDir/threads", $commentsList);
                 }
             }
         }
+
         return $commentsList;
     }
 
-    // private function recursiveGetComments(&$commentStack, $)
-    // {
-    //
-    // }
+    /**
+     * Sort an arrays' contents by length (increasing length)
+     * For usage with 'usort'
+     * e.g: usort($array, 'sortByLength');
+     */
+    private function sortByLengthInc($a, $b)
+    {
+        return strlen($a) - strlen($b);
+    }
+
+    private function sortByLengthDec($a, $b)
+    {
+        return strlen($b->path) - strlen($a->path);
+    }
 
     /**
      * permissions.php contains list of people who's comments are auto approved and they also can maintain comment approval/visibility
@@ -107,11 +172,11 @@ class Comments
 
         foreach ($userEditList as $validUser) {
             if ($user == $validUser) {
-                return true;
+                return TRUE;
             }
         }
 
-        return false;
+        return FALSE;
     }
 }
 
@@ -122,12 +187,27 @@ class FirstLevelComment
         $commentText,
         $startIndex,
         $endIndex,
-        $commentType
+        $commentType,
+        $thread = NULL,
+        $path = NULL
     ) {
         $this->visibility = $visibility;
         $this->commentText = $commentText;
         $this->startIndex = $startIndex;
         $this->endIndex = $endIndex;
         $this->commentType = $commentType;
+        $this->thread = $thread;
+        $this->path = $path;
+    }
+
+    public function populateByArray($array)
+    {
+        $this->visibility = $array['visibility'];
+        $this->commentText = $array['commentText'];
+        $this->startIndex = $array['startIndex'];
+        $this->endIndex = $array['endIndex'];
+        $this->commentType = $array['commentType'];
+        $this->thread = array();
+        $this->path = $array['path'];
     }
 }
