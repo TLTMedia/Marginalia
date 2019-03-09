@@ -850,7 +850,7 @@ function commentApproval(approved, id) {
       startDex: yetApprove.startIndex,
       endDex: yetApprove.endIndex,
       timeStamp: yetApprove.timeStamp,
-      textChosen: textChosen,
+      textChosen: (textChosen.substr(0, textChosen.lastIndexOf("."))),
       userFolder: userFolderSelected
     });
     $.post("save.php", {
@@ -869,7 +869,7 @@ function commentApproval(approved, id) {
       removalID: yetApprove.userID,
       timeID: yetApprove.timeStamp,
       isReply: false,
-      textChosen: textChosen,
+      textChosen: (textChosen.substr(0, textChosen.lastIndexOf("."))),
       userFolder: userFolderSelected
     });
     console.log(dataString)
@@ -1654,7 +1654,7 @@ function saveUserComment() {
     startDex: commentIndexMap.get(timeSt)[0],
     endDex: commentIndexMap.get(timeSt)[1],
     timeStamp: timeSt,
-    textChosen: textChosen,
+    textChosen: (textChosen.substr(0, textChosen.lastIndexOf("."))),
     userFolder: userFolderSelected
   });
 
