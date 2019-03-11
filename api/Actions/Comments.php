@@ -73,11 +73,13 @@ class Comments
             // Uses references to not lose the original object... But be able to change the 'pointer' of where we want to write data to
             $commentsPointer = &$comments;
             if (($amt = $this->pathIsContinuation($filePath, $commentsPointer)) == -1) {
+                // if $jsonData->visible == false, /...
                 array_push($commentsPointer, $jsonData);
             } else {
                 // if $jsonData == NULL, then we've finally found a spot for the comment in the $comments tree...
                 while ($jsonData != NULL) {
                     if (($amt2 = $this->pathIsContinuation($filePath, $commentsPointer[$amt]->threads)) == -1) {
+                        // if $jsonData->visible == false, /...
                         array_push($commentsPointer[$amt]->threads, $jsonData);
                         $jsonData = NULL;
                     } else {
