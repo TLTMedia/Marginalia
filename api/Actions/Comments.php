@@ -72,6 +72,12 @@ class Comments
             // TODO: How can I do this recursively??
             // This is incomplete and will only nest up to 4 times.
             // Just a physical, coded, working example to help think about how to do it recursively...
+            // if (($amt = $this->pathIsContinuation($filePath, $comments)) == -1) {
+            //     array_push($comments, $jsonData);
+            // } else {
+            //     $comments[$amt]->threads = $this->pathReadingHelper($jsonData, $filePath, $amt, $comments[$amt]->threads);
+            // }
+
             if (($amt = $this->pathIsContinuation($filePath, $comments)) == -1) {
                 array_push($comments, $jsonData);
             } else {
@@ -93,6 +99,20 @@ class Comments
 
         return $comments;
     }
+
+    /**
+     * Recursive path continuation reading
+     */
+    // private function pathReadingHelper($jsonData, $filePath, $amt, &$comments)
+    // {
+    //     if (($amt2 = $this->pathIsContinuation($filePath, $comments)) == -1) {
+    //         array_push($comments, $jsonData);
+    //     } else {
+    //         retur$this->pathReadingHelper($jsonData, $filePath, $amt2, $comments[$amt]->threads);
+    //     }
+    //
+    //     return $comments;
+    // }
 
     /**
      * Checks if the $path is inside $array, {NOT!!!!} if the entire length of $path is covered by a value in $array...
@@ -207,7 +227,7 @@ class FirstLevelComment
         $this->startIndex = $array['startIndex'];
         $this->endIndex = $array['endIndex'];
         $this->commentType = $array['commentType'];
-        $this->thread = array();
+        $this->threads = array();
         $this->path = $array['path'];
     }
 }
