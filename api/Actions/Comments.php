@@ -69,29 +69,20 @@ class Comments
             $jsonData->path = $filePath;
             $jsonData->threads = array();
 
-            // TODO: How can I do this recursively??
-            // This is incomplete and will only nest up to 4 times.
-            // Just a physical, coded, working example to help think about how to do it recursively...
-            // if (($amt = $this->pathIsContinuation($filePath, $comments)) == -1) {
-            //     array_push($comments, $jsonData);
-            // } else {
-            //     $comments[$amt]->threads = $this->pathReadingHelper($jsonData, $filePath, $amt, $comments[$amt]->threads);
-            // }
-
-            if (($amt = $this->pathIsContinuation($filePath, $comments)) == -1) {
-                array_push($comments, $jsonData);
+            // Recusively check if the $filePath is a subpath of an existing path in $comment...
+            // Uses references to not lose the original object... But be able to change the 'pointer' of where we want to write data to
+            $commentsPointer = &$comments;
+            if (($amt = $this->pathIsContinuation($filePath, $commentsPointer)) == -1) {
+                array_push($commentsPointer, $jsonData);
             } else {
-                if (($amt2 = $this->pathIsContinuation($filePath, $comments[$amt]->threads)) == -1) {
-                    array_push($comments[$amt]->threads, $jsonData);
-                } else {
-                    if (($amt3 = $this->pathIsContinuation($filePath, $comments[$amt]->threads[$amt2]->threads)) == -1) {
-                        array_push($comments[$amt]->threads[$amt2]->threads, $jsonData);
+                // if $jsonData == NULL, then we've finally found a spot for the comment in the $comments tree...
+                while ($jsonData != NULL) {
+                    if (($amt2 = $this->pathIsContinuation($filePath, $commentsPointer[$amt]->threads)) == -1) {
+                        array_push($commentsPointer[$amt]->threads, $jsonData);
+                        $jsonData = NULL;
                     } else {
-                        if (($amt4 = $this->pathIsContinuation($filePath, $comments[$amt]->threads[$amt2]->threads[$amt3]->threads)) == -1) {
-                            array_push($comments[$amt]->threads[$amt2]->threads[$amt3]->threads, $jsonData);
-                        } else {
-                            //
-                        }
+                        $commentsPointer = &$commentsPointer[$amt]->threads;
+                        $amt = $amt2;
                     }
                 }
             }
@@ -99,20 +90,6 @@ class Comments
 
         return $comments;
     }
-
-    /**
-     * Recursive path continuation reading
-     */
-    // private function pathReadingHelper($jsonData, $filePath, $amt, &$comments)
-    // {
-    //     if (($amt2 = $this->pathIsContinuation($filePath, $comments)) == -1) {
-    //         array_push($comments, $jsonData);
-    //     } else {
-    //         retur$this->pathReadingHelper($jsonData, $filePath, $amt2, $comments[$amt]->threads);
-    //     }
-    //
-    //     return $comments;
-    // }
 
     /**
      * Checks if the $path is inside $array, {NOT!!!!} if the entire length of $path is covered by a value in $array...
