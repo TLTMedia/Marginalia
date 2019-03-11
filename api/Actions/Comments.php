@@ -187,7 +187,7 @@ class FirstLevelComment
         $startIndex,
         $endIndex,
         $commentType,
-        $thread = NULL,
+        $threads = NULL,
         $path = NULL
     ) {
         $this->visibility = $visibility;
@@ -195,7 +195,7 @@ class FirstLevelComment
         $this->startIndex = $startIndex;
         $this->endIndex = $endIndex;
         $this->commentType = $commentType;
-        $this->thread = $thread;
+        $this->threads = $threads;
         $this->path = $path;
     }
 
