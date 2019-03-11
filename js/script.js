@@ -15,7 +15,10 @@ var userFolderWorks = []; // The works that the user has
 
 // Holds user information
 var user;
-var currentUser;
+var currentUser = {}; // TODO: (... need to remove this global nonsense... temporary bypass)
+currentUser.netid = 'ikleiman';
+currentUser.firstname = 'Ilan';
+currentUser.lastname = 'Kleiman';
 
 // Assists with comment saving
 var isEdit = false; // If the sent text is an edit to a previous text
@@ -428,18 +431,22 @@ function loadUserComments() {
   userReplyMap = new Map();
 
   var dfd = new $.Deferred();
-  $.get("load.php", {
-    text: textChosen,
-    userFolder: userFolderSelected
-  }).done(function(data) {
+  $.getJSON("api/public/get_comments/" + userFolderSelected + "/" + textChosen).done(function(data) {
     $(".allButtons").show();
     $(".loader").hide();
     $("#text").fadeIn();
     $("#textSpace").fadeIn();
     $("#textTitle").fadeIn();
+
+    var commentData = data.data;
+    for (var i = 0; i < commentData.length; ++i) {
+        console.log(commentData[i].commentText);
+        makeSpan(rangy.createRange(), commentData[i].path, commentData[i].commentType, commentData[i].commentType, commentData[i].startIndex,
+          commentData[i].endIndex, commentData[i].visibility, commentData[i].commentType, commentData[i].commentType);
+    }
     //console.log(data);
     //console.log(data.userLoggedIn);
-    currentUser = data.userLoggedIn;
+    //currentUser = data.userLoggedIn;
     currentUser.fullname = currentUser.firstname + " " + currentUser.lastname;
     var selRange = rangy.createRange();
     var stud = [];
@@ -1645,24 +1652,34 @@ function saveUserComment() {
 
   //console.log(literature.substring(commentIndexMap.get(timeSt)[0],commentIndexMap.get(timeSt)[1]));
 
-  var dataString = JSON.stringify({
-    user: netID,
-    firstname: firstName,
-    lastname: lastName,
-    type: type,
-    comData: cData,
-    startDex: commentIndexMap.get(timeSt)[0],
-    endDex: commentIndexMap.get(timeSt)[1],
-    timeStamp: timeSt,
-    textChosen: (textChosen.substr(0, textChosen.lastIndexOf("."))),
-    userFolder: userFolderSelected
-  });
+  // var dataString = JSON.stringify({
+  //   user: netID,
+  //   firstname: firstName,
+  //   lastname: lastName,
+  //   type: type,
+  //   comData: cData,
+  //   startDex: commentIndexMap.get(timeSt)[0],
+  //   endDex: commentIndexMap.get(timeSt)[1],
+  //   timeStamp: timeSt,
+  //   textChosen: (textChosen.substr(0, textChosen.lastIndexOf("."))),
+  //   userFolder: userFolderSelected
+  // });
 
 
-  console.log(JSON.parse(dataString));
-
-  $.post("save.php", {
-      data: dataString
+  //console.log(JSON.parse(dataString));
+  $.ajax("api/public/save_comments/", {
+      data: JSON.stringify({
+          author: userFolderSelected,
+          work: textChosen,
+          replyTo: "_", // if it's a comment to a comment...
+          replyHash: "_", // ^ (no backend exists for this yet)
+          startIndex: commentIndexMap.get(timeSt)[0],
+          endIndex: commentIndexMap.get(timeSt)[1],
+          commentText: cData,
+          commentType: type
+      }),
+      contentType: 'application/json',
+      type : 'POST'
     })
     .done(function(msg) {
       console.log('Data Sent')
