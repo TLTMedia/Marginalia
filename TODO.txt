@@ -22,3 +22,4 @@ MISC:
     - Cancel button for annotations too
     - Private top right to personal
     - Unapproved or approved comments... Professor approves them
+    - Files within the /parts directory should be an api endpoint
