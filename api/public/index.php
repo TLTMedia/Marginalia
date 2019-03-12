@@ -160,7 +160,7 @@ $app->get('/get_comments/:author/:work', function ($author, $work) use ($app) {
  * - TODO: ... maybe change to post() ? ...
  */
 $app->get('/git_pull/master/:code', function ($code) use ($app) {
-    $real = file_get_contents("git_secret.txt");
+    $real = file_get_contents("../../git_secret.txt");
     if ($real != $code) {
         echo json_encode(array(
             "status" => "error",
