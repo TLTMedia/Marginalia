@@ -90,13 +90,20 @@ function createUserSelectScreen() {
   // componentHandler.upgradeElement($('#usersItems')[0]);
   // $(".userFiles").hide();
   $.getJSON("api/public/get_users", function(data) {
+
+    if (data['status'] != 'ok') {
+      alert("Unable to retrieve user listing");
+    }
+
     // Add all users Folders
-    var length = data.length;
+    var length = data['data'].length;
     var rows = 0;
     while (length >= 1) {
       length -= 3;
       rows++;
     }
+
+    data = data['data'];
 
     for (var userNum in data) {
       var userItem = $("<li/>", {

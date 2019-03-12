@@ -14,8 +14,11 @@ class Users
             $netid = substr($userid, strrpos($userid, '/') + 1);;
             array_push($allNetIDs, $netid);
         }
-
-        return json_encode($allNetIDs);
+        
+        return json_encode(array(
+            "status" => "ok",
+            "data" => $allNetIDs
+        ));
     }
 
     /**
