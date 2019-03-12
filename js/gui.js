@@ -89,7 +89,7 @@ function createUserSelectScreen() {
 
   // componentHandler.upgradeElement($('#usersItems')[0]);
   // $(".userFiles").hide();
-  $.get("grabUsers.php", function(data) {
+  $.get("api/public/get_users", function(data) {
     // Add all users Folders
     var length = data.length;
     var rows = 0;
