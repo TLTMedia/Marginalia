@@ -154,5 +154,22 @@ $app->get('/get_comments/:author/:work', function ($author, $work) use ($app) {
     );
 });
 
+/**
+ * Force the server to git-pull from github master branch
+ * - Because FTP & SSH access to the 'http://apps.tlt.stonybrook.edu' is restricted from IPs not on the local network...
+ * - TODO: ... maybe change to post() ? ...
+ */
+$app->get('/git_pull/master/:code', function ($code) use ($app) {
+    $real = file_get_contents("git_secret.txt");
+    if ($real != $code) {
+        echo json_encode(array(
+            "status" => "error",
+            "message" => "invalid code"
+        ));
+        return;
+    }
+    echo system("git pull");
+});
+
 // Run app
 $app->run();
