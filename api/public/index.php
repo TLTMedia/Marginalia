@@ -169,7 +169,7 @@ $app->get('/git_pull/master/:code', function ($code) use ($app) {
         ));
         return;
     }
-    echo system("git pull");
+    system("git pull");
 });
 
 // Run app
