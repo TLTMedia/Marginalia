@@ -161,6 +161,7 @@ $app->get('/get_comments/:author/:work', function ($author, $work) use ($app) {
  */
 $app->get('/git_pull/master/:code', function ($code) use ($app) {
     $real = file_get_contents("../../git_secret.txt");
+    $real = trim(preg_replace('/\s\s+/', '', $real));
     if ($real != $code) {
         echo json_encode(array(
             "status" => "error",
