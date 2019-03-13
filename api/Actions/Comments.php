@@ -5,6 +5,7 @@ class Comments
     /**
      * Save a users' comment on a specified work
      * This method must check if the user has access to comment on specified work
+     * TODO: Replying to a comment... replyhash = direct parents' comment timestamp & replyTo is the parent author eppn
      */
     public function saveComment($workAuthor, $workName, $replyTo, $replyHash, $commenterName, $startIndex, $endIndex, $commentText, $commentType)
     {
