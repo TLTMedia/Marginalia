@@ -11,7 +11,7 @@ var remSpan;
 function highlightCurrentSelection(evt, currentUser) {
 
   var dfd = new $.Deferred();
-  var mainUser = user.data.user;
+  var mainUser = currentUser['eppn'];
   var selectedRange = rangy.getSelection().getRangeAt(0);
   // console.log(rangy.getSelection())
 

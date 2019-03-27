@@ -115,7 +115,7 @@ function createUserSelectScreen() {
           $(".chosenUser").text(userFolderSelected + ":");
           $(".chosenFile").text("");
           $("#worksButtons").remove();
-          readWhiteList();
+          //readWhiteList();
           createLitSelectorScreen();
         }
       });
@@ -179,7 +179,7 @@ function createLitSelectorScreen() {
         }
       });
 
-      if (userFolderSelected == user.getUserNetID() || whitelist.includes(user.getUserNetID())) {
+      if (userFolderSelected == currentUser['eppn'] || whitelist.includes(currentUser['eppn'])) {
         litButton.on('contextmenu', function(evt) {
           evt.preventDefault();
           setFileModeration(evt);
@@ -219,11 +219,11 @@ function createLitSelectorScreen() {
     //console.log(moderation);
     allModeratedPages = moderation;
     for (var lit in moderation) {
-      if (!moderation[lit].includes(user.getUserNetID())) {
+      if (!moderation[lit].includes(currentUser['eppn'])) {
         var buttonMod = $("button[name='" + lit + "']");
         buttonMod.addClass("moderatedUserButton");
         //console.log(whitelist);
-        if (!whitelist.includes(user.getUserNetID())) {
+        if (!whitelist.includes(currentUser['eppn'])) {
           buttonMod.attr("disabled", "disabled");
         }
       }

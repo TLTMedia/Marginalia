@@ -13,12 +13,7 @@ $(function() {
 var userFolderSelected; // The User-folder they've selected to view
 var userFolderWorks = []; // The works that the user has
 
-// Holds user information
-var user;
-var currentUser = {}; // TODO: (... need to remove this global nonsense... temporary bypass)
-currentUser.netid = 'ikleiman';
-currentUser.firstname = 'Ilan';
-currentUser.lastname = 'Kleiman';
+var currentUser = {};
 
 // Assists with comment saving
 var isEdit = false; // If the sent text is an edit to a previous text
@@ -51,16 +46,13 @@ var width = 0;
   Loads the users folder and creates a button for each user
 */
 function init() {
+    getUserData();
+
   $(".loader").hide();
   $("#text").hide();
   $("#addLitBase").hide();
-  makeCommmentObject().then(data => {
-    comment = data;
-    user = data;
-    createUserSelectScreen();
-    // will be made into a system button
-    console.log(user);
-  });
+  createUserSelectScreen();
+
 
   $(window).on("resize", function() {
     var stageWidth = $(window).width();
@@ -84,7 +76,7 @@ function buildHTMLFile(litContents, litName) {
   var litDiv = $("<div/>", {
     "id": "litDiv"
   }).on("mouseup", function(evt) {
-    highlightCurrentSelection(evt, user.getUserNetID()).then(function(data) {})
+    highlightCurrentSelection(evt, currentUser['eppn']).then(function(data) {})
   });
 
   var metaChar = $("<meta/>", {
@@ -183,7 +175,7 @@ function setFileModeration(clicked) {
         var dontHave = !(allModeratedPages.hasOwnProperty(target)) && !$("#moderateButton").prop("checked");
 
         if (send) {
-          allModeratedPages[target] = [user.getUserNetID()];
+          allModeratedPages[target] = [currentUser['eppn']];
         }
         var dataString = JSON.stringify({
           "type": $("#moderateButton").prop("checked"),
@@ -410,7 +402,7 @@ function saveLit(litname, private, litFile) {
 //       id: "litDiv",
 //       html: lit
 //     }).on("mouseup", function(evt) {
-//       highlightCurrentSelection(evt, user.getUserNetID())
+//       highlightCurrentSelection(evt, currentUser['eppn'])
 //     });
 //     $('#text').append(litDiv);
 //   })
@@ -458,7 +450,7 @@ function loadUserComments() {
     //console.log(data);
     //console.log(data.userLoggedIn);
     //currentUser = data.userLoggedIn;
-    currentUser.fullname = currentUser.firstname + " " + currentUser.lastname;
+    //currentUser.fullname = currentUser.firstname + " " + currentUser.lastname;
     var stud = [];
     allUserComments = $(data)[0].arrayOfComments;
     //console.log("Users and their comments: \n", allUserComments);
@@ -751,15 +743,6 @@ function makeStudentSelectors(studArray) {
   This adds together both the site-admins along with the student's relative
   admin powers, if requested the user can ask to give other people admin powers
 */
-function readWhiteList() {
-  $.get("grabWhitelist.php", {
-    localAdmin: userFolderSelected
-  }).done(function(data) {
-    whitelist = data.split("\n");
-    console.log("Whitelist: ", whitelist);
-  });
-
-}
 
 // Admin approval form where all comments go to at first
 /*
