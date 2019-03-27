@@ -1,7 +1,6 @@
-loadComments.php => api/../get_current_user
-grabUsers.php => api/../get_users
 grabWhitelist.php => ... should be on works/work# level... (permission for individual works... not for their entire works directory)
-
+grabModeratedPages.php?
+visibility for comments & approving them via admin
 
 DONE (old):
     - loadComments.php [NOTE: this never loaded comments, just some info on the logged in user]
