@@ -11,17 +11,55 @@ class Comments
     {
         $visibility = $this->userOnModList(__PATH__ . "$workAuthor/works/$workName", $commenterName);
 
-        $lowestCommentPath = __PATH__ . "$workAuthor/works/$workName/data/threads/$commenterName";
-        if (!is_dir($lowestCommentPath)) {
-            mkdir($lowestCommentPath);
+        if ($replyTo == '_' || $replyHash == '_') {
+            // create new top level comment
+            $lowestCommentPath = __PATH__ . "$workAuthor/works/$workName/data/threads/$commenterName";
+            if (!is_dir($lowestCommentPath)) {
+                mkdir($lowestCommentPath);
+            }
+
+            $commentHash = time();
+            $newCommentPath = $lowestCommentPath . "/" . $commentHash;
+            if (!is_dir($newCommentPath)) {
+                mkdir($newCommentPath);
+            }
+        } else {
+            // find the path to the specified comment we're replying to
+            $commentPaths = $this->getCommentFilesRecursively($workAuthor, $workName);
+            $replyPath = null;
+            $replyToEndPath = $replyTo . "/" . $replyHash . "/comment.json";
+            $size = strlen($replyToEndPath);
+
+            foreach ($commentPaths as $path) {
+                if (substr($path, -$size) == $replyToEndPath) {
+                    $replyPath = substr($path, 0, strrpos($path, '/') + 1);
+                    break;
+                }
+            }
+
+            // unable to find the path for the comment to reply to
+            if (!isset($replyPath)) {
+                return json_encode(array(
+                    "status" => "error",
+                    "message" => "unable to save comment"
+                ));
+            }
+
+            // creating the directories/pathing for the new comment
+            if (!is_dir($replyPath . "threads")) {
+                mkdir($replyPath . "threads");
+            }
+            if (!is_dir($replyPath . "threads/" . $_SERVER['eppn'])) {
+                mkdir($replyPath . "threads/" . $_SERVER['eppn']);
+            }
+            $commentHash = time();
+            $newCommentPath = $replyPath . "threads/" . $_SERVER['eppn'] . "/" . $commentHash;
+            if (!is_dir($newCommentPath)) {
+                mkdir($newCommentPath);
+            }
         }
 
-        $newCommentPath = $lowestCommentPath . "/" . time();
-        if (!is_dir($newCommentPath)) {
-            mkdir($newCommentPath);
-        }
-
-        $comment = new FirstLevelComment($visibility, $commentText, $startIndex, $endIndex, $commentType);
+        $comment = new Comment($visibility, $commentText, $startIndex, $endIndex, $commentType, $_SERVER['nickname'], $_SERVER['sn']);
         if (file_put_contents($newCommentPath . "/comment.json", json_encode($comment))) {
             return json_encode(array(
                 "status" => "ok",
@@ -73,14 +111,13 @@ class Comments
             // Recusively check if the $filePath is a subpath of an existing path in $comment...
             // Uses references to not lose the original object... But be able to change the 'pointer' of where we want to write data to
             $commentsPointer = &$comments;
-            if (($amt = $this->pathIsContinuation($filePath, $commentsPointer)) == -1) {
+            if (($amt = $this->isThreadOf($filePath, $commentsPointer)) == -1) {
                 // if $jsonData->visible == false, /...
                 array_push($commentsPointer, $jsonData);
             } else {
                 // if $jsonData == NULL, then we've finally found a spot for the comment in the $comments tree...
                 while ($jsonData != NULL) {
-                    if (($amt2 = $this->pathIsContinuation($filePath, $commentsPointer[$amt]->threads)) == -1) {
-                        // if $jsonData->visible == false, /...
+                    if (($amt2 = $this->isThreadOf($filePath, $commentsPointer[$amt]->threads)) == -1) {
                         array_push($commentsPointer[$amt]->threads, $jsonData);
                         $jsonData = NULL;
                     } else {
@@ -98,7 +135,7 @@ class Comments
      * Checks if the $path is inside $array, {NOT!!!!} if the entire length of $path is covered by a value in $array...
      * Rather, if the $path is a continuation of any of the existing arrays...
      */
-    private function pathIsContinuation($path, &$array)
+    private function isThreadOf($path, &$array)
     {
         usort($array, 'self::sortByLengthDec');
         $count = 0;
@@ -178,9 +215,19 @@ class Comments
 
         return FALSE;
     }
+
+    private function getEppnHashFromPath($path)
+    {
+        $array = array_reverse(explode("/", $path));
+
+        return array(
+            'eppn' => $array[2],
+            'hash' => $array[1]
+        );
+    }
 }
 
-class FirstLevelComment
+class Comment
 {
     public function __construct(
         $visibility,
@@ -188,26 +235,15 @@ class FirstLevelComment
         $startIndex,
         $endIndex,
         $commentType,
-        $threads = NULL,
-        $path = NULL
+        $firstName,
+        $lastName
     ) {
         $this->visibility = $visibility;
         $this->commentText = $commentText;
         $this->startIndex = $startIndex;
         $this->endIndex = $endIndex;
         $this->commentType = $commentType;
-        $this->threads = $threads;
-        $this->path = $path;
-    }
-
-    public function populateByArray($array)
-    {
-        $this->visibility = $array['visibility'];
-        $this->commentText = $array['commentText'];
-        $this->startIndex = $array['startIndex'];
-        $this->endIndex = $array['endIndex'];
-        $this->commentType = $array['commentType'];
-        $this->threads = array();
-        $this->path = $array['path'];
+        $this->firstName = $firstName;
+        $this->lastName = $lastName;
     }
 }

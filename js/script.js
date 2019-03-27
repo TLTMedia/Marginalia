@@ -441,14 +441,24 @@ function loadUserComments() {
     var commentData = data.data;
     for (var i = 0; i < commentData.length; ++i) {
         console.log(commentData[i].commentText);
-        makeSpan(rangy.createRange(), commentData[i].path, commentData[i].commentType, commentData[i].commentType, commentData[i].startIndex,
-          commentData[i].endIndex, commentData[i].visibility, commentData[i].commentType, commentData[i].commentType);
+        // makeSpan(classID, firstName, lastName, startDex, endDex, isVisible, userID, type)
+        var [,hash,eppn,] = commentData[i].path.split("/").reverse()
+        makeSpan(
+            hash,
+            commentData[i].firstName,
+            commentData[i].lastName,
+            commentData[i].startIndex,
+            commentData[i].endIndex,
+            commentData[i].visibility,
+            eppn,
+            commentData[i].commentType,
+            btoa(commentData[i].commentText)
+        );
     }
     //console.log(data);
     //console.log(data.userLoggedIn);
     //currentUser = data.userLoggedIn;
     currentUser.fullname = currentUser.firstname + " " + currentUser.lastname;
-    var selRange = rangy.createRange();
     var stud = [];
     allUserComments = $(data)[0].arrayOfComments;
     //console.log("Users and their comments: \n", allUserComments);
@@ -549,8 +559,8 @@ function loadUserComments() {
 
                 userReplyMap.set(comment.timeStamp, student.comments[com].replies);
 
-                makeSpan(selRange, id, comment.firstname, comment.lastname, comment.startIndex,
-                  comment.endIndex, comment.isVisible, comment.userID, comment.type);
+                makeSpan(id, comment.firstname, comment.lastname, comment.startIndex,
+                  comment.endIndex, comment.isVisible, comment.userID, comment.type, comment.commentText);
 
                 userComMap.set(comment.timeStamp, comment.commentData);
               } else {
@@ -599,9 +609,10 @@ function loadUserComments() {
 A span is composed of class, firstname, lastname, start index, endindex,
                       innertext, isvisible, userid and type
 */
-function makeSpan(rangeMake, classID, firstName, lastName, startDex, endDex, isVisible, userID, type) {
-  console.log(classID, firstName, lastName, startDex, endDex, isVisible, userID, type);
+function makeSpan(classID, firstName, lastName, startDex, endDex, isVisible, eppn, type, commentText) {
+  console.log(classID, firstName, lastName, startDex, endDex, isVisible, eppn, type);
 
+  var rangeMake = rangy.createRange();
   rangeMake.selectCharacters(document.getElementById("textSpace"), startDex, endDex);
   hlRange(rangeMake);
 
@@ -612,30 +623,33 @@ function makeSpan(rangeMake, classID, firstName, lastName, startDex, endDex, isV
   span.attr("class", classID);
   span.attr("firstname", firstName);
   span.attr("lastname", lastName);
-  span.attr("userID", userID);
+  span.attr("eppn", eppn);
+  span.attr("commentType", type);
+  span.attr("commentText", commentText);
+  span.attr("title", "By: " + firstName + " " + lastName);
 
 
   $(span).off().on("click", function(evt) {
-    console.log("TESTER3");
-    // if ($(this).attr("class").substring(0, 3) != "hl_") {
-    idName = $(this).attr("class").split("_");
+    var eppn = $(this).attr("eppn");
+    var type = $(this).attr("commentType");
 
-    var type = commentTypeMap.get(idName[1]);
-    console.log(idName[1]);
-    $(".commentTypeDropdown").val(type.charAt(0).toUpperCase() + type.substr(1));
+    $(".commentTypeDropdown").val(
+        type.charAt(0).toUpperCase() + type.substr(1)
+    );
     $("[id='ui-id-1']").text("Annotation by: " + $(this).attr("firstname") + " " + $(this).attr("lastname"));
 
 
-    CKEDITOR.instances.textForm.setData(userComMap.get(idName[1]));
+    CKEDITOR.instances.textForm.setData(atob($(this).attr("commentText")));
     // console.log(idName[0] == currentUser.netid)
     // console.log(whitelist.includes(currentUser.netid))
-    if (idName[0] != currentUser.netid && whitelist.includes(currentUser.netid)) {
+    if (eppn != currentUser.eppn && whitelist.includes(currentUser.eppn)) {
       isEdit = true;
     }
 
     evt.stopPropagation();
 
-    fillReplyBox(evt);
+    // TODO: show replies
+    //fillReplyBox(evt);
     displayReplyBox(evt);
     displayCommentBox(evt);
     textShowReply();
@@ -645,7 +659,7 @@ function makeSpan(rangeMake, classID, firstName, lastName, startDex, endDex, isV
 
     CKEDITOR.instances['textForm'].setReadOnly(true);
     $(".commentTypeDropdown").attr("disabled", "disabled");
-    if (idName[0] == currentUser.netid || whitelist.includes(currentUser.netid)) {
+    if (eppn == currentUser.eppn || whitelist.includes(currentUser.eppn)) {
       $("#commentSave").hide();
       $("#commentRemove").show();
       $("#commentExit").show();

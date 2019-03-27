@@ -23,3 +23,6 @@ MISC:
     - Private top right to personal
     - Unapproved or approved comments... Professor approves them
     - Files within the /parts directory should be an api endpoint
+
+    - remove first part of path in get_comments/
+    e.g. (../../users/ikleiman@stonybrook.edu/works/Something/data/)

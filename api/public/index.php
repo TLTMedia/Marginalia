@@ -148,11 +148,18 @@ $app->get('/get_comments/:author/:work', function ($author, $work) use ($app) {
     require '../Actions/Comments.php';
     $comments = new Comments;
 
+    // override header to ensure it's sending it as JSON (not necessary, but ensures it sends json header rather than text/html)
+    $app->response->header('Content-Type', 'application/json');
+
     echo $comments->getComments(
         $author,
         $work
     );
 });
+
+/**
+ * Delete comments
+ */
 
 /**
  * Force the server to git-pull from github master branch
