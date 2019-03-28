@@ -1,13 +1,22 @@
-grabWhitelist.php => ... should be on works/work# level... (permission for individual works... not for their entire works directory)
+grabWhitelist.php
+    => list of a group of students instructors/ta's (moderators)
+    => different students may have different instructors/ta's (moderators)
+
+instructor/ta
+    => delete comments (owner of comment)
+    => approve [inreview/reviewed] of comments (if project is ['moderated'])
+
+user
+    => set own project to public or private
+    => set own comments to public or private (approved/unapproved aka visibility is separate)
+    => potentially private work is visible to a user' whitelist?
+
+    777 - user/group[whitelist]/other[public]
+
 grabModeratedPages.php?
 visibility for comments & approving them via admin
 
 DONE (old):
-    - loadComments.php [NOTE: this never loaded comments, just some info on the logged in user]
-    - grabUsers.php
-    - grabWhitelist.php [NOTE: ... permissions at a work-level directory...]
-    - grabUserWorks.php
-    - grabModeratedPages.php [NOTE: I think this can be backend...]
     - grabUserWorkText.php
     - save.php [NOTE: subject to change.. is diff from previous save methodology]
 
@@ -25,3 +34,12 @@ MISC:
 
     - remove first part of path in get_comments/
     e.g. (../../users/ikleiman@stonybrook.edu/works/Something/data/)
+
+works
+    -private/public
+
+comment
+    - approved/unapproved
+        - approved by permissions.json/admins of the work.
+
+    - private (only self)

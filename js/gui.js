@@ -211,22 +211,4 @@ function createLitSelectorScreen() {
     componentHandler.upgradeElement($('#worksButtons')[0]);
 
   });
-
-  $.get("grabModeratedPages.php", {
-    folder: dataString
-  }).done(function(data) {
-    var moderation = JSON.parse(data);
-    //console.log(moderation);
-    allModeratedPages = moderation;
-    for (var lit in moderation) {
-      if (!moderation[lit].includes(currentUser['eppn'])) {
-        var buttonMod = $("button[name='" + lit + "']");
-        buttonMod.addClass("moderatedUserButton");
-        //console.log(whitelist);
-        if (!whitelist.includes(currentUser['eppn'])) {
-          buttonMod.attr("disabled", "disabled");
-        }
-      }
-    }
-  })
 }

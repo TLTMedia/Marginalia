@@ -8,10 +8,9 @@ var remSpan;
 // // }
 
 //applies the hl to the area selected by the user
-function highlightCurrentSelection(evt, currentUser) {
+function highlightCurrentSelection(evt) {
 
   var dfd = new $.Deferred();
-  var mainUser = currentUser['eppn'];
   var selectedRange = rangy.getSelection().getRangeAt(0);
   // console.log(rangy.getSelection())
 
@@ -21,8 +20,8 @@ function highlightCurrentSelection(evt, currentUser) {
     $("#commentRemove").text("Unselect");
     $("#commentSave").text("Save");
     $("div[aria-describedby='choices']").hide();
-    $("[id='ui-id-1']").text("Annotation by: " + mainUser.firstname + " " + mainUser.lastname);
-    remSpan = 'hl_' + user.getUserNetID();
+    $("[id='ui-id-1']").text("Annotation by: " + currentUser['firstname'] + " " + currentUser['lastname']);
+    remSpan = 'hl_' + currentUser['eppn'];
 
     var range = selectedRange.toCharacterRange(document.getElementById('textSpace'));
     console.log(rangy)

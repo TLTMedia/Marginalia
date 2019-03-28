@@ -6,8 +6,10 @@
 
 // It should open to the literature selection window prior to initialization
 $(function() {
-  init();
-})
+    getUserData().then(function(userData) {
+        init(userData);
+    });
+});
 
 // Holds beginning information for user folder selection
 var userFolderSelected; // The User-folder they've selected to view
@@ -45,8 +47,8 @@ var width = 0;
   Loads the userdata obtained by the netID login
   Loads the users folder and creates a button for each user
 */
-function init() {
-    getUserData();
+function init(userData) {
+    currentUser = userData;
 
   $(".loader").hide();
   $("#text").hide();
@@ -76,7 +78,7 @@ function buildHTMLFile(litContents, litName) {
   var litDiv = $("<div/>", {
     "id": "litDiv"
   }).on("mouseup", function(evt) {
-    highlightCurrentSelection(evt, currentUser['eppn']).then(function(data) {})
+    highlightCurrentSelection(evt).then(function(data) {})
   });
 
   var metaChar = $("<meta/>", {

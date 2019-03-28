@@ -14,7 +14,7 @@ class Users
             $netid = substr($userid, strrpos($userid, '/') + 1);;
             array_push($allNetIDs, $netid);
         }
-        
+
         return json_encode(array(
             "status" => "ok",
             "data" => $allNetIDs
@@ -28,7 +28,7 @@ class Users
     {
         $user->firstname = $_SERVER['nickname'];
         $user->lastname = $_SERVER['sn'];
-        $user->netid = $_SERVER['eppn'];
+        $user->eppn = $_SERVER['eppn'];
 
         return json_encode(array(
             "status" => "ok",
