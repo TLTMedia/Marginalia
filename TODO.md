@@ -1,26 +1,22 @@
-grabWhitelist.php
-    => list of a group of students instructors/ta's (moderators)
-    => different students may have different instructors/ta's (moderators)
-
-instructor/ta
+# instructor/ta
     => delete comments (owner of comment)
     => approve [inreview/reviewed] of comments (if project is ['moderated'])
 
-user
+# user
     => set own project to public or private
     => set own comments to public or private (approved/unapproved aka visibility is separate)
     => potentially private work is visible to a user' whitelist?
 
     777 - user/group[whitelist]/other[public]
 
-grabModeratedPages.php?
-visibility for comments & approving them via admin
+# grabWhitelist.php
+    => list of a group of students instructors/ta's (moderators)
+    => different students may have different instructors/ta's (moderators)
 
-DONE (old):
-    - grabUserWorkText.php
-    - save.php [NOTE: subject to change.. is diff from previous save methodology]
+# grabModeratedPages.php
+    visibility for comments & approving them via admin
 
-MISC:
+# MISC:
     - Change annotation header box color to same as the blue one
     - Top right box should say "filter by"...
     - Remove the ".HTML" when choosing documents (UI)
@@ -35,10 +31,10 @@ MISC:
     - remove first part of path in get_comments/
     e.g. (../../users/ikleiman@stonybrook.edu/works/Something/data/)
 
-works
+# works
     -private/public
 
-comment
+# comment
     - approved/unapproved
         - approved by permissions.json/admins of the work.
 
