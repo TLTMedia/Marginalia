@@ -12,8 +12,8 @@ export class Users {
             endpoint: 'get_users',
             method: 'get',
             data: this.grouping
-        }).then(function(userData) {
-            console.log("returned user list", user_list);
+        }).then(function(data) {
+            console.log("returned user list", data);
         });
     }
 }
