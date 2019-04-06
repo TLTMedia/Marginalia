@@ -3,3 +3,4 @@ users/*
 ._*
 PHP_errors.log
 .git_secret.txt
+node_modules/
