@@ -25,13 +25,13 @@ export class Users {
     }
 
     async get_user_works(eppn) {
-        let works = await this.api.request({
+        lthis.selected_user_works = await this.api.request({
             endpoint: 'get_works/' + eppn
         });
-        works.forEach((work, index) => {
-            works[index] = works[index].substr(0, works[index].lastIndexOf('\.'));
+        /* remove '.html' */
+        this.selected_user_works.forEach((work, index) => {
+            this.selected_user_works[index] = this.selected_user_works[index].substr(0, this.selected_user_works[index].lastIndexOf('\.'));
         });
-        this.selected_user_works = works;
         return this.selected_user_works;
     }
 }
