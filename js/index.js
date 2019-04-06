@@ -5,9 +5,14 @@ import { APIHandler, Users, Comments } from './ModuleLoader.js';
 
 (async () => {
     const api = new APIHandler();
+
     const users = await new Users({api});
-    //const comments = await new Comments({api});
-    console.log(await users.get_user_works('ikleiman@stonybrook.edu'));
+    let my_works = await users.get_user_works(this.current_user['eppn']);
+    console.log(my_works);
     console.log(users);
+
+    const comments = await new Comments({api: api, work: my_works[0], eppn: this.current_user['eppn']});
+    console.log(comments)
+
     init(users.current_user);
 })();
