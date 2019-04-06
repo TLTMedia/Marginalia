@@ -14,6 +14,6 @@ export class Users {
             method: 'get',
             data: this.grouping
         });
-        return await user_list['data'];
+        return await user_list;
     }
 }
