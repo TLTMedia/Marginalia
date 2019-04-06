@@ -1,5 +1,3 @@
-import { APIHandler } from "./APIHandler.js";
-
 export class Users {
     constructor({grouping = ''} = {}) {
         this.grouping = grouping;
