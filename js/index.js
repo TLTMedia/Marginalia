@@ -7,8 +7,7 @@ import { APIHandler, Users } from './ModuleLoader.js';
     const xyz = new APIHandler();
     console.log("APIHandler is:", xyz);
 
-    console.log("ONLY EVER BEFORE USERS IS");
     const abc = await new Users({api: xyz});
     console.log("Users is:", abc.user_list);
-    console.log("ONLY EVER AFTER USERS IS");
+    console.log("Current users is:", abc.current_user);
 })();
