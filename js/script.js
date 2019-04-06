@@ -4,6 +4,8 @@
     to replace getting the comments attributes directly, reducing DOM load time
 */
 
+import {hello, APIHandler} from './APIHandler.js';
+
 // It should open to the literature selection window prior to initialization
 $(function() {
     getUserData().then(function(userData) {
