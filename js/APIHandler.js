@@ -12,11 +12,10 @@ export class APIHandler {
             dataType: "json"
         }).done(function(data) {
             if (callback) {
-                console.log("yes callback");
+                defer.resolve(callback(data));
             } else {
-                console.log("no callback");
+                defer.resolve(data);
             }
-            defer.resolve(callback(data));
         }).fail(function(jqXHR, textStatus, errorThrown) {
             alert("Error: " + errorThrown);
         });
