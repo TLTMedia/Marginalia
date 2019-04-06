@@ -6,7 +6,7 @@ export class Users {
         this.user_list = this.get_users();
     }
 
-    get_users() {
+    async get_users() {
         let api = new APIHandler();
         let user_list = api.request({
             endpoint: 'get_users',
