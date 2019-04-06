@@ -30,7 +30,7 @@ export class Users {
         });
         /* remove '.html' */
         this.selected_user_works.forEach((work, index) => {
-            this.selected_user_works[index] = this.selected_user_works[index].substr(0, this.selected_user_works[index].lastIndexOf('\.'));
+            work[index] = work[index].substr(0, work[index].lastIndexOf('\.'));
         });
         return this.selected_user_works;
     }
