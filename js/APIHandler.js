@@ -3,10 +3,6 @@ export class APIHandler {
         this.base_url = base_url;
     }
 
-    say() {
-        console.log('test');
-    }
-
     request = function({endpoint = 'get_users', method = 'GET', data = '', callback = console.log} = {}) {
         let defer = $.Deferred();
         $.ajax({

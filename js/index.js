@@ -1,14 +1,12 @@
 /**
  * Initialization of Marginalia scripts begin here
  */
-import {APIHandler} from './ModuleLoader.js';
+import { APIHandler, Users } from './ModuleLoader.js';
 
 $(function() {
-    var xyz = new APIHandler();
-    console.log(xyz);
-    TEST();
-});
+    let xyz = new APIHandler();
+    console.log("APIHandler is:", xyz);
 
-function TEST() {
-    console.log('test');
-}
+    let abc = new Users();
+    console.log("Users is:", abc);
+});

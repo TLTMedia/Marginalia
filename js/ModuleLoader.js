@@ -1,7 +1,5 @@
 import {APIHandler} from './APIHandler.js';
+import {Users} from './Users.js';
 
-let x = new APIHandler();
-x.say();
-x.request();
-
+export {Users} from './Users.js';
 export {APIHandler} from './APIHandler.js';
