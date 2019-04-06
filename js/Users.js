@@ -4,16 +4,17 @@ export class Users {
     constructor({grouping = ''} = {}) {
         this.grouping = grouping;
         this.user_list = this.get_users();
+        console.log(this.user_list);
     }
 
     async get_users() {
         let api = new APIHandler();
-        let user_list = api.request({
+        api.request({
             endpoint: 'get_users',
             method: 'get',
             data: this.grouping
         }).then(function(data) {
-            console.log("returned user list", data);
+            return data;
         });
     }
 }
