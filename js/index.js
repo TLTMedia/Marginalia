@@ -7,7 +7,7 @@ import { APIHandler, Users, Comments } from './ModuleLoader.js';
     const api = new APIHandler();
 
     const users = await new Users({api});
-    let my_works = await users.get_user_works(this.current_user['eppn']);
+    let my_works = await users.get_user_works(users.current_user['eppn']);
     console.log(my_works);
     console.log(users);
 
