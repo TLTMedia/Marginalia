@@ -4,9 +4,9 @@
 import { APIHandler, Users } from './ModuleLoader.js';
 
 (async () => {
-    let xyz = new APIHandler();
+    const xyz = new APIHandler();
     console.log("APIHandler is:", xyz);
 
-    let abc = await new Users({api: xyz});
+    const abc = await new Users({api: xyz});
     console.log("Users is:", abc.user_list);
 })();
