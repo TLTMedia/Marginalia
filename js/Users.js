@@ -3,8 +3,8 @@ import { APIHandler } from "./APIHandler.js";
 export class Users {
     constructor({grouping = ''} = {}) {
         this.grouping = grouping;
-        this.user_list = this.get_users();
-        console.log(this.user_list);
+        this.user_list = this.get_users()['data'];
+        console.log(this.user_list['data']);
     }
 
     async get_users() {
