@@ -12,9 +12,9 @@ export class APIHandler {
             dataType: "json"
         }).done(function(data) {
             if (callback) {
-                defer.resolve(callback(data));
+                defer.resolve(callback(data['data']));
             } else {
-                defer.resolve(data);
+                defer.resolve(data['data']);
             }
         }).fail(function(jqXHR, textStatus, errorThrown) {
             alert("Error: " + errorThrown);
