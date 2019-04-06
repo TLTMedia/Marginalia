@@ -3,7 +3,7 @@ export class APIHandler {
         this.base_url = base_url;
     }
 
-    request = function({endpoint = 'get_users', method = 'GET', data = '', callback} = {}) {
+    request = function({endpoint = 'get_users', method = 'GET', data = '', callback = console.log} = {}) {
         let defer = $.Deferred();
         $.ajax({
             url: this.base_url + endpoint,
@@ -11,11 +11,7 @@ export class APIHandler {
             data: data,
             dataType: "json"
         }).done(function(data) {
-            if (callback) {
-                defer.resolve(callback(data));
-            } else {
-                defer.resolve(data);
-            }
+            defer.resolve(callback(data));
         }).fail(function(jqXHR, textStatus, errorThrown) {
             alert("Error: " + errorThrown);
         });

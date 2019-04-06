@@ -11,7 +11,8 @@ export class Users {
         let user_list = api.request({
             endpoint: 'get_users',
             method: 'get',
-            data: this.grouping
+            data: this.grouping,
+            callback: alert
         });
         console.log("returned user list", user_list);
     }
