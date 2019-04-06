@@ -94,10 +94,10 @@ $app->get('/remove_permission/:work/:user', function ($work, $user) use ($app) {
 /**
  * Get a list of the logged in users' works
  */
-$app->get('/get_works/:user', function ($user) use ($app) {
+$app->get('/get_works/:user', function ($eppn) use ($app) {
     require '../Actions/Users.php';
     $user = new Users;
-    echo $user->getUserWorks($user);
+    echo $user->getUserWorks($eppn);
 });
 
 /**
