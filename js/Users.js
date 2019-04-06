@@ -3,7 +3,7 @@ import { APIHandler } from "./APIHandler.js";
 export class Users {
     constructor({grouping = ''} = {}) {
         this.grouping = grouping;
-        this.user_list = this.get_users();
+        this.user_list = await this.get_users();
         console.log(this.user_list);
     }
 
