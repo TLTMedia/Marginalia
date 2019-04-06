@@ -7,6 +7,6 @@ $(function() {
     let xyz = new APIHandler();
     console.log("APIHandler is:", xyz);
 
-    let abc = new Users();
+    let abc = await new Users();
     console.log("Users is:", abc.user_list[0]);
 });
