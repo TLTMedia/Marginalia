@@ -25,10 +25,13 @@ export class Users {
     }
 
     async get_user_works(eppn) {
-        let works = this.api.request({
+        let works = await this.api.request({
             endpoint: 'get_works/' + eppn
         });
-        this.selected_user_works = await works;
+        works.forEach((work, index) => {
+            works[index] = works[index].substr(0, works[index].lastIndexOf('\.'));
+        });
+        this.selected_user_works = works;
         return this.selected_user_works;
     }
 }
