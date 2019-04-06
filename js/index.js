@@ -11,7 +11,7 @@ import { APIHandler, Users, Comments } from './ModuleLoader.js';
     console.log(my_works);
     console.log(users);
 
-    const comments = await new Comments({api: api, work: my_works[0], eppn: this.current_user['eppn']});
+    const comments = await new Comments({api: api, work: my_works[0], eppn: users.current_user['eppn']});
     console.log(comments)
 
     init(users.current_user);
