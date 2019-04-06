@@ -7,6 +7,6 @@ import { APIHandler, Users } from './ModuleLoader.js';
     let xyz = new APIHandler();
     console.log("APIHandler is:", xyz);
 
-    let abc = await new Users();
+    let abc = await new Users(xyz);
     console.log("Users is:", abc.user_list);
 })();

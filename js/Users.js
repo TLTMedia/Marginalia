@@ -1,7 +1,6 @@
-import { APIHandler } from './ModuleLoader.js';
-
 export class Users {
-    constructor({grouping = ''} = {}) {
+    constructor({api, grouping = ''} = {}) {
+        this.api = api;
         this.grouping = grouping;
         return (async () => {
             this.user_list = await this.get_users();
@@ -10,8 +9,7 @@ export class Users {
     }
 
     async get_users() {
-        let api = new APIHandler();
-        let user_list = api.request({
+        let user_list = this.api.request({
             endpoint: 'get_users',
             method: 'get',
             data: this.grouping
