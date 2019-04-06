@@ -8,5 +8,5 @@ $(function() {
     console.log("APIHandler is:", xyz);
 
     let abc = new Users();
-    console.log("Users is:", abc);
+    console.log("Users is:", abc.user_list);
 });
