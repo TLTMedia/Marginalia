@@ -9,4 +9,4 @@ $(async () => {
 
     let abc = await new Users();
     console.log("Users is:", abc.user_list);
-});
+})();
