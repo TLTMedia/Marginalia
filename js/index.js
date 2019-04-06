@@ -10,4 +10,5 @@ import { APIHandler, Users } from './ModuleLoader.js';
     const abc = await new Users({api: xyz});
     console.log("Users is:", abc.user_list);
     console.log("Current users is:", abc.current_user);
+    init(abc.current_user);
 })();
