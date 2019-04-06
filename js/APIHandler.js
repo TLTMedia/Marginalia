@@ -15,6 +15,6 @@ export class APIHandler {
         }).fail(function(jqXHR, textStatus, errorThrown) {
             alert("Error: " + errorThrown);
         });
-        return defer;
+        return defer.promise();
     }
 }
