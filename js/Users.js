@@ -1,3 +1,5 @@
+import { APIHandler } from './ModuleLoader.js';
+
 export class Users {
     constructor({grouping = ''} = {}) {
         this.grouping = grouping;
