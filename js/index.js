@@ -4,5 +4,11 @@
 import {APIHandler} from './APIHandler.js';
 
 $(function() {
-    console.log(new APIHandler);
+    var xyz = new APIHandler();
+    console.log(xyz);
+    TEST();
 });
+
+function TEST() {
+    console.log('test');
+}
