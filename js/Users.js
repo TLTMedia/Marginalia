@@ -25,7 +25,7 @@ export class Users {
     }
 
     async get_user_works(eppn) {
-        lthis.selected_user_works = await this.api.request({
+        this.selected_user_works = await this.api.request({
             endpoint: 'get_works/' + eppn
         });
         /* remove '.html' */
