@@ -3,7 +3,7 @@
   • Use the new map (commentIndexMap) that holds an 2 number array [startIndex, endIndex]
     to replace getting the comments attributes directly, reducing DOM load time
 */
-
+import {hello, APIHandler} from './APIHandler.js';
 // It should open to the literature selection window prior to initialization
 $(function() {
     getUserData().then(function(userData) {
@@ -48,6 +48,7 @@ var width = 0;
   Loads the users folder and creates a button for each user
 */
 function init(userData) {
+    let api = new APIHandler();
     currentUser = userData;
 
   $(".loader").hide();
