@@ -1,9 +1,3 @@
-// $(function() {
-//     getUserData().then(function(userData) {
-//         init(userData);
-//     });
-// });
-
 // Holds beginning information for user folder selection
 var userFolderSelected; // The User-folder they've selected to view
 var userFolderWorks = []; // The works that the user has

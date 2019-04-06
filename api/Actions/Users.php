@@ -39,12 +39,13 @@ class Users
     /**
      * Returns a list of the users works
      */
-    public function getUserWorks()
+    public function getUserWorks($user)
     {
+        // TODO: check if the current $_SERVER['eppn'] has access to this $user directory
         // holds an array of all the works in the user's(eppn) directory
         $allWorks = array();
 
-        foreach(glob("../../users/" . $_SERVER['eppn'] . "/works/*") as $work) {
+        foreach(glob("../../users/" . $user . "/works/*") as $work) {
             $workName = substr($work, strrpos($work, '/') + 1);
             array_push($allWorks, $workName . ".html");
         }

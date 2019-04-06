@@ -23,4 +23,12 @@ export class Users {
         });
         return await user;
     }
+
+    async get_user_works(user) {
+        let works = this.api.request({
+            endpoint: 'get_works/' + user
+        });
+        this.selected_user_works = await works;
+        return this.selected_user_works;
+    }
 }
