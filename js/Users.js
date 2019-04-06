@@ -1,13 +1,13 @@
 import { APIHandler } from "./APIHandler.js";
 
 export class Users {
-    constructor({grouping = ''} = {}) {
+    async constructor({grouping = ''} = {}) {
         this.grouping = grouping;
         this.user_list = await this.get_users();
         console.log(this.user_list);
     }
 
-    async get_users() {
+    get_users() {
         let api = new APIHandler();
         api.request({
             endpoint: 'get_users',
