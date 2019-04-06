@@ -3,10 +3,10 @@
  */
 import { APIHandler, Users } from './ModuleLoader.js';
 
-$(function() {
+$(async function() {
     let xyz = new APIHandler();
     console.log("APIHandler is:", xyz);
 
-    let abc = new Users();
-    console.log("Users is:", abc.user_list);
+    let abc = await new Users();
+    console.log("Users is:", abc.user_list[0]);
 });
