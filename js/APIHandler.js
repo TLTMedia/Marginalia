@@ -1,6 +1,3 @@
-export function hello() {
-    console.log('hello');
-}
 export class APIHandler {
     constructor({base_url = window.location + 'api/public/'} = {}) {
         this.base_url = base_url;
