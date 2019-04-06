@@ -1,9 +1,7 @@
-import {hello, APIHandler} from './APIHandler.js';
-
-hello();
+import {APIHandler} from './APIHandler.js';
 
 let x = new APIHandler();
 x.say();
 x.request();
 
-export {hello, APIHandler} from './APIHandler.js';
+export {APIHandler} from './APIHandler.js';

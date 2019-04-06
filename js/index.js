@@ -1,7 +1,7 @@
 /**
  * Initialization of Marginalia scripts begin here
  */
-import {APIHandler} from './APIHandler.js';
+import {APIHandler} from './ModuleLoader.js';
 
 $(function() {
     var xyz = new APIHandler();
