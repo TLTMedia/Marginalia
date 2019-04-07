@@ -6,7 +6,7 @@ export class APIHandler {
     request = ({endpoint = 'get_users', method = 'GET', data = '', callback} = {}) => {
         let defer = $.Deferred();
         $.ajax({
-            url: this.base_url + endpoint,
+            url: this.base_url + endpoint + '?modular',
             method: method,
             data: data,
             dataType: "json"
