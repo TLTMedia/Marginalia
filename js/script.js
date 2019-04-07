@@ -34,22 +34,19 @@ var width = 0;
   Loads the userdata obtained by the netID login
   Loads the users folder and creates a button for each user
 */
-function init(userData, userList) {
-    //let api = new APIHandler();
-    currentUser = userData;
+function init(users) {
+  currentUser = users.current_user;
 
   $(".loader").hide();
   $("#text").hide();
   $("#addLitBase").hide();
-  createUserSelectScreen(userList);
-
+  createUserSelectScreen(users.user_list);
 
   $(window).on("resize", function() {
     var stageWidth = $(window).width();
     $("#text").css("height", $("#litDiv").height() + "px");
     $("html").css("font-size", (stageWidth / 60) + "px");
   }).trigger("resize")
-
 }
 
 // Creates a visual list of all users which gives access to their folders
