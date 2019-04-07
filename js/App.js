@@ -15,5 +15,5 @@ import { APIHandler, Users, Comments, RangyHelper, Dom } from './ModuleLoader.js
     const comments = await new Comments({api: api, work: my_works[0], eppn: users.current_user['eppn']});
     console.log(comments)
 
-    init(users.current_user);
+    init(users.current_user, users.user_list);
 })();

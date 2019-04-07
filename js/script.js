@@ -34,14 +34,14 @@ var width = 0;
   Loads the userdata obtained by the netID login
   Loads the users folder and creates a button for each user
 */
-function init(userData) {
+function init(userData, userList) {
     //let api = new APIHandler();
     currentUser = userData;
 
   $(".loader").hide();
   $("#text").hide();
   $("#addLitBase").hide();
-  createUserSelectScreen();
+  createUserSelectScreen(userList);
 
 
   $(window).on("resize", function() {

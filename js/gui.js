@@ -49,7 +49,7 @@ $(window).ready(function() {
     });
 });
 
-function createUserSelectScreen() {
+function createUserSelectScreen(userList) {
   width = $(document).width();
   var userWorks = [];
   var selector = $("#userSelector");
@@ -60,77 +60,35 @@ function createUserSelectScreen() {
   });
 
   selector.append(usersItems);
-  // const userList = apiRequest('get_users', 'GET');
 
-  // // Add all users Folders
-  // var length = data.length;
-  // var rows = 0;
-  // while (length >= 1) {
-  //   length -= 3;
-  //   rows++;
-  // }
+  var length = userList.length;
+  var rows = 0;
+  while (length >= 1) {
+    length -= 3;
+    rows++;
+  }
 
-  // for (var userNum in data) {
-  //   var userItem = $("<li/>", {
-  //     text: data[userNum],
-  //     class: "mdl-menu__item userButton",
-  //     click: function(evt) {
-  //       $(".userFiles").show();
-  //       userFolderSelected = $(this).text();
-  //       $(".chosenUser").text(userFolderSelected + ":");
-  //       $(".chosenFile").text("");
-  //       $("#worksButtons").remove();
-  //       readWhiteList();
-  //       createLitSelectorScreen();
-  //     }
-  //   });
-  //   usersItems.append(userItem);
-  // }
+  for (var userNum in userList) {
+    var userItem = $("<li/>", {
+      text: userList[userNum],
+      class: "mdl-menu__item userButton",
+      click: function(evt) {
+        $(".userFiles").show();
+        userFolderSelected = $(this).text();
+        $(".chosenUser").text(userFolderSelected + ":");
+        $(".chosenFile").text("");
+        $("#worksButtons").remove();
+        //readWhiteList();
+        createLitSelectorScreen();
+      }
+    });
 
-  // componentHandler.upgradeElement($('#usersItems')[0]);
-  // $(".userFiles").hide();
-  $.getJSON("api/public/get_users", function(data) {
+    usersItems.append(userItem);
+  }
 
-    if (data['status'] != 'ok') {
-      alert("Unable to retrieve user listing");
-    }
+  componentHandler.upgradeElement($('#usersItems')[0]);
 
-    // Add all users Folders
-    var length = data['data'].length;
-    var rows = 0;
-    while (length >= 1) {
-      length -= 3;
-      rows++;
-    }
-
-    data = data['data'];
-
-    for (var userNum in data) {
-      var userItem = $("<li/>", {
-        text: data[userNum],
-        class: "mdl-menu__item userButton",
-        click: function(evt) {
-          $(".userFiles").show();
-          userFolderSelected = $(this).text();
-          $(".chosenUser").text(userFolderSelected + ":");
-          $(".chosenFile").text("");
-          $("#worksButtons").remove();
-          //readWhiteList();
-          createLitSelectorScreen();
-        }
-      });
-
-      usersItems.append(userItem);
-    }
-
-    componentHandler.upgradeElement($('#usersItems')[0]);
-
-    $(".userFiles").hide();
-
-
-
-  });
-
+  $(".userFiles").hide();
 }
 
 function createLitSelectorScreen() {
