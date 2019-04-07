@@ -1,10 +1,11 @@
 /**
  * Initialization of Marginalia scripts begin here
  */
-import { APIHandler, Users, Comments } from './ModuleLoader.js';
+import { APIHandler, Users, Comments, RangyHelper, Dom } from './ModuleLoader.js';
 
 (async () => {
     const api = new APIHandler();
+    //const dom = new Dom({api: api});
 
     const users = await new Users({api});
     let my_works = await users.get_user_works(users.current_user['eppn']);
