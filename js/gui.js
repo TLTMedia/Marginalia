@@ -71,11 +71,11 @@ createUserSelectScreen = async ({users = users} = {}) => {
 
   for (var userNum in user_list) {
     var userItem = $("<li/>", {
-      text: user_list[userNum],
+      text: await user_list[userNum],
       class: "mdl-menu__item userButton",
       click: (async () => {
         $(".userFiles").show();
-        userFolderSelected = $(this).text();
+        userFolderSelected = await $(this).text();
         console.log(userFolderSelected);
         $(".chosenUser").text(userFolderSelected + ":");
         $(".chosenFile").text("");
