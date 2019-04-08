@@ -80,7 +80,7 @@ createUserSelectScreen = async ({users = users} = {}) => {
         $(".chosenFile").text("");
         $("#worksButtons").remove();
         //readWhiteList();
-        await createLitSelectorScreen({users: users});
+        await createLitSelectorScreen({users: users, selected_eppn: userFolderSelected});
       }
     });
 
@@ -96,7 +96,7 @@ createUserSelectScreen = async ({users = users} = {}) => {
  * Temporary pass the api object to 'everything'... 
  * So that any ~global~ function can make an api call...
  */
-createLitSelectorScreen = async ({users = users} = {}) => {
+createLitSelectorScreen = async ({users = users, selected_eppn = selected_eppn} = {}) => {
   var selector = $(".userFiles");
   var worksButtons = $("<ul/>", {
     id: "worksButtons",
@@ -104,7 +104,7 @@ createLitSelectorScreen = async ({users = users} = {}) => {
     for: "pickLit"
   });
   selector.append(worksButtons);
-  var dataString = userFolderSelected;
+  var dataString = selected_eppn;
 
   
 
