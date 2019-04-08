@@ -97,6 +97,7 @@ createUserSelectScreen = async ({users = users} = {}) => {
  * So that any ~global~ function can make an api call...
  */
 createLitSelectorScreen = async ({users = users, selected_eppn = selected_eppn} = {}) => {
+  console.log(selected_eppn);
   var selector = $(".userFiles");
   var worksButtons = $("<ul/>", {
     id: "worksButtons",
