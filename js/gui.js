@@ -74,6 +74,7 @@ createUserSelectScreen = async ({users = users} = {}) => {
       text: user_list[userNum],
       class: "mdl-menu__item userButton",
       click: (async () => {
+        console.log(user_list[userNum]);
         $(".userFiles").show();
         $(".chosenUser").text(user_list[userNum] + ":");
         $(".chosenFile").text("");
