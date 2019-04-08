@@ -78,11 +78,11 @@ createUserSelectScreen = async ({users = users} = {}) => {
     usersItems.append(userItem);
   }
 
-  $(".userButton").click(async () => {
+  $(".userButton").click(function() {
       $(".userFiles").show();
-      let select_folder = $(this).text();
-      console.log(select_folder);
-      $(".chosenUser").text(select_folder + ":");
+      let selected_eppn = $(this).text();
+      console.log(selected_eppn);
+      $(".chosenUser").text(selected_eppn + ":");
       $(".chosenFile").text("");
       $("#worksButtons").remove();
       await createLitSelectorScreen({users: users, selected_eppn: selected_eppn});
