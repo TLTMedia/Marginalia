@@ -69,24 +69,24 @@ createUserSelectScreen = async ({users = users} = {}) => {
     rows++;
   }
 
-  for (var userNum in user_list) {
-    var userItem = $("<li/>", {
-      text: await user_list[userNum],
-      class: "mdl-menu__item userButton",
-      click: (async () => {
-        $(".userFiles").show();
-        userFolderSelected = await $(this).text();
-        console.log(userFolderSelected);
-        $(".chosenUser").text(userFolderSelected + ":");
-        $(".chosenFile").text("");
-        $("#worksButtons").remove();
-        //readWhiteList();
-        await createLitSelectorScreen({users: users, selected_eppn: userFolderSelected});
-      })
+  for (let userNum in user_list) {
+    let userItem = $("<li/>", {
+      text: user_list[userNum],
+      class: "mdl-menu__item userButton"
     });
 
     usersItems.append(userItem);
   }
+
+  $(".userButton").click(function() {
+      $(".userFiles").show();
+      let select_folder = $(this).text();
+      console.log(select_folder);
+      $(".chosenUser").text(select_folder + ":");
+      $(".chosenFile").text("");
+      $("#worksButtons").remove();
+      await createLitSelectorScreen({users: users, selected_eppn: selected_eppn});
+  });
 
   componentHandler.upgradeElement($('#usersItems')[0]);
 
