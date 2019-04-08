@@ -81,7 +81,7 @@ createUserSelectScreen = async ({users = users} = {}) => {
         $("#worksButtons").remove();
         //readWhiteList();
         await createLitSelectorScreen({users: users, selected_eppn: userFolderSelected});
-      })()
+      })
     });
 
     usersItems.append(userItem);
