@@ -85,7 +85,7 @@ createUserSelectScreen = async ({users = users} = {}) => {
       $(".chosenUser").text(selected_eppn + ":");
       $(".chosenFile").text("");
       $("#worksButtons").remove();
-      await createLitSelectorScreen({users: users, selected_eppn: selected_eppn});
+      createLitSelectorScreen({users: users, selected_eppn: selected_eppn});
   });
 
   componentHandler.upgradeElement($('#usersItems')[0]);
