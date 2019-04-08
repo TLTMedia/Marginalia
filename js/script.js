@@ -34,7 +34,7 @@ var width = 0;
   Loads the userdata obtained by the netID login
   Loads the users folder and creates a button for each user
 */
-function init(users) {
+init = async (users) => {
   currentUser = users.current_user;
 
   $(".loader").hide();

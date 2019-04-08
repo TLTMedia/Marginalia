@@ -105,8 +105,6 @@ function createLitSelectorScreen() {
     folder: dataString
   }).done(function(data) {
     var works = JSON.parse(data);
-    //console.log(works);
-
     var length = works.length;
     var rows = 0;
     while (length >= 1) {
@@ -129,9 +127,6 @@ function createLitSelectorScreen() {
           textChosen = $(this).attr("name");
           $(".chosenFile").text(textChosen);
           userChosen = $(".chosenUser").html();
-          //console.log(textChosen);
-          // console.log(userChosen);
-          // console.log($(this).attr("name"));
           getLitContents(userChosen, textChosen);
           removeSpans();
         }
@@ -156,17 +151,7 @@ function createLitSelectorScreen() {
 
       worksButtons.append(litButton);
     }
-    // var userReturnButton = $("<button/>", {
-    //   id: "userReturnButton",
-    //   text: "- Return to User Select -"
-    // }).on("click", function(evt) {
-    //   $(".litSelector").empty();
-    //   $('div[aria-describedby="userPrivateList"]').hide();
-    //   $('div[aria-describedby="moderateFileChoice"]').hide();
-    //   createUserSelectScreen();
-    // });
-    // worksButtons.append("<br/>", userReturnButton);
-    componentHandler.upgradeElement($('#worksButtons')[0]);
 
+    componentHandler.upgradeElement($('#worksButtons')[0]);
   });
 }
