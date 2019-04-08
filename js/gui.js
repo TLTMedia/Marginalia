@@ -78,7 +78,7 @@ createUserSelectScreen = async ({users = users} = {}) => {
     usersItems.append(userItem);
   }
 
-  $(".userButton").click(function() {
+  $(".userButton").click(async () => {
       $(".userFiles").show();
       let select_folder = $(this).text();
       console.log(select_folder);
