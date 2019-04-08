@@ -49,7 +49,8 @@ $(window).ready(function() {
     });
 });
 
-createUserSelectScreen = async ({user_list = user_list, api = api} = {}) => {
+createUserSelectScreen = async ({users = users} = {}) => {
+  user_list = users.user_list;
   width = $(document).width();
   var userWorks = [];
   var selector = $("#userSelector");
@@ -79,7 +80,7 @@ createUserSelectScreen = async ({user_list = user_list, api = api} = {}) => {
         $(".chosenFile").text("");
         $("#worksButtons").remove();
         //readWhiteList();
-        await createLitSelectorScreen({api: api});
+        await createLitSelectorScreen({users: users});
       }
     });
 
@@ -95,7 +96,7 @@ createUserSelectScreen = async ({user_list = user_list, api = api} = {}) => {
  * Temporary pass the api object to 'everything'... 
  * So that any ~global~ function can make an api call...
  */
-createLitSelectorScreen = async ({api = api} = {}) => {
+createLitSelectorScreen = async ({users = users} = {}) => {
   var selector = $(".userFiles");
   var worksButtons = $("<ul/>", {
     id: "worksButtons",
@@ -104,6 +105,8 @@ createLitSelectorScreen = async ({api = api} = {}) => {
   });
   selector.append(worksButtons);
   var dataString = userFolderSelected;
+
+  
 
   $.get("grabUserWorks.php", {
     folder: dataString
