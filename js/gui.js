@@ -49,7 +49,7 @@ $(window).ready(function() {
     });
 });
 
-function createUserSelectScreen(userList) {
+createUserSelectScreen = async ({user_list = user_list, api = api} = {}) => {
   width = $(document).width();
   var userWorks = [];
   var selector = $("#userSelector");
@@ -61,16 +61,16 @@ function createUserSelectScreen(userList) {
 
   selector.append(usersItems);
 
-  var length = userList.length;
+  var length = user_list.length;
   var rows = 0;
   while (length >= 1) {
     length -= 3;
     rows++;
   }
 
-  for (var userNum in userList) {
+  for (var userNum in user_list) {
     var userItem = $("<li/>", {
-      text: userList[userNum],
+      text: user_list[userNum],
       class: "mdl-menu__item userButton",
       click: function(evt) {
         $(".userFiles").show();
@@ -79,7 +79,7 @@ function createUserSelectScreen(userList) {
         $(".chosenFile").text("");
         $("#worksButtons").remove();
         //readWhiteList();
-        createLitSelectorScreen();
+        await createLitSelectorScreen({api: api});
       }
     });
 
@@ -91,7 +91,11 @@ function createUserSelectScreen(userList) {
   $(".userFiles").hide();
 }
 
-function createLitSelectorScreen() {
+/**
+ * Temporary pass the api object to 'everything'... 
+ * So that any ~global~ function can make an api call...
+ */
+createLitSelectorScreen = async ({api = api} = {}) => {
   var selector = $(".userFiles");
   var worksButtons = $("<ul/>", {
     id: "worksButtons",

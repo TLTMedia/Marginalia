@@ -34,13 +34,13 @@ var width = 0;
   Loads the userdata obtained by the netID login
   Loads the users folder and creates a button for each user
 */
-init = async (users) => {
+init = async ({users = users, api = api} = {}) => {
   currentUser = users.current_user;
 
   $(".loader").hide();
   $("#text").hide();
   $("#addLitBase").hide();
-  createUserSelectScreen(users.user_list);
+  createUserSelectScreen({user_list: users.user_list, api: api});
 
   $(window).on("resize", function() {
     var stageWidth = $(window).width();
