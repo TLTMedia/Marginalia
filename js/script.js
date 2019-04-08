@@ -1,8 +1,18 @@
+/**
+ * TODO: temporary global until I recode the entire frontend... First just getting things to all work.
+ */
+var API;
+
+var currentUser = {};
+/**
+ * Ends the temporarily known, necessary globals
+ */
+
 // Holds beginning information for user folder selection
 var userFolderSelected; // The User-folder they've selected to view
 var userFolderWorks = []; // The works that the user has
 
-var currentUser = {};
+
 
 // Assists with comment saving
 var isEdit = false; // If the sent text is an edit to a previous text
@@ -34,7 +44,8 @@ var width = 0;
   Loads the userdata obtained by the netID login
   Loads the users folder and creates a button for each user
 */
-init = async ({users = users} = {}) => {
+init = async ({api = api, users = users} = {}) => {
+  API = api;
   currentUser = users.current_user;
 
   $(".loader").hide();
@@ -99,17 +110,12 @@ function buildHTMLFile(litContents, litName) {
   $("#text").append(litDiv);
 }
 
-function getLitContents(userChosen, textChosen) {
-  var dataString = JSON.stringify({
-    userFolder: userChosen,
-    work: textChosen
-  });
-  $.get("grabUserWorkText.php", {
-    data: dataString,
-  }).done(function(data) {
-    literatureText = data;
-    buildHTMLFile(literatureText, $(this).attr("class"))
-    makeBoxes();
+function getLitContents(current_user, current_text) {
+  let endpoint = 'get_work/' + current_user + '/' + current_text;
+  API.request({endpoint}).then((data) => {
+      literatureText = data;
+      buildHTMLFile(literatureText, $(this).attr("class"))
+      makeBoxes();
   });
 }
 // Creates the main selector screen once a netid is chosen
@@ -401,27 +407,27 @@ function saveLit(litname, private, litFile) {
   Each is mapped with its cooresponding Hex-Encoded UNIX timestamp
   The student selection menu is filled with each student's netid
 */
-function loadUserComments() {
+loadUserComments = () => {
   $("#text").hide();
   $("#textSpace").hide();
   $("#textTitle").hide();
   $(".loader").show();
-  userComMap = new Map();
-  userReplyMap = new Map();
 
-  var dfd = new $.Deferred();
-  $.getJSON("api/public/get_comments/" + userFolderSelected + "/" + textChosen).done(function(data) {
+  let endpoint = "get_comments/" + $(".chosenUser").text().split(":")[0] + "/" + textChosen;
+  API.request({endpoint}).then((data) => {
+      renderComments(data);
+  });
+}
+
+renderComments = (commentData) => {
     $(".allButtons").show();
     $(".loader").hide();
     $("#text").fadeIn();
     $("#textSpace").fadeIn();
     $("#textTitle").fadeIn();
 
-    var commentData = data.data;
-    for (var i = 0; i < commentData.length; ++i) {
-        console.log(commentData[i].commentText);
-        // makeSpan(classID, firstName, lastName, startDex, endDex, isVisible, userID, type)
-        var [,hash,eppn,] = commentData[i].path.split("/").reverse()
+    for (let i = 0; i < commentData.length; ++i) {
+        let [,hash,eppn,] = commentData[i].path.split("/").reverse()
         makeSpan(
             hash,
             commentData[i].firstName,
@@ -434,153 +440,8 @@ function loadUserComments() {
             btoa(commentData[i].commentText)
         );
     }
-    //console.log(data);
-    //console.log(data.userLoggedIn);
-    //currentUser = data.userLoggedIn;
-    //currentUser.fullname = currentUser.firstname + " " + currentUser.lastname;
-    var stud = [];
-    allUserComments = $(data)[0].arrayOfComments;
-    //console.log("Users and their comments: \n", allUserComments);
-    for (var numStud in allUserComments) {
-      for (var user in $(allUserComments[numStud])) {
-        if (!(isNaN(user))) {
-          var student = $(allUserComments[numStud])[user];
-          console.log("Student: ", student);
-          // if (student.comments.length > 0) {
-          //   stud.push(student.netID);
-          // }
-          for (var com in student.comments) {
-            if (!(isNaN(user))) {
-              // Create a span and set it so that attributes are added and
-              // global parameters are notified of change+
-              var comment = student.comments[com];
-
-              // If the comment is visible and the user isn't a part of the stud
-              // array thjen we add them
-              if (!(stud.includes(student.netID)) && (comment.isVisible == "true" || currentUser.netid == student.netID)) {
-                stud.push(student.netID);
-              }
-
-              if (comment.isVisible == "true" || comment.userID == currentUser.netid) {
-                console.log(comment.commentData)
-                var id = student.netID + "_" + comment.timeStamp;
-
-                /*  selRange.selectCharacters(document.getElementById("textSpace"), comment.startIndex, comment.endIndex);
-                hlRange(selRange);
-
-                  userReplyMap.set(comment.timeStamp, student.comments[com].replies);
-
-                  var span = $("." + remSpan);
-                  $("span[class^='hl_']").off().on("click", function(evt) {
-                    console.log("TESTER3");
-                    if ($(this).attr("class").substring(0, 3) != "hl_") {
-                      var type = $(this).attr("type");
-                      $(".commentTypeDropdown").val(type.charAt(0).toUpperCase() + type.substr(1));
-
-                      var cbox = $('div[aria-describedby="commentBox"]');
-                      var titlebars = $(cbox).find(".ui-dialog-titlebar");
-                      var commentBoxTitle = $($(titlebars).find("#ui-id-1")).text("Annotation by: " + $(this).attr("firstname") + " " + $(this).attr("lastname"));
-
-                      idName = $(this).attr("class").split("_");
-
-                      CKEDITOR.instances.textForm.setData(userComMap.get(idName[1]));
-                      console.log(idName[0] == currentUser.netid)
-                      console.log(whitelist.includes(currentUser.netid))
-                      if (idName[0] != currentUser.netid && whitelist.includes(currentUser.netid)) {
-                        isEdit = true;
-                      }
-
-                      evt.stopPropagation();
-
-                      fillReplyBox(evt);
-                      displayReplyBox(evt);
-                      displayCommentBox(evt);
-                      textShowReply();
-
-                      remSpan = $(evt.currentTarget).attr("class");
-
-                      CKEDITOR.instances['textForm'].setReadOnly(true);
-                      $(".commentTypeDropdown").attr("disabled", "disabled");
-                      if (idName[0] == currentUser.netid || whitelist.includes(currentUser.netid)) {
-                        $("#commentSave").hide();
-                        $("#commentRemove").show();
-                        $("#commentExit").show();
-                        $("#commentEdit").show();
-                      } else {
-                        $("#commentSave").hide();
-                        $("#commentEdit").hide();
-                        $("#commentRemove").hide();
-                        $("#commentExit").show();
-                      }
-                    }
-
-                    console.log(commentBoxTitle);
-                  });
-
-                  // A table with all comments in it that can be accessed easily
-                  userComMap.set(comment.timeStamp, comment.commentData);
-                  // Create the attributes for each span
-
-                  span.attr("firstname", comment.firstname);
-                  span.attr("lastname", comment.lastname);
-                  span.attr("startIndex", comment.startIndex);
-                  span.attr("endIndex", comment.endIndex);
-                //  span.attr("innertext", comment.commentData);
-                  //span.attr("isVisible", comment.isVisible);
-                  span.attr("userID", comment.userID);
-                  span.attr("type", comment.type);
-                  span.attr("class", id);*/
-
-
-                commentTypeMap.set(comment.timeStamp, comment.type);
-
-                commentIndexMap.set(comment.timeStamp, [comment.startIndex, comment.endIndex]);
-
-                userReplyMap.set(comment.timeStamp, student.comments[com].replies);
-
-                makeSpan(id, comment.firstname, comment.lastname, comment.startIndex,
-                  comment.endIndex, comment.isVisible, comment.userID, comment.type, comment.commentText);
-
-                userComMap.set(comment.timeStamp, comment.commentData);
-              } else {
-                adminApproveMap.set(comment.timeStamp, comment);
-              }
-            } else {
-              continue;
-            }
-          }
-        } else {
-          continue;
-        }
-      }
-    }
-    console.log("Mapped User Comments: ", userComMap);
-    console.log("Mapped User Replies: ", userReplyMap);
-    console.log("Mapped Comment Types: ", commentTypeMap);
-    console.log("Admin Approve Comments: ", adminApproveMap);
-
-    if (whitelist.includes(currentUser.netid) && adminApproveMap.size > 0) {
-      fillAdminApprovalMap();
-      $('[aria-describedby="comApproval"]').show();
-    } else {
-      $('[aria-describedby="comApproval"]').remove();
-    }
 
     $("#text").css("height", $("#litDiv").height() + "px");
-    makeStudentSelectors(stud);
-  });
-
-  $("body").on("click", function(evt) {
-    // width = $(document).width();
-    // if (height != $(document).height() && width != $(document).width()) {
-    //   height = $(document).height();
-    // }
-    // console.log("X-Y\n", evt.pageX, evt.pageY);
-    // console.log("Height-Width\n", $(document).height(), $(document).width());
-  });
-
-  width = $(document).width();
-  return dfd;
 }
 
 // Makes a span out of its components
@@ -589,16 +450,11 @@ A span is composed of class, firstname, lastname, start index, endindex,
                       innertext, isvisible, userid and type
 */
 function makeSpan(classID, firstName, lastName, startDex, endDex, isVisible, eppn, type, commentText) {
-  console.log(classID, firstName, lastName, startDex, endDex, isVisible, eppn, type);
-
   var rangeMake = rangy.createRange();
   rangeMake.selectCharacters(document.getElementById("textSpace"), startDex, endDex);
   hlRange(rangeMake);
 
-  console.log("SourceText: " + literatureText.substring(startDex, endDex));
-
   var span = $("." + remSpan);
-
   span.attr("class", classID);
   span.attr("firstname", firstName);
   span.attr("lastname", lastName);
@@ -607,7 +463,6 @@ function makeSpan(classID, firstName, lastName, startDex, endDex, isVisible, epp
   span.attr("commentText", commentText);
   span.attr("title", "By: " + firstName + " " + lastName);
 
-
   $(span).off().on("click", function(evt) {
     var eppn = $(this).attr("eppn");
     var type = $(this).attr("commentType");
@@ -615,20 +470,15 @@ function makeSpan(classID, firstName, lastName, startDex, endDex, isVisible, epp
     $(".commentTypeDropdown").val(
         type.charAt(0).toUpperCase() + type.substr(1)
     );
+    
     $("[id='ui-id-1']").text("Annotation by: " + $(this).attr("firstname") + " " + $(this).attr("lastname"));
 
-
     CKEDITOR.instances.textForm.setData(atob($(this).attr("commentText")));
-    // console.log(idName[0] == currentUser.netid)
-    // console.log(whitelist.includes(currentUser.netid))
     if (eppn != currentUser.eppn && whitelist.includes(currentUser.eppn)) {
       isEdit = true;
     }
 
     evt.stopPropagation();
-
-    // TODO: show replies
-    //fillReplyBox(evt);
     displayReplyBox(evt);
     displayCommentBox(evt);
     textShowReply();
@@ -649,80 +499,7 @@ function makeSpan(classID, firstName, lastName, startDex, endDex, isVisible, epp
       $("#commentRemove").hide();
       $("#commentExit").show();
     }
-    // }
   });
-
-  // A table with all comments in it that can be accessed easily
-  // Create the attributes for each span
-}
-
-// Makes the clickable buttons under Students: if there are any, if not then no
-/*
-  Using an array from loadUserComments() the student tab is filled with the
-  names of each student who has comment data
-*/
-function makeStudentSelectors(studArray) {
-  var students = $('<div/>', {
-    class: "nameMenu"
-  });
-
-  var nameList = $('<div/>', {
-    class: "nameList"
-  });
-
-  for (var stud in studArray) {
-    if (!(isNaN(stud))) {
-
-      var list = $('<li/>', {
-        class: "button"
-      });
-
-      var radioLabel = $("<label>", {
-        class: "mdl-radio mdl-js-radio",
-        id: "button" + studArray[stud],
-        for: studArray[stud]
-      });
-
-      var input = $('<input/>', {
-        type: "radio",
-        id: studArray[stud],
-        name: "commentType",
-        class: "mdl-radio__button"
-      });
-
-      var spanText = $("<span>", {
-        class: "mdl-radio__label",
-        text: studArray[stud]
-      });
-
-      $(list).append(radioLabel);
-      $(radioLabel).append(input, spanText);
-
-      //var label = $('<label/>');
-
-      //label = studArray[stud];
-
-      nameList.append(list);
-
-      input.on("click", function(evt) {
-        if (!($(this).parent().attr("class") == "button active")) {
-          loadCommentsByType($(this).attr("id").toLowerCase(), true);
-          $(".active").removeClass("active");
-          $(this).parent().addClass("active");
-        }
-      });
-      componentHandler.upgradeElement($(radioLabel)[0]);
-    } else {
-      continue;
-    }
-  }
-  if (studArray.length == 0) {
-    students.append("No Students ");
-  } else {
-    students.append("Students: ", nameList);
-  }
-
-  $(".allButtons").append(students);
 }
 
 // Who is able to edit every comment or reply

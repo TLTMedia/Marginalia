@@ -3,7 +3,7 @@ export class APIHandler {
         this.base_url = base_url;
     }
 
-    request = ({endpoint = 'get_users', method = 'GET', data = '', callback} = {}) => {
+    request = ({endpoint = 'get_creators', method = 'GET', data = '', callback} = {}) => {
         let defer = $.Deferred();
         $.ajax({
             url: this.base_url + endpoint + '?modular',

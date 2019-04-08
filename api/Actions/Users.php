@@ -5,7 +5,7 @@ class Users
     /**
      * Returns a list of the users
      */
-    public function getUsers()
+    public function getCreators()
     {
         $userFolder = glob("../../users/*");
         $allNetIDs = array();

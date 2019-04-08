@@ -43,11 +43,11 @@ $app->get('/', function () use ($app) {
 /**
  * Gets a list of all the users with works...
  */
-$app->get('/get_users', function () use ($app) {
+$app->get('/get_creators', function () use ($app) {
     require '../Actions/Users.php';
     $userList = new Users;
 
-    echo $userList->getUsers();
+    echo $userList->getCreators();
 });
 
 /**
@@ -103,10 +103,10 @@ $app->get('/get_works/:user', function ($eppn) use ($app) {
 /**
  * Get a users' work file data
  */
-$app->get('/get_work/:work', function ($work) use ($app) {
+$app->get('/get_work/:eppn/:work', function ($eppn, $work) use ($app) {
     require '../Actions/Users.php';
     $user = new Users;
-    $workFullPath = __PATH__ . $_SERVER['eppn'] . "/works/" . $work . "/" . $work . ".html";
+    $workFullPath = __PATH__ . $eppn . "/works/" . $work . "/index.html";
     echo $user->getUserWork($workFullPath);
 });
 

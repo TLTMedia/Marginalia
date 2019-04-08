@@ -50,7 +50,7 @@ $(window).ready(function() {
 });
 
 createUserSelectScreen = async ({users = users} = {}) => {
-  user_list = users.user_list;
+  user_list = users.creator_list;
   width = $(document).width();
   var userWorks = [];
   var selector = $("#userSelector");
@@ -81,7 +81,6 @@ createUserSelectScreen = async ({users = users} = {}) => {
   $(".userButton").click(function() {
       $(".userFiles").show();
       let selected_eppn = $(this).text();
-      console.log(selected_eppn);
       $(".chosenUser").text(selected_eppn + ":");
       $(".chosenFile").text("");
       $("#worksButtons").remove();
@@ -94,11 +93,10 @@ createUserSelectScreen = async ({users = users} = {}) => {
 }
 
 /**
- * Temporary pass the api object to 'everything'... 
+ * Temporary pass the api object to 'everything'...
  * So that any ~global~ function can make an api call...
  */
 createLitSelectorScreen = async ({users = users, selected_eppn = selected_eppn} = {}) => {
-  console.log(selected_eppn);
   var selector = $(".userFiles");
   var worksButtons = $("<ul/>", {
     id: "worksButtons",
@@ -106,61 +104,48 @@ createLitSelectorScreen = async ({users = users, selected_eppn = selected_eppn} 
     for: "pickLit"
   });
   selector.append(worksButtons);
-  var dataString = selected_eppn;
 
-  
-
-  $.get("grabUserWorks.php", {
-    folder: dataString
-  }).done(function(data) {
-    var works = JSON.parse(data);
-    var length = works.length;
-    var rows = 0;
-    while (length >= 1) {
-      length -= 3;
-      rows++;
-    }
-
-    for (var lit in works) {
-      var fileWithoutExt = works[lit].substr(0, works[lit].lastIndexOf('.')) || works[lit];
-      var litButton = $('<li/>', {
-        name: works[lit],
-        class: "mdl-menu__item",
-        id: "inputLitButton",
-        text: fileWithoutExt,
-        click: function(evt) {
-          hideAllBoxes();
-          $(".nameMenu").remove()
-          $("#text").empty();
-          $("div[aria-describedby='moderateFileChoice']").hide();
-          textChosen = $(this).attr("name");
-          $(".chosenFile").text(textChosen);
-          userChosen = $(".chosenUser").html();
-          getLitContents(userChosen, textChosen);
-          removeSpans();
-        }
-      });
-
-      if (userFolderSelected == currentUser['eppn'] || whitelist.includes(currentUser['eppn'])) {
-        litButton.on('contextmenu', function(evt) {
-          evt.preventDefault();
-          setFileModeration(evt);
-          var newTop = evt.pageY + "px";
-          var newLeft = $(document).width() * .85 + "px";
-          $('div[aria-describedby="moderateFileChoice"]').css({
-            'top': newTop + "px",
-            'left': newLeft + "px",
-          })
-          $('div[aria-describedby="userPrivateList"]').css({
-            'top': newTop + "px",
-            'left': newLeft + "px",
-          })
+  users.get_user_works(selected_eppn).then((works) => {
+      for (var lit in works) {
+        var fileWithoutExt = works[lit].substr(0, works[lit].lastIndexOf('.')) || works[lit];
+        var litButton = $('<li/>', {
+          name: works[lit],
+          class: "mdl-menu__item",
+          id: "inputLitButton",
+          text: fileWithoutExt,
+          click: function(evt) {
+            hideAllBoxes();
+            $(".nameMenu").remove()
+            $("#text").empty();
+            $("div[aria-describedby='moderateFileChoice']").hide();
+            textChosen = $(this).attr("name");
+            $(".chosenFile").text(textChosen);
+            userChosen = $(".chosenUser").html().split(":")[0];
+            getLitContents(userChosen, textChosen);
+            removeSpans();
+          }
         });
+
+        if (userFolderSelected == currentUser['eppn'] || whitelist.includes(currentUser['eppn'])) {
+          litButton.on('contextmenu', function(evt) {
+            evt.preventDefault();
+            setFileModeration(evt);
+            var newTop = evt.pageY + "px";
+            var newLeft = $(document).width() * .85 + "px";
+            $('div[aria-describedby="moderateFileChoice"]').css({
+              'top': newTop + "px",
+              'left': newLeft + "px",
+            })
+            $('div[aria-describedby="userPrivateList"]').css({
+              'top': newTop + "px",
+              'left': newLeft + "px",
+            })
+          });
+        }
+
+        worksButtons.append(litButton);
       }
 
-      worksButtons.append(litButton);
-    }
-
-    componentHandler.upgradeElement($('#worksButtons')[0]);
+      componentHandler.upgradeElement($('#worksButtons')[0]);
   });
 }

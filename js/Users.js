@@ -3,15 +3,15 @@ export class Users {
         this.api = api;
         this.grouping = grouping;
         return (async () => {
-            this.user_list = await this.get_users();
+            this.creator_list = await this.get_creators();
             this.current_user = await this.get_current_user();
             return this;
         })();
     }
 
-    async get_users() {
+    async get_creators() {
         let user_list = this.api.request({
-            endpoint: 'get_users',
+            endpoint: 'get_creators',
             data: this.grouping
         });
         return await user_list;
