@@ -75,12 +75,11 @@ createUserSelectScreen = async ({users = users} = {}) => {
       class: "mdl-menu__item userButton",
       click: (async () => {
         $(".userFiles").show();
-        userFolderSelected = $(this).text();
-        $(".chosenUser").text(userFolderSelected + ":");
+        $(".chosenUser").text(user_list[userNum] + ":");
         $(".chosenFile").text("");
         $("#worksButtons").remove();
         //readWhiteList();
-        await createLitSelectorScreen({users: users, selected_eppn: userFolderSelected});
+        await createLitSelectorScreen({users: users, selected_eppn: user_list[userNum]});
       })
     });
 
