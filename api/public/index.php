@@ -231,7 +231,7 @@ $app->get('/git/pull/:code', function ($code) use ($app) {
     system("git pull --all");
 });
 
-$app->get('/git/push/:code', function ($code) use ($app) {
+$app->get('/git/add-commit-push/:code', function ($code) use ($app) {
     $real = file_get_contents("../../.git_secret.txt");
     $real = trim(preg_replace('/\s\s+/', '', $real));
     if ($real != $code) {
@@ -241,6 +241,8 @@ $app->get('/git/push/:code', function ($code) use ($app) {
         ));
         return;
     }
+    system("git add .");
+    system("git commit -m 'remote: read commit comments (this is a remote commit & push of code)'");
     system("git push -u origin develop");
 });
 
