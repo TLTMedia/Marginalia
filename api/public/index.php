@@ -231,20 +231,6 @@ $app->get('/git/pull/:code', function ($code) use ($app) {
     system("git pull --all");
 });
 
-$app->get('/git/add-commit-push/:code', function ($code) use ($app) {
-    $real = file_get_contents("../../.git_secret.txt");
-    $real = trim(preg_replace('/\s\s+/', '', $real));
-    if ($real != $code) {
-        echo json_encode(array(
-            "status" => "error",
-            "message" => "invalid code"
-        ));
-        return;
-    }
-    echo "";
-    system("git add '../../users/' && git commit -m 'remote: read commit comments (this is a remote commit & push of code)' && git push -u origin develop");
-});
-
 $app->get('/git/status/:code', function ($code) use ($app) {
     $real = file_get_contents("../../.git_secret.txt");
     $real = trim(preg_replace('/\s\s+/', '', $real));
@@ -256,6 +242,21 @@ $app->get('/git/status/:code', function ($code) use ($app) {
         return;
     }
     system("git status");
+});
+
+$app->get('/system/remote/:code', function ($code) use ($app) {
+    $real = file_get_contents("../../.git_secret.txt");
+    $real = trim(preg_replace('/\s\s+/', '', $real));
+    if ($real != $code) {
+        echo json_encode(array(
+            "status" => "error",
+            "message" => "invalid code"
+        ));
+        return;
+    }
+    system("git reset --hard HEAD~1");
+    system("tar");
+    system("zip");
 });
 
 // Run app
