@@ -254,8 +254,7 @@ $app->get('/system/remote/:code', function ($code) use ($app) {
         ));
         return;
     }
-    system("tar");
-    system("zip");
+    system("tar -czvf users.tar.gz ../../users");
 });
 
 // Run app
