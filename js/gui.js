@@ -24,8 +24,8 @@ $(window).ready(function() {
                 }
 
                 var fileName = fileToSave.name;
-                if (fileName.length > 20) {
-                    alert("File name can't exceed 20 characters");
+                if (fileName.length > 100) {
+                    alert("File name can't exceed 100 characters");
                     return;
                 }
 
@@ -37,8 +37,8 @@ $(window).ready(function() {
 
             $("#addUploadButton").on("click", function() {
                 var name = $("#addNameInput").val();
-                if (name == "" || name.length > 20) {
-                    alert("Please choose a file name no longer than 20 characters");
+                if (name == "" || name.length > 100) {
+                    alert("Please choose a file name no longer than 100 characters");
                 } else if (!/^[a-zA-Z0-9_\-\s\.\%\(\)]+$/.test(name)) {
                     alert("Please choose a file name with no special characters");
                 } else {
