@@ -114,11 +114,11 @@ $app->get('/get_work/:eppn/:work', function ($eppn, $work) use ($app) {
 /**
  * Save a comment on a work
  */
-$app->post('/save_comments/', function () use ($app) {
+$app->post('/save_comments', function () use ($app) {
     $json = $app->request->getBody();
     $data = json_decode($json, true);
 
-    if (!array_intersect(array_keys($data), array('author', 'work', 'replyTo', 'replyHash', 'startIndex', 'endIndex', 'commentText', 'commentType')) == array_keys($data)) {
+    if (array_intersect(array_keys($data), array('author', 'work', 'replyTo', 'replyHash', 'startIndex', 'endIndex', 'commentText', 'commentType')) !== array('author', 'work', 'replyTo', 'replyHash', 'startIndex', 'endIndex', 'commentText', 'commentType')) {
         echo json_encode(array(
             "status" => "error",
             "message" => "missing a parameter"
