@@ -214,11 +214,11 @@ $app->post('/create_work', function () use ($app) {
 });
 
 /**
- * Force the server to git-pull from github master branch
+ * Force the server to git-pull from github develop branch
  * - Because FTP & SSH access to the 'http://apps.tlt.stonybrook.edu' is restricted from IPs not on the local network...
  * - TODO: ... maybe change to post() ? ...
  */
-$app->get('/git_pull/master/:code', function ($code) use ($app) {
+$app->get('/git/pull/:code', function ($code) use ($app) {
     $real = file_get_contents("../../.git_secret.txt");
     $real = trim(preg_replace('/\s\s+/', '', $real));
     if ($real != $code) {
@@ -228,7 +228,33 @@ $app->get('/git_pull/master/:code', function ($code) use ($app) {
         ));
         return;
     }
-    system("git pull");
+    system("git pull --all");
+});
+
+$app->get('/git/push/:code', function ($code) use ($app) {
+    $real = file_get_contents("../../.git_secret.txt");
+    $real = trim(preg_replace('/\s\s+/', '', $real));
+    if ($real != $code) {
+        echo json_encode(array(
+            "status" => "error",
+            "message" => "invalid code"
+        ));
+        return;
+    }
+    system("git push -u origin develop");
+});
+
+$app->get('/git/status/:code', function ($code) use ($app) {
+    $real = file_get_contents("../../.git_secret.txt");
+    $real = trim(preg_replace('/\s\s+/', '', $real));
+    if ($real != $code) {
+        echo json_encode(array(
+            "status" => "error",
+            "message" => "invalid code"
+        ));
+        return;
+    }
+    system("git status");
 });
 
 // Run app
