@@ -34,6 +34,18 @@ $app->view->parserOptions = array(
 );
 $app->view->parserExtensions = array(new \Slim\Views\TwigExtension());
 
+/**
+ * returns true when the values of an array are equal
+ */
+function array_equal($a, $b) {
+    return (
+         is_array($a)
+         && is_array($b)
+         && count($a) == count($b)
+         && array_diff($a, $b) === array_diff($b, $a)
+    );
+}
+
 // Define routes
 $app->get('/', function () use ($app) {
     $app->log->info("Slim-Skeleton '/' route");
@@ -118,7 +130,7 @@ $app->post('/save_comments', function () use ($app) {
     $json = $app->request->getBody();
     $data = json_decode($json, true);
 
-    if (array_intersect(array_keys($data), array('author', 'work', 'replyTo', 'replyHash', 'startIndex', 'endIndex', 'commentText', 'commentType')) !== array('author', 'work', 'replyTo', 'replyHash', 'startIndex', 'endIndex', 'commentText', 'commentType')) {
+    if (!array_equal(array_keys($data), array('author', 'work', 'replyTo', 'replyHash', 'startIndex', 'endIndex', 'commentText', 'commentType'))) {
         echo json_encode(array(
             "status" => "error",
             "message" => "missing a parameter"
@@ -174,6 +186,30 @@ $app->get('/set_privacy/:creator/:work/:privacy', function ($creator, $work, $pr
         $work,
         $_SERVER['eppn'],
         $privacy
+    );
+});
+
+/**
+ * Create a new work
+ */
+$app->post('/create_work', function () use ($app) {
+    $json = $app->request->getBody();
+    $data = json_decode($json, true);
+
+    if (!array_equal(array_keys($data), array('privacy', 'work'))) {
+        echo json_encode(array(
+            "status" => "error",
+            "message" => "missing a parameter"
+        ));
+        return;
+    }
+
+    require '../Actions/CreateWork.php';
+    $newWork = new CreateWork(
+        $_SERVER['eppn'],
+        $data['work'],
+        $data['privacy'],
+        $_FILES['file']
     );
 });
 
