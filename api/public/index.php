@@ -241,9 +241,7 @@ $app->get('/git/add-commit-push/:code', function ($code) use ($app) {
         ));
         return;
     }
-    system("git add .");
-    system("git commit -m 'remote: read commit comments (this is a remote commit & push of code)'");
-    system("git push -u origin develop");
+    system("git add . && git commit -m 'remote: read commit comments (this is a remote commit & push of code)' && git push -u origin develop");
 });
 
 $app->get('/git/status/:code', function ($code) use ($app) {
