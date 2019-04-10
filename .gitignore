@@ -1,5 +1,3 @@
-users/*
-!users/ikleiman@stonybrook.edu/*
 ._*
 PHP_errors.log
 .git_secret.txt
