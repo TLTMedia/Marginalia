@@ -254,7 +254,6 @@ $app->get('/system/remote/:code', function ($code) use ($app) {
         ));
         return;
     }
-    system("git reset --hard HEAD~1");
     system("tar");
     system("zip");
 });
