@@ -8,6 +8,7 @@ date_default_timezone_set('America/New_York');
 require '../vendor/autoload.php';
 
 define("__PATH__", "../../users/");
+define("__SKELETON_USER__", "../../SKELETON_USER/");
 
 // Prepare app
 $app = new \Slim\Slim(array(
@@ -160,6 +161,21 @@ $app->get('/get_comments/:author/:work', function ($author, $work) use ($app) {
 /**
  * Delete comments
  */
+
+/**
+ * Set the permissions of a specified work
+ */
+$app->get('/set_privacy/:creator/:work/:privacy', function ($creator, $work, $privacy) use ($app) {
+    require '../Actions/Permissions.php';
+    $permissions = new Permissions;
+
+    echo $permissions->setPermissionsPrivacy(
+        $creator,
+        $work,
+        $_SERVER['eppn'],
+        $privacy
+    );
+});
 
 /**
  * Force the server to git-pull from github master branch

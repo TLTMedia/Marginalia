@@ -100,11 +100,51 @@ class Permissions
     }
 
     /**
+     * Set a work to 'private' or 'public'
+     * Initially checks whether the current user is allowed to do so
+     *  -> needs to get the works' `permissions.json` page and see if $eppn is in it
+     */
+    public function setPermissionsPrivacy($creator, $work, $currentUser, $privacy)
+    {
+        $pathOfWork = __PATH__ . "$creator/works/$work";
+
+        /**
+         * if $privacy isn't either 'public' or 'private' return error
+         */
+        if (!in_array($privacy, array('public', 'private'))) {
+            return json_encode(array(
+                "status" => "error",
+                "message" => "invalid privacy type"
+            ));
+        }
+
+        /**
+         * if the current user isn't on the permissions list return error
+         */
+        $hasPermissions = $this->userOnPermissionsList($pathOfWork, $currentUser);
+        if (!$hasPermissions) {
+            return json_encode(array(
+                "status" => "error",
+                "message" => "invalid permissions to set work privacy"
+            ));
+        }
+
+        $permissionsData = json_decode($this->getRawPermissionsList($pathOfWork));
+        $permissionsData->privacy = $privacy;
+        $filePath = $pathOfWork . "/permissions.json";
+        file_put_contents($filePath, json_encode($permissionsData));
+
+        return json_encode(array(
+            "status" => "ok"
+        ));
+    }
+
+    /**
      * Get the permissions list of a specified $pathOfWork...
      * No padding/extra json garbage for user friendliness...
      * purely return data
      */
-    public function getRawPermissionsList($pathOfWork)
+    private function getRawPermissionsList($pathOfWork)
     {
         // $pathOfWork = ../../users/ikleiman@stonybrook.edu/works_data/Something
         $filePath = $pathOfWork . "/permissions.json";
@@ -118,6 +158,20 @@ class Permissions
 
         return file_get_contents($filePath);
     }
+
+    /**
+     * permissions.php contains list of people who's comments are auto approved and they also can maintain comment approval/visibility
+     */
+    private function userOnPermissionsList($pathOfWork, $user)
+    {
+        $userEditList = json_decode($this->getRawPermissionsList($pathOfWork))->admins;
+
+        if (in_array($user, $userEditList)) {
+            return TRUE;
+        }
+
+        return FALSE;
+    }
 }
 
 class DefaultPermissions
@@ -125,5 +179,6 @@ class DefaultPermissions
     public function __construct()
     {
         $this->admins = array();
+        $this->privacy = "public";
     }
 }

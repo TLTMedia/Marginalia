@@ -9,7 +9,8 @@ class Comments
      */
     public function saveComment($workAuthor, $workName, $replyTo, $replyHash, $commenterName, $startIndex, $endIndex, $commentText, $commentType)
     {
-        $visibility = $this->userOnModList(__PATH__ . "$workAuthor/works/$workName", $commenterName);
+        // changed function to Permissions.php
+        //$visibility = $this->userOnPermissionsList(__PATH__ . "$workAuthor/works/$workName", $commenterName);
 
         if ($replyTo == '_' || $replyHash == '_') {
             // create new top level comment
@@ -196,24 +197,6 @@ class Comments
     private function sortByLengthDec($a, $b)
     {
         return strlen($b->path) - strlen($a->path);
-    }
-
-    /**
-     * permissions.php contains list of people who's comments are auto approved and they also can maintain comment approval/visibility
-     */
-    private function userOnModList($pathOfWork, $user)
-    {
-        require 'Permissions.php';
-        $permissions = new Permissions;
-        $userEditList = json_decode($permissions->getRawPermissionsList($pathOfWork))->admins;
-
-        foreach ($userEditList as $validUser) {
-            if ($user == $validUser) {
-                return TRUE;
-            }
-        }
-
-        return FALSE;
     }
 
     private function getEppnHashFromPath($path)
