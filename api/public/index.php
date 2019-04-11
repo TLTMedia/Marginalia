@@ -195,8 +195,8 @@ $app->get('/set_privacy/:creator/:work/:privacy', function ($creator, $work, $pr
 $app->post('/create_work', function () use ($app) {
     $json = $app->request->getBody();
 
-    $work = $app->request()->post('work');
-    $privacy = $app->request()->post('privacy');
+    echo $work = $app->request()->post('work');
+    echo $privacy = $app->request()->post('privacy');
     var_dump($_FILES['file']);
     // if (!array_equal(array_keys($data), array('privacy', 'work'))) {
     //     echo json_encode(array(
