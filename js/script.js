@@ -342,58 +342,25 @@ function fillUserPrivateList(nameArray) {
   }
 }
 
-
-
-/*
-    Uploads the user's .docx file...
-    @var litname : the name the file should be saved as on the server
-    @var private : true/false specifies whether it's a private file
-        if true, file is hidden from other users; only visible to self
-    @var litfile : file object data ... (the file data to upload)
-*/
 saveLit = ({work, privacy, data} = {}) => {
   if (data.size > 2000000) {
     alert("Error: File too large. Can't be larger than 2Mb.");
+    return;
   }
-  var formData = new FormData();
+
+  const formData = new FormData();
   formData.append("file", data);
   formData.append("work", work);
   formData.append("privacy", privacy);
-
-  console.log("JSON DATA IS", formData);
 
   API.request({
     endpoint: "create_work",
     method: "POST",
     data: formData
   }).then((data) => {
-    console.log(data);
+    alert(data);
   });
 }
-
-// This function is not used but can be looked at for reference
-// function init() {
-//   // Holds information on input comments, the literature shown
-//   // and the different buttons that can be made
-//   var dropdown;
-//   var lit;
-//   var comment;
-//
-//   getLit(textChosen).then(function(data) {
-//     lit = data;
-//     makeBoxes();
-//   }).fail(function(data) {
-//     lit = data
-//   }).always(function() {
-//     var litDiv = $('<div/>', {
-//       id: "litDiv",
-//       html: lit
-//     }).on("mouseup", function(evt) {
-//       highlightCurrentSelection(evt, currentUser['eppn'])
-//     });
-//     $('#text').append(litDiv);
-//   })
-// }
 
 // Load the user's comments after a work button is clicked
 /*

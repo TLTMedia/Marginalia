@@ -29,8 +29,9 @@ export class APIHandler {
                     defer.resolve(data['data']);
                 }
             }
-        }).fail((jqXHR, textStatus, errorThrown) => {
-            console.log("ERROR", errorThrown);
+        }).fail((jqXHR, textStatus, errorThrown, data) => {
+            alert(errorThrown);
+            console.log("ERROR", data);
         });
         return defer.promise();
     }
