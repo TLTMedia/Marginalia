@@ -4,13 +4,7 @@
 // error_reporting(E_ALL);
 
 date_default_timezone_set('America/New_York');
-echo ini_set('upload_max_filesize', '20M');
-echo ini_set('post_max_size', '20M');
-echo ini_get('upload_max_filesize');
-echo "\n";
-echo ini_get('post_max_size');
 
-echo "dumped file";
 require '../vendor/autoload.php';
 
 define("__PATH__", "../../users/");
