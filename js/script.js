@@ -355,11 +355,9 @@ saveLit = ({work, privacy, data} = {}) => {
   console.log(work, privacy, data);
   var formData = new FormData();
   formData.append("file", data);
-  formData.append("work", work);
-  formData.append("privacy", privacy);
 
   let jsonData = JSON.stringify({
-    file: data,
+    file: formData,
     work: work,
     privacy: privacy
   });
