@@ -358,7 +358,8 @@ saveLit = ({work, privacy, data} = {}) => {
     method: "POST",
     data: formData
   }).then((data) => {
-    alert(data);
+    console.log(data);
+    alert("successfully created new work");
   });
 }
 
