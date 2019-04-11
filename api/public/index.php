@@ -195,24 +195,25 @@ $app->get('/set_privacy/:creator/:work/:privacy', function ($creator, $work, $pr
 $app->post('/create_work', function () use ($app) {
     $json = $app->request->getBody();
 
-    echo $work = $app->request()->post('work');
-    echo $privacy = $app->request()->post('privacy');
-    var_dump($_FILES['file']);
-    // if (!array_equal(array_keys($data), array('privacy', 'work'))) {
-    //     echo json_encode(array(
-    //         "status" => "error",
-    //         "message" => "missing a parameter"
-    //     ));
-    //     return;
-    // }
+    try {
+        $work = $app->request()->post('work');
+        $privacy = $app->request()->post('privacy');
+        $tempFile = $_FILES['file'];
+    } catch(Exception $e) {
+        echo json_encode(array(
+            "status" => "error",
+            "message" => "missing parameter"
+        ));
+        return;
+    }
 
-    // require '../Actions/CreateWork.php';
-    // $newWork = new CreateWork(
-    //     $_SERVER['eppn'],
-    //     $data['work'],
-    //     $data['privacy'],
-    //     $_FILES['file']
-    // );
+    require '../Actions/CreateWork.php';
+    echo $newWork = new CreateWork(
+        $_SERVER['eppn'],
+        $work,
+        $privacy,
+        $tempFile
+    );
 });
 
 /**

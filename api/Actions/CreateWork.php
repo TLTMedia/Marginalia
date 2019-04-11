@@ -2,7 +2,7 @@
 
 class CreateWork
 {
-    public function __construct($creator, $work, $privacy, $data)
+    public function __construct($creator, $work, $privacy, $tmpFilePath)
     {
         /**
          * Create the user directory if it doesn't exist
@@ -17,29 +17,62 @@ class CreateWork
                 "status" => "error",
                 "message" => "work already exists"
             ));
+        } else {
+            if (mkdir($this->pathOfWork)) {
+                return json_encode(array(
+                    "status" => "ok",
+                    "message" => "successfully created work"
+                ));
+            } else {
+                return json_encode(array(
+                    "status" => "error",
+                    "message" => "unabled to create work"
+                ));
+            }
         }
 
         $this->directories = array(
             "data"
         );
 
-        $this->files = array(
-            "index.html",
-            "permissions.json"
-        );
+        /**
+         * Creating the default directories for the new work
+         */
+        foreach ($this->directories as $directory) {
+            if (mkdir($this->pathOfWork . "/" . $directory)) {
+                return json_encode(array(
+                    "status" => "ok",
+                    "message" => "successfully created directory: " . $directory
+                ));
+            } else {
+                return json_encode(array(
+                    "status" => "error",
+                    "message" => "unabled to create directory: " . $directory
+                ));
+            }
+        }
+        
+        /**
+         * Creating the index.html file with Mammoth
+         */
+        $destinationPath = $this->pathOfWork . "/index.html";
+        $execString = "/home1/tltsecure/.local/bin/mammoth $tmpFilePath $destinationPath";
+        system($execString);
+        unlink($tmpFilePath);
 
         /**
-         * Creating The Default Directories
+         * Creating the default permissions.json file
          */
+        require 'Permissions.php';
+        $permissions = new DefaultPermissions;
+        $permissions->privacy = $privacy;
+        $permissions->admins[] = $creator;
+        file_put_contents($this->pathOfWork . "/permissions.json", $permissions);
 
-        /**
-         * Creating the default files
-         * @var [type]
-         */
-
-        // require 'Permissions.php'
-        // $permissions = new Permissions;
-
+        return json_encode(array(
+            "status" => "ok",
+            "message" => "successfully created work: " . $work
+        ));
     }
 
     /**
