@@ -68,7 +68,7 @@ class CreateWork
         $destinationPath = $pathOfWork . "/index.html";
         $execString = "/home1/tltsecure/.local/bin/mammoth $tmpFilePath $destinationPath";
         system($execString);
-        unlink($tmpFilePath);
+        //unlink($tmpFilePath);
 
         /**
          * Creating the default permissions.json file
