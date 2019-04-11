@@ -352,7 +352,9 @@ function fillUserPrivateList(nameArray) {
     @var litfile : file object data ... (the file data to upload)
 */
 saveLit = ({work, privacy, data} = {}) => {
-  console.log(work, privacy, data);
+  if (data.size > 2000000) {
+    alert("Error: File too large. Can't be larger than 2Mb.");
+  }
   var formData = new FormData();
   formData.append("file", data);
   formData.append("work", work);

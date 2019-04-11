@@ -197,7 +197,7 @@ $app->post('/create_work', function () use ($app) {
 
     echo $work = $app->request()->post('work');
     echo $privacy = $app->request()->post('privacy');
-    var_dump($_FILES);
+    var_dump($_FILES['file']);
     // if (!array_equal(array_keys($data), array('privacy', 'work'))) {
     //     echo json_encode(array(
     //         "status" => "error",
