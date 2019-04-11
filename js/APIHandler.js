@@ -15,15 +15,19 @@ export class APIHandler {
             contentType: false,
             processData: false
         }).done(function(data) {
-            if (data['status'] !== 'ok') {
+            if (data['status'] == 'error') {
                 console.debug(data);
                 alert(data['message']);
                 return;
-            }
-            if (callback) {
-                defer.resolve(callback(data['data']));
+            } else if (data['status'] !== 'ok') {
+                console.log(data);
+                return;
             } else {
-                defer.resolve(data['data']);
+                if (callback) {
+                    defer.resolve(callback(data['data']));
+                } else {
+                    defer.resolve(data['data']);
+                }
             }
         }).fail(function(jqXHR, textStatus, errorThrown) {
             alert("Error: " + errorThrown);
