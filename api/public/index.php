@@ -5,6 +5,8 @@
 
 date_default_timezone_set('America/New_York');
 
+var_dump($_FILES['file']);
+echo "dumped file";
 require '../vendor/autoload.php';
 
 define("__PATH__", "../../users/");
@@ -197,7 +199,7 @@ $app->post('/create_work', function () use ($app) {
 
     echo $work = $app->request()->post('work');
     echo $privacy = $app->request()->post('privacy');
-    var_dump($_FILES['file']);
+    var_dump($_FILES);
     // if (!array_equal(array_keys($data), array('privacy', 'work'))) {
     //     echo json_encode(array(
     //         "status" => "error",
