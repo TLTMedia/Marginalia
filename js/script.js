@@ -355,7 +355,7 @@ function fillUserPrivateList(nameArray) {
 
 saveLit = ({work, privacy, data} = {}) => {
   console.log(work, privacy, data);
-  const formData = new FormData();
+  var formData = new FormData();
   formData.append("file", data);
   formData.append("work", work);
   formData.append("privacy", privacy);
