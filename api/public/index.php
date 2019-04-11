@@ -194,9 +194,9 @@ $app->get('/set_privacy/:creator/:work/:privacy', function ($creator, $work, $pr
  */
 $app->post('/create_work', function () use ($app) {
     $json = $app->request->getBody();
-    var_dump($json);
+    var_dump($app->request);
     $data = json_decode($json, true);
-    var_dump($data);
+    var_dump($app->request);
     // if (!array_equal(array_keys($data), array('privacy', 'work'))) {
     //     echo json_encode(array(
     //         "status" => "error",
@@ -217,7 +217,6 @@ $app->post('/create_work', function () use ($app) {
 /**
  * Force the server to git-pull from github develop branch
  * - Because FTP & SSH access to the 'http://apps.tlt.stonybrook.edu' is restricted from IPs not on the local network...
- * - TODO: ... maybe change to post() ? ...
  */
 $app->get('/git/pull/:code', function ($code) use ($app) {
     $real = file_get_contents("../../.git_secret.txt");
