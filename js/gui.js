@@ -42,7 +42,7 @@ $(window).ready(function() {
                 } else if (!/^[a-zA-Z0-9_\-\s\.\%\(\)]+$/.test(name)) {
                     alert("Please choose a file name with no special characters");
                 } else {
-                    saveLit(name, $("#privateCheck").is('.is-checked'), fileToSave);
+                    saveLit({work: name, privacy: $("#privateCheck").is('.is-checked'), data: fileToSave});
                 }
             });
         });
