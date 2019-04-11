@@ -4,7 +4,13 @@ class CreateWork
 {
     public function __construct()
     {
-        
+        $this->pathOfWork;
+        /**
+         * Empty directories we want to create in the $work directory
+         */
+        $this->directories = array(
+            "data"
+        );
     }
 
     /**
@@ -38,13 +44,6 @@ class CreateWork
                 ));
             }
         }
-
-        /**
-         * Empty directories we want to create in the $work directory
-         */
-        $this->directories = array(
-            "data"
-        );
 
         /**
          * Creating the default directories for the new work
