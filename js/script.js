@@ -351,11 +351,11 @@ function fillUserPrivateList(nameArray) {
         if true, file is hidden from other users; only visible to self
     @var litfile : file object data ... (the file data to upload)
 */
-function saveLit({litname, private, litFile} = {}) {
+function saveLit({work, privacy, data} = {}) {
   var formData = new FormData();
-  formData.append("file", litFile);
-  formData.append("litname", litname);
-  formData.append("private", private);
+  formData.append("file", data);
+  formData.append("litname", work);
+  formData.append("private", privacy);
   console.log(formData);
   // API.request({
   //   endpoint: "create_work",
