@@ -198,7 +198,7 @@ $app->post('/create_work', function () use ($app) {
     try {
         $work = $app->request()->post('work');
         $privacy = $app->request()->post('privacy');
-        $tempFile = $_FILES['file'];
+        $tempFile = $_FILES['file']['tmp_name'];
     } catch(Exception $e) {
         echo json_encode(array(
             "status" => "error",
@@ -208,12 +208,13 @@ $app->post('/create_work', function () use ($app) {
     }
 
     require '../Actions/CreateWork.php';
-    echo $newWork = new CreateWork(
+    $work = new CreateWork(
         $_SERVER['eppn'],
         $work,
         $privacy,
         $tempFile
     );
+    echo $work;
 });
 
 /**
