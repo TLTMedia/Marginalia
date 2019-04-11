@@ -359,7 +359,7 @@ saveLit = ({work, privacy, data} = {}) => {
     data: formData
   }).then((data) => {
     console.log(data);
-    alert(data['message']);
+    alert("successfully created new work");
   });
 }
 
