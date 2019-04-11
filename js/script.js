@@ -359,10 +359,12 @@ saveLit = ({work, privacy, data} = {}) => {
   formData.append("privacy", privacy);
 
   let jsonData = JSON.stringify({
-    file: data.serializeArray(),
+    file: data,
     work: work,
     privacy: privacy
   });
+
+  console.log(jsonData);
 
   API.request({
     endpoint: "create_work",
