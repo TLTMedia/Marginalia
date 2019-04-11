@@ -358,10 +358,16 @@ saveLit = ({work, privacy, data} = {}) => {
   formData.append("work", work);
   formData.append("privacy", privacy);
 
+  let jsonData = JSON.stringify({
+    file: data,
+    work: work,
+    privacy: privacy
+  });
+
   API.request({
     endpoint: "create_work",
-    method: 'POST',
-    data: formData
+    method: "POST",
+    data: jsonData
   }).then((data) => {
     console.log(data);
   });
