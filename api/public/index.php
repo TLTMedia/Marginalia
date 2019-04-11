@@ -197,21 +197,21 @@ $app->post('/create_work', function () use ($app) {
     var_dump($json);
     $data = json_decode($json, true);
     var_dump($data);
-    if (!array_equal(array_keys($data), array('privacy', 'work'))) {
-        echo json_encode(array(
-            "status" => "error",
-            "message" => "missing a parameter"
-        ));
-        return;
-    }
+    // if (!array_equal(array_keys($data), array('privacy', 'work'))) {
+    //     echo json_encode(array(
+    //         "status" => "error",
+    //         "message" => "missing a parameter"
+    //     ));
+    //     return;
+    // }
 
-    require '../Actions/CreateWork.php';
-    $newWork = new CreateWork(
-        $_SERVER['eppn'],
-        $data['work'],
-        $data['privacy'],
-        $_FILES['file']
-    );
+    // require '../Actions/CreateWork.php';
+    // $newWork = new CreateWork(
+    //     $_SERVER['eppn'],
+    //     $data['work'],
+    //     $data['privacy'],
+    //     $_FILES['file']
+    // );
 });
 
 /**
