@@ -8,7 +8,6 @@ echo ini_get('file_uploads');
 ini_set('file_uploads', 1);
 echo ini_get('file_uploads');
 
-var_dump($_FILES['file']);
 echo "dumped file";
 require '../vendor/autoload.php';
 
