@@ -2,7 +2,15 @@
 
 class CreateWork
 {
-    public function __construct($creator, $work, $privacy, $tmpFilePath)
+    public function __construct()
+    {
+        
+    }
+
+    /**
+     * Initialization function
+     */
+    public function init($creator, $work, $privacy, $tmpFilePath)
     {
         /**
          * Create the user directory if it doesn't exist
