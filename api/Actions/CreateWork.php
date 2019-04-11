@@ -31,6 +31,9 @@ class CreateWork
             }
         }
 
+        /**
+         * Empty directories we want to create in the $work directory
+         */
         $this->directories = array(
             "data"
         );
