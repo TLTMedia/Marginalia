@@ -9,7 +9,11 @@ export class APIHandler {
             url: this.base_url + endpoint + '?modular',
             method: method,
             data: data,
-            dataType: "json"
+            dataType: 'json',
+            async: false,
+            cache: false,
+            contentType: false,
+            processData: false
         }).done(function(data) {
             if (callback) {
                 defer.resolve(callback(data['data']));

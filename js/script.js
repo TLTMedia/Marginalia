@@ -351,31 +351,22 @@ function fillUserPrivateList(nameArray) {
         if true, file is hidden from other users; only visible to self
     @var litfile : file object data ... (the file data to upload)
 */
-function saveLit(litname, private, litFile) {
-    var formData = new FormData();
-    formData.append("file", litFile);
-    formData.append("litname", litname);
-    formData.append("private", private);
 
-    $.ajax({
-        url: "saveInput.php",
-        type: "POST",
-        data: formData,
-        async: false,
-        cache: false,
-        contentType: false,
-        processData: false
-    }).done(function(data) {
-        if (data.status == 'success') {
-            alert("File upload successful.");
-        } else {
-            alert("File upload failure. " + data);
-        }
-    }).fail(function(data) {
-        alert("File upload failure. " + data);
-    });
+
+saveLit = (litname, private, litFile) => {
+  let formData = new FormData();
+  formData.append("file", litFile);
+  formData.append("litname", litname);
+  formData.append("private", private);
+
+  API.request({
+    endpoint: "create_work",
+    method: 'POST',
+    data: formData
+  }).then((data) => {
+    console.log(data);
+  });
 }
-
 
 // This function is not used but can be looked at for reference
 // function init() {
