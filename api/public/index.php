@@ -4,6 +4,9 @@
 // error_reporting(E_ALL);
 
 date_default_timezone_set('America/New_York');
+echo ini_get('file_uploads');
+ini_set('file_uploads', 1);
+echo ini_get('file_uploads');
 
 var_dump($_FILES['file']);
 echo "dumped file";
