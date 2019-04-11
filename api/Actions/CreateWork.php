@@ -32,12 +32,7 @@ class CreateWork
                 "message" => "work already exists"
             ));
         } else {
-            if (mkdir($pathOfWork)) {
-                return json_encode(array(
-                    "status" => "ok",
-                    "message" => "successfully created work"
-                ));
-            } else {
+            if (!mkdir($pathOfWork)) {
                 return json_encode(array(
                     "status" => "error",
                     "message" => "unabled to create work"
@@ -49,12 +44,7 @@ class CreateWork
          * Creating the default directories for the new work
          */
         foreach ($this->directories as $directory) {
-            if (mkdir($pathOfWork . "/" . $directory)) {
-                return json_encode(array(
-                    "status" => "ok",
-                    "message" => "successfully created directory: " . $directory
-                ));
-            } else {
+            if (!mkdir($pathOfWork . "/" . $directory)) {
                 return json_encode(array(
                     "status" => "error",
                     "message" => "unabled to create directory: " . $directory
@@ -68,7 +58,7 @@ class CreateWork
         $destinationPath = $pathOfWork . "/index.html";
         $execString = "/home1/tltsecure/.local/bin/mammoth $tmpFilePath $destinationPath";
         system($execString);
-        unlink($tmpFilePath);
+        //unlink($tmpFilePath);
 
         /**
          * Creating the default permissions.json file
