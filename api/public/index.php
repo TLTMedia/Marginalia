@@ -208,7 +208,7 @@ $app->post('/create_work', function () use ($app) {
     }
 
     require '../Actions/CreateWork.php';
-    $work = new CreateWork;
+    $work = new CreateWork();
     echo $work->init(
         $_SERVER['eppn'],
         $work,
