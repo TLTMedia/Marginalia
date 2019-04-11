@@ -17,7 +17,7 @@ export class APIHandler {
         }).done(function(data) {
             if (data['status'] == 'error') {
                 console.log("ERROR", data);
-                // alert(data['message']);
+                alert(data['message']);
                 return;
             } else if (data['status'] !== 'ok') {
                 console.log("NOK", data);
@@ -30,7 +30,7 @@ export class APIHandler {
                 }
             }
         }).fail(function(jqXHR, textStatus, errorThrown) {
-            alert("Error: " + errorThrown);
+            console.log("ERROR", errorThrown);
         });
         return defer.promise();
     }
