@@ -4,7 +4,7 @@ class CreateWork
 {
     public function __construct()
     {
-        $this->pathOfWork = "";
+        $this->pathOfWork = "_";
         /**
          * Empty directories we want to create in the $work directory
          */
@@ -26,6 +26,7 @@ class CreateWork
         }
 
         $this->pathOfWork = __PATH__ . "$creator/works/$work";
+
         if (file_exists($this->pathOfWork)) {
             return json_encode(array(
                 "status" => "error",
