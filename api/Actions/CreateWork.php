@@ -8,7 +8,7 @@ class CreateWork
          * Empty directories we want to create in the $work directory
          */
         $this->directories = array(
-            "data"
+            "data/threads"
         );
     }
 
@@ -44,7 +44,7 @@ class CreateWork
          * Creating the default directories for the new work
          */
         foreach ($this->directories as $directory) {
-            if (!mkdir($pathOfWork . "/" . $directory)) {
+            if (!mkdir($pathOfWork . "/" . $directory, 0777, TRUE)) {
                 return json_encode(array(
                     "status" => "error",
                     "message" => "unabled to create directory: " . $directory
