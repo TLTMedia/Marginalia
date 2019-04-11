@@ -15,6 +15,11 @@ export class APIHandler {
             contentType: false,
             processData: false
         }).done(function(data) {
+            if (data['status'] !== 'ok') {
+                console.debug(data);
+                alert(data['message']);
+                return;
+            }
             if (callback) {
                 defer.resolve(callback(data['data']));
             } else {

@@ -353,11 +353,12 @@ function fillUserPrivateList(nameArray) {
 */
 
 
-saveLit = (work, privacy, data) => {
+saveLit = ({work, privacy, data} = {}) => {
   let formData = new FormData();
   formData.append("file", data);
   formData.append("work", work);
   formData.append("privacy", privacy);
+  console.log(formData);
 
   API.request({
     endpoint: "create_work",
