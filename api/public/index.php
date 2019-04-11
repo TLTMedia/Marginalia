@@ -208,8 +208,8 @@ $app->post('/create_work', function () use ($app) {
     }
 
     require '../Actions/CreateWork.php';
-    $work = new CreateWork();
-    echo $work->init(
+    $newWork = new CreateWork();
+    echo $newWork->init(
         $_SERVER['eppn'],
         $work,
         $privacy,

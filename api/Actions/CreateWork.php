@@ -24,7 +24,7 @@ class CreateWork
             $this->recurse_copy(__SKELETON_USER__, __PATH__ . $creator);
         }
 
-        $pathOfWork = __PATH__ . "$creator/works/$work";
+        $pathOfWork = __PATH__ . "" . $creator . "/works/" . $work;
 
         if (file_exists($pathOfWork)) {
             return json_encode(array(
