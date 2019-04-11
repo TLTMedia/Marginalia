@@ -8,7 +8,7 @@ export class APIHandler {
         $.ajax({
             url: this.base_url + endpoint + '?modular',
             method: method,
-            data: data,
+            data: JSON.stringify(data),
             dataType: 'json',
             async: false,
             cache: false,
