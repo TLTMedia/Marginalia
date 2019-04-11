@@ -359,7 +359,7 @@ saveLit = ({work, privacy, data} = {}) => {
   formData.append("privacy", privacy);
 
   let jsonData = JSON.stringify({
-    file: data,
+    file: data.serializeArray(),
     work: work,
     privacy: privacy
   });
