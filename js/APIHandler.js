@@ -16,11 +16,11 @@ export class APIHandler {
             processData: false
         }).done(function(data) {
             if (data['status'] == 'error') {
-                console.debug(data);
-                alert(data['message']);
+                console.log("ERROR", data);
+                // alert(data['message']);
                 return;
             } else if (data['status'] !== 'ok') {
-                console.log(data);
+                console.log("NOK", data);
                 return;
             } else {
                 if (callback) {
