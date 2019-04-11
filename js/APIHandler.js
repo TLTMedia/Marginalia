@@ -29,9 +29,9 @@ export class APIHandler {
                     defer.resolve(data['data']);
                 }
             }
-        }).fail((jqXHR, textStatus, errorThrown, data) => {
-            alert(errorThrown);
-            console.log("ERROR", data);
+        }).fail((jqXHR, textStatus, errorThrown) => {
+            alert("Error uploading file");
+            console.log("ERROR", errorThrown);
         });
         return defer.promise();
     }
