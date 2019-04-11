@@ -5,8 +5,10 @@
 
 date_default_timezone_set('America/New_York');
 echo ini_get('file_uploads');
-ini_set('file_uploads', 1);
-echo ini_get('file_uploads');
+echo "\n";
+echo ini_get('upload_max_filesize');
+echo "\n";
+echo ini_get('post_max_size');
 
 echo "dumped file";
 require '../vendor/autoload.php';
