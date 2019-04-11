@@ -4,7 +4,6 @@ class CreateWork
 {
     public function __construct()
     {
-        $this->pathOfWork = "_";
         /**
          * Empty directories we want to create in the $work directory
          */
@@ -25,15 +24,15 @@ class CreateWork
             $this->recurse_copy(__SKELETON_USER__, __PATH__ . $creator);
         }
 
-        $this->pathOfWork = __PATH__ . "$creator/works/$work";
+        $pathOfWork = __PATH__ . "$creator/works/$work";
 
-        if (file_exists($this->pathOfWork)) {
+        if (file_exists($pathOfWork)) {
             return json_encode(array(
                 "status" => "error",
                 "message" => "work already exists"
             ));
         } else {
-            if (mkdir($this->pathOfWork)) {
+            if (mkdir($pathOfWork)) {
                 return json_encode(array(
                     "status" => "ok",
                     "message" => "successfully created work"
@@ -50,7 +49,7 @@ class CreateWork
          * Creating the default directories for the new work
          */
         foreach ($this->directories as $directory) {
-            if (mkdir($this->pathOfWork . "/" . $directory)) {
+            if (mkdir($pathOfWork . "/" . $directory)) {
                 return json_encode(array(
                     "status" => "ok",
                     "message" => "successfully created directory: " . $directory
@@ -66,7 +65,7 @@ class CreateWork
         /**
          * Creating the index.html file with Mammoth
          */
-        $destinationPath = $this->pathOfWork . "/index.html";
+        $destinationPath = $pathOfWork . "/index.html";
         $execString = "/home1/tltsecure/.local/bin/mammoth $tmpFilePath $destinationPath";
         system($execString);
         unlink($tmpFilePath);
@@ -78,7 +77,7 @@ class CreateWork
         $permissions = new DefaultPermissions;
         $permissions->privacy = $privacy;
         $permissions->admins[] = $creator;
-        file_put_contents($this->pathOfWork . "/permissions.json", $permissions);
+        file_put_contents($pathOfWork . "/permissions.json", $permissions);
 
         return json_encode(array(
             "status" => "ok",
