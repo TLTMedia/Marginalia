@@ -14,7 +14,7 @@ export class APIHandler {
             cache: false,
             contentType: false,
             processData: false
-        }).done(function(data) {
+        }).done((data) => {
             if (data['status'] == 'error') {
                 console.log("ERROR", data);
                 alert(data['message']);
@@ -29,7 +29,7 @@ export class APIHandler {
                     defer.resolve(data['data']);
                 }
             }
-        }).fail(function(jqXHR, textStatus, errorThrown) {
+        }).fail((jqXHR, textStatus, errorThrown) => {
             console.log("ERROR", errorThrown);
         });
         return defer.promise();
