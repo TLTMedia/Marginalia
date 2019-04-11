@@ -24,9 +24,9 @@ export class APIHandler {
                 return;
             } else {
                 if (callback) {
-                    defer.resolve(callback(data['data']));
+                    defer.resolve(callback(data['data'] || data['message']));
                 } else {
-                    defer.resolve(data['data']);
+                    defer.resolve(data['data'] || data['message']);
                 }
             }
         }).fail((jqXHR, textStatus, errorThrown) => {
