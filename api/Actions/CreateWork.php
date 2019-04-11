@@ -4,7 +4,7 @@ class CreateWork
 {
     public function __construct()
     {
-        $this->pathOfWork;
+        $this->pathOfWork = "";
         /**
          * Empty directories we want to create in the $work directory
          */
