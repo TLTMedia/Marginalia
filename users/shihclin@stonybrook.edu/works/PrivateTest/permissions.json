@@ -2,6 +2,6 @@
   "admins": [
     "shihclin@stonybrook.edu"
   ],
-  "public": true,
+  "public": false,
   "comments_require_approval": false
 }
