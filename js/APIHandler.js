@@ -30,7 +30,7 @@ export class APIHandler {
                 }
             }
         }).fail((jqXHR, textStatus, errorThrown) => {
-            alert("Error uploading file");
+            alert("An unexpected error occured. Please try again.");
             console.log("ERROR", errorThrown);
         });
         return defer.promise();
