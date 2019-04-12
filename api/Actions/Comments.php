@@ -7,14 +7,11 @@ class Comments
      * This method must check if the user has access to comment on specified work
      * TODO: Replying to a comment... replyhash = direct parents' comment timestamp & replyTo is the parent author eppn
      */
-    public function saveComment($workAuthor, $workName, $replyTo, $replyHash, $commenterName, $startIndex, $endIndex, $commentText, $commentType, $visibility)
+    public function saveComment($workAuthor, $workName, $replyTo, $replyHash, $commenterEppn, $startIndex, $endIndex, $commentText, $commentType, $visibility, $commenterFirstName, $commenterLastName)
     {
-        // changed function to Permissions.php
-        //$visibility = $this->userOnPermissionsList(__PATH__ . "$workAuthor/works/$workName", $commenterName);
-
         if ($replyTo == '_' || $replyHash == '_') {
             // create new top level comment
-            $lowestCommentPath = __PATH__ . "$workAuthor/works/$workName/data/threads/$commenterName";
+            $lowestCommentPath = __PATH__ . "$workAuthor/works/$workName/data/threads/$commenterEppn";
             if (!is_dir($lowestCommentPath)) {
                 mkdir($lowestCommentPath);
             }
@@ -50,17 +47,17 @@ class Comments
             if (!is_dir($replyPath . "threads")) {
                 mkdir($replyPath . "threads");
             }
-            if (!is_dir($replyPath . "threads/" . $_SERVER['eppn'])) {
-                mkdir($replyPath . "threads/" . $_SERVER['eppn']);
+            if (!is_dir($replyPath . "threads/" . $commenterEppn)) {
+                mkdir($replyPath . "threads/" . $commenterEppn);
             }
             $commentHash = time();
-            $newCommentPath = $replyPath . "threads/" . $_SERVER['eppn'] . "/" . $commentHash;
+            $newCommentPath = $replyPath . "threads/" . $commenterEppn . "/" . $commentHash;
             if (!is_dir($newCommentPath)) {
                 mkdir($newCommentPath);
             }
         }
 
-        $comment = new Comment($visibility, $commentText, $startIndex, $endIndex, $commentType, $_SERVER['nickname'], $_SERVER['sn']);
+        $comment = new Comment($visibility, $commentText, $startIndex, $endIndex, $commentType, $commenterFirstName, $commenterLastName, $commenterEppn);
         if (file_put_contents($newCommentPath . "/comment.json", json_encode($comment))) {
             return json_encode(array(
                 "status" => "ok",
@@ -219,7 +216,8 @@ class Comment
         $endIndex,
         $commentType,
         $firstName,
-        $lastName
+        $lastName,
+        $eppn
     ) {
         $this->visibility = $visibility;
         $this->commentText = $commentText;
@@ -228,5 +226,6 @@ class Comment
         $this->commentType = $commentType;
         $this->firstName = $firstName;
         $this->lastName = $lastName;
+        $this->eppn = $eppn;
     }
 }

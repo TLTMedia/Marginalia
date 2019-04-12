@@ -151,7 +151,9 @@ $app->post('/save_comments', function () use ($app) {
         $data['endIndex'],
         $data['commentText'],
         $data['commentType'],
-        $data['visibility']
+        $data['visibility'],
+        $_SERVER['nickname'],
+        $_SERVER['sn']
     );
 });
 
