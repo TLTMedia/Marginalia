@@ -90,7 +90,7 @@ class Comments
         if (file_put_contents($fileToModify, json_encode($fileData))) {
             return json_encode(array(
                 "status" => "ok",
-                "data" => "successfully changed comment to " . $privacy
+                "data" => "successfully changed comment to " . json_encode($privacy)
             ));
         } else {
             return json_encode(array(

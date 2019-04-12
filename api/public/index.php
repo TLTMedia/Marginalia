@@ -238,6 +238,14 @@ $app->post('/set_comment_public', function () use ($app) {
     require '../Actions/Comments.php';
     $comments = new Comments;
 
+    if (!in_array(json_encode($data['public']), array('true', 'false'))) {
+        echo json_encode(array(
+            "status" => "error",
+            "message" => "unable to edit comment"
+        ));
+        return;
+    }
+
     echo $comments->setCommentPublic(
         $data['creator'],
         $data['work'],
