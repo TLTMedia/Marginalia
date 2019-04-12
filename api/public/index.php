@@ -119,8 +119,8 @@ $app->get('/get_works/:user', function ($eppn) use ($app) {
 $app->get('/get_work/:eppn/:work', function ($eppn, $work) use ($app) {
     require '../Actions/Users.php';
     $user = new Users;
-    $workFullPath = __PATH__ . $eppn . "/works/" . $work . "/index.html";
-    echo $user->getUserWork($workFullPath);
+    $workFullPath = __PATH__ . $eppn . "/works/" . $work;
+    echo $user->getUserWork($workFullPath, $_SERVER['eppn']);
 });
 
 /**

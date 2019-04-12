@@ -69,18 +69,36 @@ class Users
     /**
      * Grab user work data...
      */
-    public function getUserWork($pathOfWork)
+    public function getUserWork($pathOfWork, $currentEppn)
     {
-        if (!file_exists($pathOfWork)) {
+        $workIndex = $pathOfWork . "/index.html";
+        if (!file_exists($workIndex)) {
             return json_encode(array(
                 "status" => "error",
                 "message" => "work does not exist"
             ));
         }
 
-        return json_encode(array(
-            "status" => "ok",
-            "data" => file_get_contents($pathOfWork)
-        ));
+        require 'Permissions.php';
+        $permissions = new Permissions;
+        if (!$permissions->isWorkPublic($pathOfWork)) {
+            if ($permissions->userOnPermissionsList($pathOfWork, $currentEppn)) {
+                return json_encode(array(
+                    "status" => "ok",
+                    "data" => file_get_contents($workIndex)
+                ));
+            } else {
+                return json_encode(array(
+                    "status" => "error",
+                    "message" => "invalid permissions to view work"
+                ));
+            }
+        } else {
+            // work is public
+            return json_encode(array(
+                "status" => "ok",
+                "data" => file_get_contents($workIndex)
+            ));
+        }
     }
 }
