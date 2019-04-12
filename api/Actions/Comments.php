@@ -7,7 +7,7 @@ class Comments
      * This method must check if the user has access to comment on specified work
      * TODO: Replying to a comment... replyhash = direct parents' comment timestamp & replyTo is the parent author eppn
      */
-    public function saveComment($workAuthor, $workName, $replyTo, $replyHash, $commenterName, $startIndex, $endIndex, $commentText, $commentType)
+    public function saveComment($workAuthor, $workName, $replyTo, $replyHash, $commenterName, $startIndex, $endIndex, $commentText, $commentType, $visibility)
     {
         // changed function to Permissions.php
         //$visibility = $this->userOnPermissionsList(__PATH__ . "$workAuthor/works/$workName", $commenterName);

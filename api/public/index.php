@@ -130,7 +130,7 @@ $app->post('/save_comments', function () use ($app) {
     $json = $app->request->getBody();
     $data = json_decode($json, true);
 
-    if (!array_equal(array_keys($data), array('author', 'work', 'replyTo', 'replyHash', 'startIndex', 'endIndex', 'commentText', 'commentType'))) {
+    if (!array_equal(array_keys($data), array('visibility', 'author', 'work', 'replyTo', 'replyHash', 'startIndex', 'endIndex', 'commentText', 'commentType'))) {
         echo json_encode(array(
             "status" => "error",
             "message" => "missing a parameter"
@@ -150,7 +150,8 @@ $app->post('/save_comments', function () use ($app) {
         $data['startIndex'],
         $data['endIndex'],
         $data['commentText'],
-        $data['commentType']
+        $data['commentType'],
+        $data['visibility']
     );
 });
 

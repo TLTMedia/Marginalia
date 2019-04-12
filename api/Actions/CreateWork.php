@@ -32,7 +32,7 @@ class CreateWork
                 "message" => "work already exists"
             ));
         } else {
-            if (!mkdir($pathOfWork)) {
+            if (!mkdir($pathOfWork, 0777, TRUE)) {
                 return json_encode(array(
                     "status" => "error",
                     "message" => "unabled to create work"
@@ -51,7 +51,7 @@ class CreateWork
                 ));
             }
         }
-        
+
         /**
          * Creating the index.html file with Mammoth
          */
@@ -67,7 +67,7 @@ class CreateWork
         $permissions = new DefaultPermissions;
         $permissions->privacy = $privacy;
         $permissions->admins[] = $creator;
-        file_put_contents($pathOfWork . "/permissions.json", $permissions);
+        file_put_contents($pathOfWork . "/permissions.json", json_encode($permissions));
 
         return json_encode(array(
             "status" => "ok",
@@ -85,7 +85,7 @@ class CreateWork
         while(false !== ( $file = readdir($dir)) ) {
             if (( $file != '.' ) && ( $file != '..' )) {
                 if ( is_dir($src . '/' . $file) ) {
-                    recurse_copy($src . '/' . $file,$dst . '/' . $file);
+                    $this->recurse_copy($src . '/' . $file,$dst . '/' . $file);
                 }
                 else {
                     copy($src . '/' . $file,$dst . '/' . $file);
