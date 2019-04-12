@@ -7,7 +7,7 @@ class Comments
      * This method must check if the user has access to comment on specified work
      * TODO: Replying to a comment... replyhash = direct parents' comment timestamp & replyTo is the parent author eppn
      */
-    public function saveComment($workAuthor, $workName, $replyTo, $replyHash, $commenterEppn, $startIndex, $endIndex, $commentText, $commentType, $visibility, $commenterFirstName, $commenterLastName)
+    public function saveComment($workAuthor, $workName, $replyTo, $replyHash, $commenterEppn, $startIndex, $endIndex, $commentText, $commentType, $privacy, $commenterFirstName, $commenterLastName)
     {
         if ($replyTo == '_' || $replyHash == '_') {
             // create new top level comment
@@ -57,7 +57,7 @@ class Comments
             }
         }
 
-        $comment = new Comment($visibility, $commentText, $startIndex, $endIndex, $commentType, $commenterFirstName, $commenterLastName, $commenterEppn);
+        $comment = new Comment($privacy, $commentText, $startIndex, $endIndex, $commentType, $commenterFirstName, $commenterLastName, $commenterEppn);
         if (file_put_contents($newCommentPath . "/comment.json", json_encode($comment))) {
             return json_encode(array(
                 "status" => "ok",
@@ -111,8 +111,7 @@ class Comments
             $commentsPointer = &$comments;
             if (($amt = $this->isThreadOf($filePath, $commentsPointer)) == -1) {
                 // inserts first level comments of the work (highlighted comments. NOT comments of comments)
-                if (!($jsonData->visibility == FALSE && $jsonData->eppn != $readerEppn)) {
-                    unset($jsonData->visibility);
+                if (!($jsonData->public == FALSE && $jsonData->eppn != $readerEppn)) {
                     array_push($commentsPointer, $jsonData);
                 } // else it's a first level hidden comment
             } else {
@@ -121,9 +120,8 @@ class Comments
                 while ($jsonData != NULL) {
                     if (($amt2 = $this->isThreadOf($filePath, $commentsPointer[$amt]->threads)) == -1) {
                         $jsonData->isReply = TRUE; // NOT NECESSARY FOR BACKEND. This was wanted by frontend development
-                        // checking if the comment is hidden of not (only show the visibility == false comments to the owner of the comment)
-                        if (!($jsonData->visibility == FALSE && $jsonData->eppn != $readerEppn)) {
-                            unset($jsonData->visibility);
+                        // checking if the comment is hidden of not (only show the public == false comments to the owner of the comment)
+                        if (!($jsonData->public == FALSE && $jsonData->eppn != $readerEppn)) {
                             array_push($commentsPointer[$amt]->threads, $jsonData);
                         } // else it's a hidden comment
                         $jsonData = NULL;
@@ -219,7 +217,7 @@ class Comments
 class Comment
 {
     public function __construct(
-        $visibility,
+        $privacy,
         $commentText,
         $startIndex,
         $endIndex,
@@ -228,7 +226,7 @@ class Comment
         $lastName,
         $eppn
     ) {
-        $this->visibility = $visibility;
+        $this->public = $privacy;
         $this->commentText = $commentText;
         $this->startIndex = $startIndex;
         $this->endIndex = $endIndex;
