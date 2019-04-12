@@ -72,6 +72,35 @@ class Comments
     }
 
     /**
+     * Set an existing comments' public status
+     * $commenterEppn isn't required, but it's the $_SERVER['eppn'] ...
+     */
+    public function setCommentPublic($creator, $work, $commentHash, $commenterEppn, $privacy)
+    {
+        $fileToModify = $this->getCommentPathByHash($creator, $work, $commentHash, $commenterEppn);
+        if (!$fileToModify) {
+            return json_encode(array(
+                "status" => "error",
+                "message" => "unable to edit comment"
+            ));
+        }
+
+        $fileData = json_decode(file_get_contents($fileToModify));
+        $fileData->public = $privacy;
+        if (file_put_contents($fileToModify, json_encode($fileData))) {
+            return json_encode(array(
+                "status" => "ok",
+                "data" => "successfully changed comment to " . $privacy
+            ));
+        } else {
+            return json_encode(array(
+                "status" => "error",
+                "message" => "unable to edit comment"
+            ));
+        }
+    }
+
+    /**
      * Get visible comments and related info to them for a specific work belonging to a user
      * ... helper function to a recursive function?
      */
@@ -91,6 +120,24 @@ class Comments
             "status" => "ok",
             "data" => $this->buildCommentJsonFromPaths($commentFilePaths, $readerEppn)
         ));
+    }
+
+    /**
+     * Get the path of a comment.json file by the commentCreatorEppn and commentHash (and work creator & work name)
+     */
+    private function getCommentPathByHash($creator, $work, $commentHash, $commenterEppn)
+    {
+        $replyToEndPath = $commenterEppn . "/" . $commentHash . "/comment.json";
+
+        $commentPaths = $this->getCommentFilesRecursively($creator, $work);
+        foreach ($commentPaths as $path) {
+            $position = strrpos($path, $replyToEndPath);
+            if ($position) {
+                return $path;
+            }
+        }
+
+        return FALSE;
     }
 
     /**

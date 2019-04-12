@@ -222,6 +222,32 @@ $app->post('/create_work', function () use ($app) {
 });
 
 /**
+ * Set an existing comment public/privacy status
+ */
+$app->post('/set_comment_public', function () use ($app) {
+    $json = $app->request->getBody();
+    $data = json_decode($json, true);
+    if (!array_equal(array_keys($data), array("creator", "work", "comment_hash", "public"))) {
+        echo json_encode(array(
+            "status" => "error",
+            "message" => "missing a parameter"
+        ));
+        return;
+    }
+
+    require '../Actions/Comments.php';
+    $comments = new Comments;
+
+    echo $comments->setCommentPublic(
+        $data['creator'],
+        $data['work'],
+        $data['comment_hash'],
+        $_SERVER['eppn'],
+        $data['public']
+    );
+});
+
+/**
  * Force the server to git-pull from github develop branch
  * - Because FTP & SSH access to the 'http://apps.tlt.stonybrook.edu' is restricted from IPs not on the local network...
  */
@@ -236,32 +262,6 @@ $app->get('/git/pull/:code', function ($code) use ($app) {
         return;
     }
     system("git pull --all");
-});
-
-$app->get('/git/status/:code', function ($code) use ($app) {
-    $real = file_get_contents("../../.git_secret.txt");
-    $real = trim(preg_replace('/\s\s+/', '', $real));
-    if ($real != $code) {
-        echo json_encode(array(
-            "status" => "error",
-            "message" => "invalid code"
-        ));
-        return;
-    }
-    system("git status");
-});
-
-$app->get('/system/remote/:code', function ($code) use ($app) {
-    $real = file_get_contents("../../.git_secret.txt");
-    $real = trim(preg_replace('/\s\s+/', '', $real));
-    if ($real != $code) {
-        echo json_encode(array(
-            "status" => "error",
-            "message" => "invalid code"
-        ));
-        return;
-    }
-    system("tar -czvf users.tar.gz ../../users");
 });
 
 // Run app
