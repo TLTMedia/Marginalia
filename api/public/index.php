@@ -110,7 +110,7 @@ $app->get('/remove_permission/:work/:user', function ($work, $user) use ($app) {
 $app->get('/get_works/:user', function ($eppn) use ($app) {
     require '../Actions/Users.php';
     $user = new Users;
-    echo $user->getUserWorks($eppn);
+    echo $user->getUserWorks($eppn, $_SERVER['eppn']);
 });
 
 /**

@@ -271,7 +271,8 @@ class Comment
         $commentType,
         $firstName,
         $lastName,
-        $eppn
+        $eppn,
+        $approved = FALSE
     ) {
         $this->public = $privacy;
         $this->commentText = $commentText;
@@ -281,5 +282,6 @@ class Comment
         $this->firstName = $firstName;
         $this->lastName = $lastName;
         $this->eppn = $eppn;
+        $this->approved = $approved;
     }
 }

@@ -104,14 +104,14 @@ class Permissions
      * Initially checks whether the current user is allowed to do so
      *  -> needs to get the works' `permissions.json` page and see if $eppn is in it
      */
-    public function setPermissionsPrivacy($creator, $work, $currentUser, $privacy)
+    public function setPermissionsPrivacy($creator, $work, $currentUser, $public)
     {
         $pathOfWork = __PATH__ . "$creator/works/$work";
 
         /**
          * if $privacy isn't either 'public' or 'private' return error
          */
-        if (!in_array($privacy, array('public', 'private'))) {
+        if (!in_array($public, array('true', 'false'))) {
             return json_encode(array(
                 "status" => "error",
                 "message" => "invalid privacy type"
@@ -130,7 +130,7 @@ class Permissions
         }
 
         $permissionsData = json_decode($this->getRawPermissionsList($pathOfWork));
-        $permissionsData->privacy = $privacy;
+        $permissionsData->public = json_decode($public);
         $filePath = $pathOfWork . "/permissions.json";
         file_put_contents($filePath, json_encode($permissionsData));
 
@@ -162,11 +162,35 @@ class Permissions
     /**
      * permissions.php contains list of people who's comments are auto approved and they also can maintain comment approval/visibility
      */
-    private function userOnPermissionsList($pathOfWork, $user)
+    public function userOnPermissionsList($pathOfWork, $eppn)
     {
-        $userEditList = json_decode($this->getRawPermissionsList($pathOfWork))->admins;
 
-        if (in_array($user, $userEditList)) {
+        try {
+            $eppnEditList = json_decode($this->getRawPermissionsList($pathOfWork))->admins;
+        } catch(Exception $e) {
+            return FALSE;
+        }
+
+        if (in_array($eppn, $eppnEditList)) {
+            return TRUE;
+        }
+
+        return FALSE;
+    }
+
+    /**
+     * Is the work public?
+     */
+    public function isWorkPublic($pathOfWork)
+    {
+
+        try {
+            $workIsPublic = json_decode($this->getRawPermissionsList($pathOfWork))->public;
+        } catch(Exception $e) {
+            return FALSE; // invalid path
+        }
+
+        if ($workIsPublic) {
             return TRUE;
         }
 
@@ -179,6 +203,7 @@ class DefaultPermissions
     public function __construct()
     {
         $this->admins = array();
-        $this->privacy = "public";
+        $this->public = TRUE;
+        $this->comments_require_approval = FALSE;
     }
 }

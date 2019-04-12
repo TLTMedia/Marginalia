@@ -39,15 +39,25 @@ class Users
     /**
      * Returns a list of the users works
      */
-    public function getUserWorks($user)
+    public function getUserWorks($eppn, $currentEppn)
     {
-        // TODO: check if the current $_SERVER['eppn'] has access to this $user directory
-        // holds an array of all the works in the user's(eppn) directory
+        require 'Permissions.php';
+        $permissions = new Permissions;
         $allWorks = array();
-
-        foreach(glob("../../users/" . $user . "/works/*") as $work) {
+        $userWorksPath = __PATH__ . $eppn . "/works/";
+        foreach(glob($userWorksPath . "*") as $work) {
             $workName = substr($work, strrpos($work, '/') + 1);
-            array_push($allWorks, $workName . ".html");
+            if (!$permissions->isWorkPublic($work)) {
+                if ($permissions->userOnPermissionsList($work, $currentEppn)) {
+                    array_push($allWorks, $workName . ".html");
+                } else {
+                    // work is private but user isn't on the permissions
+                    // so don't show the user this work
+                }
+            } else {
+                // work is public
+                array_push($allWorks, $workName . ".html");
+            }
         }
 
         return json_encode(array(
