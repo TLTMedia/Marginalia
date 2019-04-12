@@ -169,7 +169,8 @@ $app->get('/get_comments/:author/:work', function ($author, $work) use ($app) {
 
     echo $comments->getComments(
         $author,
-        $work
+        $work,
+        $_SERVER['eppn']
     );
 });
 

@@ -75,10 +75,10 @@ class Comments
      * Get visible comments and related info to them for a specific work belonging to a user
      * ... helper function to a recursive function?
      */
-    public function getComments($author, $work)
+    public function getComments($creator, $work, $readerEppn)
     {
         try {
-            $commentFilePaths = $this->getCommentFilesRecursively($author, $work);
+            $commentFilePaths = $this->getCommentFilesRecursively($creator, $work);
         } catch(Exception $e) {
             return json_encode(array(
                 "status" => "error",
@@ -89,14 +89,14 @@ class Comments
 
         return json_encode(array(
             "status" => "ok",
-            "data" => $this->buildCommentJsonFromPaths($commentFilePaths)
+            "data" => $this->buildCommentJsonFromPaths($commentFilePaths, $readerEppn)
         ));
     }
 
     /**
      * Builds the JSON content of comment files - given an array of file paths
      */
-    private function buildCommentJsonFromPaths(&$commentFilePaths)
+    private function buildCommentJsonFromPaths(&$commentFilePaths, $readerEppn)
     {
         usort($commentFilePaths, 'self::sortByLengthInc');
         $comments = array();
@@ -110,13 +110,22 @@ class Comments
             // Uses references to not lose the original object... But be able to change the 'pointer' of where we want to write data to
             $commentsPointer = &$comments;
             if (($amt = $this->isThreadOf($filePath, $commentsPointer)) == -1) {
-                // if $jsonData->visible == false, /...
-                array_push($commentsPointer, $jsonData);
+                // inserts first level comments of the work (highlighted comments. NOT comments of comments)
+                if (!($jsonData->visibility == FALSE && $jsonData->eppn != $readerEppn)) {
+                    unset($jsonData->visibility);
+                    array_push($commentsPointer, $jsonData);
+                } // else it's a first level hidden comment
             } else {
+                // recursively iterate through the next level comments and see if they 'fit' in a pre-existing higher level comment
                 // if $jsonData == NULL, then we've finally found a spot for the comment in the $comments tree...
                 while ($jsonData != NULL) {
                     if (($amt2 = $this->isThreadOf($filePath, $commentsPointer[$amt]->threads)) == -1) {
-                        array_push($commentsPointer[$amt]->threads, $jsonData);
+                        $jsonData->isReply = TRUE; // NOT NECESSARY FOR BACKEND. This was wanted by frontend development
+                        // checking if the comment is hidden of not (only show the visibility == false comments to the owner of the comment)
+                        if (!($jsonData->visibility == FALSE && $jsonData->eppn != $readerEppn)) {
+                            unset($jsonData->visibility);
+                            array_push($commentsPointer[$amt]->threads, $jsonData);
+                        } // else it's a hidden comment
                         $jsonData = NULL;
                     } else {
                         $commentsPointer = &$commentsPointer[$amt]->threads;
