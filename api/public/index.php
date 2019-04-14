@@ -71,7 +71,7 @@ $app->get('/get_current_user', function () use ($app) {
     require '../Actions/Users.php';
     $user = new Users;
 
-    echo $user->getCurrentUser();
+    echo $user->getCurrentUser($_SERVER['nickname'], $_SERVER['sn'], $_SERVER['eppn']);
 });
 
 /**

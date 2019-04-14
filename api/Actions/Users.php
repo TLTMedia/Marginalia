@@ -24,11 +24,12 @@ class Users
     /**
      * Returns info on the currently logged in user
      */
-    public function getCurrentUser()
+    public function getCurrentUser($firstName, $lastName, $eppn)
     {
-        $user->firstname = $_SERVER['nickname'];
-        $user->lastname = $_SERVER['sn'];
-        $user->eppn = $_SERVER['eppn'];
+        $user = json_decode("{}");
+        $user->firstname = $firstName;
+        $user->lastname = $lastName;
+        $user->eppn = $eppn;
 
         return json_encode(array(
             "status" => "ok",
