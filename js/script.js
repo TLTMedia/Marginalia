@@ -398,19 +398,21 @@ renderComments = (commentData) => {
             commentData[i].visibility,
             eppn,
             commentData[i].commentType,
-            btoa(commentData[i].commentText)
+            btoa(commentData[i].commentText),
+            commentData[i].threads
         );
     }
 
     $("#text").css("height", $("#litDiv").height() + "px");
+
 }
 
 // Makes a span out of its components
 /*
 A span is composed of class, firstname, lastname, start index, endindex,
-                      innertext, isvisible, userid and type
+                      innertext, isvisible, userid and type , threads(array of reply)
 */
-function makeSpan(classID, firstName, lastName, startDex, endDex, isVisible, eppn, type, commentText) {
+function makeSpan(classID, firstName, lastName, startDex, endDex, isVisible, eppn, type, commentText,threads) {
   var rangeMake = rangy.createRange();
   rangeMake.selectCharacters(document.getElementById("textSpace"), startDex, endDex);
   hlRange(rangeMake);
@@ -423,15 +425,22 @@ function makeSpan(classID, firstName, lastName, startDex, endDex, isVisible, epp
   span.attr("commentType", type);
   span.attr("commentText", commentText);
   span.attr("title", "By: " + firstName + " " + lastName);
+  span.attr("threads", threads);
 
   $(span).off().on("click", function(evt) {
+    //clean the reply first
+    $("#replies").empty();
+    //read the replies in the thread and shows it
+    readThreads(threads);
+
+
     var eppn = $(this).attr("eppn");
     var type = $(this).attr("commentType");
 
     $(".commentTypeDropdown").val(
         type.charAt(0).toUpperCase() + type.substr(1)
     );
-    
+
     $("[id='ui-id-1']").text("Annotation by: " + $(this).attr("firstname") + " " + $(this).attr("lastname"));
 
     CKEDITOR.instances.textForm.setData(atob($(this).attr("commentText")));
@@ -462,6 +471,53 @@ function makeSpan(classID, firstName, lastName, startDex, endDex, isVisible, epp
     }
   });
 }
+
+
+// simillar to makeSpan but highlight by checking isReply
+function newShowReply(firstName, lastName, startDex, endDex, isVisible, type, commentText,threads) {
+  var replyBox = $('<div/>', {
+    class: "replies",
+    id: "",
+    width: 499,
+    height: 50
+  });
+  replyBox[0].disabled = true;
+  var userName = firstName + " " + lastName;
+  var inText = atob(commentText);
+  inText = inText.replace("<p>"," ");
+  inText = inText.replace("</p>","\n");
+  replyBox.html(userName + ": " +inText);
+  $("#replies").append(replyBox);
+
+}
+//read the thread (threads is the reply array     path is for determine parent)
+function readThreads(threads){
+  if(threads.length==0){
+    return;
+  }
+  else{
+    for(var i =0; i<threads.length ; i++){
+      //makespam here
+      newShowReply(
+      threads[i].firstName,
+      threads[i].lastName,
+      threads[i].startIndex,
+      threads[i].endIndex,
+      threads[i].visibility,
+      threads[i].commentType,
+      btoa(threads[i].commentText),
+      threads[i].threads
+      );
+
+      console.log(threads[i].commentText);
+      readThreads(threads[i].threads);
+    }
+  }
+}
+
+
+
+
 
 // Who is able to edit every comment or reply
 /*
@@ -698,7 +754,7 @@ function makeSelectionButtons() {
           }
         });
 
-        console.log();
+        console.log("this is in makeSelectionButton");
         componentHandler.upgradeElement($(radioLabel)[0]);
       }
     })
@@ -749,6 +805,7 @@ function loadCommentsByType(type, isNetID) {
       }
     }
   }
+  //TODO L this method remove every highlight comment without checking which type of comment
   removeSpans();
   loadArrayOfComments(allComsOfType);
 }
@@ -900,7 +957,7 @@ function makeDraggableReplyBox() {
 
 // When opened, the reply box will have a place for you to type in the commentbox
 function createSelfReplyBoxButton() {
-
+  console.log("function createSelfReplyBoxButton was called");
   var makeReplyBox = $('<button/>', {
     class: "makeReplyBox",
     text: "Make a Reply",
@@ -1061,7 +1118,7 @@ function hideAllBoxes() {
 function textShowReply() {
   var position = $("[aria-describedby='replies']").css("top");
   position = parseInt(position.substring(0, position.length - 2));
-  position = (position - 325);
+  position = (position -325);
   if (position < 0) {
     $("[aria-describedby='replies']").css({
       "top": -(position) + 200 + "px"
@@ -1370,44 +1427,25 @@ function saveUserComment() {
   }
   /*******/
 
-  // TODO: Find the error occuring when it comes to text not loading in the right place
+  let comment_data = JSON.stringify({
+      author: $(".chosenUser").text().split(":")[0],
+      work: textChosen,
+      replyTo: "_", // if it's a comment to a comment...
+      replyHash: "_", // ^ (no backend exists for this yet)
+      startIndex: commentIndexMap.get(timeSt)[0],
+      endIndex: commentIndexMap.get(timeSt)[1],
+      commentText: cData,
+      commentType: type,
+      visibility: true// TODO: user option when posting
+  });
 
-  //console.log(literature.substring(commentIndexMap.get(timeSt)[0],commentIndexMap.get(timeSt)[1]));
-
-  // var dataString = JSON.stringify({
-  //   user: netID,
-  //   firstname: firstName,
-  //   lastname: lastName,
-  //   type: type,
-  //   comData: cData,
-  //   startDex: commentIndexMap.get(timeSt)[0],
-  //   endDex: commentIndexMap.get(timeSt)[1],
-  //   timeStamp: timeSt,
-  //   textChosen: (textChosen.substr(0, textChosen.lastIndexOf("."))),
-  //   userFolder: userFolderSelected
-  // });
-
-
-  //console.log(JSON.parse(dataString));
-  $.ajax("api/public/save_comments/", {
-      data: JSON.stringify({
-          author: userFolderSelected,
-          work: textChosen,
-          replyTo: "_", // if it's a comment to a comment...
-          replyHash: "_", // ^ (no backend exists for this yet)
-          startIndex: commentIndexMap.get(timeSt)[0],
-          endIndex: commentIndexMap.get(timeSt)[1],
-          commentText: cData,
-          commentType: type
-      }),
-      contentType: 'application/json',
-      type : 'POST'
-    })
-    .done(function(msg) {
-      console.log('Data Sent')
-    }).fail(function(msg) {
-      console.log("Data Failed to Send")
-    });
+  API.request({
+      method: "POST",
+      endpoint: "save_comments",
+      data: comment_data,
+  }).then((data) => {
+      alert(data);
+  });
 }
 
 // Saves a user's reply to a thread
