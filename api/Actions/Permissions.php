@@ -164,7 +164,6 @@ class Permissions
      */
     public function userOnPermissionsList($pathOfWork, $eppn)
     {
-
         try {
             $eppnEditList = json_decode($this->getRawPermissionsList($pathOfWork))->admins;
         } catch(Exception $e) {
@@ -183,7 +182,6 @@ class Permissions
      */
     public function isWorkPublic($pathOfWork)
     {
-
         try {
             $workIsPublic = json_decode($this->getRawPermissionsList($pathOfWork))->public;
         } catch(Exception $e) {
@@ -191,6 +189,24 @@ class Permissions
         }
 
         if ($workIsPublic) {
+            return TRUE;
+        }
+
+        return FALSE;
+    }
+
+    /**
+     * Does the work want comments to be approved?
+     */
+    public function commentsNeedsApproval($pathOfWork)
+    {
+        try {
+            $needApproval = json_decode($this->getRawPermissionsList($pathOfWork))->comments_require_approval;
+        } catch(Exception $e) {
+            return FALSE; // invalid path
+        }
+
+        if ($needApproval) {
             return TRUE;
         }
 

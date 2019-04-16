@@ -7,11 +7,43 @@ class Comments
      * This method must check if the user has access to comment on specified work
      * TODO: Replying to a comment... replyhash = direct parents' comment timestamp & replyTo is the parent author eppn
      */
-    public function saveComment($workAuthor, $workName, $replyTo, $replyHash, $commenterEppn, $startIndex, $endIndex, $commentText, $commentType, $privacy, $commenterFirstName, $commenterLastName)
+    public function saveComment(
+        $workAuthor,
+        $workName,
+        $replyTo,
+        $replyHash,
+        $commenterEppn,
+        $startIndex,
+        $endIndex,
+        $commentText,
+        $commentType,
+        $privacy,
+        $commenterFirstName,
+        $commenterLastName
+    )
     {
+        $workPath = __PATH__ . $workAuthor . "/works/" . $workName;
+
+        $approved = $this->commentabilityOfWork($workPath, $commenterEppn, $privacy);
+        if ($approved == -1) {
+            return json_encode(array(
+                "status" => "error",
+                "message" => "invalid permission to comment"
+            ));
+        } elseif ($approved == 0) {
+            $approved = FALSE; // for saving in comment object
+        } else {
+            $approved = TRUE;
+        }
+
+        /**
+         * Get the new comment file location
+         * (Yes, this entire if/else block does that 1 thing)
+         * Comments directly on a page (first level comments will send these values when saved)
+         */
         if ($replyTo == '_' || $replyHash == '_') {
             // create new top level comment
-            $lowestCommentPath = __PATH__ . "$workAuthor/works/$workName/data/threads/$commenterEppn";
+            $lowestCommentPath = $workPath . "/data/threads/" . $commenterEppn;
             if (!is_dir($lowestCommentPath)) {
                 mkdir($lowestCommentPath);
             }
@@ -57,7 +89,18 @@ class Comments
             }
         }
 
-        $comment = new Comment($privacy, $commentText, $startIndex, $endIndex, $commentType, $commenterFirstName, $commenterLastName, $commenterEppn);
+        $comment = new Comment(
+            $privacy,
+            $commentText,
+            $startIndex,
+            $endIndex,
+            $commentType,
+            $commenterFirstName,
+            $commenterLastName,
+            $commenterEppn,
+            $approved
+        );
+
         if (file_put_contents($newCommentPath . "/comment.json", json_encode($comment))) {
             return json_encode(array(
                 "status" => "ok",
@@ -68,6 +111,56 @@ class Comments
                 "status" => "error",
                 "message" => "unable to save comment"
             ));
+        }
+    }
+
+    /**
+     * Returns an int representing the approval... Read pseudocode for explanation
+     *
+     * ~~ Pseudocode ~~
+     * IF work is private:
+     *      IF user on admin list:
+     *          THEN approved = TRUE
+     *      ELSE:
+     *          THEN CANNOT COMMENT
+     * ELSE (work is public)
+     *      IF the comment is private ($privacy == false) // yes naming is wacky all around...
+     *          THEN approved = TRUE // This means, changing the privacy will need approval before viewable by others in the future
+     *      ELSE:
+     *          IF the work "comments_require_approval == true"
+     *              IF user on admin list: approved = TRUE
+     *              ELSE approved = FALSE
+     *          ELSE approved = TRUE
+     *
+     * @return -1: user isn't even allowed to comment on this work
+     * @return 0: comment needs approval
+     * @return 1: comment is approved (aka doesn't need approval to be post)
+     */
+    private function commentabilityOfWork($workPath, $commenterEppn, $privacy)
+    {
+        require 'Permissions.php';
+        $permissions = new Permissions;
+
+        if (!$permissions->isWorkPublic($workPath)) {
+            if ($permissions->userOnPermissionsList($workPath, $commenterEppn)) {
+                return 1;
+            } else {
+                return -1;
+            }
+        } else {
+            if (!$privacy) {
+                return 1;
+            } else {
+                if ($permissions->commentsNeedsApproval($workPath)) {
+                    if ($permissions->userOnPermissionsList($workPath, $commenterEppn)) {
+                        return 1;
+                    } else {
+                        return 0;
+                    }
+                } else {
+                    return 1;
+                }
+            }
         }
     }
 
@@ -87,6 +180,26 @@ class Comments
 
         $fileData = json_decode(file_get_contents($fileToModify));
         $fileData->public = $privacy;
+        if ($privacy) {
+            /**
+             * Work has become public, check if we need it to get approval
+             *
+             * IF work Wants comments to be approved
+             *      THEN Approved = FALSE
+             * ELSE
+             *      THEN Approved = TRUE
+             */
+            require 'Permissions.php';
+            $permissions = new Permissions;
+
+            $workPath = __PATH__ . $creator . "/works/" . $work;
+            if ($permissions->commentsNeedsApproval($workPath)) {
+                $fileData->approved = FALSE;
+            } else {
+                $fileData->approved = TRUE;
+            }
+        }
+
         if (file_put_contents($fileToModify, json_encode($fileData))) {
             return json_encode(array(
                 "status" => "ok",
@@ -118,7 +231,7 @@ class Comments
 
         return json_encode(array(
             "status" => "ok",
-            "data" => $this->buildCommentJsonFromPaths($commentFilePaths, $readerEppn)
+            "data" => $this->buildCommentJsonFromPaths($commentFilePaths, $readerEppn, $creator, $work)
         ));
     }
 
@@ -142,11 +255,22 @@ class Comments
 
     /**
      * Builds the JSON content of comment files - given an array of file paths
+     *
+     *      [DONE] Show public & private comments to the comment-creator
+     *
+     *      [TODO] Show public & unapproved comments to admins
+     *
+     *      [TODO] Show public & approved comments to everyone
      */
-    private function buildCommentJsonFromPaths(&$commentFilePaths, $readerEppn)
+    private function buildCommentJsonFromPaths(&$commentFilePaths, $readerEppn, $creator, $work)
     {
+        $workPath = __PATH__ . $creator . "/works/" . $work;
+
         usort($commentFilePaths, 'self::sortByLengthInc');
         $comments = array();
+
+        require 'Permissions.php';
+        $permissions = new Permissions;
 
         foreach ($commentFilePaths as $filePath) {
             $jsonData = json_decode(file_get_contents($filePath));
@@ -158,9 +282,31 @@ class Comments
             $commentsPointer = &$comments;
             if (($amt = $this->isThreadOf($filePath, $commentsPointer)) == -1) {
                 // inserts first level comments of the work (highlighted comments. NOT comments of comments)
-                if (!($jsonData->public == FALSE && $jsonData->eppn != $readerEppn)) {
-                    array_push($commentsPointer, $jsonData);
-                } // else it's a first level hidden comment
+                if ($jsonData->public) {
+                    // comment is public
+                    if ($jsonData->approved) {
+                        // comment is approved
+                        array_push($commentsPointer, $jsonData);
+                    } else {
+                        // comment is not approved
+                        // only work admins should be able to see it
+                        if ($permissions->userOnPermissionsList($workPath, $readerEppn)) {
+                            // reader is admin so can see the comment
+                            array_push($commentsPointer, $jsonData);
+                        } else {
+                            // reader is not an admin, so can't see the comment
+                        }
+                    }
+                } else {
+                    // comment is private
+                    // only the comment creator should be able to see it
+                    if ($jsonData->eppn == $readerEppn) {
+                        // comment creator is also the reader
+                        array_push($commentsPointer, $jsonData);
+                    } else {
+                        // no one else can see this comment
+                    }
+                }
             } else {
                 // recursively iterate through the next level comments and see if they 'fit' in a pre-existing higher level comment
                 // if $jsonData == NULL, then we've finally found a spot for the comment in the $comments tree...
@@ -168,9 +314,31 @@ class Comments
                     if (($amt2 = $this->isThreadOf($filePath, $commentsPointer[$amt]->threads)) == -1) {
                         $jsonData->isReply = TRUE; // NOT NECESSARY FOR BACKEND. This was wanted by frontend development
                         // checking if the comment is hidden of not (only show the public == false comments to the owner of the comment)
-                        if (!($jsonData->public == FALSE && $jsonData->eppn != $readerEppn)) {
-                            array_push($commentsPointer[$amt]->threads, $jsonData);
-                        } // else it's a hidden comment
+                        if ($jsonData->public) {
+                            // comment is public
+                            if ($jsonData->approved) {
+                                // comment is approved
+                                array_push($commentsPointer[$amt]->threads, $jsonData);
+                            } else {
+                                // comment is not approved
+                                // only work admins should be able to see it
+                                if ($permissions->userOnPermissionsList($workPath, $readerEppn)) {
+                                    // reader is admin so can see the comment
+                                    array_push($commentsPointer[$amt]->threads, $jsonData);
+                                } else {
+                                    // reader is not an admin, so can't see the comment
+                                }
+                            }
+                        } else {
+                            // comment is private
+                            // only the comment creator should be able to see it
+                            if ($jsonData->eppn == $readerEppn) {
+                                // comment creator is also the reader
+                                array_push($commentsPointer[$amt]->threads, $jsonData);
+                            } else {
+                                // no one else can see this comment
+                            }
+                        }
                         $jsonData = NULL;
                     } else {
                         $commentsPointer = &$commentsPointer[$amt]->threads;
