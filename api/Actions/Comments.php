@@ -5,7 +5,6 @@ class Comments
     /**
      * Save a users' comment on a specified work
      * This method must check if the user has access to comment on specified work
-     * TODO: Replying to a comment... replyhash = direct parents' comment timestamp & replyTo is the parent author eppn
      */
     public function saveComment(
         $workAuthor,
@@ -258,9 +257,9 @@ class Comments
      *
      *      [DONE] Show public & private comments to the comment-creator
      *
-     *      [TODO] Show public & unapproved comments to admins
+     *      [DONE] Show public & unapproved comments to admins
      *
-     *      [TODO] Show public & approved comments to everyone
+     *      [DONE] Show public & approved comments to everyone
      */
     private function buildCommentJsonFromPaths(&$commentFilePaths, $readerEppn, $creator, $work)
     {
