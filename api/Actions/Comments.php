@@ -3,6 +3,27 @@
 class Comments
 {
     /**
+     * Returns the meta data for first level comments
+     */
+    public function getHighlights($creator, $work, $reader)
+    {
+        try {
+            $commentFilePaths = $this->getCommentFiles($creator, $work, FALSE);
+        } catch(Exception $e) {
+            return json_encode(array(
+                "status" => "error",
+                "message" => "unable to get comments",
+                "raw_exception" => $e->getMessage()
+            ));
+        }
+
+        return json_encode(array(
+            "status" => "ok",
+            "data" => $this->getFileMetaData($commentFilePaths, $reader)
+        ));
+    }
+
+    /**
      * Save a users' comment on a specified work
      * This method must check if the user has access to comment on specified work
      */
@@ -54,7 +75,7 @@ class Comments
             }
         } else {
             // find the path to the specified comment we're replying to
-            $commentPaths = $this->getCommentFilesRecursively($workAuthor, $workName);
+            $commentPaths = $this->getCommentFiles($workAuthor, $workName, TRUE);
             $replyPath = null;
             $replyToEndPath = $replyTo . "/" . $replyHash . "/comment.json";
             $size = strlen($replyToEndPath);
@@ -216,10 +237,10 @@ class Comments
      * Get visible comments and related info to them for a specific work belonging to a user
      * ... helper function to a recursive function?
      */
-    public function getComments($creator, $work, $readerEppn)
+    public function getComments($creator, $work, $reader)
     {
         try {
-            $commentFilePaths = $this->getCommentFilesRecursively($creator, $work);
+            $commentFilePaths = $this->getCommentFiles($creator, $work, TRUE);
         } catch(Exception $e) {
             return json_encode(array(
                 "status" => "error",
@@ -230,8 +251,76 @@ class Comments
 
         return json_encode(array(
             "status" => "ok",
-            "data" => $this->buildCommentJsonFromPaths($commentFilePaths, $readerEppn, $creator, $work)
+            "data" => $this->buildCommentJsonFromPaths($commentFilePaths, $reader, $creator, $work)
         ));
+    }
+
+    /**
+     * Returns meta data of the given file-comment paths
+     * @param  array $arrayOfFullCommentPath array of full file paths to comments
+     * @return array JSON of the meta data for each of the comment files... no comment text, just location of the comments
+     */
+    private function getFileMetaData($arrayOfFullCommentPath, $reader)
+    {
+        $data = array();
+        foreach ($arrayOfFullCommentPath as $filePath) {
+            $jsonData = json_decode(file_get_contents($filePath . "/comment.json"));
+
+            /**
+             * Below logic taken from $this->buildCommentJsonFromPaths()
+             */
+            if ($jsonData->public) {
+                // comment is public
+                if ($jsonData->approved) {
+                    // comment is approved
+                    array_push($data,
+                        array(
+                            "startIndex" => $jsonData->startIndex,
+                            "endIndex" => $jsonData->endIndex,
+                            "commentType" => $jsonData->commentType,
+                            "eppn" => $jsonData->eppn,
+                            "hash" => end(explode("/", $filePath)),
+                        )
+                    );
+                } else {
+                    // comment is not approved
+                    // only work admins should be able to see it
+                    if ($permissions->userOnPermissionsList($workPath, $readerEppn)) {
+                        // reader is admin so can see the comment
+                        array_push($data,
+                            array(
+                                "startIndex" => $jsonData->startIndex,
+                                "endIndex" => $jsonData->endIndex,
+                                "commentType" => $jsonData->commentType,
+                                "eppn" => $jsonData->eppn,
+                                "hash" => end(explode("/", $filePath)),
+                            )
+                        );
+                    } else {
+                        // reader is not an admin, so can't see the comment
+                    }
+                }
+            } else {
+                // comment is private
+                // only the comment creator should be able to see it
+                if ($jsonData->eppn == $reader) {
+                    // comment creator is also the reader
+                    array_push($data,
+                        array(
+                            "startIndex" => $jsonData->startIndex,
+                            "endIndex" => $jsonData->endIndex,
+                            "commentType" => $jsonData->commentType,
+                            "eppn" => $jsonData->eppn,
+                            "hash" => end(explode("/", $filePath)),
+                        )
+                    );
+                } else {
+                    // no one else can see this comment
+                }
+            }
+        }
+
+        return $data;
     }
 
     /**
@@ -241,7 +330,7 @@ class Comments
     {
         $replyToEndPath = $commenterEppn . "/" . $commentHash . "/comment.json";
 
-        $commentPaths = $this->getCommentFilesRecursively($creator, $work);
+        $commentPaths = $this->getCommentFiles($creator, $work, TRUE);
         foreach ($commentPaths as $path) {
             $position = strrpos($path, $replyToEndPath);
             if ($position) {
@@ -374,10 +463,18 @@ class Comments
     /**
      * Recursive starter function... returns an array of all the file paths to comment.json files that're associated with $author and $work
      */
-    private function getCommentFilesRecursively($author, $work)
+    private function getCommentFiles($author, $work, $recursive)
     {
         $initialFiles = array();
-        return $this->getCommentFilesRecursivelyHelper(__PATH__ . "$author/works/$work/data/threads", $initialFiles);
+        $baseCommentPath = __PATH__ . "$author/works/$work/data/threads";
+        if ($recursive) {
+            return $this->getCommentFilesRecursivelyHelper($baseCommentPath, $initialFiles);
+        } else {
+            foreach (array_values(array_diff(scandir($baseCommentPath), array('.', '..'))) as $user) {
+                $initialFiles = array_merge($initialFiles, glob($baseCommentPath . "/" . $user . "/*"));
+            }
+            return $initialFiles;
+        }
     }
 
     /**
