@@ -7,9 +7,17 @@ html {
   overflow-y: scroll;
 }
 
-#text span {
+/*.commented-selection[typeof=]
+.historical, .analytical, .comment, .definition, .question
+*/
+.commented-selection {
+    background-color: rgba(100, 255, 100);
+    cursor: context-menu;
+}
+
+/* #text span {
   background-color: #48c448;
-  cursor: context-menu;
+
 }
 
 #text span span {
@@ -22,7 +30,7 @@ html {
 
 #text span span span span {
   background-color: #186818;
-}
+} */
 
 .content {
   width: 100%;

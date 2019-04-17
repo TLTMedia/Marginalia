@@ -2,6 +2,7 @@
  * TODO: temporary global until I recode the entire frontend... First just getting things to all work.
  */
 var API;
+var TEXTSPACE = "textSpace";
 
 var currentUser = {};
 /**
@@ -374,7 +375,7 @@ loadUserComments = () => {
   $("#textTitle").hide();
   $(".loader").show();
 
-  let endpoint = "get_comments/" + $(".chosenUser").text().split(":")[0] + "/" + textChosen;
+  let endpoint = "get_highlights/" + $(".chosenUser").text().split(":")[0] + "/" + textChosen;
   API.request({endpoint}).then((data) => {
       renderComments(data);
   });
@@ -388,28 +389,58 @@ renderComments = (commentData) => {
     $("#textTitle").fadeIn();
 
     for (let i = 0; i < commentData.length; ++i) {
-        let [,hash,eppn,] = commentData[i].path.split("/").reverse()
-        makeSpan(
-            hash,
-            commentData[i].firstName,
-            commentData[i].lastName,
-            commentData[i].startIndex,
-            commentData[i].endIndex,
-            commentData[i].visibility,
-            eppn,
-            commentData[i].commentType,
-            btoa(commentData[i].commentText),
-            commentData[i].threads
-        );
+        highlightText({
+            startIndex: commentData[i].startIndex,
+            endIndex: commentData[i].endIndex,
+            commentType: commentData[i].commentType,
+            eppn: commentData[i].eppn,
+            hash: commentData[i].hash,
+        });
     }
 
     $("#text").css("height", $("#litDiv").height() + "px");
 
+    $(".commented-selection").off().on("click", function(evt) {
+        $("#replies").empty();
+
+        let comment_data = JSON.stringify({
+            creator: $(".chosenUser").text().split(":")[0],
+            work: $(".chosenFile").text(),
+            commenter: $(this).attr("creator"),
+            hash: $(this).attr("id"),
+        });
+
+        API.request({
+            endpoint: "get_comment_chain",
+            data: comment_data,
+            method: "POST"
+        }).then((data) => {
+            evt.stopPropagation();
+            displayReplyBox(evt);
+            displayCommentBox(evt);
+            textShowReply();
+            hideUnconfirmedHighlights();
+            readThreads(data);
+        });
+    })
 }
 
-// Makes a span out of its components
+highlightText = ({startIndex, endIndex, commentType, eppn, hash} = {}) => {
+    let range = rangy.createRange();
+    range.selectCharacters(document.getElementById(TEXTSPACE), startIndex, endIndex);
+    let area = rangy.createClassApplier("commented-selection", {
+        useExistingElements: false,
+        elementAttributes: {
+            "id": hash,
+            "creator": eppn,
+            "typeof": commentType,
+        }
+    });
+    area.applyToRange(range);
+}
+
 /*
-A span is composed of class, firstname, lastname, start index, endindex,
+    A span is composed of class, firstname, lastname, start index, endindex,
                       innertext, isvisible, userid and type , threads(array of reply)
 */
 function makeSpan(classID, firstName, lastName, startDex, endDex, isVisible, eppn, type, commentText,threads) {
