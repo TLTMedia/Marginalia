@@ -443,72 +443,13 @@ highlightText = ({startIndex, endIndex, commentType, eppn, hash} = {}) => {
     A span is composed of class, firstname, lastname, start index, endindex,
                       innertext, isvisible, userid and type , threads(array of reply)
 */
-function makeSpan(classID, firstName, lastName, startDex, endDex, isVisible, eppn, type, commentText,threads) {
-  var rangeMake = rangy.createRange();
-  rangeMake.selectCharacters(document.getElementById("textSpace"), startDex, endDex);
-  hlRange(rangeMake);
-
-  var span = $("." + remSpan);
-  span.attr("class", classID);
-  span.attr("firstname", firstName);
-  span.attr("lastname", lastName);
-  span.attr("eppn", eppn);
-  span.attr("commentType", type);
-  span.attr("commentText", commentText);
-  span.attr("title", "By: " + firstName + " " + lastName);
-  span.attr("threads", threads);
-
-  $(span).off().on("click", function(evt) {
-    //clean the reply first
-    $("#replies").empty();
-    //read the replies in the thread and shows it
-    readThreads(threads);
 
 
-    var eppn = $(this).attr("eppn");
-    var type = $(this).attr("commentType");
-
-    $(".commentTypeDropdown").val(
-        type.charAt(0).toUpperCase() + type.substr(1)
-    );
-
-    $("[id='ui-id-1']").text("Annotation by: " + $(this).attr("firstname") + " " + $(this).attr("lastname"));
-
-    CKEDITOR.instances.textForm.setData(atob($(this).attr("commentText")));
-    if (eppn != currentUser.eppn && whitelist.includes(currentUser.eppn)) {
-      isEdit = true;
-    }
-
-    evt.stopPropagation();
-    displayReplyBox(evt);
-    displayCommentBox(evt);
-    textShowReply();
-    hideUnconfirmedHighlights();
-
-    remSpan = $(evt.currentTarget).attr("class");
-
-    CKEDITOR.instances['textForm'].setReadOnly(true);
-    $(".commentTypeDropdown").attr("disabled", "disabled");
-    if (eppn == currentUser.eppn || whitelist.includes(currentUser.eppn)) {
-      $("#commentSave").hide();
-      $("#commentRemove").show();
-      $("#commentExit").show();
-      $("#commentEdit").show();
-    } else {
-      $("#commentSave").hide();
-      $("#commentEdit").hide();
-      $("#commentRemove").hide();
-      $("#commentExit").show();
-    }
-  });
-}
-
-
-// simillar to makeSpan but highlight by checking isReply
-function newShowReply(firstName, lastName, startDex, endDex, isVisible, type, commentText,threads) {
+// the parentHash is the parent's id default null
+function newShowReply(firstName, lastName, startDex, endDex, isVisible, type, commentText,threads,hash,parentHash = null) {
   var replyBox = $('<div/>', {
     class: "replies",
-    id: "",
+    id: hash,
     width: 499,
     height: 50
   });
@@ -518,30 +459,43 @@ function newShowReply(firstName, lastName, startDex, endDex, isVisible, type, co
   inText = inText.replace("<p>"," ");
   inText = inText.replace("</p>","\n");
   replyBox.html(userName + ": " +inText);
-  $("#replies").append(replyBox);
 
+  // this reply has a parent
+  if(parentHash != null){
+    $('#'+ parentHash+".replies").append(replyBox);
+    console.log("My parent ID is ",parentHash);
+    console.log(inText + " should be printed");
+  }
+  // this reply don't has a parent
+  else{
+    $("#replies").append(replyBox);
+  }
 }
-//read the thread (threads is the reply array     path is for determine parent)
-function readThreads(threads){
-  if(threads.length==0){
+
+//read the thread (threads is the reply array, parentId is the hash, parentReplyBox is the replyBox returned by the newShowReply())
+function readThreads(threads, parentId = null){
+
+  if (threads.length==0){
     return;
   }
   else{
     for(var i =0; i<threads.length ; i++){
-      //makespam here
-      newShowReply(
-      threads[i].firstName,
-      threads[i].lastName,
-      threads[i].startIndex,
-      threads[i].endIndex,
-      threads[i].visibility,
-      threads[i].commentType,
-      btoa(threads[i].commentText),
-      threads[i].threads
-      );
-
+      // also pass the parentId
+        newShowReply(
+          threads[i].firstName,
+          threads[i].lastName,
+          threads[i].startIndex,
+          threads[i].endIndex,
+          threads[i].visibility,
+          threads[i].commentType,
+          btoa(threads[i].commentText),
+          threads[i].threads,
+          threads[i].hash,
+          parentId
+        );
       console.log(threads[i].commentText);
-      readThreads(threads[i].threads);
+      console.log(parentId);
+      readThreads(threads[i].threads, threads[i].hash);
     }
   }
 }
@@ -836,7 +790,7 @@ function loadCommentsByType(type, isNetID) {
       }
     }
   }
-  //TODO L this method remove every highlight comment without checking which type of comment
+  //TODO LIN this method remove every highlight comment without checking which type of comment
   removeSpans();
   loadArrayOfComments(allComsOfType);
 }

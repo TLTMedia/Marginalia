@@ -9,7 +9,7 @@ var remSpan;
 
 //applies the hl to the area selected by the user
 function highlightCurrentSelection(evt) {
-
+console.log("highlight now");
   var dfd = new $.Deferred();
   var selectedRange = rangy.getSelection().getRangeAt(0);
   // console.log(rangy.getSelection())
