@@ -3,6 +3,27 @@
 class Comments
 {
     /**
+     * Get the comment data and its children for a specific comment
+     */
+    public function getCommentChain($creator, $work, $commenter, $hash, $reader)
+    {
+        try {
+            $commentFilePaths = $this->getCommentFiles($creator, $work, TRUE, $commenter, $hash);
+        } catch(Exception $e) {
+            return json_encode(array(
+                "status" => "error",
+                "message" => "unable to get comments",
+                "raw_exception" => $e->getMessage()
+            ));
+        }
+
+        return json_encode(array(
+            "status" => "ok",
+            "data" => $this->buildCommentJsonFromPaths($commentFilePaths, $reader, $creator, $work)
+        ));
+    }
+
+    /**
      * Returns the meta data for first level comments
      */
     public function getHighlights($creator, $work, $reader)
@@ -462,13 +483,15 @@ class Comments
 
     /**
      * Recursive starter function... returns an array of all the file paths to comment.json files that're associated with $author and $work
+     *
+     * NOTE: specifying a $commenter and $hash only works when $recursive = TRUE
      */
-    private function getCommentFiles($author, $work, $recursive)
+    private function getCommentFiles($author, $work, $recursive, $commenter = null, $hash = null)
     {
         $initialFiles = array();
         $baseCommentPath = __PATH__ . "$author/works/$work/data/threads";
         if ($recursive) {
-            return $this->getCommentFilesRecursivelyHelper($baseCommentPath, $initialFiles);
+            return $this->getCommentFilesRecursivelyHelper($baseCommentPath, $initialFiles, $commenter, $hash);
         } else {
             foreach (array_values(array_diff(scandir($baseCommentPath), array('.', '..'))) as $user) {
                 $initialFiles = array_merge($initialFiles, glob($baseCommentPath . "/" . $user . "/*"));
@@ -480,7 +503,7 @@ class Comments
     /**
      * Recursive helper function in getting the comment-file paths for a specified 'thread' directory path
      */
-    private function getCommentFilesRecursivelyHelper($thread, &$commentsList)
+    private function getCommentFilesRecursivelyHelper($thread, &$commentsList, $commenter = null, $hash = null)
     {
         $files = array_diff(scandir($thread), array('.', '..'));
 
@@ -488,10 +511,20 @@ class Comments
             $timestampedDirs = array_diff(scandir("$thread/$userPost"), array('.', '..'));
 
             foreach ($timestampedDirs as $timestampedDir) {
-                array_push($commentsList, "$thread/$userPost/$timestampedDir/comment.json");
+                if (is_null($commenter) && is_null($hash)) {
+                    array_push($commentsList, "$thread/$userPost/$timestampedDir/comment.json");
 
-                if (is_dir("$thread/$userPost/$timestampedDir/threads")) {
-                    $this->getCommentFilesRecursivelyHelper("$thread/$userPost/$timestampedDir/threads", $commentsList);
+                    if (is_dir("$thread/$userPost/$timestampedDir/threads")) {
+                        $this->getCommentFilesRecursivelyHelper("$thread/$userPost/$timestampedDir/threads", $commentsList);
+                    }
+                } else {
+                    if ($commenter == $userPost && $timestampedDir == $hash) {
+                        array_push($commentsList, "$thread/$userPost/$timestampedDir/comment.json");
+
+                        if (is_dir("$thread/$userPost/$timestampedDir/threads")) {
+                            $this->getCommentFilesRecursivelyHelper("$thread/$userPost/$timestampedDir/threads", $commentsList);
+                        }
+                    }
                 }
             }
         }

@@ -255,6 +255,9 @@ $app->post('/set_comment_public', function () use ($app) {
     require '../Actions/Comments.php';
     $comments = new Comments;
 
+    /**
+     * TODO: move this to inside setCommentPublic
+     */
     if (!in_array(json_encode($data['public']), array('true', 'false'))) {
         echo json_encode(array(
             "status" => "error",
@@ -269,6 +272,32 @@ $app->post('/set_comment_public', function () use ($app) {
         $data['comment_hash'],
         $_SERVER['eppn'],
         $data['public']
+    );
+});
+
+/**
+ * Set an existing comment public/privacy status
+ */
+$app->post('/get_comment_chain', function () use ($app) {
+    $json = $app->request->getBody();
+    $data = json_decode($json, true);
+    if (!array_equal(array_keys($data), array("creator", "work", "commenter", "hash"))) {
+        echo json_encode(array(
+            "status" => "error",
+            "message" => "missing a parameter"
+        ));
+        return;
+    }
+
+    require '../Actions/Comments.php';
+    $comments = new Comments;
+
+    echo $comments->getCommentChain(
+        $data['creator'],
+        $data['work'],
+        $data['commenter'],
+        $data['hash'],
+        $_SERVER['eppn']
     );
 });
 
