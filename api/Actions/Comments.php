@@ -5,10 +5,48 @@ class Comments
     /**
      * Constructor for reusing objects and variables etc
      */
-    public function __construct()
+    public function __construct($creator, $work)
     {
         require 'Permissions.php';
         $this->permissions = new Permissions;
+        $this->workPath = __PATH__ . $creator . "/works/" . $work;
+    }
+
+    public function editComment($creator, $work, $commenter, $hash, $type, $text, $public, $editor)
+    {
+        if (!($commenter == $editor || $this->permissions->userOnPermissionsList($this->workPath, $editor))) {
+            return json_encode(array(
+                "status" => "error",
+                "message" => "only the comment creator can delete this comment"
+            ));
+        }
+
+        $fileToModify = $this->getCommentPathByHash($creator, $work, $hash, $commenter);
+        if (!$fileToModify) {
+            return json_encode(array(
+                "status" => "error",
+                "message" => "unable to find comment"
+            ));
+        }
+
+        $jsonData = json_decode(file_get_contents($fileToModify));
+        if ($public && $this->permissions->commentsNeedsApproval($this->workPath)) {
+            $jsonData->approved = FALSE;
+        }
+        $jsonData->commentText = $text;
+        $jsonData->commentType = $type;
+
+        if (file_put_contents($fileToModify, json_encode($jsonData))) {
+            return json_encode(array(
+                "status" => "ok",
+                "message" => "successfully edited comment"
+            ));
+        } else {
+            return json_encode(array(
+                "status" => "error",
+                "message" => "an error occurred while trying to edit the comment"
+            ));
+        }
     }
 
     /**
@@ -22,7 +60,7 @@ class Comments
     {
         $workPath = __PATH__ . $creator . "/works/" . $work;
 
-        if (!($commenter !== $reader || $this->permissions->userOnPermissionsList($workPath, $reader))) {
+        if (!($commenter == $reader || $this->permissions->userOnPermissionsList($workPath, $reader))) {
             return json_encode(array(
                 "status" => "error",
                 "message" => "only the comment creator can delete this comment"
@@ -45,11 +83,17 @@ class Comments
             $jsonData->firstName = "deleted";
             $jsonData->lastName = "deleted";
             $jsonData->deleted = TRUE;
-            file_put_contents($fileToModify, json_encode($jsonData));
-            return json_encode(array(
-                "status" => "ok",
-                "message" => "successfully deleted comment"
-            ));
+            if (file_put_contents($fileToModify, json_encode($jsonData))) {
+                return json_encode(array(
+                    "status" => "ok",
+                    "message" => "successfully deleted comment"
+                ));
+            } else {
+                return json_encode(array(
+                    "status" => "error",
+                    "message" => "an error occurred while trying to delete the comment"
+                ));
+            }
         } else {
             if ($this->deleteDir($commentDirectoryHash)) {
                 return json_encode(array(
@@ -363,7 +407,7 @@ class Comments
                 } else {
                     // comment is not approved
                     // only work admins should be able to see it
-                    if ($this->permissions->userOnPermissionsList($workPath, $readerEppn)) {
+                    if ($this->permissions->userOnPermissionsList($this->workPath, $reader)) {
                         // reader is admin so can see the comment
                         array_push($data,
                             array(

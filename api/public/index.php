@@ -139,7 +139,7 @@ $app->post('/save_comments', function () use ($app) {
     }
 
     require '../Actions/Comments.php';
-    $comments = new Comments;
+    $comments = new Comments($data["author"], $data["work"]);
 
     echo $comments->saveComment(
         $data['author'],
@@ -158,11 +158,41 @@ $app->post('/save_comments', function () use ($app) {
 });
 
 /**
+ * Save a comment on a work
+ */
+$app->post('/edit_comment', function () use ($app) {
+    $json = $app->request->getBody();
+    $data = json_decode($json, true);
+
+    if (!array_equal(array_keys($data), array("creator", "work", "commenter", "hash", "type", "text", "public"))) {
+        echo json_encode(array(
+            "status" => "error",
+            "message" => "missing a parameter"
+        ));
+        return;
+    }
+
+    require '../Actions/Comments.php';
+    $comments = new Comments($data["creator"], $data["work"]);
+
+    echo $comments->editComment(
+        $data['creator'],
+        $data['work'],
+        $data['commenter'],
+        $data['hash'],
+        $data['type'],
+        $data['text'],
+        $data['public'],
+        $_SERVER['eppn']
+    );
+});
+
+/**
  * Get visible comments of a work
  */
 $app->get('/get_comments/:author/:work', function ($author, $work) use ($app) {
     require '../Actions/Comments.php';
-    $comments = new Comments;
+    $comments = new Comments($author, $work);
 
     // override header to ensure it's sending it as JSON (not necessary, but ensures it sends json header rather than text/html)
     $app->response->header('Content-Type', 'application/json');
@@ -177,15 +207,15 @@ $app->get('/get_comments/:author/:work', function ($author, $work) use ($app) {
 /**
  * Get highlights/first level comment meta data (not the text of the comment)
  */
-$app->get('/get_highlights/:author/:work', function ($author, $work) use ($app) {
+$app->get('/get_highlights/:author/:work', function ($creator, $work) use ($app) {
     require '../Actions/Comments.php';
-    $comments = new Comments;
+    $comments = new Comments($creator, $work);
 
     // override header to ensure it's sending it as JSON (not necessary, but ensures it sends json header rather than text/html)
     $app->response->header('Content-Type', 'application/json');
 
     echo $comments->getHighlights(
-        $author,
+        $creator,
         $work,
         $_SERVER['eppn']
     );
@@ -249,7 +279,7 @@ $app->post('/set_comment_public', function () use ($app) {
     }
 
     require '../Actions/Comments.php';
-    $comments = new Comments;
+    $comments = new Comments($data["creator"], $data["work"]);
 
     /**
      * TODO: move this to inside setCommentPublic
@@ -286,7 +316,7 @@ $app->post('/get_comment_chain', function () use ($app) {
     }
 
     require '../Actions/Comments.php';
-    $comments = new Comments;
+    $comments = new Comments($data["creator"], $data["work"]);
 
     echo $comments->getCommentChain(
         $data['creator'],
@@ -312,7 +342,7 @@ $app->post('/delete_comment', function () use ($app) {
     }
 
     require '../Actions/Comments.php';
-    $comments = new Comments;
+    $comments = new Comments($data["creator"], $data["work"]);
 
     echo $comments->deleteComment(
         $data['creator'],
