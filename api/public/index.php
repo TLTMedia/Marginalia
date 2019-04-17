@@ -192,10 +192,6 @@ $app->get('/get_highlights/:author/:work', function ($author, $work) use ($app) 
 });
 
 /**
- * Delete comments
- */
-
-/**
  * Set the permissions of a specified work
  */
 $app->get('/set_privacy/:creator/:work/:privacy', function ($creator, $work, $privacy) use ($app) {
@@ -293,6 +289,32 @@ $app->post('/get_comment_chain', function () use ($app) {
     $comments = new Comments;
 
     echo $comments->getCommentChain(
+        $data['creator'],
+        $data['work'],
+        $data['commenter'],
+        $data['hash'],
+        $_SERVER['eppn']
+    );
+});
+
+/**
+ * Delete comment
+ */
+$app->post('/delete_comment', function () use ($app) {
+    $json = $app->request->getBody();
+    $data = json_decode($json, true);
+    if (!array_equal(array_keys($data), array("creator", "work", "commenter", "hash"))) {
+        echo json_encode(array(
+            "status" => "error",
+            "message" => "missing a parameter"
+        ));
+        return;
+    }
+
+    require '../Actions/Comments.php';
+    $comments = new Comments;
+
+    echo $comments->deleteComment(
         $data['creator'],
         $data['work'],
         $data['commenter'],

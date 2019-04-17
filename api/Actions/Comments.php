@@ -3,6 +3,69 @@
 class Comments
 {
     /**
+     * Constructor for reusing objects and variables etc
+     */
+    public function __construct()
+    {
+        require 'Permissions.php';
+        $this->permissions = new Permissions;
+    }
+
+    /**
+     * Delete a comment
+     *  -> must be owner of the comment || must be on the permissions list of the work
+     *    IF the comment has children threads, will set it to the text "<i>comment deleted</i>"
+     *      and set a property in the comment.json 'deleted => true'
+     *    ELSE the comment has no children threads, so the comment.json file gets deleted.
+     */
+    public function deleteComment($creator, $work, $commenter, $hash, $reader)
+    {
+        $workPath = __PATH__ . $creator . "/works/" . $work;
+
+        if (!($commenter !== $reader || $this->permissions->userOnPermissionsList($workPath, $reader))) {
+            return json_encode(array(
+                "status" => "error",
+                "message" => "only the comment creator can delete this comment"
+            ));
+        }
+
+        $fileToModify = $this->getCommentPathByHash($creator, $work, $hash, $commenter);
+        if (!$fileToModify) {
+            return json_encode(array(
+                "status" => "error",
+                "message" => "unable to find comment"
+            ));
+        }
+
+        $commentDirectoryHash = substr($fileToModify, 0, strrpos($fileToModify, "comment.json"));
+        if (file_exists($commentDirectoryHash . "threads/")) {
+            // comment has replies/threads - so don't delete the comment.json; replace the comment owner and text with 'deleted'
+            $jsonData = json_decode(file_get_contents($fileToModify));
+            $jsonData->commentText = "deleted";
+            $jsonData->firstName = "deleted";
+            $jsonData->lastName = "deleted";
+            $jsonData->deleted = TRUE;
+            file_put_contents($fileToModify, json_encode($jsonData));
+            return json_encode(array(
+                "status" => "ok",
+                "message" => "successfully deleted comment"
+            ));
+        } else {
+            if ($this->deleteDir($commentDirectoryHash)) {
+                return json_encode(array(
+                    "status" => "ok",
+                    "message" => "successfully deleted comment"
+                ));
+            } else {
+                return json_encode(array(
+                    "status" => "error",
+                    "message" => "an error occurred while trying to delete the comment"
+                ));
+            }
+        }
+    }
+
+    /**
      * Get the comment data and its children for a specific comment
      */
     public function getCommentChain($creator, $work, $commenter, $hash, $reader)
@@ -179,11 +242,8 @@ class Comments
      */
     private function commentabilityOfWork($workPath, $commenterEppn, $privacy)
     {
-        require 'Permissions.php';
-        $permissions = new Permissions;
-
-        if (!$permissions->isWorkPublic($workPath)) {
-            if ($permissions->userOnPermissionsList($workPath, $commenterEppn)) {
+        if (!$this->permissions->isWorkPublic($workPath)) {
+            if ($this->permissions->userOnPermissionsList($workPath, $commenterEppn)) {
                 return 1;
             } else {
                 return -1;
@@ -192,8 +252,8 @@ class Comments
             if (!$privacy) {
                 return 1;
             } else {
-                if ($permissions->commentsNeedsApproval($workPath)) {
-                    if ($permissions->userOnPermissionsList($workPath, $commenterEppn)) {
+                if ($this->permissions->commentsNeedsApproval($workPath)) {
+                    if ($this->permissions->userOnPermissionsList($workPath, $commenterEppn)) {
                         return 1;
                     } else {
                         return 0;
@@ -230,11 +290,8 @@ class Comments
              * ELSE
              *      THEN Approved = TRUE
              */
-            require 'Permissions.php';
-            $permissions = new Permissions;
-
             $workPath = __PATH__ . $creator . "/works/" . $work;
-            if ($permissions->commentsNeedsApproval($workPath)) {
+            if ($this->permissions->commentsNeedsApproval($workPath)) {
                 $fileData->approved = FALSE;
             } else {
                 $fileData->approved = TRUE;
@@ -306,7 +363,7 @@ class Comments
                 } else {
                     // comment is not approved
                     // only work admins should be able to see it
-                    if ($permissions->userOnPermissionsList($workPath, $readerEppn)) {
+                    if ($this->permissions->userOnPermissionsList($workPath, $readerEppn)) {
                         // reader is admin so can see the comment
                         array_push($data,
                             array(
@@ -378,9 +435,6 @@ class Comments
         usort($commentFilePaths, 'self::sortByLengthInc');
         $comments = array();
 
-        require 'Permissions.php';
-        $permissions = new Permissions;
-
         foreach ($commentFilePaths as $filePath) {
             $jsonData = json_decode(file_get_contents($filePath));
             $jsonData->path = $filePath;
@@ -395,12 +449,14 @@ class Comments
                     // comment is public
                     if ($jsonData->approved) {
                         // comment is approved
+                        $jsonData->hash = $this->getEppnHashFromPath($jsonData->path, "hash");
                         array_push($commentsPointer, $jsonData);
                     } else {
                         // comment is not approved
                         // only work admins should be able to see it
-                        if ($permissions->userOnPermissionsList($workPath, $readerEppn)) {
+                        if ($this->permissions->userOnPermissionsList($workPath, $readerEppn)) {
                             // reader is admin so can see the comment
+                            $jsonData->hash = $this->getEppnHashFromPath($jsonData->path, "hash");
                             array_push($commentsPointer, $jsonData);
                         } else {
                             // reader is not an admin, so can't see the comment
@@ -411,6 +467,7 @@ class Comments
                     // only the comment creator should be able to see it
                     if ($jsonData->eppn == $readerEppn) {
                         // comment creator is also the reader
+                        $jsonData->hash = $this->getEppnHashFromPath($jsonData->path, "hash");
                         array_push($commentsPointer, $jsonData);
                     } else {
                         // no one else can see this comment
@@ -427,12 +484,14 @@ class Comments
                             // comment is public
                             if ($jsonData->approved) {
                                 // comment is approved
+                                $jsonData->hash = $this->getEppnHashFromPath($jsonData->path, "hash");
                                 array_push($commentsPointer[$amt]->threads, $jsonData);
                             } else {
                                 // comment is not approved
                                 // only work admins should be able to see it
-                                if ($permissions->userOnPermissionsList($workPath, $readerEppn)) {
+                                if ($this->permissions->userOnPermissionsList($workPath, $readerEppn)) {
                                     // reader is admin so can see the comment
+                                    $jsonData->hash = $this->getEppnHashFromPath($jsonData->path, "hash");
                                     array_push($commentsPointer[$amt]->threads, $jsonData);
                                 } else {
                                     // reader is not an admin, so can't see the comment
@@ -443,6 +502,7 @@ class Comments
                             // only the comment creator should be able to see it
                             if ($jsonData->eppn == $readerEppn) {
                                 // comment creator is also the reader
+                                $jsonData->hash = $this->getEppnHashFromPath($jsonData->path, "hash");
                                 array_push($commentsPointer[$amt]->threads, $jsonData);
                             } else {
                                 // no one else can see this comment
@@ -547,14 +607,47 @@ class Comments
         return strlen($b->path) - strlen($a->path);
     }
 
-    private function getEppnHashFromPath($path)
+    private function getEppnHashFromPath($path, $type = null)
     {
         $array = array_reverse(explode("/", $path));
 
-        return array(
-            'eppn' => $array[2],
-            'hash' => $array[1]
-        );
+        if (is_null($type)) {
+            return array(
+                'eppn' => $array[2],
+                'hash' => $array[1]
+            );
+        } elseif ($type == "hash") {
+            return $array[1];
+        } elseif ($type == "eppn") {
+            return $array[2];
+        } else {
+            // error
+            return array(
+                'eppn' => $array[2],
+                'hash' => $array[1]
+            );
+        }
+    }
+
+    private static function deleteDir($dirPath)
+    {
+        if (!is_dir($dirPath)) {
+            return FALSE;
+        }
+        if (substr($dirPath, strlen($dirPath) - 1, 1) != '/') {
+            $dirPath .= '/';
+        }
+        $files = glob($dirPath . '{,.}[!.,!..]*',GLOB_MARK|GLOB_BRACE);
+        foreach ($files as $file) {
+            if (is_dir($file)) {
+                self::deleteDir($file);
+            } else {
+                unlink($file);
+            }
+        }
+        rmdir($dirPath);
+
+        return TRUE;
     }
 }
 
