@@ -518,11 +518,8 @@ renderComments = (commentData) => {
             //detect click action on the replies
             $(".replies").off().on("click",function(evt){
               evt.stopPropagation();
-              isReply =true;
               var rid = $(this).attr('id');
               console.log(rid);
-              $("#commentBox").attr("replyToEppn", $(this).attr('name'));
-              $("#commentBox").attr("replyToHash", rid);
               $("#commentSave").show();
               //if the user who clicked is the same as the user who written the reply
               console.log($(this).attr('name'));
@@ -532,7 +529,7 @@ renderComments = (commentData) => {
               else{
                 $("#commentEdit").hide();
               }
-              CKEDITOR.instances.textForm.setReadOnly(false);
+              CKEDITOR.instances[textForm].setReadOnly(false);
 
             });
         });
@@ -1433,7 +1430,6 @@ function saveUserComment() {
     span.removeAttr("startIndex");
     span.removeAttr("endIndex");
   }
-  console.log(commentIndexMap.get(timeSt)[0]);
   /*******/
 
   let comment_data = JSON.stringify({
@@ -1473,23 +1469,14 @@ function saveUserReply() {
     let reply_data = JSON.stringify({
       author: $(".chosenUser").text().split(":")[0],
       work: textChosen,
-      replyTo: $("#commentBox").attr("replytoeppn"),
-      replyHash: $("#commentBox").attr("replytohash"),
-      startIndex: "_",
-      endIndx: "_",
+      replyTo: "",
+      replyHash:"",
+      startIndex:"",
+      endIndx:"",
       commentText: commentText,
-      commentType: "_",
+      commentType: "null",
       visiblility: true
     });
-
-    API.request({
-        method: "POST",
-        endpoint: "save_comments",
-        data: reply_data,
-    }).then((data) => {
-        alert(data);
-    });
-
   }
   console.log(CKEDITOR.instances.textForm.getData())
   var dataString = JSON.stringify({

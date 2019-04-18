@@ -32,7 +32,6 @@ function highlightCurrentSelection(evt) {
     $("#commentEdit").hide();
     $("div[aria-describedby='comApproval']").hide();
 
-    //hlRange(rangy);
     // let rangeArea = rangy.createRange();
     // rangeArea.selectCharacters(document.getElementById(TEXTSPACE), selectedRange.startOffset, selectedRange.endOffset);
     // let area = rangy.createClassApplier("commented-selection", {
@@ -43,8 +42,6 @@ function highlightCurrentSelection(evt) {
     //     }
     // });
     // area.applyToRange(rangeArea);
-
-    hlRange(selectedRange);
 
 
     $("." + remSpan).attr("startIndex", range.start);
@@ -76,14 +73,10 @@ function unhighlight(hl_ID) {
 }
 
 function hlRange(range) {
-  remSpan = "hl_" + currentUser.eppn;
-  console.log(range);
+  remSpan = "hl_" + currentUser.netid;
+
   let applierCount = rangy.createClassApplier(remSpan, {
-    useExistingElements: false,
-    elementAttributes: {
-        "startIndex": "a",
-        "endIndex": "b",
-    }
+    useExistingElements: false
   });
 
   if (literatureText.length == 0) {
