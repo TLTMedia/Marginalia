@@ -71,12 +71,17 @@ init = async ({api = api, users = users} = {}) => {
 
 
 function buildHTMLFile(litContents, litName) {
-  makeDropDown();
-  makeDraggableCommentBox();
-  makeDraggableReplyBox();
-  hideAllBoxes();
+  if (!$(".commentTypeDropdown").length) {
+    makeDropDown();
+    makeDraggableCommentBox();
+    makeDraggableReplyBox();
+    hideAllBoxes();
+  } else {
+    // already initialized once before...
+    // just skip to loading comments
+    loadUserComments();
+  }
 
-  //console.log(litContents);
   var litDiv = $("<div/>", {
     "id": "litDiv"
   }).on("mouseup", function(evt) {
@@ -107,21 +112,11 @@ function buildHTMLFile(litContents, litName) {
   var preText = $("<div/>", {
     "id": "textSpace"
   });
-  preText.hide();
-  //litContents = litContents.replace(/\n\n/g, "\n");
-  //litContents = litContents.replace(/\n/g, "<br/>");
+
   preText.html(litContents);
 
   litDiv.append(metaChar, metaName, link, script, preText);
   $("#text").append(litDiv);
-}
-
-function getLitContents(current_user, current_text) {
-  let endpoint = 'get_work/' + current_user + '/' + current_text;
-  API.request({endpoint}).then((data) => {
-      literatureText = data;
-      buildHTMLFile(literatureText, $(this).attr("class"));
-  });
 }
 // Creates the main selector screen once a netid is chosen
 /*
@@ -481,6 +476,7 @@ renderComments = (commentData) => {
     $("#text").fadeIn();
     $("#textSpace").fadeIn();
     $("#textTitle").fadeIn();
+    $("#commentEdit").hide();
 
     for (let i = 0; i < commentData.length; ++i) {
         highlightText({
@@ -510,11 +506,15 @@ renderComments = (commentData) => {
             method: "POST"
         }).then((data) => {
             evt.stopPropagation();
+
             displayReplyBox(evt);
             displayCommentBox(evt);
             textShowReply();
             hideUnconfirmedHighlights();
             readThreads(data);
+            //hide the text editing part
+            $("[class = 'ui-dialog ui-corner-all ui-widget ui-widget-content ui-front no-close ui-dialog-buttons ui-draggable ui-resizable']").hide();
+
             //detect click action on the replies
             $(".replies").off().on("click",function(evt){
               evt.stopPropagation();
@@ -527,12 +527,15 @@ renderComments = (commentData) => {
               //if the user who clicked is the same as the user who written the reply
               console.log($(this).attr('name'));
               if(currentUser.eppn == $(this).attr('name')){
-                $("#commentEdit").show();
+                $(".commentButton").hide();
+                $(".commentButton" + "[commentId = "+rid +"]").show();
               }
               else{
-                $("#commentEdit").hide();
+                $(".commentButton").hide();
+                $(".commentButton" + "#replyToComments" + "[commentId = "+rid+"]").show;
               }
               CKEDITOR.instances.textForm.setReadOnly(false);
+              console.log(CKEDITOR.instances);
 
             });
         });
@@ -560,13 +563,11 @@ highlightText = ({startIndex, endIndex, commentType, eppn, hash} = {}) => {
 
 
 // the parentHash is the parent's id (default null
-function newShowReply(firstName, lastName, startDex, endDex, isVisible, type, commentText,threads,hash,parentHash = null) {
+function newShowReply(eppn, firstName, lastName, startDex, endDex, isVisible, type, commentText,threads,hash,parentHash = null) {
   var replyBox = $('<div/>', {
     class: "replies",
     id: hash,
-    name: currentUser.eppn,
-    width: 499,
-    height: 50
+    name: eppn,
   });
   replyBox[0].disabled = true;
   var userName = firstName + " " + lastName;
@@ -574,17 +575,41 @@ function newShowReply(firstName, lastName, startDex, endDex, isVisible, type, co
   inText = inText.replace("<p>"," ");
   inText = inText.replace("</p>","\n");
   replyBox.html(userName + ": " +inText);
+  var replyComment = $("<button/>",{
+      text:"Reply",
+      class:"commentButton",
+      id:"replyToComments",
+      commentId:hash,
+      click:function(){
+        $("[class = 'ui-dialog ui-corner-all ui-widget ui-widget-content ui-front no-close ui-dialog-buttons ui-draggable ui-resizable']").show();
+        //TODO let the text editor know that this is a reply
+      }
+    });
+  var editComment = $("<button/>",{
+      text:"Edit",
+      class:"commentButton",
+      id:"editComment",
+      commentId:hash,
+      click:function(){
+        $("[class = 'ui-dialog ui-corner-all ui-widget ui-widget-content ui-front no-close ui-dialog-buttons ui-draggable ui-resizable']").show();
+        console.log(inText);
+        CKEDITOR.instances.textForm.setData(inText);
+        //TODO let the text editor know that this is a edit
+      }
+  });
+
 
   // this reply has a parent
   if(parentHash != null){
     $('#'+ parentHash+".replies").append(replyBox);
-    console.log("My parent ID is ",parentHash);
-    console.log(inText + " should be printed");
+    $("#"+hash+".replies").append(replyComment,editComment);
   }
   // this reply don't has a parent
   else{
-    $("#replies").append(replyBox);
+    $("#replies").append(replyBox).append(replyComment,editComment);
+    $("#"+hash+".replies").append(replyComment,editComment);
   }
+  $(".commentButton").hide();
 }
 
 //read the thread (threads is the reply array, parentId is the hash, parentReplyBox is the replyBox returned by the newShowReply())
@@ -597,6 +622,7 @@ function readThreads(threads, parentId = null){
     for(var i =0; i<threads.length ; i++){
       // also pass the parentId
         newShowReply(
+          threads[i].eppn,
           threads[i].firstName,
           threads[i].lastName,
           threads[i].startIndex,
@@ -812,7 +838,6 @@ function loadCommentsByType(type, isNetID) {
       }
     }
   }
-  //TODO LIN this method remove every highlight comment without checking which type of comment
   removeSpans();
   loadArrayOfComments(allComsOfType);
 }
@@ -876,6 +901,7 @@ function removeSpans() {
 function clickDisplayComments(evt, id) {
   console.log("COMMENT");
   var span = $("." + remSpan);
+  console.log(remSpan);
   console.log(userComMap.get(id));
   CKEDITOR.instances.textForm.setData(userComMap.get(id));
   CKEDITOR.instances['textForm'].setReadOnly(false);
@@ -888,6 +914,27 @@ function clickDisplayComments(evt, id) {
   })
 
   $("div[aria-describedby='commentBox']").attr('comID', id);
+
+  $("[aria-describedby='commentBox']").show();
+
+
+}
+
+function editTheComment(evt, id, data) {
+  console.log("EDIT COMMENT CLICKED");
+  console.log();
+  CKEDITOR.instances.textForm.setData(userComMap.get(id));
+  CKEDITOR.instances['textForm'].setReadOnly(false);
+  var newTop = evt.pageY + "px";
+  var newLeft = width * .55 + "px";
+
+  $("[aria-describedby='commentBox']").css({
+    'top': newTop,
+    'left': newLeft
+  })
+
+  $("div[aria-describedby='commentBox']").attr('comID', id);
+  $("div[aria-describedby='commentBox']").html(data);
 
   $("[aria-describedby='commentBox']").show();
 
@@ -950,6 +997,8 @@ function displayChoiceBox(evt) {
 
 // This is the box that will house the various replies a comment thread may hold
 function makeDraggableReplyBox() {
+  console.log(($("#replies").length))
+  if ($("#replies").length){
   $("#replies").dialog({
     dialogClass: "no-close",
     use: 'reply',
@@ -959,7 +1008,7 @@ function makeDraggableReplyBox() {
   });
 
   createCommentAprovalForm();
-
+  }
 }
 
 // When opened, the reply box will have a place for you to type in the commentbox
@@ -1057,19 +1106,24 @@ function makeDraggableCommentBox() {
           text: "Edit",
           id: "commentEdit",
           click: function(evt) {
-            console.log("REMSPAN: ", remSpan.split("_"))
+            console.log("ID IS: ", $(this).attr("id"));
+            console.log("REMSPAN: ", remSpan.split("_"));
+            //TODO include currentUser.netid
             if (currentUser.netid == remSpan.split("_")[0]) {
               isEdit = true;
             }
-            clickDisplayComments(evt, remSpan.split("_")[1]);
+            console.log("isEdit = ",isEdit);
+            //clickDisplayComments(evt, remSpan.split("_")[1]);
+            editTheComment(evt, remSpan.split("_")[1], $(""));
             $("[aria-describedby='replies']").hide();
             // $("#commentSave").text("Save");
             $("#commentSave").show();
-            $("#commentExit").hide();
+            $("#commentExit").show();
             $("#commentEdit").hide();
             $(".commentTypeDropdown").attr("disabled", false);
           }
-        }, {
+        },
+        {
           text: "Remove",
           id: "commentRemove",
           click: function() {
@@ -1295,7 +1349,8 @@ function hideUnconfirmedHighlights() {
 
 // This function will reset the CKEditor and all attributes
 function resetCkeAndHide() {
-  $("." + remSpan).each(function() {
+  var readableRemSpan = remSpan.replace("@","\\@");
+  $("." + readableRemSpan).each(function() {
     var attributes = this.attributes;
     var i = attributes.length;
     while (i-- && i != 0) {
@@ -1389,8 +1444,10 @@ function saveUserComment() {
 
   var timeSt = Math.floor(Date.now() / 1000).toString(16);
   var cData = CKEDITOR.instances.textForm.getData();
-  var newSpanClass = currentUser.netid + "_" + timeSt;
-  var span = $("." + remSpan);
+  var newSpanClass = currentUser.eppn + "_" + timeSt;
+  var readableRemSpan = remSpan.replace("@","\\@");
+  var span = $("." + readableRemSpan);
+  console.log(span);
   var type = $(".commentTypeDropdown").val();
   if (type == null) {
     type = "historical";
@@ -1404,6 +1461,7 @@ function saveUserComment() {
 
   CKEDITOR.instances.textForm.setData("");
   if (isEdit) {
+    var readableRemSpan = remSpan.replace("@","\\@");
     var span = $("." + remSpan);
     timeSt = idName[1];
     netID = idName[0];
@@ -1428,12 +1486,12 @@ function saveUserComment() {
   /*******/
   if (!(userReplyMap.has(timeSt))) {
     userReplyMap.set(timeSt, []);
+    console.log("save s:", span.attr("startIndex"), " e: ", span.attr("endIndex"))
     commentIndexMap.set(timeSt, [span.attr("startIndex"), span.attr("endIndex")]);
     userComMap.set(timeSt, cData);
     span.removeAttr("startIndex");
     span.removeAttr("endIndex");
   }
-  console.log(commentIndexMap.get(timeSt)[0]);
   /*******/
 
   let comment_data = JSON.stringify({
@@ -1459,7 +1517,7 @@ function saveUserComment() {
 
 // Saves a user's reply to a thread
 function saveUserReply() {
-
+  console.log("call saveUserReply()");
   var timeSt = Math.floor(Date.now() / 1000).toString(16);
   var firstName = currentUser.firstname;
   var lastName = currentUser.lastname;
@@ -1476,118 +1534,20 @@ function saveUserReply() {
       replyTo: $("#commentBox").attr("replytoeppn"),
       replyHash: $("#commentBox").attr("replytohash"),
       startIndex: "_",
-      endIndx: "_",
+      endIndex: "_",
       commentText: commentText,
       commentType: "_",
-      visiblility: true
+      visibility: true
     });
-
     API.request({
-        method: "POST",
         endpoint: "save_comments",
-        data: reply_data,
+        method: "POST",
+        data: reply_data
     }).then((data) => {
         alert(data);
+        if(data == "comment saved"){
+
+        }
     });
-
   }
-  console.log(CKEDITOR.instances.textForm.getData())
-  var dataString = JSON.stringify({
-    mainUser: idName[0],
-    comID: idName[1],
-    repData: CKEDITOR.instances.textForm.getData(),
-    timeStamp: timeSt,
-    firstname: firstName,
-    lastname: lastName,
-    netID: netID,
-    textChosen: textChosen,
-    userFolder: userFolderSelected
-  });
-  console.log(JSON.parse(dataString));
-
-  isEdit = false;
-  isReplyEdit = false;
-  $.post("reply.php", {
-      data: dataString
-    })
-    .done(function(msg) {
-      console.log('Data Sent')
-    }).fail(function(msg) {
-      console.log("Data Failed to Send")
-    });
-
-  var inText = CKEDITOR.instances.textForm.getData();
-  var fullname = firstName + " " + lastName;
-  var userReply = true;
-  var replyBase = $('<div/>', {
-    class: "replyBase_" + timeSt,
-    replyID: timeSt,
-    userIsD: currentUser.netID
-  });
-
-  var replyName = $('<text/>', {
-    class: "replyName",
-    text: fullname
-  });
-
-  var replyArea = $('<textArea/>', {
-    class: "replyArea"
-  });
-
-  replyArea[0].disabled = true;
-  inText = inText.replace(/<\/p>/g, "\n");
-  inText = inText.replace(/<[^>]*>/g, "");
-
-  replyArea.text(inText);
-
-  var replyDeleteButton = $('<button/>', {
-    class: "replyDeleteButton",
-    text: "Delete",
-    click: function(evt) {
-      if ($(this).text() == "Delete") {
-        $(this).parent().children(".replyEditButton").text("No, i'm not");
-        $(this).text("Are you sure?");
-      } else if ($(this).text() == "Are you sure?") {
-        removeUserReply(evt);
-      }
-    }
-  });
-
-  var replyEditButton = $('<button/>', {
-    class: "replyEditButton",
-    text: "Edit",
-    click: function(evt) {
-      if ($(this).text() == "No, i'm not") {
-        $($(this).siblings()[2]).text("Delete");
-        $(this).text("Edit");
-      } else {
-        CKEDITOR.instances.textForm.setData((($(this).siblings())[1]).innerHTML);
-        comBoxReply(evt);
-        $("#commentSave").show();
-        $("#commentEdit").hide();
-        $("#commentRemove").hide();
-        CKEDITOR.instances['textForm'].setReadOnly(false);
-        console.log("Edit this Reply");
-        isReplyEdit = true;
-        isEdit = $(this).parent().attr("replyid");
-      }
-    }
-  });
-
-  if (!userReply && !whitelist.includes(currentUser.netid)) {
-    replyDeleteButton.attr("disabled", "disabled");
-    replyEditButton.attr("disabled", "disabled");
-  }
-
-  replyBase.append(replyName, replyArea, replyDeleteButton, replyEditButton);
-  if ($("#viewRepliesButton").is(":visible")) {
-    $("#viewRepliesButton").click().then(function() {
-      $("#replies").append(replyBase);
-    });
-  } else {
-    $("#replies").append(replyBase);
-  }
-  CKEDITOR.instances.textForm.setData("");
-  createSelfReplyBoxButton();
-  ///
 }

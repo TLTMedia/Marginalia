@@ -12,6 +12,7 @@ function highlightCurrentSelection(evt) {
   var dfd = new $.Deferred();
   var selectedRange = rangy.getSelection().getRangeAt(0);
   // console.log(rangy.getSelection())
+  unhighlight();
 
   if (selectedRange.endOffset != selectedRange.startOffset) {
     $(".loader").show();
@@ -22,8 +23,9 @@ function highlightCurrentSelection(evt) {
     $("[id='ui-id-1']").text("Annotation by: " + currentUser['firstname'] + " " + currentUser['lastname']);
     let remSpan = "commented-selection";
 
+
     let range = selectedRange.toCharacterRange(document.getElementById('textSpace'));
-    console.log(rangy)
+    console.log(rangy);
     CKEDITOR.instances['textForm'].setReadOnly(false);
     $(".commentTypeDropdown").removeAttr("disabled")
     $("#commentSave").show();
@@ -43,12 +45,9 @@ function highlightCurrentSelection(evt) {
     //     }
     // });
     // area.applyToRange(rangeArea);
+    //console.log(range);
+    hlRange(selectedRange,range);
 
-    hlRange(selectedRange);
-
-
-    $("." + remSpan).attr("startIndex", range.start);
-    $("." + remSpan).attr("endIndex", range.end);
     $("div[aria-describedby='replies']").hide();
 
     $("span[class^='hl']").off().on("click", function(evt) {
@@ -66,31 +65,32 @@ function highlightCurrentSelection(evt) {
   return dfd;
 }
 
-function unhighlight(hl_ID) {
-  let applierCount = rangy.createClassApplier(hl_ID);
-  //console.log(applierCount);
-  let range = rangy.createRange();
-
-  range.selectNodeContents(document.getElementById("text"));
-  applierCount.undoToRange(range);
+function unhighlight() {
+  remSpan = "hl_" + currentUser.eppn.replace(/[@\.]/g,"_");
+  $("."+remSpan).contents().unwrap();
 }
 
-function hlRange(range) {
-  remSpan = "hl_" + currentUser.eppn;
-  console.log(range);
+function hlRange(selectedRange,range) {
+  remSpan = "hl_" + currentUser.eppn.replace(/[@\.]/g,"_");
+  console.log(selectedRange);
+  console.log("start: ",range.start," end: ",range.end);
   let applierCount = rangy.createClassApplier(remSpan, {
     useExistingElements: false,
     elementAttributes: {
-        "startIndex": "a",
-        "endIndex": "b",
+        "startIndex": range.start,
+        "endIndex": range.end,
     }
   });
+// setTimeout(function(){$(`.${remSpan}`).addClass("commented-selection")},100);
+// console.log(`.${remSpan}`)
 
   if (literatureText.length == 0) {
     literatureText = $("#textSpace")[0].outerText;
-    //  console.log(literatureText);
+      //console.log(literatureText);
   }
-  applierCount.applyToRange(range);
+
+  applierCount.applyToRange(selectedRange);
   //console.log(range);
   //linkComments(id);
+  return remSpan;
 }

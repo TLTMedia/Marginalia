@@ -96,56 +96,45 @@ createUserSelectScreen = async ({users = users} = {}) => {
  * Temporary pass the api object to 'everything'...
  * So that any ~global~ function can make an api call...
  */
-createLitSelectorScreen = async ({users = users, selected_eppn = selected_eppn} = {}) => {
-  var selector = $(".userFiles");
-  var worksButtons = $("<ul/>", {
-    id: "worksButtons",
-    class: "mdl-menu mdl-menu--bottom-left mdl-js-menu mdl-js-ripple-effect",
-    for: "pickLit"
-  });
-  selector.append(worksButtons);
+ createLitSelectorScreen = ({users = users, selected_eppn = selected_eppn} = {}) => {
+   var selector = $(".userFiles");
+   var worksButtons = $("<ul/>", {
+     id: "worksButtons",
+     class: "mdl-menu mdl-menu--bottom-left mdl-js-menu mdl-js-ripple-effect",
+     for: "pickLit"
+   });
+   selector.append(worksButtons);
 
-  users.get_user_works(selected_eppn).then((works) => {
-      for (var lit in works) {
-        var fileWithoutExt = works[lit].substr(0, works[lit].lastIndexOf('.')) || works[lit];
-        var litButton = $('<li/>', {
-          name: works[lit],
-          class: "mdl-menu__item",
-          id: "inputLitButton",
-          text: fileWithoutExt,
-          click: function(evt) {
-            hideAllBoxes();
-            $(".nameMenu").remove()
-            $("#text").empty();
-            $("div[aria-describedby='moderateFileChoice']").hide();
-            textChosen = $(this).attr("name");
-            $(".chosenFile").text(textChosen);
-            userChosen = $(".chosenUser").html().split(":")[0];
-            getLitContents(userChosen, textChosen);
-            removeSpans();
-          }
-        });
+   users.get_user_works(selected_eppn).then((works) => {
+       for (var lit in works) {
+         var fileWithoutExt = works[lit].substr(0, works[lit].lastIndexOf('.')) || works[lit];
+         var litButton = $('<li/>', {
+           name: works[lit],
+           class: "mdl-menu__item",
+           id: "inputLitButton",
+           text: fileWithoutExt,
+           click: function(evt) {
+             hideAllBoxes();
+             $(".nameMenu").remove();
+             $("#text").empty();
+             $("div[aria-describedby='moderateFileChoice']").hide();
+             textChosen = $(this).attr("name");
+             $(".chosenFile").text(textChosen);
+             userChosen = $(".chosenUser").html().split(":")[0];
 
-        if (userFolderSelected == currentUser['eppn'] || whitelist.includes(currentUser['eppn'])) {
-          litButton.on('contextmenu', function(evt) {
-            evt.preventDefault();
-            setFileModeration(evt);
-            var newTop = evt.pageY + "px";
-            var newLeft = $(document).width() * .85 + "px";
-            $('div[aria-describedby="moderateFileChoice"]').css({
-              'top': newTop + "px",
-              'left': newLeft + "px",
-            })
-            $('div[aria-describedby="userPrivateList"]').css({
-              'top': newTop + "px",
-              'left': newLeft + "px",
-            })
-          });
-        }
+             let endpoint = 'get_work/' + userChosen + '/' + textChosen;
+             API.request({endpoint}).then((data) => {
+                 literatureText = data;
+                 buildHTMLFile(data, $(this).attr("class"));
+             });
 
-        worksButtons.append(litButton);
-      }
+             removeSpans();
+           }
+         });
 
-      componentHandler.upgradeElement($('#worksButtons')[0]);
-  });
-}
+         worksButtons.append(litButton);
+       }
+
+       componentHandler.upgradeElement($('#worksButtons')[0]);
+   });
+ }

@@ -104,5 +104,15 @@
   </div>
   <div id="text" visible="false"></div>
 </body>
+<script>
+$( document ).on( "DOMNodeInserted", function( e ) {
+	var classes=$(e.target).attr("class");
+if(classes && classes.match(/^hl_/)){
+$(e.target).addClass("commented-selection")
 
+
+}
+	  // the new element
+});
+</script>
 </html>

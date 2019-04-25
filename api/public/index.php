@@ -133,7 +133,7 @@ $app->post('/save_comments', function () use ($app) {
     if (!array_equal(array_keys($data), array('visibility', 'author', 'work', 'replyTo', 'replyHash', 'startIndex', 'endIndex', 'commentText', 'commentType'))) {
         echo json_encode(array(
             "status" => "error",
-            "message" => "missing a parameter"
+            "message" => array_keys($data)
         ));
         return;
     }
