@@ -124,9 +124,12 @@ class Comments
             ));
         }
 
+        $commentTree = $this->buildCommentJsonFromPaths($commentFilePaths, $reader, $creator, $work);
+        $this->recursivelyRemovePathProperty($commentTree);
+
         return json_encode(array(
             "status" => "ok",
-            "data" => $this->buildCommentJsonFromPaths($commentFilePaths, $reader, $creator, $work)
+            "data" => $commentTree
         ));
     }
 
@@ -375,6 +378,20 @@ class Comments
             "status" => "ok",
             "data" => $this->buildCommentJsonFromPaths($commentFilePaths, $reader, $creator, $work)
         ));
+    }
+
+    /**
+     * Path property in a comment is needed to construct the comments in the proper order.
+     * Once the object is created with all the linkings, we can then remove the path.
+     * CANNOT remove path property while the tree is being built. Only once the entire tree has been constructed...
+     *
+     * This function removes the path property recursively
+     */
+    private function recursivelyRemovePathProperty(&$commentChain) {
+        foreach($commentChain as $comment) {
+            unset($comment->path);
+            $this->recursivelyRemovePathProperty($comment->threads);
+        }
     }
 
     /**
