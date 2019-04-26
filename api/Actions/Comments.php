@@ -406,8 +406,8 @@ class Comments
                     );
                 } else {
                     // comment is not approved
-                    // only work admins should be able to see it
-                    if ($this->permissions->userOnPermissionsList($this->workPath, $reader)) {
+                    // only work admins should be able to see it OR the creator of the comment
+                    if ($this->permissions->userOnPermissionsList($this->workPath, $reader) || $reader == $jsonData->eppn) {
                         // reader is admin so can see the comment
                         array_push($data,
                             array(
