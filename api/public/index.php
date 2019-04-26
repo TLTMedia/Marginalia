@@ -188,23 +188,6 @@ $app->post('/edit_comment', function () use ($app) {
 });
 
 /**
- * Get visible comments of a work
- */
-$app->get('/get_comments/:author/:work', function ($author, $work) use ($app) {
-    require '../Actions/Comments.php';
-    $comments = new Comments($author, $work);
-
-    // override header to ensure it's sending it as JSON (not necessary, but ensures it sends json header rather than text/html)
-    $app->response->header('Content-Type', 'application/json');
-
-    echo $comments->getComments(
-        $author,
-        $work,
-        $_SERVER['eppn']
-    );
-});
-
-/**
  * Get highlights/first level comment meta data (not the text of the comment)
  */
 $app->get('/get_highlights/:author/:work', function ($creator, $work) use ($app) {

@@ -359,28 +359,6 @@ class Comments
     }
 
     /**
-     * Get visible comments and related info to them for a specific work belonging to a user
-     * ... helper function to a recursive function?
-     */
-    public function getComments($creator, $work, $reader)
-    {
-        try {
-            $commentFilePaths = $this->getCommentFiles($creator, $work, TRUE);
-        } catch(Exception $e) {
-            return json_encode(array(
-                "status" => "error",
-                "message" => "unable to get comments",
-                "raw_exception" => $e->getMessage()
-            ));
-        }
-
-        return json_encode(array(
-            "status" => "ok",
-            "data" => $this->buildCommentJsonFromPaths($commentFilePaths, $reader, $creator, $work)
-        ));
-    }
-
-    /**
      * Path property in a comment is needed to construct the comments in the proper order.
      * Once the object is created with all the linkings, we can then remove the path.
      * CANNOT remove path property while the tree is being built. Only once the entire tree has been constructed...
