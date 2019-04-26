@@ -497,8 +497,8 @@ class Comments
                         array_push($commentsPointer, $jsonData);
                     } else {
                         // comment is not approved
-                        // only work admins should be able to see it
-                        if ($this->permissions->userOnPermissionsList($workPath, $readerEppn)) {
+                        // only work admins should be able to see it OR the creator of the comment themselves
+                        if ($this->permissions->userOnPermissionsList($workPath, $readerEppn) || $readerEppn == $jsonData->eppn) {
                             // reader is admin so can see the comment
                             $jsonData->hash = $this->getEppnHashFromPath($jsonData->path, "hash");
                             array_push($commentsPointer, $jsonData);
@@ -532,8 +532,8 @@ class Comments
                                 array_push($commentsPointer[$amt]->threads, $jsonData);
                             } else {
                                 // comment is not approved
-                                // only work admins should be able to see it
-                                if ($this->permissions->userOnPermissionsList($workPath, $readerEppn)) {
+                                // only work admins should be able to see it OR the creator of the comment themselves
+                                if ($this->permissions->userOnPermissionsList($workPath, $readerEppn) || $readerEppn == $jsonData->eppn) {
                                     // reader is admin so can see the comment
                                     $jsonData->hash = $this->getEppnHashFromPath($jsonData->path, "hash");
                                     array_push($commentsPointer[$amt]->threads, $jsonData);
