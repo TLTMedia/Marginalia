@@ -65,13 +65,17 @@ function highlightCurrentSelection(evt) {
   return dfd;
 }
 
+function escapeEPPN(eppn) {
+  return eppn.replace(/([@\.])/g, "\\\$1");
+}
+
 function unhighlight() {
-  remSpan = "hl_" + currentUser.eppn.replace(/[@\.]/g,"_");
+  remSpan = "hl_" + currentUser.eppn.replace(/[@\.]/g, "_");
   $("."+remSpan).contents().unwrap();
 }
 
 function hlRange(selectedRange,range) {
-  remSpan = "hl_" + currentUser.eppn.replace(/[@\.]/g,"_");
+  remSpan = "hl_" + currentUser.eppn.replace(/[@\.]/g, "_");
   console.log(selectedRange);
   console.log("start: ",range.start," end: ",range.end);
   let applierCount = rangy.createClassApplier(remSpan, {
@@ -81,16 +85,11 @@ function hlRange(selectedRange,range) {
         "endIndex": range.end,
     }
   });
-// setTimeout(function(){$(`.${remSpan}`).addClass("commented-selection")},100);
-// console.log(`.${remSpan}`)
 
   if (literatureText.length == 0) {
     literatureText = $("#textSpace")[0].outerText;
-      //console.log(literatureText);
   }
 
   applierCount.applyToRange(selectedRange);
-  //console.log(range);
-  //linkComments(id);
   return remSpan;
 }

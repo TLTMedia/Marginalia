@@ -90,29 +90,16 @@
     <div class="loader" id="loadingSign"></div>
 
     <div class="typeSelector" id="loadlist"></div>
-		<div id="type-of-work">
-				<select id="type-of-work-selection">
-						<option value="all">All</option>
-						<option value="historical">Historical</option>
-						<option value="analytical">Analytical</option>
-						<option value="comment">Comment</option>
-						<option value="definition">Definition</option>
-						<option value="question">Question</option>
-						<option value="private">Private</option>
-				</select>
-		</div>
   </div>
   <div id="text" visible="false"></div>
 </body>
-<script>
-$( document ).on( "DOMNodeInserted", function( e ) {
-	var classes=$(e.target).attr("class");
-if(classes && classes.match(/^hl_/)){
-$(e.target).addClass("commented-selection")
-
-
-}
-	  // the new element
+<script defer>
+$(document).on("DOMNodeInserted", e => {
+	const classes = $(e.target).attr("class");
+	if (classes && classes.match(/^hl_/)) {
+		$(e.target).addClass("commented-selection");
+		console.log("special function");
+	}
 });
 </script>
 </html>

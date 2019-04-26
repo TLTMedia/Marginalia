@@ -526,13 +526,14 @@ renderComments = (commentData) => {
               $("#commentSave").show();
               //if the user who clicked is the same as the user who written the reply
               console.log($(this).attr('name'));
-              if(currentUser.eppn == $(this).attr('name')){
+              if (currentUser.eppn == $(this).attr('name')) {
                 $(".commentButton").hide();
-                $(".commentButton" + "[commentId = "+rid +"]").show();
-              }
-              else{
+                $(".commentButton" + "[commentid = " + rid + "]").show();
+              } else {
                 $(".commentButton").hide();
-                $(".commentButton" + "#replyToComments" + "[commentId = "+rid+"]").show;
+                $("#replyToComments" + "[commentid = " + rid + "]").show();
+                console.log(rid);
+                console.log("should show reply button");
               }
               CKEDITOR.instances.textForm.setReadOnly(false);
               console.log(CKEDITOR.instances);
@@ -563,7 +564,7 @@ highlightText = ({startIndex, endIndex, commentType, eppn, hash} = {}) => {
 
 
 // the parentHash is the parent's id (default null
-function newShowReply(eppn, firstName, lastName, startDex, endDex, isVisible, type, commentText,threads,hash,parentHash = null) {
+function newShowReply(eppn, firstName, lastName, startDex, endDex, isVisible, type, commentText, threads, hash, parentHash = null) {
   var replyBox = $('<div/>', {
     class: "replies",
     id: hash,
@@ -600,12 +601,12 @@ function newShowReply(eppn, firstName, lastName, startDex, endDex, isVisible, ty
 
 
   // this reply has a parent
-  if(parentHash != null){
+  if (parentHash != null) {
     $('#'+ parentHash+".replies").append(replyBox);
     $("#"+hash+".replies").append(replyComment,editComment);
   }
-  // this reply don't has a parent
-  else{
+  // this reply doesn't have a parent
+  else {
     $("#replies").append(replyBox).append(replyComment,editComment);
     $("#"+hash+".replies").append(replyComment,editComment);
   }
@@ -806,6 +807,7 @@ function makeCrossX() {
 
 // Loads all comments of a certain type whether it be a student name or type
 function loadCommentsByType(type, isNetID) {
+  console.log(type, isNetID);
   var allComsOfType = [];
 
   // If the type is determined by netID at first
