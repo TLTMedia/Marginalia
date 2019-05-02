@@ -86,7 +86,8 @@ class Users
             if ($permissions->userOnPermissionsList($pathOfWork, $currentEppn)) {
                 return json_encode(array(
                     "status" => "ok",
-                    "data" => file_get_contents($workIndex)
+                    "data" => file_get_contents($workIndex),
+                    "admin" => true // must be to reach here
                 ));
             } else {
                 return json_encode(array(
@@ -98,7 +99,8 @@ class Users
             // work is public
             return json_encode(array(
                 "status" => "ok",
-                "data" => file_get_contents($workIndex)
+                "data" => file_get_contents($workIndex),
+                "admin" => $permissions->userOnPermissionsList($pathOfWork, $currentEppn)
             ));
         }
     }
