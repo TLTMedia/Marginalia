@@ -192,7 +192,7 @@ class Comments
          * (Yes, this entire if/else block does that 1 thing)
          * Comments directly on a page (first level comments will send these values when saved)
          */
-        if ($replyTo == '_' || $replyHash == '_') {
+        if (isset($replyTo) && isset($replyHash)) {
             // create new top level comment
             $lowestCommentPath = $workPath . "/data/threads/" . $commenterEppn;
             if (!is_dir($lowestCommentPath)) {
