@@ -1,4 +1,8 @@
 ._*
 PHP_errors.log
 .git_secret.txt
-node_modules/
+users/
+composer.json
+composer.lock
+composer.phar
+vendor/

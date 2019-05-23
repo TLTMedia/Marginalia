@@ -3,7 +3,7 @@
 class Users
 {
     /**
-     * Returns a list of the users
+     * Returns a list of all the work creators
      */
     public function getCreators()
     {

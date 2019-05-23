@@ -1,4 +1,5 @@
 $(window).ready(function() {
+
     $("#litadd").on("click", function(evt) {
         $("#addLitBase").load("parts/upload.htm", function() {
             $(this).fadeIn();
@@ -128,7 +129,7 @@ createUserSelectScreen = async ({users = users} = {}) => {
                  buildHTMLFile(data, $(this).attr("class"));
              });
 
-             removeSpans();
+             //removeSpans();
            }
          });
 

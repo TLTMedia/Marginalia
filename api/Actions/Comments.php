@@ -1,9 +1,21 @@
 <?php
 
+/**
+ * Comments class that contains methods used for editing/creating/deleting comments
+ *
+ * This class relies on Permissions.php to check whether a user is allowed to modify specified comment
+ */
 class Comments
 {
     /**
      * Constructor for reusing objects and variables etc
+     *
+     * Uses the work name and its creator, instantiates a permissions object which is used by many of this classes functions
+     *
+     * @see userOnPermissionsList()
+     *
+     * @param String $work The work name
+     * @param String $creator The EPPN of the creator of the specified work
      */
     public function __construct($creator, $work)
     {
@@ -12,6 +24,23 @@ class Comments
         $this->workPath = __PATH__ . $creator . "/works/" . $work;
     }
 
+    /**
+     * Method for editing an existing comment
+     *
+     * In addition to providing comment editing functionality, this method checks to see if the user has the proper permissions to edit said comment.
+     *
+     * @see Permissions.php
+     *
+     * @param String $creator The EPPN of the creator of the specified work
+     * @param String $work The work name
+     * @param String $commenter The EPPN of the comment creator
+     * @param String $hash The hash (unique ID) of the comment to edit
+     * @param String $type The new "type" the comment should be (historical, question, analytical, definition...)
+     * @param String $text The new comment-text that this comment should be changed to
+     * @param Boolean $public True indicates that the work should be public and viewable to everyone. False indicates it should be viewable to only work admins
+     * @param String $editor The EPPN of the user attempting to edit the comment. Obtained via $_SERVER['eppn']... Used to check whether the user has permissions to edit the comment
+     * @return JSON Representing the success status of editing a comment
+     */
     public function editComment($creator, $work, $commenter, $hash, $type, $text, $public, $editor)
     {
         if (!($commenter == $editor || $this->permissions->userOnPermissionsList($this->workPath, $editor))) {
@@ -192,7 +221,7 @@ class Comments
          * (Yes, this entire if/else block does that 1 thing)
          * Comments directly on a page (first level comments will send these values when saved)
          */
-        if (isset($replyTo) && isset($replyHash)) {
+        if (is_null($replyTo) && is_null($replyHash)) {
             // create new top level comment
             $lowestCommentPath = $workPath . "/data/threads/" . $commenterEppn;
             if (!is_dir($lowestCommentPath)) {

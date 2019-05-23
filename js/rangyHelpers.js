@@ -21,7 +21,6 @@ function highlightCurrentSelection(evt) {
     $("#commentSave").text("Save");
     $("div[aria-describedby='choices']").hide();
     $("[id='ui-id-1']").text("Annotation by: " + currentUser['firstname'] + " " + currentUser['lastname']);
-    let remSpan = "commented-selection";
 
 
     let range = selectedRange.toCharacterRange(document.getElementById('textSpace'));
@@ -30,9 +29,9 @@ function highlightCurrentSelection(evt) {
     $(".commentTypeDropdown").removeAttr("disabled")
     $("#commentSave").show();
     $("#commentRemove").show();
-    $("#commentExit").hide();
+    $("#commentExit").show();
     $("#commentEdit").hide();
-    $("div[aria-describedby='comApproval']").hide();
+    //$("div[aria-describedby='comApproval']").hide();
 
     //hlRange(rangy);
     // let rangeArea = rangy.createRange();
@@ -48,34 +47,38 @@ function highlightCurrentSelection(evt) {
     //console.log(range);
     hlRange(selectedRange,range);
 
-    $("div[aria-describedby='replies']").hide();
+    $("#replies").parent().hide();
 
-    $("span[class^='hl']").off().on("click", function(evt) {
-      console.log("TESTER1");
-      if ($(this).attr("class").substring(0, 3) != "hl_") {
-        idName = $(this).attr("class").split("_");
-        evt.stopPropagation();
-
-        remSpan = $(evt.currentTarget).attr("class");
-      }
-    })
+    // $("span[class^='hl']").off().on("click", function(evt) {
+    //   console.log("TESTER1");
+    //   if ($(this).attr("class").substring(0, 3) != "hl_") {
+    //     idName = $(this).attr("class").split("_");
+    //     evt.stopPropagation();
+    //
+    //     remSpan = $(evt.currentTarget).attr("class");
+    //   }
+    // })
     $(".loader").hide();
     displayCommentBox(evt);
   }
   return dfd;
 }
 
-function escapeEPPN(eppn) {
-  return eppn.replace(/([@\.])/g, "\\\$1");
+function unhighlight(){
+  console.log("unhilight");
+  remSpan ="hl_" + currentUser.eppn;
+  console.log(remSpan);
+  $("."+escapeEPPN(remSpan)).contents().unwrap();
 }
 
-function unhighlight() {
-  remSpan = "hl_" + currentUser.eppn.replace(/[@\.]/g, "_");
-  $("."+remSpan).contents().unwrap();
+function escapeEPPN(eppn) {
+  return eppn.replace(/([@\.])/g, "\\$1");
 }
+
+
 
 function hlRange(selectedRange,range) {
-  remSpan = "hl_" + currentUser.eppn.replace(/[@\.]/g, "_");
+  remSpan = ("hl_" + currentUser.eppn);
   console.log(selectedRange);
   console.log("start: ",range.start," end: ",range.end);
   let applierCount = rangy.createClassApplier(remSpan, {

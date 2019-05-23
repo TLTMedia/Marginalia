@@ -11,20 +11,41 @@ html {
   overflow-y: scroll;
 }
 
-/*.commented-selection[typeof=]
-.historical, .analytical, .comment, .definition, .question
-*/
+/* the whole replybox*/
+#replies {
+  margin-top: -10px;
+}
+
+/* single reply*/
+.replies {
+  padding-left: 10px;
+  border-left: 3px solid rgba(0, 0, 0, 0.6);
+  background-color: #efebe9;
+}
+
+.replies img {
+  width: calc(100% - 40px) !important;
+  height: auto !important;
+  padding-right: 20px;
+  display: block;
+}
+
+.replyText {
+  margin-bottom: 10px;
+  margin-left: 0px;
+  margin-top: 10px;
+
+  padding-left: 5px;
+  padding-right: 5px;
+  padding-bottom: 5px;
+  padding-top: 5px;
+  display: block;
+}
+
 .commented-selection {
   background-color: rgba(100, 255, 100);
   cursor: context-menu;
 }
-
-
-.replies {
-  padding-left: 15px;
-}
-
-
 
 #type-of-work {
   box-sizing: border-box;
@@ -949,6 +970,7 @@ div[aria-describedby] {
 div[aria-describedby='replies'] {
   height: 10%;
   position: absolute;
+  z-index: 0;
 }
 
 div[aria-describedby='choices'] {
@@ -957,6 +979,7 @@ div[aria-describedby='choices'] {
 
 div[aria-describedby='commentBox'] {
   position: absolute;
+  z-index: 1;
 }
 
 div[aria-describedby='moderateFileChoice'] {
@@ -970,86 +993,29 @@ div[aria-describedby="inputDialog"] {
   width: 6rem;
 }
 
-div[aria-describedby='userPrivateList'] {
-  background-color: #CCC;
-  font-size: .55rem;
-}
-
-div[id='replies'] {
-  background-color: #DEDEDE;
-}
-
-div[id='comApproval'] {
-  background-color: #DEDEDE;
-}
-
-div[class^='replyBase'] {
-  padding-top: 2%;
-}
-
-.replyDisapproveButton {
-  margin-left: 5%;
-  margin-top: 10px;
-}
-
-.approveArea {
-  margin-bottom: 5px;
-}
-
-.approveName {
-  margin-left: 10px;
-}
-
-div[class^='approve_'] {
-  padding-bottom: 5px;
-  padding-top: 5px;
-}
-
-.replyArea, .approveArea {
-  height: 100px;
-  width: 99%;
-  margin-left: .5%;
-  border: none;
-  resize: vertical;
-  position: relative;
-  display: block;
-  color: #000;
-  top: 8px;
-}
-
-.replyDeleteButton {
-  margin-left: 2px;
-  margin-top: 10px;
-  width: 13%;
-  height: 5%;
-}
-
-.replyEditButton {
-  position: relative;
-  color: #000;
-  left: 73%;
-  width: 13%;
-  height: 5%;
-}
-
-.replyName, .approveName {
-  color: #000;
-  top: 40%;
-  margin-left: 10px;
-  margin-top: 5px;
-}
-
-.userName {
-  color: #000;
-  top: 40%;
-}
 
 .ui-dialog {
+  background-color: #efebe9;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  border-radius: 10px;
+  box-shadow: 7px 7px 3px #666666;
   border-style: solid;
-  /* border-color: #CA99FA; */
-  border-color: #4db6ac;
-  border-width: 1px;
-  /* left:675px !important; */
+  border-width: 2px 0px 0px 2px
+}
+
+.ui-dialog-buttonpane{
+  border-bottom-right-radius: 10px;
+  border-bottom-left-radius: 10px;
+}
+
+.ui-dialog-title {
+  height: 40px;
+  width: 500px;
+  display: table-cell;
+  vertical-align: middle;
+  text-align: center;
+  font-weight: bolder;
 }
 
 .ui-dialog-titlebar-close {
@@ -1057,15 +1023,20 @@ div[class^='approve_'] {
 }
 
 .ui-dialog-titlebar {
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
   text-align: center;
-  /* background-color: #CA99FA; */
-  background-color: #4db6ac;
+  //background-color: #C999F6;
+  background-color:#4db6ac;
+  height: 40px;
+  //border-bottom: 2px solid rgba(52, 52, 52, 1.0);
 }
 
 .ui-dialog-buttonpane {
   text-align: center;
   background-color: #DEDEDE;
 }
+
 
 .loader {
   position: absolute;
@@ -1079,6 +1050,20 @@ div[class^='approve_'] {
   height: 120px;
   -webkit-animation: spin 2s linear infinite;
   animation: spin 2s linear infinite;
+}
+
+.closeReplyBox{
+  background-color: #f44336;
+  color: white;
+  border-radius: 12px;
+  border: 1px solid #f30000;
+  font-size: 10px;
+
+}
+
+.closeReplyBox:hover {
+  background-color: #f30000;
+  color: white;
 }
 
 input[type="file"] {
@@ -1119,4 +1104,56 @@ input[type="file"] {
 
 #userSelector {
     font-style: italic;
+}
+
+/*----------toast notifcation ---------*/
+
+#toast-notification {
+    visibility: hidden;
+    max-width: 0px;
+    height: 50px;
+    /*margin-left: -125px;*/
+    margin: auto;
+    background-color: #4db6ac;
+    color: #fff;
+    text-align: center;
+    border-radius: 2px;
+
+    position: fixed;
+    z-index: 2;
+    left: 0;right:0;
+    bottom: 30px;
+    font-size: 15px;
+    white-space: nowrap;
+}
+
+#toast-notification #notification-data{
+    color: #fff;
+    padding: 16px;
+    overflow: hidden;
+	  white-space: nowrap;
+}
+#toast-notification.show {
+    visibility: visible;
+    animation: fadein 0.5s,expand 0.5s 0.5s,show 1s 1s,shrink 0.5s 2s, fadeout 0.5s 2.5s;
+}
+@keyframes fadein {
+    from {bottom: 0; opacity: 0;}
+    to {bottom: 30px; opacity: 1;}
+}
+@keyframes expand {
+    from {min-width: 0px}
+    to {min-width: 350px}
+}
+@keyframes show {
+    from {min-width: 350px}
+    to {min-width: 350px}
+}
+@keyframes shrink {
+    from {min-width: 350px;}
+    to {min-width: 0px;}
+}
+@keyframes fadeout {
+    from {bottom: 30px; opacity: 1;}
+    to {bottom: 60px; opacity: 0;}
 }
