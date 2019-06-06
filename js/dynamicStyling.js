@@ -9,13 +9,18 @@ function positionHeaderElms() {
         top: $("#header").height() - 2 * getRem()
     });
 
-    $(".headerUpload").css({
-        right: $(window).width() * 0.04
+
+    $(".headerSetting").css({
+        right: $(window).width() * 0.04 - 20
     });
 
-    // $(".headerHome").css({
-    //     right: $(".headerUpload").width() + $(window).width() * 0.04 + 25
-    // })
+    $(".headerUpload").css({
+        right: $(".headerSetting").width() + $(window).width() * 0.04 - 10
+    })
+
+    $(".headerHome").css({
+        right: $(".headerUpload").width() + $(".headerSetting").width() + $(window).width() * 0.04
+    })
 }
 
 /* https://stackoverflow.com/questions/16089004/use-jquery-to-increase-width-of-container-by-10-rem */

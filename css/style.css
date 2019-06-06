@@ -14,13 +14,19 @@ html {
 /* the whole replybox*/
 #replies {
   margin-top: -10px;
+  border-bottom-left-radius:10px;
+  border-bottom-right-radius:10px;
 }
 
 /* single reply*/
 .replies {
   padding-left: 10px;
-  border-left: 3px solid rgba(0, 0, 0, 0.6);
+  border-left: 3px solid #d7d3d1;
   background-color: #efebe9;
+}
+
+.firstComment{
+  font-size: 18px;
 }
 
 .replies img {
@@ -31,9 +37,9 @@ html {
 }
 
 .replyText {
-  margin-bottom: 10px;
+  margin-bottom: 15px;
   margin-left: 0px;
-  margin-top: 10px;
+  margin-top: 12px;
 
   padding-left: 5px;
   padding-right: 5px;
@@ -41,6 +47,31 @@ html {
   padding-top: 5px;
   display: block;
 }
+
+.commentButtonSpan{
+  height: 30px;
+}
+
+.commentMenuButton{
+  margin-right: 30px;
+  float: right;
+}
+
+/* .replyToComments,.editComments,.deleteComments{
+  border-radius: 10px;
+  background-color: #f2efed;
+  box-shadow: 0 2px #999;
+}
+
+.replyToComments:hover,.editComments:hover,.deleteComments:hover{
+  background-color: #d7d3d1;
+}
+
+.replyToComments:active,.editComments:active,.deleteComments:active{
+  box-shadow: 0 0 #999;
+} */
+
+
 
 .commented-selection {
   background-color: rgba(100, 255, 100);
@@ -90,6 +121,12 @@ html {
   z-index: 1;
 }
 
+#home{
+  float: left;
+  z-index: 1;
+}
+
+
 .headerTab {
     z-index: 2;
     cursor: pointer;
@@ -104,6 +141,7 @@ html {
 .headerTab:hover {
     border-bottom-width: 2px;
 }
+
 
 #goBack {
     display: inline-block;
@@ -203,11 +241,7 @@ html {
   background-color: #b2dfdb;
 }
 
-.commentBox {
-  position: absolute;
-  top: 25%;
-  left: 68%;
-  width: 30%;
+#commentBox {
   background-color: #efebe9;
 }
 
@@ -660,7 +694,7 @@ div[id='textSpace'] {
   padding-left: .5%;
 }
 
-.allButtons {
+.allButtons, .allCommenters{
   -moz-user-select: -moz-none;
   -khtml-user-select: none;
   -webkit-user-select: none;
@@ -761,6 +795,17 @@ button[id^="removePrivateName_"]:hover {
   top: calc(5rem + 24px);
   right: 0;
   list-style-type: none;
+  margin-top: 20px;
+  padding: 0;
+  background-color: #EFEBE9;
+  position: fixed;
+  /* overflow: auto; */
+}
+
+.commenterSelector ul {
+  top: calc(5rem + 300px);
+  right: 0;
+  list-style-type: none;
   margin: 0;
   padding: 0;
   background-color: #EFEBE9;
@@ -814,7 +859,7 @@ button[id^="removePrivateName_"]:hover {
   display: block;
 }
 
-.button {
+.button, .commenters {
   height: 5%;
   position: relative;
   display: block;
@@ -824,15 +869,15 @@ button[id^="removePrivateName_"]:hover {
   border-bottom-left-radius: .5rem;
 }
 
-.button label {
+.button label , .commenters label{
   padding-left: 4px;
 }
 
-.button input {
+.button input, .commenters input{
   width: 20px;
 }
 
-.button:hover {
+.button:hover , .commenters:hover{
   background-color: #C8C8C8;
 }
 
@@ -846,22 +891,25 @@ input[type='radio']:active {
 
 #commentExit {
   width: 15%;
+  border-radius: 10px;
+  background-color: #f2efed;
+  border-color: #c1bfbd;
+  border-width: 2px;
 }
 
 #commentSave {
   margin-right: 2%;
   width: 15%;
+  border-radius: 10px;
+  background-color: #f2efed;
+  border-color: #c1bfbd;
+  border-width: 2px;
 }
 
-#commentRemove {
-  margin-right: 2%;
-  width: 15%;
+#commentSave:hover, #commentExit:hover{
+  background-color: #bfbcba;
 }
 
-#commentEdit {
-  margin-right: 2%;
-  width: 15%;
-}
 
 #viewRepliesButton {
   width: 120px;
@@ -908,7 +956,7 @@ input[type='radio']:active {
 
 ::-webkit-scrollbar-thumb {
   border-radius: 10px;
-  background: #C999F6;
+  background: #4db6ac;
   -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
 }
 
@@ -1001,12 +1049,14 @@ div[aria-describedby="inputDialog"] {
   border-radius: 10px;
   box-shadow: 7px 7px 3px #666666;
   border-style: solid;
-  border-width: 2px 0px 0px 2px
+  border-width: 2px 1px 1px 2px;
+  height: auto;
 }
 
-.ui-dialog-buttonpane{
+.ui-dialog-buttonpane>div{
   border-bottom-right-radius: 10px;
   border-bottom-left-radius: 10px;
+  background-color: #efebe9;
 }
 
 .ui-dialog-title {
@@ -1026,7 +1076,7 @@ div[aria-describedby="inputDialog"] {
   border-top-left-radius: 10px;
   border-top-right-radius: 10px;
   text-align: center;
-  //background-color: #C999F6;
+
   background-color:#4db6ac;
   height: 40px;
   //border-bottom: 2px solid rgba(52, 52, 52, 1.0);
@@ -1036,6 +1086,7 @@ div[aria-describedby="inputDialog"] {
   text-align: center;
   background-color: #DEDEDE;
 }
+
 
 
 .loader {
@@ -1055,14 +1106,15 @@ div[aria-describedby="inputDialog"] {
 .closeReplyBox{
   background-color: #f44336;
   color: white;
-  border-radius: 12px;
-  border: 1px solid #f30000;
+  border-radius: 10px;
+  border: 1px solid #c13328;
+  margin: 1px 3px 1px 0px;
   font-size: 10px;
 
 }
 
 .closeReplyBox:hover {
-  background-color: #f30000;
+  background-color: #c13328;
   color: white;
 }
 
@@ -1106,11 +1158,65 @@ input[type="file"] {
     font-style: italic;
 }
 
+#settingTitle{
+  font-size: 20px;
+  font-weight:bold;
+}
+
+.settingLitTitle, .settingUserTitle{
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.settingUserDiv{
+  border-bottom: 2px solid #d7d3d1;
+  margin-bottom: 7px;
+}
+
+.settingLitDiv{
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.settingUsers , .settingLit{
+  background-color: #efebe9;
+  font-weight: bold;
+}
+
+.settingUsers:hover,.settingLit:hover{
+  background-color:#bfbcba;
+}
+
+.settingLitSelected{
+  background-color:#bfbcba;
+}
+
+#settingButtons{
+  float:right;
+}
+
+.litDelButton, .litEditButton{
+  border-radius: 10px;
+  background-color: #f2efed;
+  box-shadow: 0 2px #999;
+}
+
+.litDelButton:hover, .litEditButton:hover{
+  background-color: #d7d3d1;
+  border-radius: 10px;
+}
+
+.litDelButton:active , .litEditButton:active{
+  box-shadow: 0 0 #999;
+}
+
+
+
 /*----------toast notifcation ---------*/
 
 #toast-notification {
     visibility: hidden;
-    max-width: 0px;
+    max-width: 50px;
     height: 50px;
     /*margin-left: -125px;*/
     margin: auto;
@@ -1125,6 +1231,16 @@ input[type="file"] {
     bottom: 30px;
     font-size: 15px;
     white-space: nowrap;
+}
+
+#logo{
+    width: 50px;
+    height: 50px;
+    float: left;
+    background-color: #4db6ac;
+    box-sizing: border-box;
+    background-image: url(../img/smalllogo.svg);
+    background-repeat: no-repeat;
 }
 
 #toast-notification #notification-data{
@@ -1143,17 +1259,17 @@ input[type="file"] {
 }
 @keyframes expand {
     from {min-width: 0px}
-    to {min-width: 350px}
+    to {min-width: 400px}
 }
 @keyframes show {
-    from {min-width: 350px}
-    to {min-width: 350px}
+    from {min-width: 400px}
+    to {min-width: 400px}
 }
 @keyframes shrink {
-    from {min-width: 350px;}
+    from {min-width: 400px;}
     to {min-width: 0px;}
 }
 @keyframes fadeout {
-    from {bottom: 30px; opacity: 1;}
-    to {bottom: 60px; opacity: 0;}
+    from {bottom: 60px; opacity: 1;}
+    to {bottom: 30px; opacity: 0;}
 }

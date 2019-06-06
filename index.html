@@ -27,6 +27,8 @@
 	<script src="js/rangyHelpers.js"></script>
 
 	<script src="js/script.js"></script>
+	<script src="js/replyBoxAction.js"></script>
+	<script src="js/commentBoxAction.js"></script>
 	<script src="js/gui.js"></script>
 
 	<script src="js/dynamicStyling.js"></script>
@@ -36,8 +38,9 @@
   <div class="content">
 
     <div id="header">
-        <!-- <div class="headerTab headerHome" onClick="window.location.reload()">Home</div> -->
+        <div class="headerTab headerHome"id = "home" onClick="window.location.reload()">Home</div>
         <div class="headerTab headerUpload" id="litadd">Add Literature</div>
+				<div class="headerTab headerSetting" id="setting"> Settings </div>
     </div>
     <div id="firstPage">
       <div id="cardbox" class="introBoxes">
@@ -47,6 +50,18 @@
         </div>
 
         <div id="addLitBase"></div>
+				<div id="settingBase">
+				    <div id="settingTitle">Setting</div>
+				    <div class="tempNameContainer" style="margin-top:10px;"></div>
+				    <div class = "settingUserDiv"><h6 class = settingUserTitle>Users:</h6><ul class = "users"></ul></div>
+				    <div class = "settingLitDiv"><h6 class = settingLitTitle>Literature:</h6><ul class = "literatures"></ul></div>
+				    <div id="settingGoBack" style="margin-bottom:0px">
+				        <button class="mdl-button mdl-js-button mdl-button--icon">
+				            <span class="material-icons">arrow_back</span>
+				        </button>
+				        Go Back
+				    </div>
+				</div>
         <div id="nonTitleContent">
 
           <div class="pleaseSelect">
@@ -90,11 +105,13 @@
     <div class="loader" id="loadingSign"></div>
 
     <div class="typeSelector" id="loadlist"></div>
+		<div class="commenterSelector" id = "commenterSelector"></div>
   </div>
   <div id="text" visible="false"></div>
 
 	<div id = "toast-notification">
-		<div id = "notification-data"></div>
+		<div id = "logo"></div>
+			<div id = "notification-data"></div>
 	</div>
 
 </body>

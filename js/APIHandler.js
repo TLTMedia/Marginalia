@@ -23,10 +23,27 @@ export class APIHandler {
                 console.log("NOK", data);
                 return;
             } else {
+              var returnMessages = {
+                data: data['data'],
+                message: data['message'],
+                commentHash: data['commentHash'],
+                parentDeleted: data['parentDeleted']
+              }
                 if (callback) {
-                    defer.resolve(callback(data['data'] || data['message']));
-                } else {
-                    defer.resolve(data['data'] || data['message']);
+                    if( data['commentHash'] == undefined){
+                        defer.resolve(callback(data['data'] || data['message']));
+                    }
+                    else{
+                        defer.resolve(callback(returnMessages));
+                    }
+                }
+                else {
+                    if( data['commentHash'] == undefined){
+                        defer.resolve(data['data'] || data['message']);
+                    }
+                    else{
+                        defer.resolve(returnMessages);
+                    }
                 }
             }
         }).fail((jqXHR, textStatus, errorThrown) => {

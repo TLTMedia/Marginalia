@@ -1,21 +1,18 @@
 $(window).ready(function() {
 
     $("#litadd").on("click", function(evt) {
+        $("#settingBase").hide();
         $("#addLitBase").load("parts/upload.htm", function() {
             $(this).fadeIn();
-
             $("#nonTitleContent").hide();
-
             /* Makes the checkbox button ('page is private') clickable ... */
             componentHandler.upgradeElement($("#privateCheck")[0]);
-
             $("#goBack").on("click", function() {
                 if ($("#addLitBase").is(":visible")) {
                     $("#addLitBase").hide();
                     $("#nonTitleContent").show();
                 }
             });
-
             var fileToSave;
             $("#addFileButton").on("change", function(e) {
                 fileToSave = e.target.files[0];
@@ -48,7 +45,123 @@ $(window).ready(function() {
             });
         });
     });
+
+    $("#setting").off().on("click",function(evt){
+      settingButtonAction(evt);
+    });
 });
+
+saveLit = ({work, privacy, data} = {}) => {
+  if (data.size > 2000000) {
+    alert("Error: File too large. Can't be larger than 2Mb.");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("file", data);
+  formData.append("work", work);
+  formData.append("privacy", privacy);
+
+  API.request({
+    endpoint: "create_work",
+    method: "POST",
+    data: formData,
+    callback: launchToastNotifcation
+  });
+}
+
+function settingButtonAction(evt){
+  $("#addLitBase").hide();
+  $("#settingBase").fadeIn();
+  $(".settingLitDiv").hide();
+  $(this).fadeIn();
+  $("#nonTitleContent").hide();
+  $("#settingGoBack").children().on("click", function() {
+      if ($("#settingBase").is(":visible")) {
+          $("#settingBase").hide();
+          $("#nonTitleContent").show();
+      }
+  });
+}
+
+createSettingScreen = async ({users = users} = {}) =>{
+  $("#settingBase").hide();
+  user_list = users.creator_list;
+  for(i in user_list){
+    console.log(user_list[i]);
+    var user = $("<li/>",{
+      text:user_list[i],
+      class:'settingUsers',
+      id:user_list[i],
+      click: function(evt){
+        showUsersLit(users,evt["currentTarget"]["id"]);
+      }
+    });
+    $(".users").append(user);
+  }
+}
+
+function showUsersLit(users,selected_eppn){
+  $(".settingLitTitle").html(selected_eppn+"'s Literatures:");
+  $(".settingLitDiv").show();
+  $(".literatures").empty();
+  users.get_user_works(selected_eppn).then((works) => {
+      for (var lit in works) {
+        var fileWithoutExt = works[lit].substr(0, works[lit].lastIndexOf('.')) || works[lit];
+        var litButton = $('<li/>', {
+          class: "settingLit",
+          id: "s"+works[lit],
+          text: fileWithoutExt,
+          click: function(evt){
+            litOnClick(evt);
+          }
+        });
+        $(".literatures").append(litButton);
+      }
+  });
+}
+
+function litOnClick(evt){
+  $(".settingLit").removeClass("settingLitSelected");
+  $("#settingButtons").remove();
+  console.log(evt);
+  var selectedLitId = evt["currentTarget"]["id"];
+  var escapedLitId = escapeSpecialChar(selectedLitId);
+  $("#"+escapedLitId).addClass("settingLitSelected");
+  var deleteLitButton = $('<button/>',{
+    class:"litDelButton",
+    text: "Delete",
+    click: (evt)=>{
+      console.log("delete");
+      litDelButtonOnClick(evt,selectedLitId);
+    }
+  });
+  var editLitButton = $('<button/>',{
+    class:"litEditButton",
+    text: "Edit",
+    click: (evt)=>{
+      console.log("edit");
+      litEditButtonOnClick(evt,selectedLitId);
+    }
+  })
+  var settingButtons = $('<span/>',{
+    id:"settingButtons"
+  });
+  $(".literatures").append(settingButtons);
+  $("#settingButtons").append(editLitButton,deleteLitButton);
+}
+
+function litDelButtonOnClick(evt,selectedLitId){
+  //TODO backEndAPI
+  //get the acctual name of the literature bcus the id pass in is (s + lit Name)
+  var litId = selectedLitId.slice(1,selectedLitId.length);
+  console.log("delete ",litId);
+}
+
+function litEditButtonOnClick(evt,selectedLitId){
+  var litId = selectedLitId.slice(1,selectedLitId.length);
+  console.log("edit ",litId)
+}
 
 createUserSelectScreen = async ({users = users} = {}) => {
   user_list = users.creator_list;
@@ -110,26 +223,14 @@ createUserSelectScreen = async ({users = users} = {}) => {
        for (var lit in works) {
          var fileWithoutExt = works[lit].substr(0, works[lit].lastIndexOf('.')) || works[lit];
          var litButton = $('<li/>', {
-           name: works[lit],
            class: "mdl-menu__item",
-           id: "inputLitButton",
+           id: works[lit],
            text: fileWithoutExt,
            click: function(evt) {
              hideAllBoxes();
              $(".nameMenu").remove();
-             $("#text").empty();
-             $("div[aria-describedby='moderateFileChoice']").hide();
-             textChosen = $(this).attr("name");
-             $(".chosenFile").text(textChosen);
-             userChosen = $(".chosenUser").html().split(":")[0];
-
-             let endpoint = 'get_work/' + userChosen + '/' + textChosen;
-             API.request({endpoint}).then((data) => {
-                 literatureText = data;
-                 buildHTMLFile(data, $(this).attr("class"));
-             });
-
-             //removeSpans();
+             textChosen = evt['currentTarget']['id'];
+             selectLit(textChosen);
            }
          });
 
@@ -137,5 +238,16 @@ createUserSelectScreen = async ({users = users} = {}) => {
        }
 
        componentHandler.upgradeElement($('#worksButtons')[0]);
+   });
+ }
+
+ function selectLit(textChosen){
+   $("#text").empty();
+   $(".chosenFile").text(textChosen);
+   userChosen = $(".chosenUser").html().split(":")[0];
+   let endpoint = 'get_work/' + userChosen + '/' + textChosen;
+   API.request({endpoint}).then((data) => {
+       literatureText = data;
+       buildHTMLFile(data, "mdl-menu__item");
    });
  }

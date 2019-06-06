@@ -9,78 +9,36 @@ var remSpan;
 
 //applies the hl to the area selected by the user
 function highlightCurrentSelection(evt) {
-  var dfd = new $.Deferred();
   var selectedRange = rangy.getSelection().getRangeAt(0);
-  // console.log(rangy.getSelection())
-  unhighlight();
-
+  $("#commentBox").removeAttr("data-replyToEppn");
+  $("#commentBox").removeAttr("data-replyToHash");
   if (selectedRange.endOffset != selectedRange.startOffset) {
+    unhighlight();
     $(".loader").show();
     CKEDITOR.instances.textForm.setData("");
-    $("#commentRemove").text("Unselect");
-    $("#commentSave").text("Save");
-    $("div[aria-describedby='choices']").hide();
-    $("[id='ui-id-1']").text("Annotation by: " + currentUser['firstname'] + " " + currentUser['lastname']);
-
-
+    $("#commentExit").text("Unselect");
     let range = selectedRange.toCharacterRange(document.getElementById('textSpace'));
-    console.log(rangy);
     CKEDITOR.instances['textForm'].setReadOnly(false);
     $(".commentTypeDropdown").removeAttr("disabled")
-    $("#commentSave").show();
-    $("#commentRemove").show();
-    $("#commentExit").show();
-    $("#commentEdit").hide();
-    //$("div[aria-describedby='comApproval']").hide();
-
-    //hlRange(rangy);
-    // let rangeArea = rangy.createRange();
-    // rangeArea.selectCharacters(document.getElementById(TEXTSPACE), selectedRange.startOffset, selectedRange.endOffset);
-    // let area = rangy.createClassApplier("commented-selection", {
-    //     useExistingElements: false,
-    //     elementAttributes: {
-    //         "creator": $(".chosenUser").text().split(":")[0],
-    //         "typeof": "new",
-    //     }
-    // });
-    // area.applyToRange(rangeArea);
-    //console.log(range);
     hlRange(selectedRange,range);
-
-    $("#replies").parent().hide();
-
-    // $("span[class^='hl']").off().on("click", function(evt) {
-    //   console.log("TESTER1");
-    //   if ($(this).attr("class").substring(0, 3) != "hl_") {
-    //     idName = $(this).attr("class").split("_");
-    //     evt.stopPropagation();
-    //
-    //     remSpan = $(evt.currentTarget).attr("class");
-    //   }
-    // })
-    $(".loader").hide();
-    displayCommentBox(evt);
+    if($("."+escapeSpecialChar(remSpan)).parent().attr("class") != "commented-selection"){
+      $("#replies").parent().hide();
+      $(".loader").hide();
+      displayCommentBox(evt);
+    }
   }
-  return dfd;
 }
 
 function unhighlight(){
-  console.log("unhilight");
   remSpan ="hl_" + currentUser.eppn;
   console.log(remSpan);
-  $("."+escapeEPPN(remSpan)).contents().unwrap();
+  var text = $("."+escapeSpecialChar(remSpan)).text();
+  $("."+escapeSpecialChar(remSpan)).contents().unwrap();
+  return text;
 }
-
-function escapeEPPN(eppn) {
-  return eppn.replace(/([@\.])/g, "\\$1");
-}
-
-
 
 function hlRange(selectedRange,range) {
   remSpan = ("hl_" + currentUser.eppn);
-  console.log(selectedRange);
-  console.log("start: ",range.start," end: ",range.end);
   let applierCount = rangy.createClassApplier(remSpan, {
     useExistingElements: false,
     elementAttributes: {
@@ -88,11 +46,16 @@ function hlRange(selectedRange,range) {
         "endIndex": range.end,
     }
   });
-
   if (literatureText.length == 0) {
     literatureText = $("#textSpace")[0].outerText;
   }
-
   applierCount.applyToRange(selectedRange);
   return remSpan;
+}
+
+function escapeSpecialChar(id){
+  if(id == null){
+    return null;
+  }
+  return id.replace(/([\s!"#$%&'()\*+,\.\/:;<=>?@\[\]^`{|}~])/g, "\\$1");
 }

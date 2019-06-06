@@ -60,7 +60,7 @@ class Comments
 
         $jsonData = json_decode(file_get_contents($fileToModify));
         if ($public && $this->permissions->commentsNeedsApproval($this->workPath)) {
-            $jsonData->approved = FALSE;
+            $jsonData->approved = false;
         }
         $jsonData->commentText = $text;
         $jsonData->commentType = $type;
@@ -105,14 +105,15 @@ class Comments
         }
 
         $commentDirectoryHash = substr($fileToModify, 0, strrpos($fileToModify, "comment.json"));
-        if (file_exists($commentDirectoryHash . "threads/")) {
+        if (file_exists($commentDirectoryHash . "threads/") && !($this->isCommentRoot($commentDirectoryHash))) {
             // comment has replies/threads - so don't delete the comment.json; replace the comment owner and text with 'deleted'
             $jsonData = json_decode(file_get_contents($fileToModify));
             $jsonData->commentText = "deleted";
             $jsonData->firstName = "deleted";
             $jsonData->lastName = "deleted";
-            $jsonData->deleted = TRUE;
+            $jsonData->deleted = true;
             if (file_put_contents($fileToModify, json_encode($jsonData))) {
+
                 return json_encode(array(
                     "status" => "ok",
                     "message" => "successfully deleted comment"
@@ -124,7 +125,10 @@ class Comments
                 ));
             }
         } else {
-            if ($this->deleteDir($commentDirectoryHash)) {
+            if ($this->deleteDir($commentDirectoryHash, true)) {
+                $parentDeleted = !file_exists(dirname($commentDirectoryHash));
+
+
                 return json_encode(array(
                     "status" => "ok",
                     "message" => "successfully deleted comment"
@@ -144,8 +148,8 @@ class Comments
     public function getCommentChain($creator, $work, $commenter, $hash, $reader)
     {
         try {
-            $commentFilePaths = $this->getCommentFiles($creator, $work, TRUE, $commenter, $hash);
-        } catch(Exception $e) {
+            $commentFilePaths = $this->getCommentFiles($creator, $work, true, $commenter, $hash);
+        } catch (Exception $e) {
             return json_encode(array(
                 "status" => "error",
                 "message" => "unable to get comments",
@@ -168,8 +172,8 @@ class Comments
     public function getHighlights($creator, $work, $reader)
     {
         try {
-            $commentFilePaths = $this->getCommentFiles($creator, $work, FALSE);
-        } catch(Exception $e) {
+            $commentFilePaths = $this->getCommentFiles($creator, $work, false);
+        } catch (Exception $e) {
             return json_encode(array(
                 "status" => "error",
                 "message" => "unable to get comments",
@@ -200,8 +204,7 @@ class Comments
         $privacy,
         $commenterFirstName,
         $commenterLastName
-    )
-    {
+    ) {
         $workPath = __PATH__ . $workAuthor . "/works/" . $workName;
 
         $approved = $this->commentabilityOfWork($workPath, $commenterEppn, $privacy);
@@ -211,9 +214,9 @@ class Comments
                 "message" => "invalid permission to comment"
             ));
         } elseif ($approved == 0) {
-            $approved = FALSE; // for saving in comment object
+            $approved = false; // for saving in comment object
         } else {
-            $approved = TRUE;
+            $approved = true;
         }
 
         /**
@@ -235,7 +238,7 @@ class Comments
             }
         } else {
             // find the path to the specified comment we're replying to
-            $commentPaths = $this->getCommentFiles($workAuthor, $workName, TRUE);
+            $commentPaths = $this->getCommentFiles($workAuthor, $workName, true);
             $replyPath = null;
             $replyToEndPath = $replyTo . "/" . $replyHash . "/comment.json";
             $size = strlen($replyToEndPath);
@@ -284,7 +287,8 @@ class Comments
         if (file_put_contents($newCommentPath . "/comment.json", json_encode($comment))) {
             return json_encode(array(
                 "status" => "ok",
-                "message" => "comment saved"
+                "message" => "comment saved",
+                "commentHash" =>  $commentHash
             ));
         } else {
             return json_encode(array(
@@ -368,9 +372,9 @@ class Comments
              */
             $workPath = __PATH__ . $creator . "/works/" . $work;
             if ($this->permissions->commentsNeedsApproval($workPath)) {
-                $fileData->approved = FALSE;
+                $fileData->approved = false;
             } else {
-                $fileData->approved = TRUE;
+                $fileData->approved = true;
             }
         }
 
@@ -394,8 +398,9 @@ class Comments
      *
      * This function removes the path property recursively
      */
-    private function recursivelyRemovePathProperty(&$commentChain) {
-        foreach($commentChain as $comment) {
+    private function recursivelyRemovePathProperty(&$commentChain)
+    {
+        foreach ($commentChain as $comment) {
             unset($comment->path);
             $this->recursivelyRemovePathProperty($comment->threads);
         }
@@ -419,7 +424,8 @@ class Comments
                 // comment is public
                 if ($jsonData->approved) {
                     // comment is approved
-                    array_push($data,
+                    array_push(
+                        $data,
                         array(
                             "startIndex" => $jsonData->startIndex,
                             "endIndex" => $jsonData->endIndex,
@@ -433,7 +439,8 @@ class Comments
                     // only work admins should be able to see it OR the creator of the comment
                     if ($this->permissions->userOnPermissionsList($this->workPath, $reader) || $reader == $jsonData->eppn) {
                         // reader is admin so can see the comment
-                        array_push($data,
+                        array_push(
+                            $data,
                             array(
                                 "startIndex" => $jsonData->startIndex,
                                 "endIndex" => $jsonData->endIndex,
@@ -451,7 +458,8 @@ class Comments
                 // only the comment creator should be able to see it
                 if ($jsonData->eppn == $reader) {
                     // comment creator is also the reader
-                    array_push($data,
+                    array_push(
+                        $data,
                         array(
                             "startIndex" => $jsonData->startIndex,
                             "endIndex" => $jsonData->endIndex,
@@ -476,7 +484,7 @@ class Comments
     {
         $replyToEndPath = $commenterEppn . "/" . $commentHash . "/comment.json";
 
-        $commentPaths = $this->getCommentFiles($creator, $work, TRUE);
+        $commentPaths = $this->getCommentFiles($creator, $work, true);
         foreach ($commentPaths as $path) {
             $position = strrpos($path, $replyToEndPath);
             if ($position) {
@@ -484,7 +492,7 @@ class Comments
             }
         }
 
-        return FALSE;
+        return false;
     }
 
     /**
@@ -544,9 +552,9 @@ class Comments
             } else {
                 // recursively iterate through the next level comments and see if they 'fit' in a pre-existing higher level comment
                 // if $jsonData == NULL, then we've finally found a spot for the comment in the $comments tree...
-                while ($jsonData != NULL) {
+                while ($jsonData != null) {
                     if (($amt2 = $this->isThreadOf($filePath, $commentsPointer[$amt]->threads)) == -1) {
-                        $jsonData->isReply = TRUE; // NOT NECESSARY FOR BACKEND. This was wanted by frontend development
+                        $jsonData->isReply = true; // NOT NECESSARY FOR BACKEND. This was wanted by frontend development
                         // checking if the comment is hidden of not (only show the public == false comments to the owner of the comment)
                         if ($jsonData->public) {
                             // comment is public
@@ -576,7 +584,7 @@ class Comments
                                 // no one else can see this comment
                             }
                         }
-                        $jsonData = NULL;
+                        $jsonData = null;
                     } else {
                         $commentsPointer = &$commentsPointer[$amt]->threads;
                         $amt = $amt2;
@@ -599,7 +607,7 @@ class Comments
         foreach ($array as $somePath) {
             $truncatedPath = substr($somePath->path, 0, strrpos($somePath->path, '/'));
             // maybe use preg_match ? ... I don't think it's necessary,... but maybe when comment nesting gets extremely large it'd cause issues with strrpos?
-            if (strpos($path, $truncatedPath) !== FALSE) {
+            if (strpos($path, $truncatedPath) !== false) {
                 return $count;
             }
 
@@ -697,28 +705,42 @@ class Comments
         }
     }
 
-    private static function deleteDir($dirPath)
+    private static function deleteDir($dirPath, $removeEmptyParent)
     {
         if (!is_dir($dirPath)) {
-            return FALSE;
+            return false;
         }
         if (substr($dirPath, strlen($dirPath) - 1, 1) != '/') {
             $dirPath .= '/';
         }
-        $files = glob($dirPath . '{,.}[!.,!..]*',GLOB_MARK|GLOB_BRACE);
+        $files = glob($dirPath . '{,.}[!.,!..]*', GLOB_MARK|GLOB_BRACE);
         foreach ($files as $file) {
             if (is_dir($file)) {
-                self::deleteDir($file);
+                self::deleteDir($file, false);
             } else {
                 unlink($file);
             }
         }
         rmdir($dirPath);
+        $parent = dirname($dirPath);
+        if (count(glob("$parent/*")) === 0 && $removeEmptyParent) {
+            rmdir($parent);
+        }
 
-        return TRUE;
+        return true;
+    }
+    private function isCommentRoot($dirPath)
+    {
+        $afterDataDir=preg_split("/data/", $dirPath);
+
+        return ($this->dirLength($afterDataDir[1])) ==5;
+    }
+    //count slashes to find directory depth
+    private function dirLength($dirPath)
+    {
+        return count(preg_split("/\//",$dirPath));
     }
 }
-
 class Comment
 {
     public function __construct(
@@ -730,7 +752,7 @@ class Comment
         $firstName,
         $lastName,
         $eppn,
-        $approved = FALSE
+        $approved = false
     ) {
         $this->public = $privacy;
         $this->commentText = $commentText;
