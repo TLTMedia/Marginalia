@@ -1,5 +1,5 @@
 export class APIHandler {
-    constructor({base_url = window.location + 'api/public/'} = {}) {
+    constructor({base_url = location.pathname + 'api/public/'} = {}) {
         this.base_url = base_url;
     }
 

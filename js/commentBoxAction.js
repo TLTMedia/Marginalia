@@ -51,7 +51,7 @@ function saveButtonOnClick() {
     var literatureName = $(".chosenFile").text();
     var commentType = $(".commentTypeDropdown").val();
     var span = $("." + escapeSpecialChar(remSpan));
-    console.log(remSpan);
+    //console.log(remSpan);
     var replyTo = $("#commentBox").attr("data-replytoeppn");
     var replyHash = $('#commentBox').attr("data-replytohash");
     var dataForSave = getDataForSave(literatureName,commentText,commentType,span,replyTo,replyHash);
@@ -79,11 +79,33 @@ function saveButtonOnClick() {
       $("#commentBox").parent().fadeOut();
     }
     else{
+      //addNewCommenterToDropDown(currentUser.eppn);
       console.log("Saved As Comment");
       saveCommentOrReply(dataForSave,true);
       $("#commentBox").parent().fadeOut();
     }
   }
+}
+
+function updateCommenterSelectors(){
+  var newCommenters = [];
+  var comments = $("#textSpace").find('span');
+  for(var i = 0 ; i < comments.length ; i++){
+    //check if this is the commentSpan or not (only commentSpan has a creator attribute)
+    if(comments[i]['attributes']['creator']){
+      var commenter = comments[i]['attributes']['creator']['value'];
+      var isCommenterExist = false;
+      for(var j = 0 ; j < newCommenters.length ; j++){
+        if(commenter == newCommenters[j]){
+          isCommenterExist = true;
+        }
+      }
+      if(!isCommenterExist){
+        newCommenters.push(commenter);
+      }
+    }
+  }
+  makeCommentersDropDown(newCommenters);
 }
 
 //return a dictionary with the data we need to save
@@ -102,7 +124,6 @@ function getDataForSave(literatureName,commentText,commentType,span,replyTo,repl
   return dataForSave;
 }
 
-//TODO find out how the comment highlight is stored
 function saveCommentOrReply(dataForSave,isComment){
   let savedData = JSON.stringify({
       author: dataForSave["author"],
@@ -121,25 +142,26 @@ function saveCommentOrReply(dataForSave,isComment){
       data: savedData,
       callback: null
   }).then((data) => {
-    console.log(data);
+    //console.log(data);
     launchToastNotifcation(data['message']);
     if(!isComment){
       var firstCommentId = $("#replies").attr("data-firstCommentId");
       refreshReplyBox(dataForSave["author"],dataForSave["work"],$("#"+firstCommentId).attr("creator"),firstCommentId);
     }
     else{
-      console.log(remSpan);
-      $('.'+escapeSpecialChar(remSpan)).removeAttr('startindex');
-      $('.'+escapeSpecialChar(remSpan)).removeAttr('endIndex');
-      $('.'+escapeSpecialChar(remSpan)).attr('id',data['commentHash']);
-      $('.'+escapeSpecialChar(remSpan)).attr('creator',currentUser.eppn);
-      $('.'+escapeSpecialChar(remSpan)).attr('typeof',dataForSave['commentType']);
+      //console.log(remSpan);
+      $('.'+escapeSpecialChar(remSpan)).removeAttr('startindex endIndex');
+      $('.'+escapeSpecialChar(remSpan)).attr({
+        'id':data['commentHash'],
+        'creator':currentUser.eppn,
+        'typeof':dataForSave['commentType']
+      });
       $('.'+escapeSpecialChar(remSpan)).removeClass(remSpan);
       refreshDropDownSelect(dataForSave["replyHash"],dataForSave["commentType"]);
+      updateCommenterSelectors();
       //update the click event on this new added comment
       $("#"+data['commentHash']).off().on("click", function(evt) {
         var commentSpanId = $(this).attr('id');
-        console.log(commentSpanId);
         clickOnComment(commentSpanId, evt);
       });
     }
@@ -198,13 +220,19 @@ function editOrDelete(dataForEditOrDelete,isEdit){
       refreshDropDownSelect(dataForEditOrDelete["hash"],dataForEditOrDelete["type"]);
     }
     //unhighlight the deleted comment
+    //update the commenterSelector
     if(firstCommentId == $("#replies").attr("deletedid")){
       console.log("should unwrap");
       removeDeletedSpan(firstCommentId);
+      updateCommenterSelectors(firstCommentId);
       $("#replies").parent().hide();
     }
     $("#replies").removeAttr("deletedid");
   });
+}
+
+function removeDeletedSpan(id){
+  $("#"+id).contents().unwrap();
 }
 
 function exitButtonOnClick(){

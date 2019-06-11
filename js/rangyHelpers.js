@@ -9,6 +9,7 @@ var remSpan;
 
 //applies the hl to the area selected by the user
 function highlightCurrentSelection(evt) {
+
   var selectedRange = rangy.getSelection().getRangeAt(0);
   $("#commentBox").removeAttr("data-replyToEppn");
   $("#commentBox").removeAttr("data-replyToHash");

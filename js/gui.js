@@ -1,5 +1,8 @@
-$(window).ready(function() {
+//TODO
 
+
+$(window).ready(function() {
+console.log($.address)
     $("#litadd").on("click", function(evt) {
         $("#settingBase").hide();
         $("#addLitBase").load("parts/upload.htm", function() {
@@ -49,6 +52,10 @@ $(window).ready(function() {
     $("#setting").off().on("click",function(evt){
       settingButtonAction(evt);
     });
+
+    $("#home").off().on("click",function(){
+      homeButtonAction();
+    });
 });
 
 saveLit = ({work, privacy, data} = {}) => {
@@ -68,6 +75,26 @@ saveLit = ({work, privacy, data} = {}) => {
     data: formData,
     callback: launchToastNotifcation
   });
+}
+
+function showLink(value){
+ console.log($.address);
+
+  $.address.value(value);
+//  address = $.address;
+}
+
+function loadFromDeepLink(){
+  [,api,...rest]=location.hash.split("#")[1].split("/");
+  if(api=="get_work"){
+     selectLit(...rest)
+  }
+}
+
+function homeButtonAction(){
+  console.log($.address.baseURL());
+  window.location.href = $.address.baseURL();
+  window.reload();
 }
 
 function settingButtonAction(evt){
@@ -92,9 +119,10 @@ createSettingScreen = async ({users = users} = {}) =>{
     var user = $("<li/>",{
       text:user_list[i],
       class:'settingUsers',
-      id:user_list[i],
+      commenterId: user_list[i],
       click: function(evt){
-        showUsersLit(users,evt["currentTarget"]["id"]);
+        console.log(evt);
+        showUsersLit(users,evt["currentTarget"]["attributes"]["commenterid"]["value"]);
       }
     });
     $(".users").append(user);
@@ -193,6 +221,7 @@ createUserSelectScreen = async ({users = users} = {}) => {
   }
 
   $(".userButton").click(function() {
+    //  console.log($.address.value());
       $(".userFiles").show();
       let selected_eppn = $(this).text();
       $(".chosenUser").text(selected_eppn + ":");
@@ -230,7 +259,7 @@ createUserSelectScreen = async ({users = users} = {}) => {
              hideAllBoxes();
              $(".nameMenu").remove();
              textChosen = evt['currentTarget']['id'];
-             selectLit(textChosen);
+             selectLit(selected_eppn,textChosen);
            }
          });
 
@@ -241,13 +270,19 @@ createUserSelectScreen = async ({users = users} = {}) => {
    });
  }
 
- function selectLit(textChosen){
+ function selectLit(selected_eppn,textChosen){
+   console.log(selected_eppn,textChosen)
    $("#text").empty();
+   $(".chosenUser").text(selected_eppn+":");
    $(".chosenFile").text(textChosen);
-   userChosen = $(".chosenUser").html().split(":")[0];
-   let endpoint = 'get_work/' + userChosen + '/' + textChosen;
+
+   // userChosen = $(".chosenUser").html().split(":")[0];
+
+   let endpoint = 'get_work/' +selected_eppn + '/' + textChosen;
+   showLink(endpoint);
+   console.log($.address.value());
    API.request({endpoint}).then((data) => {
        literatureText = data;
-       buildHTMLFile(data, "mdl-menu__item");
+       buildHTMLFile(data,selected_eppn,textChosen);
    });
  }
