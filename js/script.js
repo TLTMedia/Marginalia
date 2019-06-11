@@ -23,7 +23,6 @@ var remSpan; // holds the name of made and clicked spans
 init = async ({api = api, users = users} = {}) => {
   API = api;
   currentUser = users.current_user;
-
   $(".loader").hide();
   $("#text").hide();
   $("#addLitBase").hide();
@@ -82,112 +81,39 @@ function buildHTMLFile(litContents, selected_eppn,textChosen) {
 
   litDiv.append(metaChar, metaName, link, script, preText);
   $("#text").append(litDiv);
-
 }
-// Creates the main selector screen once a netid is chosen
-/*
-  For every .txt read within the user's works folder a button is made
-  a return button is made in the event that clicking this user was a mistake
-*/
 
-function makeDropDown() {
+function makeDropDown(){
+  let buttonTypes = ['Historical','Analytical','Comment','Definition','Question'];
   dropdown = $("<select>", {
     class: "commentTypeDropdown",
   });
-
-  let buttonTypes = [
-    'All',
-    'Historical',
-    'Analytical',
-    'Comment',
-    'Definition',
-    'Question'
-  ];
-
-  let allButtons = $('<ul/>', {
-    class: "allButtons"
+  buttonTypes.forEach((type)=>{
+    var option = $("<option>", {
+      name: type,
+      text: type
+    });
+    if ($("#commentTypeDropdown").length == 0) {
+      dropdown.append(option);
+      $("#commentTypeDropdown").val(option);
+    }
   });
-
-  buttonTypes.forEach(function(type) {
-    // Fill the dropdown bar with these data points
-    if (type != "All" && type != "Students") {
-      var option = $("<option>", {
-        name: type,
-        text: type
-      });
-      if ($("#commentTypeDropdown").length == 0) {
-        dropdown.append(option);
-        $("#commentTypeDropdown").val(option);
-      }
-    }
-    if (type != "Students") {
-
-      // let list = $('<li/>', {
-      //   class: "button"
-      // });
-      //
-      // let radioLabel = $("<label>", {
-      //   class: "mdl-radio mdl-js-radio",
-      //   id: "button" + type,
-      //   for: type
-      // });
-      //
-      // let input = $('<input/>', {
-      //   type: "radio",
-      //   id: type,
-      //   name: "commentType",
-      //   class: "mdl-radio__button",
-      // });
-      //
-      // let spanText = $("<span>", {
-      //   class: "mdl-radio__label",
-      //   text: type
-      // });
-      //
-      // $(list).append(radioLabel);
-      // $(radioLabel).append(input, spanText);
-      let list = makeDropDownOptions(type,'typeSelector');
-      $(allButtons).append(list);
-    }
-  })
-
-  if ($(".allButtons").length == 0) {
-    $('#loadlist').append(allButtons);
-  }
-  $(".commentTypeDropdown").val(buttonTypes[0]);
-
-  $("#All").click();
-  //$("#All").parent().addClass("active");
 }
 
-function dropDownSelect(currentSelectedType){
-  if (currentSelectedType == "All") {
-    $(".commented-selection").css({"background-color": "rgba(100, 255, 100, 1.0)"});
-  } else {
-    $(".commented-selection").css({"background-color": "rgba(100, 255, 100, 0.0)"});
-    $(".commented-selection" + "[typeof='" + currentSelectedType + "']").css({"background-color": "rgba(100, 255, 100, 1.0)"});
-  }
-}
-
-function newDropDownSelect(currentSelectedType, currentSelectedCommenter){
+function selectorOnSelect(currentSelectedType, currentSelectedCommenter){
   console.log('type : ',currentSelectedType);
   console.log('commenter: ',currentSelectedCommenter);
-  var currentSelectedCommenterEppn = currentSelectedCommenter.split("_")[1];
   $(".commented-selection").css({"background-color": "rgba(100, 255, 100, 0.0)"});
   if (currentSelectedType == "All" && currentSelectedCommenter == "AllCommenters"){
-    console.log("1")
     $(".commented-selection").css({"background-color": "rgba(100, 255, 100, 1.0)"});
   }
   else if(currentSelectedCommenter == "AllCommenters"){
-    console.log("2")
     $(".commented-selection" + "[typeof='" + currentSelectedType + "']").css({"background-color": "rgba(100, 255, 100, 1.0)"});
   }
   else if(currentSelectedType == "All"){
-    console.log("3")
     $(".commented-selection" + "[creator ='" + currentSelectedCommenter + "']").css({"background-color": "rgba(100, 255, 100, 1.0)"});
   }
   else{
-    console.log("4");
     $(".commented-selection" + "[creator ='" + currentSelectedCommenter + "'][typeof = '" + currentSelectedType + "']").css({"background-color": "rgba(100, 255, 100, 1.0)"});
   }
 }
@@ -207,7 +133,7 @@ loadUserComments = (selected_eppn,textChosen) => {
   let endpoint = "get_highlights/" + selected_eppn + "/" + textChosen;
   API.request({endpoint}).then((data) => {
       renderComments(data);
-      makeCommentersDropDown(createListOfCommenter(data));
+      makeSelector(createListOfCommenter(data));
   });
 }
 
@@ -262,55 +188,48 @@ function createListOfCommenter(data){
   return commenters;
 }
 
-//TODO clean up the code
-function makeCommentersDropDown(commenters){
+function makeSelector(commenters){
+  let buttonTypes = [
+    'All',
+    'Historical',
+    'Analytical',
+    'Comment',
+    'Definition',
+    'Question'
+  ];
+  makeTypeSelector(buttonTypes);
+  makeCommentersSelector(commenters);
+}
+
+function makeTypeSelector(buttonTypes) {
+  $("#loadlist").empty();
+  let allButtons = $('<ul/>', {
+    class: "allButtons"
+  });
+
+  buttonTypes.forEach(function(type) {
+    let list = makeSelectorOptions(type,'typeSelector');
+    $(allButtons).append(list);
+  });
+  $('#loadlist').append(allButtons);
+  $("#All").click();
+}
+
+function makeCommentersSelector(commenters){
   $("#commenterSelector").empty();
   commenters.unshift("AllCommenters");
   let allCommenters = $('<ul/>', {
     class: "allCommenters"
   });
-
-  for(var i = 0 ; i < commenters.length ; i++){
-    var data = commenters[i];
-    // let list = $('<li/>', {
-    //   class: "buttons"
-    // });
-    //
-    // let radioLabel = $("<label>", {
-    //   class: "mdl-radio mdl-js-radio",
-    //   id: "button" + data,
-    //   for: data
-    // });
-    //
-    // let input = $('<input/>', {
-    //   type: "radio",
-    //   id: data,
-    //   name: "commenterSelector",
-    //   class: "mdl-radio__button",
-    // });
-    //
-    // let spanText = $("<span>", {
-    //   class: "mdl-radio__label",
-    //   text: data.split("@")[0]
-    // });
-    //
-    // $(list).append(radioLabel);
-    // $(radioLabel).append(input, spanText);
-    let list = makeDropDownOptions(data,'commenterSelector');
+  commenters.forEach((data)=>{
+    let list = makeSelectorOptions(data,'commenterSelector');
     $(allCommenters).append(list);
-    // input.on("click", (evt)=>{
-    //   var currentSelectedType = $("#loadlist").attr("currentTarget");
-    //   var currentSelectedCommenter = evt["currentTarget"]["id"];
-    //   $("#commenterSelector").attr('currentTarget',currentSelectedCommenter);
-    //   newDropDownSelect(currentSelectedType, currentSelectedCommenter);
-    // });
-    //componentHandler.upgradeElement($(radioLabel)[0]);
-  }
+  });
   $('#commenterSelector').append(allCommenters);
   $("#AllCommenters").click();
 }
 
-function makeDropDownOptions(option,mode){
+function makeSelectorOptions(option,mode){
   let data = option;
   let name;
   let text;
@@ -361,7 +280,7 @@ function makeDropDownOptions(option,mode){
       currentSelectedCommenter = $("#commenterSelector").attr('currentTarget') ? $("#commenterSelector").attr('currentTarget') : 'AllCommenters';
       $("#loadlist").attr('currentTarget',currentSelectedType);
     }
-    newDropDownSelect(currentSelectedType, currentSelectedCommenter);
+    selectorOnSelect(currentSelectedType, currentSelectedCommenter);
   });
   componentHandler.upgradeElement($(radioLabel)[0]);
   return list;
@@ -447,7 +366,7 @@ function refreshDropDownSelect(hash, type){
   $("#button"+currentSelectedType).removeClass("is-checked");
   $("#button"+type).addClass("is-checked");
   $("#loadlist").attr("currentTarget",type);
-  newDropDownSelect(type,currentSelectedCommenter);
+  selectorOnSelect(type,currentSelectedCommenter);
 }
 
 function refreshReplyBox(creator,work,commenter,hash){

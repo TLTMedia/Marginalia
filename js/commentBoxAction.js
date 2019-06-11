@@ -105,7 +105,7 @@ function updateCommenterSelectors(){
       }
     }
   }
-  makeCommentersDropDown(newCommenters);
+  makeCommentersSelector(newCommenters);
 }
 
 //return a dictionary with the data we need to save
