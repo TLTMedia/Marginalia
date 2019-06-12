@@ -1087,8 +1087,6 @@ div[aria-describedby="inputDialog"] {
   background-color: #DEDEDE;
 }
 
-
-
 .loader {
   position: absolute;
   left: 50%;
@@ -1103,7 +1101,7 @@ div[aria-describedby="inputDialog"] {
   animation: spin 2s linear infinite;
 }
 
-.closeReplyBox{
+.closeReplyBox , .closeCommentBox{
   background-color: #f44336;
   color: white;
   border-radius: 10px;
@@ -1113,7 +1111,7 @@ div[aria-describedby="inputDialog"] {
 
 }
 
-.closeReplyBox:hover {
+.closeReplyBox:hover , .closeCommentBox:hover{
   background-color: #c13328;
   color: white;
 }
@@ -1183,11 +1181,11 @@ input[type="file"] {
   font-weight: bold;
 }
 
-.settingUsers:hover,.settingLit:hover{
+.settingUsers:hover,.settingLit:hover,.litDelButton:hover,.litEditButton:hover{
   background-color:#bfbcba;
 }
 
-.settingLitSelected{
+.settingLitSelected, .litSettingOptionSelected{
   background-color:#bfbcba;
 }
 
@@ -1195,19 +1193,14 @@ input[type="file"] {
   float:right;
 }
 
-.litDelButton, .litEditButton{
-  border-radius: 10px;
-  background-color: #f2efed;
-  box-shadow: 0 2px #999;
+.litSettingBaseTitle{
+  font-size: 16px;
+  font-weight: bold;
+  border-bottom: 2px solid #d7d3d1;
 }
 
-.litDelButton:hover, .litEditButton:hover{
-  background-color: #d7d3d1;
-  border-radius: 10px;
-}
-
-.litDelButton:active , .litEditButton:active{
-  box-shadow: 0 0 #999;
+.mdl-switch{
+  margin-left: 50px;
 }
 
 

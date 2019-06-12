@@ -1,11 +1,10 @@
 function makeDraggableCommentBox() {
-  if ($('div[aria-describedby="commentBox"]').length < 1) {
+  if ($("#commentBox").length) {
     if ($(".commentTypeDropdown").length < 1) {
       $("#commentBox").append(dropdown);
     }
     //TODO not sure is it correct to put remSpan here, remSpan = "hl_eppn@.stonybrook.edu"
-    remSpan = null;
-    $(this).parent().parent().hide();
+    //remSpan = null;
     $("#commentBox").dialog({
       dialogClass: "no-close",
       modal: true,
@@ -38,6 +37,21 @@ function makeDraggableCommentBox() {
     $(comForm).append(textForm);
     $('#commentBox').append(comForm);
     CKEDITOR.replace('textForm');
+
+    //close button
+    var closeCommentBox =  $("<button/>",{
+      text:"X",
+      class:"closeCommentBox",
+      click:function(){
+          exitButtonOnClick();
+          $("#replies").parent().css("z-index","1");
+          $("#commentBox").parent().css("z-index","0");
+      }
+    });
+    // TODO find a better way to add it
+    $("#commentBox").parent().find("#ui-id-1").prepend(closeCommentBox);
+    $(".closeCommentBox").parent().css({position: 'relative'});
+    $(".closeCommentBox").css({top: 0, left: 0, position:'absolute'});
   }
 }
 
@@ -256,6 +270,6 @@ function displayCommentBox(evt,id) {
   })
   $("#replies").attr("data-firstCommentId",id);
   $("#commentBox").attr("data-editcommentid","-1");
-  $("[id='ui-id-1']").text("Annotation by: " + currentUser['firstname'] + " " + currentUser['lastname']);
+  $("#commentBox").parent().find("#ui-id-1").contents().filter(function(){ return this.nodeType == 3; }).first().replaceWith("Annotation by: " + currentUser['firstname'] + " " + currentUser['lastname']);
   $("#commentBox").parent().fadeIn();
 }

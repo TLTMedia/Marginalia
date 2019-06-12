@@ -35,6 +35,11 @@ init = async ({api = api, users = users} = {}) => {
     $("html").css("font-size", (stageWidth / 60) + "px");
   }).trigger("resize")
   loadFromDeepLink();
+
+  $.address.externalChange((evt)=>{
+    console.log("externalChange");
+    loadFromDeepLink();
+  });
 }
 
 // Creates a visual list of all users which gives access to their folders
@@ -44,6 +49,7 @@ init = async ({api = api, users = users} = {}) => {
   The cooresponding work then has it's text and comment/reply data loaded
 */
 function buildHTMLFile(litContents, selected_eppn,textChosen) {
+  // TODO check this logic
   if (!$(".commentTypeDropdown").length) {
     makeDropDown();
     makeDraggableCommentBox();
@@ -93,11 +99,10 @@ function makeDropDown(){
       name: type,
       text: type
     });
-    if ($("#commentTypeDropdown").length == 0) {
-      dropdown.append(option);
-      $("#commentTypeDropdown").val(option);
-    }
+    dropdown.append(option);
+    $("#commentTypeDropdown").val(option);
   });
+
 }
 
 function selectorOnSelect(currentSelectedType, currentSelectedCommenter){
@@ -138,12 +143,10 @@ loadUserComments = (selected_eppn,textChosen) => {
 }
 
 renderComments = (commentData) => {
-    $(".allButtons").show();
     $(".loader").hide();
     $("#text").fadeIn();
     $("#textSpace").fadeIn();
     $("#textTitle").fadeIn();
-    $("#commentEdit").hide();
 
     for (let i = 0; i < commentData.length; ++i) {
         highlightText({
@@ -156,11 +159,11 @@ renderComments = (commentData) => {
 
     }
     $("#text").css("height", $("#litDiv").height() + "px");
-
+    //highlight to post comments
     $("#litDiv").on("mouseup", function(evt) {
       highlightCurrentSelection(evt);
     });
-
+    // click on comment to reply the post
     $(".commented-selection").off().on("click", function(evt) {
       var commentSpanId = $(this).attr('id');
       console.log(commentSpanId);
@@ -170,21 +173,20 @@ renderComments = (commentData) => {
 
 function createListOfCommenter(data){
   var commenters=[];
-  commenters.push(data[0].eppn);
-  for (var i = 1; i < data.length; i ++){
-    var eppn = data[i].eppn;
-    var eppnExist = false;
-    for(var j = 0; j< commenters.length; j++){
-      if(commenters[j] == eppn){
-        eppnExist = true;
+  if(data.length){
+    commenters.push(data[0].eppn);
+    for (var i = 1; i < data.length; i ++){
+      var eppn = data[i].eppn;
+      var eppnExist = false;
+      for(var j = 0; j< commenters.length; j++){
+        if(commenters[j] == eppn){
+          eppnExist = true;
+        }
       }
+      if(!eppnExist)
+        commenters.push(eppn);
     }
-    if(!eppnExist)
-      commenters.push(eppn);
   }
-  commenters.forEach((e)=>{
-    console.log(e);
-  })
   return commenters;
 }
 
@@ -267,7 +269,6 @@ function makeSelectorOptions(option,mode){
   $(list).append(radioLabel);
   $(radioLabel).append(input, spanText);
   input.on("click", (evt)=>{
-    console.log(evt);
     let currentSelectedType;
     let currentSelectedCommenter;
     if(evt["currentTarget"]["attributes"]["name"]["value"] == 'commenterSelector'){
@@ -370,7 +371,6 @@ function refreshDropDownSelect(hash, type){
 }
 
 function refreshReplyBox(creator,work,commenter,hash){
-  //console.log(creator,work,commenter,hash);
   $("#replies").empty();
   let comment_data = JSON.stringify({
       creator: creator,

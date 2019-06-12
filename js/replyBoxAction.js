@@ -1,13 +1,26 @@
 // This is the box that will house the various replies a comment thread may hold
 function makeDraggableReplyBox() {
   if ($("#replies").length){
-  $("#replies").dialog({
-    dialogClass: "no-close",
-    use: 'reply',
-    modal: true,
-    width: 500,
-    title: "Comments"
-  });
+    $("#replies").dialog({
+      dialogClass: "no-close",
+      use: 'reply',
+      modal: true,
+      width: 500,
+      title: "Comments"
+    });
+    var closeReplyBox =  $("<button/>",{
+      text:"X",
+      class:"closeReplyBox",
+      click:function(){
+          $("#replies").parent().fadeOut();
+          $("#replies").parent().css("z-index","0");
+          $("#commentBox").parent().css("z-index","1");
+      }
+    });
+    // TODO find a better way to add it
+    $("#replies").parent().find("#ui-id-2").prepend(closeReplyBox);
+    $(".closeReplyBox").parent().css({position: 'relative'});
+    $(".closeReplyBox").css({top: 0, left: 0, position:'absolute'});
   }
 }
 
@@ -157,9 +170,6 @@ function deleteButtonOnClick(hash,eppn,hashForReply){
 
 // This displays the replies for the current comment box
 function displayReplyBox(evt) {
-  if($("#replies").parent().find(".closeReplyBox").length != 0){
-    $("#replies").parent().find(".closeReplyBox").remove();
-  }
   var newTop = evt.pageY + "px";
   var newLeft = width * .55 + "px";
 
@@ -168,16 +178,4 @@ function displayReplyBox(evt) {
     'left': newLeft
   })
   $("#replies").parent().fadeIn();
-  var closeReplyBox =  $("<button/>",{
-    text:"X",
-    class:"closeReplyBox",
-    click:function(){
-        $("#replies").parent().fadeOut();
-        $("#replies").parent().css("z-index","0");
-        $("#commentBox").parent().css("z-index","1");
-    }
-  });
-  $("#replies").parent().find("#ui-id-2").prepend(closeReplyBox);
-  $(".closeReplyBox").parent().css({position: 'relative'});
-  $(".closeReplyBox").css({top: 0, left: 0, position:'absolute'});
 }
