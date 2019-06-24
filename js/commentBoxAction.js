@@ -231,7 +231,9 @@ function editOrDelete(dataForEditOrDelete,isEdit){
     var firstCommentId = $("#replies").attr("data-firstCommentId");
     refreshReplyBox(dataForEditOrDelete["creator"],dataForEditOrDelete["work"],$("#"+firstCommentId).attr("creator"),firstCommentId);
     if(isEdit){
-      refreshSelector(dataForEditOrDelete["hash"],dataForEditOrDelete["type"]);
+      if(dataForEditOrDelete["type"]){
+        refreshSelector(dataForEditOrDelete["hash"],dataForEditOrDelete["type"]);
+      }
     }
     //unhighlight the deleted comment
     //update the commenterSelector

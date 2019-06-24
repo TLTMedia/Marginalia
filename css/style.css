@@ -57,22 +57,6 @@ html {
   float: right;
 }
 
-/* .replyToComments,.editComments,.deleteComments{
-  border-radius: 10px;
-  background-color: #f2efed;
-  box-shadow: 0 2px #999;
-}
-
-.replyToComments:hover,.editComments:hover,.deleteComments:hover{
-  background-color: #d7d3d1;
-}
-
-.replyToComments:active,.editComments:active,.deleteComments:active{
-  box-shadow: 0 0 #999;
-} */
-
-
-
 .commented-selection {
   background-color: rgba(100, 255, 100);
   cursor: context-menu;

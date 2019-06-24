@@ -219,11 +219,9 @@ function litSettingButtonOnClick(evt,selectedLitId, selected_eppn){
   //private
   makeLitPrivacySwitch(litId, selected_eppn);
   //edit
-  makeLitEditButton(litId);
-  //delete
-  makeLitDelButton(litId);
+  makeLitEditButton(litId, selected_eppn);
   //TODO test for getting whiteList of the work
-  makeWhiteListButton(litId);
+  makeWhiteListButton(litId, selected_eppn);
 }
 
 function makeLitPrivacySwitch(litId, selected_eppn){
@@ -249,42 +247,37 @@ function makeLitPrivacySwitch(litId, selected_eppn){
   componentHandler.upgradeAllRegistered();
 }
 
-function makeLitEditButton(litId){
+function makeLitEditButton(litId, selected_eppn){
   let editOption =$("<li/>",{
     class: "mdl-list__item litEditButton",
-    text: "Edit",
-    click: (evt)=>{
-      $(".litSettingOptionSelected").removeClass("litSettingOptionSelected");
-      $(this).addClass("litSettingOptionSelected");
-      litEditButtonOnClick(evt,litId)
-    }
+    text: "Comments Need Approval"
   });
+  var editSwitch = $("<label/>",{
+    class: "mdl-switch mdl-js-switch mdl-js-ripple-effect",
+    for: "editCommentsNeedAprroval"
+  });
+  var input = $("<input/>",{
+    type: "checkbox",
+    id: "editCommentsNeedAprroval",
+    class: "mdl-switch__input"
+  })
   $(".settingOptions").append(editOption);
+  $(editOption).append(editSwitch);
+  $(editSwitch).append(input);
   componentHandler.upgradeAllRegistered();
-}
-
-function makeLitDelButton(litId){
-  let deleteOption =$("<li/>",{
-    class: "mdl-list__item litDelButton",
-    text: "Delete",
-    click: (evt)=>{
-      $(".litSettingOptionSelected").removeClass("litSettingOptionSelected");
-      $(this).addClass("litSettingOptionSelected");
-      litDelButtonOnClick(evt,litId)
-    }
+  input.on("click",(evt)=>{
+    litEditSwitchOnClick(evt,litId);
   });
-  $(".settingOptions").append(deleteOption);
-  componentHandler.upgradeAllRegistered();
 }
 
-function makeWhiteListButton(litId){
+function makeWhiteListButton(litId,selected_eppn){
   let whiteListOption =$("<li/>",{
     class: "mdl-list__item litWhiteListButton",
     text: "Manage White List",
     click: (evt)=>{
       $(".litSettingOptionSelected").removeClass("litSettingOptionSelected");
       $(this).addClass("litSettingOptionSelected");
-      showWhiteListSettingBase(litId);
+      showWhiteListSettingBase(litId,selected_eppn);
     }
   });
   $(".settingOptions").append(whiteListOption);
@@ -293,39 +286,43 @@ function makeWhiteListButton(litId){
 
 function litPrivacySwitchOnClick(evt,litId,selected_eppn){
   var isSelected = $("#privacySwitch").is(":checked");
-  let endPoint;
+  let endPoint, message;
   if(isSelected){
     endPoint = "set_privacy/"+selected_eppn+"/"+litId+"/"+false;
+    message = "current work is set to private";
   }else{
     endPoint = "set_privacy/"+selected_eppn+"/"+litId+"/"+true;
+    message = "current work is set to public";
   }
   console.log(endPoint);
   API.request({
     endpoint: endPoint,
     method: "GET"
   }).then((data)=>{
-    console.log(data);
+    launchToastNotifcation(message);
   });
 }
 
-function litDelButtonOnClick(evt,litId){
-  //TODO backEndAPI
-  console.log("delete ",litId);
+function litEditSwitchOnClick(evt,litId){
+  var isSelected = $("#editCommentsNeedAprroval").is(":checked");
+  let endPoint,message;
+  if(isSelected){
+    message = "comments need approval on the current work";
+    console.log(message);
+  }
+  else{
+    message = "comments don't need approval on the current work";
+    console.log(message);
+  }
 }
 
-function litEditButtonOnClick(evt,litId){
-  //TODO backEndAPI
-  console.log("edit ",litId)
-}
 
-
-//TODO backEnd dont allow other users to access the list
 //not sure what are the white list's permission
-function showWhiteListSettingBase(litId){
+function showWhiteListSettingBase(litId,selected_eppn){
   $(".whiteListSettingBase").fadeIn();
   $(".litSettingBase").hide();
   $(".whiteListOptionCheckBox").children("label").removeClass("is-checked");
-  var endPoint = "get_permissions_list/"+litId;
+  var endPoint = "get_permissions_list/"+selected_eppn+"/"+litId;
   console.log(endPoint)
   API.request({
     endpoint: endPoint,

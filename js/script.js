@@ -133,18 +133,18 @@ loadUserComments = (selected_eppn,textChosen) => {
   //TODO get rid of textChosen
   let endpoint = "get_highlights/" + selected_eppn + "/" + textChosen;
   API.request({endpoint}).then((data) => {
-    console.log(data);
-      renderComments(data);
+      console.log(data);
+      renderComments(data,selected_eppn);
       makeSelector(createListOfCommenter(data));
   });
 }
 
-renderComments = (commentData) => {
+renderComments = (commentData, selected_eppn) => {
     $(".loader").hide();
     $("#text").fadeIn();
     $("#textSpace").fadeIn();
     $("#textTitle").fadeIn();
-
+    console.log(selected_eppn);
     for (let i = 0; i < commentData.length; ++i) {
         highlightText({
             startIndex: commentData[i].startIndex,
@@ -152,8 +152,8 @@ renderComments = (commentData) => {
             commentType: commentData[i].commentType,
             eppn: commentData[i].eppn,
             hash: commentData[i].hash,
+            approved: commentData[i].approved
         });
-
     }
     $("#text").css("height", $("#litDiv").height() + "px");
     //highlight to post comments
@@ -296,7 +296,7 @@ function makeSelectorOptions(option,mode){
 }
 
 
-highlightText = ({startIndex, endIndex, commentType, eppn, hash} = {}) => {
+highlightText = ({startIndex, endIndex, commentType, eppn, hash , approved} = {}) => {
     let range = rangy.createRange();
     range.selectCharacters(document.getElementById(TEXTSPACE), startIndex, endIndex);
     let area = rangy.createClassApplier("commented-selection", {
@@ -305,11 +305,15 @@ highlightText = ({startIndex, endIndex, commentType, eppn, hash} = {}) => {
             "id": hash,
             "creator": eppn,
             "typeof": commentType,
+            "approved": approved
         }
     });
     area.applyToRange(range);
 }
 
+//if current user is admin for the current work, they are able to approve the unapproved comments
+//if current user is creator of the comment, they are able to edit and delete the unapproved comment
+//approved comments don't need to check anyPermission stuff
 function clickOnComment(commentSpanId , evt){
   $("#replies").empty();
   $("#commentBox").removeAttr("data-replyToEppn");
@@ -323,19 +327,25 @@ function clickOnComment(commentSpanId , evt){
       hash: $("#"+commentSpanId).attr("id"),
   });
 
-  get_comment_chain_API_request(comment_data, commentSpanId);
+  get_comment_chain_API_request(comment_data, commentSpanId,$("#"+commentSpanId).attr("approved"));
   evt.stopPropagation();
   displayReplyBox(evt);
   displayCommentBox(evt,commentSpanId);
 }
 
-function get_comment_chain_API_request(jsonData, commentSpanId){
+//TODO unapproved comments are not shown rn on purpose
+function get_comment_chain_API_request(jsonData, commentSpanId, commentApproved){
   API.request({
       endpoint: "get_comment_chain",
       data: jsonData,
       method: "POST"
   }).then((data) => {
-    readThreads(data);
+    if(commentApproved){
+      readThreads(data);
+    }
+    else{
+      //readThreads(data);
+    }
     $("#commentBox").parent().hide();
   });
 }
@@ -386,13 +396,13 @@ function refreshReplyBox(creator,work,commenter,hash){
       commenter: commenter,
       hash: hash
   });
-  get_comment_chain_API_request(comment_data, hash);
+  get_comment_chain_API_request(comment_data, hash, undefined);
 }
 
 //TODO cant access value out side then()
 function checkPermission(selected_eppn, litId){
   //check if current user is in whiteList or is the creator
-  var endPoint = "get_permissions_list/"+litId;
+  var endPoint = "get_permissions_list/"+selected_eppn+"/"+litId;
   let x = true;
   API.request({
     endpoint: endPoint,

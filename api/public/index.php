@@ -77,10 +77,11 @@ $app->get('/get_current_user', function () use ($app) {
 /**
  * Get the permissions list of a specified $work of the current logged in user ($eppn)
  */
-$app->get('/get_permissions_list/:work', function ($work) use ($app) {
+$app->get('/get_permissions_list/:eppn/:work', function ($eppn,$work) use ($app) {
     require '../Actions/Permissions.php';
     $permissions = new Permissions;
-    $workFullPath = __PATH__ . $_SERVER['eppn'] . "/works/" . $work;
+  //  $workFullPath = __PATH__ . $_SERVER['eppn'] . "/works/" . $work;
+    $workFullPath = __PATH__ .$eppn. "/works/" . $work;
     echo $permissions->getPermissionsList($workFullPath);
 });
 

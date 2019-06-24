@@ -432,6 +432,7 @@ class Comments
                             "commentType" => $jsonData->commentType,
                             "eppn" => $jsonData->eppn,
                             "hash" => end(explode("/", $filePath)),
+                            "approved" => $jsonData->approved
                         )
                     );
                 } else {
@@ -447,6 +448,7 @@ class Comments
                                 "commentType" => $jsonData->commentType,
                                 "eppn" => $jsonData->eppn,
                                 "hash" => end(explode("/", $filePath)),
+                                "approved" => $jsonData->approved
                             )
                         );
                     } else {
