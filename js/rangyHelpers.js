@@ -1,14 +1,9 @@
 var height;
 var remSpan;
 
-// function getFirstRange() {
-// //
-// //   // let sel = rangy.getSelection();
-// //   // return sel.rangeCount ? sel.getRangeAt(0) : null;
-// // }
 
 //applies the hl to the area selected by the user
-function highlightCurrentSelection(evt) {
+function highlightCurrentSelection(evt,literatureText) {
 
   var selectedRange = rangy.getSelection().getRangeAt(0);
   $("#commentBox").removeAttr("data-replyToEppn");
@@ -21,7 +16,7 @@ function highlightCurrentSelection(evt) {
     let range = selectedRange.toCharacterRange(document.getElementById('textSpace'));
     CKEDITOR.instances['textForm'].setReadOnly(false);
     $(".commentTypeDropdown").removeAttr("disabled")
-    hlRange(selectedRange,range);
+    hlRange(selectedRange,range,literatureText);
     if($("."+escapeSpecialChar(remSpan)).parent().attr("class") != "commented-selection"){
       $("#replies").parent().hide();
       $(".loader").hide();
@@ -38,7 +33,7 @@ function unhighlight(){
   return text;
 }
 
-function hlRange(selectedRange,range) {
+function hlRange(selectedRange,range,literatureText) {
   remSpan = ("hl_" + currentUser.eppn);
   let applierCount = rangy.createClassApplier(remSpan, {
     useExistingElements: false,
@@ -47,9 +42,7 @@ function hlRange(selectedRange,range) {
         "endIndex": range.end,
     }
   });
-  if (literatureText.length == 0) {
-    literatureText = $("#textSpace")[0].outerText;
-  }
+  console.log("lit",$("#textSpace"));
   applierCount.applyToRange(selectedRange);
   return remSpan;
 }

@@ -112,8 +112,24 @@ function createMenuForComment(inText,hash,eppn,hashForReply){
       deleteButtonOnClick(hash,eppn,hashForReply);
     }
   });
+  var menuSetPrivate = $("<li/>",{
+    class: "setCommentsPrivate mdl-menu__item",
+    text: "Set Private",
+    commentid: hash,
+    click : (evt)=>{
+      commentPrivateButtonOnClick(evt,false);
+    }
+  });
+  var menuSetPublic = $("<li/>",{
+    class: "setCommentsPublic mdl-menu__item",
+    text: "Set Public",
+    commentid: hash,
+    click : (evt)=>{
+      commentPrivateButtonOnClick(evt,true);
+    }
+  });
   $(commentMenuButton).append(icon);
-  $(menu).append(menuReply,menuEdit,menuDelete);
+  $(menu).append(menuReply,menuEdit,menuDelete,menuSetPrivate,menuSetPublic);
   var span = $("#r"+hash);
   if(span.text() != 'deleted'){
     span.append(commentMenuButton,menu);
@@ -130,11 +146,16 @@ function commentMenuOnClick(rid){
   $("#commentBox").attr("data-replyToHash", rid);
   $("#commentSave").show();
   $("#commentExit").text("Exit");
-  $("#replies").find(".editComments").hide();
-  $("#replies").find(".deleteComments").hide();
+  $(".commentMenu").children("li").hide();
   if (currentUser.eppn == replyToEppn) {
-    $(".editComments" + "[commentid = '" + rid + "']").show();
-    $(".deleteComments" + "[commentid = '" + rid + "']").show();
+    $(".commentMenu").children("li"+"[commentid = '" + rid + "']").show();
+    // $(".editComments" + "[commentid = '" + rid + "']").show();
+    // $(".deleteComments" + "[commentid = '" + rid + "']").show();
+    // $(".setCommentsPrivate" +"[commentid = '" + rid + "']").show();
+    // $(".setCommentsPublic" +"[commentid = '" + rid + "']").show();
+  }
+  else {
+      $(".replyToComments" + "[commentid = '" + rid + "']").show();
   }
   CKEDITOR.instances.textForm.setReadOnly(false);
 }
@@ -166,6 +187,24 @@ function deleteButtonOnClick(hash,eppn,hashForReply){
   var literatureName = $(".chosenFile").text();;
   var data = getDataForEditOrDelete(literatureName,hash,eppn,null,null);
   editOrDelete(data,false);
+}
+
+function commentPrivateButtonOnClick(evt,setPrivate){
+  var commentId = evt["currentTarget"]["attributes"]["commentid"]["value"];
+  console.log(commentId);
+  var data = JSON.stringify({
+    creator: $(".chosenUser").text().split(":")[0],
+    work: $(".chosenFile").text(),
+    comment_hash: commentId,
+    public: setPrivate ? true: false
+  });
+  API.request({
+    endpoint: "set_comment_public",
+    method: "POST",
+    data: data
+  }).then((data)=>{
+    console.log(data);
+  });
 }
 
 // This displays the replies for the current comment box

@@ -1,5 +1,4 @@
 $(window).ready(function() {
-console.log($.address)
     $("#litadd").on("click", function(evt) {
         $("#settingBase").hide();
         $("#addLitBase").load("parts/upload.htm", function() {
@@ -93,187 +92,11 @@ function loadFromDeepLink(){
 function homeButtonAction(){
   //TODO try get rid of the extra pound
   showLink("");
-  $("#text , .userFiles").hide();
+  $("#text , .userFiles, #settingBase, #addLitBase").hide();
+  $("#nonTitleContent").show();
   $(".chosenUser, .chosenFile, .typeSelector, .commenterSelector").empty();
+  resetSettingTitle();
 }
-
-function settingButtonAction(evt){
-  $("#addLitBase , #nonTitleContent").hide();
-  $("#settingBase").fadeIn();
-  $(".settingUserDiv , #settingTitle").show();
-  $(".settingLitDiv , .litSettingBase").hide();
-  $("#settingGoBack").children().on("click",()=>{
-    settingGoBackButtonOnClick();
-  });
-}
-
-function settingGoBackButtonOnClick(){
-  if ($("#settingBase").is(":visible")) {
-    if($(".litSettingBase").is(":visible")){
-      $(".litSettingBase").hide();
-      $("#settingTitle , .settingUserDiv, .settingLitDiv").show();
-    }
-    else{
-      $("#settingBase").hide();
-      $("#nonTitleContent").show();
-    }
-  }
-}
-
-createSettingScreen = async ({users = users} = {}) =>{
-  $("#settingBase").hide();
-  user_list = users.creator_list;
-  for(i in user_list){
-    console.log(user_list[i]);
-    var user = $("<li/>",{
-      text:user_list[i],
-      class:'settingUsers',
-      commenterId: user_list[i],
-      click: function(evt){
-        console.log(evt);
-        showUsersLit(users,evt["currentTarget"]["attributes"]["commenterid"]["value"]);
-      }
-    });
-    $(".users").append(user);
-  }
-}
-
-function showUsersLit(users,selected_eppn){
-  $(".settingLitTitle").html(selected_eppn+"'s Literatures:");
-  $(".settingLitDiv").show();
-  $(".literatures").empty();
-  users.get_user_works(selected_eppn).then((works) => {
-      for (var lit in works) {
-        var fileWithoutExt = works[lit].substr(0, works[lit].lastIndexOf('.')) || works[lit];
-        var litButton = $('<li/>', {
-          class: "settingLit",
-          id: "s"+works[lit],
-          text: fileWithoutExt,
-          click: function(evt){
-            litOnClick(evt, selected_eppn);
-          }
-        });
-        $(".literatures").append(litButton);
-      }
-  });
-}
-
-function litOnClick(evt, selected_eppn){
-  $(".settingLit").removeClass("settingLitSelected");
-  $("#settingButtons").remove();
-  let selectedLitId = evt["currentTarget"]["id"];
-  $("#"+escapeSpecialChar(selectedLitId)).addClass("settingLitSelected");
-
-  var litSettingButton = $("<button/>",{
-    class: "mdl-button mdl-js-button mdl-button--icon",
-    click: (evt)=>{
-      litSettingButtonOnClick(evt,selectedLitId, selected_eppn);
-    }
-  });
-  var icon = $("<i/>",{
-    class: "material-icons",
-    text: "settings"
-  });
-  var settingButtons = $('<span/>',{
-    id:"settingButtons"
-  });
-  $(".literatures").append(settingButtons);
-  $("#settingButtons").append(litSettingButton);
-  $(litSettingButton).append(icon);
-}
-
-function litSettingButtonOnClick(evt,selectedLitId, selected_eppn){
-  $("#settingTitle , .settingUserDiv, .settingLitDiv").hide();
-  $(".litSettingBase").show();
-  let litId = selectedLitId.slice(1,selectedLitId.length);
-  $(".litSettingBaseTitle").text("Settings For : " + selected_eppn +"'s " +litId);
-  if($(".settingOptions").length == 0){
-    var settingOptions = $("<ul/>",{
-      class: "settingOptions mdl-list"
-    });
-    $(".litSettingBase").append(settingOptions);
-    //private
-    makeLitPrivacySwitch(litId);
-    //edit
-    makeLitEditButton(litId);
-    //delete
-    makeLitDelButton(litId);
-  }
-  //save
-}
-
-function makeLitPrivacySwitch(litId){
-  let privacyOption =$("<li/>",{
-    class: "mdl-list__item",
-    text: "Private"
-  });
-  var privacySwitch= $("<label/>",{
-    class: "mdl-switch mdl-js-switch mdl-js-ripple-effect",
-    for: "privacySwitch"
-  });
-  var input = $("<input/>",{
-    type: "checkbox",
-    id: "privacySwitch",
-    class: "mdl-switch__input"
-  });
-  $(".settingOptions").append(privacyOption);
-  $(privacyOption).append(privacySwitch);
-  $(privacySwitch).append(input);
-  input.on("click",(evt)=>{
-    makeLitPrivacySwitchOnClick(evt,litId);
-  });
-  componentHandler.upgradeAllRegistered();
-}
-
-function makeLitEditButton(litId){
-  let editOption =$("<li/>",{
-    class: "mdl-list__item litEditButton",
-    text: "Edit",
-    click: (evt)=>{
-      $(".litSettingOptionSelected").removeClass("litSettingOptionSelected");
-      $(this).addClass("litSettingOptionSelected");
-      litEditButtonOnClick(evt,litId)
-    }
-  });
-  $(".settingOptions").append(editOption);
-  componentHandler.upgradeAllRegistered();
-}
-
-function makeLitDelButton(litId){
-  let deleteOption =$("<li/>",{
-    class: "mdl-list__item litDelButton",
-    text: "Delete",
-    click: (evt)=>{
-      $(".litSettingOptionSelected").removeClass("litSettingOptionSelected");
-      $(this).addClass("litSettingOptionSelected");
-      litDelButtonOnClick(evt,litId)
-    }
-  });
-  $(".settingOptions").append(deleteOption);
-  componentHandler.upgradeAllRegistered();
-}
-
-function makeLitPrivacySwitchOnClick(evt,litId){
-  var isSelected = $("#privacySwitch").is(":checked");
-  if(isSelected){
-    //TODO set the work to private
-  }
-  else{
-    //set the work to public
-  }
-  console.log("privacy: ",isSelected);
-}
-
-function litDelButtonOnClick(evt,litId){
-  //TODO backEndAPI
-  console.log("delete ",litId);
-}
-
-function litEditButtonOnClick(evt,litId){
-  //TODO backEndAPI
-  console.log("edit ",litId)
-}
-
 //----------------------------------------------------------
 
 createUserSelectScreen = async ({users = users} = {}) => {
@@ -336,7 +159,7 @@ createUserSelectScreen = async ({users = users} = {}) => {
            click: function(evt) {
              hideAllBoxes();
              $(".nameMenu").remove();
-             textChosen = evt['currentTarget']['id'];
+             let textChosen = evt['currentTarget']['id'];
              selectLit(selected_eppn,textChosen);
            }
          });
@@ -354,7 +177,7 @@ createUserSelectScreen = async ({users = users} = {}) => {
    let endpoint = 'get_work/' +selected_eppn + '/' + textChosen;
    showLink(endpoint);
    API.request({endpoint}).then((data) => {
-       literatureText = data;
+       let literatureText = data;
        buildHTMLFile(data,selected_eppn,textChosen);
    });
  }

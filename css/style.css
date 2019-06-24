@@ -786,33 +786,6 @@ button[id^="removePrivateName_"]:hover {
   margin-left: 5%;
 }
 
-.typeSelector {
-  right: 0;
-  z-index: -1;
-}
-
-.typeSelector ul {
-  top: calc(5rem + 24px);
-  right: 0;
-  list-style-type: none;
-  margin-top: 20px;
-  padding: 0;
-  background-color: #EFEBE9;
-  position: fixed;
-  /* overflow: auto; */
-}
-
-.commenterSelector ul {
-  top: calc(5rem + 300px);
-  right: 0;
-  list-style-type: none;
-  margin: 0;
-  padding: 0;
-  background-color: #EFEBE9;
-  position: fixed;
-  /* overflow: auto; */
-}
-
 #commentBox {
   background-color: #DEDEDE;
 }
@@ -858,8 +831,42 @@ button[id^="removePrivateName_"]:hover {
 .nameMenu:hover .nameList {
   display: block;
 }
+/*--------------Selectors------------------*/
 
-.button, .commenters {
+.typeSelector {
+  right: 0;
+  z-index: -1;
+}
+
+.typeSelector ul {
+  top: calc(5rem + 24px);
+  right: 0;
+  list-style-type: none;
+  margin-top: 20px;
+  margin-left: 2px;
+  padding: 0;
+  background-color: #EFEBE9;
+  position: fixed;
+}
+
+ .commenterSelector ul {
+  top: calc(5rem + 250px);
+  right: 0;
+  list-style-type: none;
+  width:140px;
+  margin-top: 10px;
+  padding: 0;
+  background-color: #EFEBE9;
+  position: fixed;
+}
+
+.selectorHeader{
+  padding-left: 7px;
+  font-size: 18px;
+  margin-top:2px;
+}
+
+.buttons, .commenters {
   height: 5%;
   position: relative;
   display: block;
@@ -869,15 +876,15 @@ button[id^="removePrivateName_"]:hover {
   border-bottom-left-radius: .5rem;
 }
 
-.button label , .commenters label{
+.buttons label , .commenters label{
   padding-left: 4px;
 }
 
-.button input, .commenters input{
+.buttons input, .commenters input{
   width: 20px;
 }
 
-.button:hover , .commenters:hover{
+.buttons:hover , .commenters:hover{
   background-color: #C8C8C8;
 }
 
@@ -888,7 +895,7 @@ input[type='radio'] {
 input[type='radio']:active {
   background-color: #C999F6;
 }
-
+/*------------------------------------*/
 #commentExit {
   width: 15%;
   border-radius: 10px;
@@ -1156,53 +1163,74 @@ input[type="file"] {
     font-style: italic;
 }
 
+/*-----------------settingPage---------------------*/
 #settingTitle{
   font-size: 20px;
   font-weight:bold;
 }
 
-.settingLitTitle, .settingUserTitle{
-  font-size: 16px;
+.settingTitles{
   font-weight: bold;
 }
 
-.settingUserDiv{
-  border-bottom: 2px solid #d7d3d1;
-  margin-bottom: 7px;
+
+
+.settingUserDiv ul, .settingLitDiv ul , .whiteListSettingBase ul{
+  height: 96px;
+  overflow: hidden;
+  overflow-y: scroll;
 }
 
-.settingLitDiv{
+.searchUser, .searchLit, .searchWhiteList{
+  width: 85%;
   font-size: 16px;
-  font-weight: bold;
+  padding: 12px 20px 12px 20px;
+  background-color: #f3f1ef;
+  margin-bottom: 12px;
 }
+
 
 .settingUsers , .settingLit{
   background-color: #efebe9;
   font-weight: bold;
 }
 
-.settingUsers:hover,.settingLit:hover,.litDelButton:hover,.litEditButton:hover{
+.settingUsers:hover,.settingLit:hover,.litDelButton:hover,.litEditButton:hover , .litWhiteListButton:hover{
   background-color:#bfbcba;
 }
 
-.settingLitSelected, .litSettingOptionSelected{
+.settingLitSelected, .litSettingOptionSelected, .settingUserSelected{
   background-color:#bfbcba;
 }
 
-#settingButtons{
+#litSettingButton, #userSettingButton{
   float:right;
 }
 
-.litSettingBaseTitle{
+.litSettingBaseTitle, .userSettingBaseTitle{
   font-size: 16px;
   font-weight: bold;
-  border-bottom: 2px solid #d7d3d1;
+}
+
+.whiteList{
+  height:200px;
+  overflow: hidden;
+  overflow-y: scroll;
+}
+
+.whiteListOption{
+  height: 60px;
+  width: 300px;
+}
+
+.whiteListOptionCheckBox{
+  padding: 40px;
+  float:right;
 }
 
 .mdl-switch{
   margin-left: 50px;
 }
-
 
 
 /*----------toast notifcation ---------*/

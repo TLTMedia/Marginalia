@@ -171,7 +171,7 @@ function saveCommentOrReply(dataForSave,isComment){
         'typeof':dataForSave['commentType']
       });
       $('.'+escapeSpecialChar(remSpan)).removeClass(remSpan);
-      refreshDropDownSelect(dataForSave["replyHash"],dataForSave["commentType"]);
+      refreshSelector(dataForSave["replyHash"],dataForSave["commentType"]);
       updateCommenterSelectors();
       //update the click event on this new added comment
       $("#"+data['commentHash']).off().on("click", function(evt) {
@@ -231,7 +231,7 @@ function editOrDelete(dataForEditOrDelete,isEdit){
     var firstCommentId = $("#replies").attr("data-firstCommentId");
     refreshReplyBox(dataForEditOrDelete["creator"],dataForEditOrDelete["work"],$("#"+firstCommentId).attr("creator"),firstCommentId);
     if(isEdit){
-      refreshDropDownSelect(dataForEditOrDelete["hash"],dataForEditOrDelete["type"]);
+      refreshSelector(dataForEditOrDelete["hash"],dataForEditOrDelete["type"]);
     }
     //unhighlight the deleted comment
     //update the commenterSelector

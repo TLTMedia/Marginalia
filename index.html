@@ -30,6 +30,7 @@
 	<script src="js/script.js"></script>
 	<script src="js/replyBoxAction.js"></script>
 	<script src="js/commentBoxAction.js"></script>
+	<script src="js/setting.js"></script>
 	<script src="js/gui.js"></script>
 
 	<script src="js/dynamicStyling.js"></script>
@@ -52,11 +53,20 @@
 
         <div id="addLitBase"></div>
 				<div id="settingBase">
-				    <div id="settingTitle">Setting</div>
-				    <div class = "settingUserDiv"><h6 class = "settingUserTitle">Users:</h6><ul class = "users"></ul></div>
-				    <div class = "settingLitDiv"><h6 class = "settingLitTitle">Literature:</h6><ul class = "literatures"></ul></div>
-						<div class = "litSettingBase"><h6 class = "litSettingBaseTitle">Settings For : </h6></div>
-				    <div id="settingGoBack" style="margin-bottom:0px">
+				    <div id="settingTitle">Settings</div>
+					  <div class = "settingUserDiv">
+							<h6 class = "settingTitles">Users:</h6>
+							<input type = "text" class = "searchUser" placeholder="Search for users.."></input>
+							<ul class = "mdl-list users"></ul>
+						</div>
+					  <div class = "settingLitDiv">
+							<h6 class = "settingTitles"></h6>
+							<input type = "text" class = "searchLit" placeholder="Search for works.."></input>
+							<ul class = "mdl-list literatures"></ul>
+						</div>
+						<div class = "litSettingBase"></div>
+						<div class = "whiteListSettingBase"></div>
+						<div id="settingGoBack" style="margin-bottom:0px">
 				        <button class="mdl-button mdl-js-button mdl-button--icon">
 				            <span class="material-icons">arrow_back</span>
 				        </button>

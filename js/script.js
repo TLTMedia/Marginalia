@@ -3,15 +3,9 @@ var TEXTSPACE = "textSpace";
 
 
 var currentUser = {};
-/**
- * Ends the temporarily known, necessary globals
- */
 // Adminstrative helpers, first of multiple checks
 var whitelist = []; // the admins of the website, double checked in PHP
-var idName = [0]; // The name and id of the span clicked on
 
-var textChosen; // the name of the beginning text chosen
-var literatureText = ""; // The literal string of all the text
 var remSpan; // holds the name of made and clicked spans
 
 // Initialization function
@@ -34,12 +28,13 @@ init = async ({api = api, users = users} = {}) => {
     $("#text").css("height", $("#litDiv").height() + "px");
     $("html").css("font-size", (stageWidth / 60) + "px");
   }).trigger("resize")
-  loadFromDeepLink();
+
 
   $.address.externalChange((evt)=>{
     console.log("externalChange");
     loadFromDeepLink();
   });
+
 }
 
 // Creates a visual list of all users which gives access to their folders
@@ -51,6 +46,7 @@ init = async ({api = api, users = users} = {}) => {
 function buildHTMLFile(litContents, selected_eppn,textChosen) {
   // TODO check this logic
   if (!$(".commentTypeDropdown").length) {
+    //TODO make drop down combine with commentbox
     makeDropDown();
     makeDraggableCommentBox();
     makeDraggableReplyBox();
@@ -137,6 +133,7 @@ loadUserComments = (selected_eppn,textChosen) => {
   //TODO get rid of textChosen
   let endpoint = "get_highlights/" + selected_eppn + "/" + textChosen;
   API.request({endpoint}).then((data) => {
+    console.log(data);
       renderComments(data);
       makeSelector(createListOfCommenter(data));
   });
@@ -209,6 +206,11 @@ function makeTypeSelector(buttonTypes) {
     class: "allButtons"
   });
 
+  let selectorHeader = $('<li>',{
+    class: "selectorHeader",
+    text: "Filter By:"
+  });
+  $(allButtons).append(selectorHeader);
   buttonTypes.forEach(function(type) {
     let list = makeSelectorOptions(type,'typeSelector');
     $(allButtons).append(list);
@@ -223,6 +225,12 @@ function makeCommentersSelector(commenters){
   let allCommenters = $('<ul/>', {
     class: "allCommenters"
   });
+
+  let selectorHeader = $('<li>',{
+    class: "selectorHeader",
+    text: "Filter By:"
+  });
+  $(allCommenters).append(selectorHeader);
   commenters.forEach((data)=>{
     let list = makeSelectorOptions(data,'commenterSelector');
     $(allCommenters).append(list);
@@ -358,7 +366,7 @@ function readThreads(threads, parentId = null){
   }
 }
 
-function refreshDropDownSelect(hash, type){
+function refreshSelector(hash, type){
   console.log(type);
   $("#"+hash).attr("typeof",type);
   var currentSelectedType = $("#loadlist").attr("currentTarget");
@@ -379,6 +387,33 @@ function refreshReplyBox(creator,work,commenter,hash){
       hash: hash
   });
   get_comment_chain_API_request(comment_data, hash);
+}
+
+//TODO cant access value out side then()
+function checkPermission(selected_eppn, litId){
+  //check if current user is in whiteList or is the creator
+  var endPoint = "get_permissions_list/"+litId;
+  let x = true;
+  API.request({
+    endpoint: endPoint,
+    method: "GET"
+  }).then((data)=>{
+    let isInWhiteList = false
+    for (var i =0; i<data["admins"].length;i++){
+      if(selected_eppn == data["admins"][i]){
+        isInWhiteList = true;
+      }
+    }
+    //figure out a way to return the boolean
+    if(isInWhiteList){
+      x = true;
+    }
+    else{
+      launchToastNotifcation("You don't have the permission to do this action");
+      x = false;
+    }
+  });
+  return x;
 }
 
 function launchToastNotifcation(data){
