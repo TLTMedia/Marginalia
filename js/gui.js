@@ -45,8 +45,17 @@ $(window).ready(function() {
         });
     });
 
-    $("#setting").off().on("click",function(evt){
-      settingButtonAction(evt);
+    $("#setting").addClass("disabledHeaderTab");
+    $("#setting").off().on("click",()=>{
+      if($("#setting").hasClass("disabledHeaderTab")){
+          console.log("disabled");
+      }
+      else{
+        let author =$("#setting").attr("author");
+        let work = $("#setting").attr("work");
+        console.log(author, work);
+        litSettingButtonOnClick(work,author);
+      }
     });
 
     $("#home").off().on("click",function(){
@@ -95,79 +104,142 @@ function homeButtonAction(){
   $("#text , .userFiles, #settingBase, #addLitBase").hide();
   $("#nonTitleContent").show();
   $(".chosenUser, .chosenFile, .typeSelector, .commenterSelector").empty();
+  //disable the setting header tab
+  $("#setting").addClass("disabledHeaderTab");
   resetSettingTitle();
 }
 //----------------------------------------------------------
 
-createUserSelectScreen = async ({users = users} = {}) => {
+createUserSelectScreen = async ({users = users} = {}) =>{
+  $(".workSelectMenu").hide();
   user_list = users.creator_list;
+  // TODO need to check what does this width thing do
+  // figure out why this is here
   width = $(document).width();
-  var userWorks = [];
-  var selector = $("#userSelector");
-  var usersItems = $("<ul/>", {
-    id: "usersItems",
-    class: "mdl-menu mdl-menu--bottom-left mdl-js-menu mdl-js-ripple-effect",
-    for: "pickUser"
-  });
-  selector.append(usersItems);
-  var length = user_list.length;
-  var rows = 0;
-  while (length >= 1) {
-    length -= 3;
-    rows++;
-  }
-  for (let userNum in user_list) {
-    let userItem = $("<li/>", {
-      text: user_list[userNum],
-      class: "mdl-menu__item userButton"
+  for(i in user_list){
+    var user = $("<li/>",{
+      text:user_list[i],
+      class:'mdl-list__item usersMenuOptions',
+      commenterId: user_list[i],
+      click: function(evt){
+        $(".usersMenuOptions").removeClass("settingUserSelected");
+        $(this).addClass("settingUserSelected");
+        $("#litSettingButton").remove();
+        let selected_eppn = evt["currentTarget"]["attributes"]["commenterid"]["value"];
+        showUsersLit(users,selected_eppn);
+      }
     });
-
-    usersItems.append(userItem);
+    $(".usersMenu").append(user);
   }
-  $(".userButton").click(function() {
-    //  console.log($.address.value());
-      $(".userFiles").show();
-      let selected_eppn = $(this).text();
-      $(".chosenUser").text(selected_eppn + ":");
-      $(".chosenFile").text("");
-      $("#worksButtons").remove();
-      createLitSelectorScreen({users: users, selected_eppn: selected_eppn});
+  //activate the search bar
+  $(".searchUser").on("keyup",()=>{
+    let ul = $(".usersMenu");
+    let input = $(".searchUser");
+    searchAction(input,ul,"user");
   });
-  componentHandler.upgradeElement($('#usersItems')[0]);
-  $(".userFiles").hide();
+  //make the white list
+  makeWhiteListSettingBase(user_list);
 }
+
+function showUsersLit(users,selected_eppn){
+  $(".worksMenu").empty();
+  $(".workSelectMenu").fadeIn();
+  $(".workSelectMenu").find(".worksMenuTitle").text(selected_eppn+"'s works:");
+  users.get_user_works(selected_eppn).then((works) => {
+    for (var lit in works) {
+      var fileWithoutExt = works[lit].substr(0, works[lit].lastIndexOf('.')) || works[lit];
+      var litButton = $('<li/>', {
+        class: "mdl-list__item worksMenuOptions",
+        id: works[lit],
+        text: fileWithoutExt,
+        click: function(evt){
+          $(".worksMenuOptions").removeClass("settingLitSelected");
+          $(this).addClass("settingLitSelected");
+          let selectedWorkId = evt["currentTarget"]["id"];
+          selectLit(selected_eppn,selectedWorkId);
+        }
+      });
+      $(".worksMenu").append(litButton);
+    }
+  });
+  $(".searchLit").on("keyup",()=>{
+    let ul = $(".worksMenu");
+    let input = $(".searchLit");
+    searchAction(input,ul,"work");
+  });
+}
+
+//------- old ui for selecting users and their works-----------------
+
+// createUserSelectScreen = async ({users = users} = {}) => {
+//   user_list = users.creator_list;
+//   width = $(document).width();
+//   var userWorks = [];
+//   var selector = $("#userSelector");
+//   var usersItems = $("<ul/>", {
+//     id: "usersItems",
+//     class: "mdl-menu mdl-menu--bottom-left mdl-js-menu mdl-js-ripple-effect",
+//     for: "pickUser"
+//   });
+//   selector.append(usersItems);
+//   var length = user_list.length;
+//   var rows = 0;
+//   while (length >= 1) {
+//     length -= 3;
+//     rows++;
+//   }
+//   for (let userNum in user_list) {
+//     let userItem = $("<li/>", {
+//       text: user_list[userNum],
+//       class: "mdl-menu__item userButton"
+//     });
+//
+//     usersItems.append(userItem);
+//   }
+//   $(".userButton").click(function() {
+//     //  console.log($.address.value());
+//       $(".userFiles").show();
+//       let selected_eppn = $(this).text();
+//       $(".chosenUser").text(selected_eppn + ":");
+//       $(".chosenFile").text("");
+//       $("#worksButtons").remove();
+//       createLitSelectorScreen({users: users, selected_eppn: selected_eppn});
+//   });
+//   componentHandler.upgradeElement($('#usersItems')[0]);
+//   $(".userFiles").hide();
+// }
 
 /**
  * Temporary pass the api object to 'everything'...
  * So that any ~global~ function can make an api call...
  */
- createLitSelectorScreen = ({users = users, selected_eppn = selected_eppn} = {}) => {
-   var selector = $(".userFiles");
-   var worksButtons = $("<ul/>", {
-     id: "worksButtons",
-     class: "mdl-menu mdl-menu--bottom-left mdl-js-menu mdl-js-ripple-effect",
-     for: "pickLit"
-   });
-   selector.append(worksButtons);
-   users.get_user_works(selected_eppn).then((works) => {
-       for (var lit in works) {
-         var fileWithoutExt = works[lit].substr(0, works[lit].lastIndexOf('.')) || works[lit];
-         var litButton = $('<li/>', {
-           class: "mdl-menu__item",
-           id: works[lit],
-           text: fileWithoutExt,
-           click: function(evt) {
-             hideAllBoxes();
-             $(".nameMenu").remove();
-             let textChosen = evt['currentTarget']['id'];
-             selectLit(selected_eppn,textChosen);
-           }
-         });
-         worksButtons.append(litButton);
-       }
-       componentHandler.upgradeElement($('#worksButtons')[0]);
-   });
- }
+ // createLitSelectorScreen = ({users = users, selected_eppn = selected_eppn} = {}) => {
+ //   var selector = $(".userFiles");
+ //   var worksButtons = $("<ul/>", {
+ //     id: "worksButtons",
+ //     class: "mdl-menu mdl-menu--bottom-left mdl-js-menu mdl-js-ripple-effect",
+ //     for: "pickLit"
+ //   });
+ //   selector.append(worksButtons);
+ //   users.get_user_works(selected_eppn).then((works) => {
+ //       for (var lit in works) {
+ //         var fileWithoutExt = works[lit].substr(0, works[lit].lastIndexOf('.')) || works[lit];
+ //         var litButton = $('<li/>', {
+ //           class: "mdl-menu__item",
+ //           id: works[lit],
+ //           text: fileWithoutExt,
+ //           click: function(evt) {
+ //             hideAllBoxes();
+ //             $(".nameMenu").remove();
+ //             let textChosen = evt['currentTarget']['id'];
+ //             selectLit(selected_eppn,textChosen);
+ //           }
+ //         });
+ //         worksButtons.append(litButton);
+ //       }
+ //       componentHandler.upgradeElement($('#worksButtons')[0]);
+ //   });
+ // }
 
  function selectLit(selected_eppn,textChosen){
    console.log(selected_eppn,textChosen)
@@ -179,5 +251,11 @@ createUserSelectScreen = async ({users = users} = {}) => {
    API.request({endpoint}).then((data) => {
        let literatureText = data;
        buildHTMLFile(data,selected_eppn,textChosen);
+       $("#setting").removeClass("disabledHeaderTab");
+       $("#setting").attr({
+         "author":selected_eppn,
+         "work": textChosen
+       });
+       $("#settingBase").hide();
    });
  }

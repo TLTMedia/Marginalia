@@ -54,16 +54,6 @@
         <div id="addLitBase"></div>
 				<div id="settingBase">
 				    <div id="settingTitle">Settings</div>
-					  <div class = "settingUserDiv">
-							<h6 class = "settingTitles">Users:</h6>
-							<input type = "text" class = "searchUser" placeholder="Search for users.."></input>
-							<ul class = "mdl-list users"></ul>
-						</div>
-					  <div class = "settingLitDiv">
-							<h6 class = "settingTitles"></h6>
-							<input type = "text" class = "searchLit" placeholder="Search for works.."></input>
-							<ul class = "mdl-list literatures"></ul>
-						</div>
 						<div class = "litSettingBase"></div>
 						<div class = "whiteListSettingBase"></div>
 						<div id="settingGoBack" style="margin-bottom:0px">
@@ -78,24 +68,22 @@
           <div class="pleaseSelect">
             <span>Please Select User & Literature Piece</span>
           </div>
-          <div class="chosenText">
+          <!-- <div class="chosenText">
             <span class="chosenUser">Name:</span>
             <span class="chosenFile">Work</span>
-          </div>
+          </div> -->
           <div>
-            <span class="usersMenu">
-              USERS
-              <button id="pickUser" class="mdl-button mdl-js-button mdl-button--icon">
-                <span class="material-icons">more_vert</span>
-              </button>
-            <span id="userSelector"></span>
-            </span>
+						<div class = "userSelectMenu">
+            <h6 class = "usersMenuTitle">Users:</h6>
+							<input type = "text" class = "searchUser" placeholder="Search for users.."></input>
+							<ul class = "mdl-list usersMenu"></ul>
+						</div>
 
-            <span class="userFiles" visible="false"> LITERATURE
-              <button id="pickLit" class="mdl-button mdl-js-button mdl-button--icon">
-                <span class="material-icons">more_vert</span>
-              </button>
-            </span>
+						<div class = "workSelectMenu">
+						<h6 class = "worksMenuTitle"></h6>
+							<input type = "text" class = "searchLit" placeholder="Search for works.."></input>
+							<ul class = "mdl-list worksMenu"></ul>
+						</div>
           </div>
 
           <!-- <button id="litadd" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored">

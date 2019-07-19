@@ -1,4 +1,4 @@
-function makeDraggableCommentBox() {
+function makeDraggableCommentBox(workCreator,work) {
   if ($("#commentBox").length) {
     if ($(".commentTypeDropdown").length < 1) {
       $("#commentBox").append(dropdown);
@@ -14,7 +14,7 @@ function makeDraggableCommentBox() {
           text: "Save",
           id: "commentSave",
           click: function(){
-            saveButtonOnClick();
+            saveButtonOnClick(workCreator,work);
           }
         },
         {
@@ -55,20 +55,20 @@ function makeDraggableCommentBox() {
   }
 }
 
-function saveButtonOnClick() {
+function saveButtonOnClick(workCreator,work) {
   var commentText = CKEDITOR.instances.textForm.getData();
   var isTextAreaEmpty = commentText.replace(/<p>(.*)<\/p>/g,`$1`).replace(/\s/g,"").replace(/&nbsp;/g,"").length;
   if (!isTextAreaEmpty) {
     launchToastNotifcation("Please put in some comment before you save");
   }
   else {
-    var literatureName = $(".chosenFile").text();
+    var literatureName = work;
+    var creator = workCreator;
     var commentType = $(".commentTypeDropdown").val();
     var span = $("." + escapeSpecialChar(remSpan));
-    //console.log(remSpan);
     var replyTo = $("#commentBox").attr("data-replytoeppn");
     var replyHash = $('#commentBox').attr("data-replytohash");
-    var dataForSave = getDataForSave(literatureName,commentText,commentType,span,replyTo,replyHash);
+    var dataForSave = getDataForSave(creator,literatureName,commentText,commentType,span,replyTo,replyHash);
     console.log(dataForSave);
     var editCommentID = $("#commentBox").attr("data-editCommentID");
     if(editCommentID!="-1"){
@@ -81,7 +81,7 @@ function saveButtonOnClick() {
       else{
         commentType = null;
       }
-      var dataForEdit = getDataForEditOrDelete(literatureName,editCommentID,commentCreatorEppn,commentType,commentText,true);
+      var dataForEdit = getDataForEditOrDelete(creator,literatureName,editCommentID,commentCreatorEppn,commentType,commentText,true);
       //console.log(dataForEdit);
       editOrDelete(dataForEdit,true);
       $("#commentBox").attr('data-editCommentID','-1');
@@ -123,9 +123,9 @@ function updateCommenterSelectors(){
 }
 
 //return a dictionary with the data we need to save
-function getDataForSave(literatureName,commentText,commentType,span,replyTo,replyHash){
+function getDataForSave(creator,literatureName,commentText,commentType,span,replyTo,replyHash){
   var dataForSave = {
-    author: $(".chosenUser").text().split(":")[0],
+    author: creator,
     work: literatureName,
     commentText: commentText,
     commentType: commentType,
@@ -176,15 +176,16 @@ function saveCommentOrReply(dataForSave,isComment){
       //update the click event on this new added comment
       $("#"+data['commentHash']).off().on("click", function(evt) {
         var commentSpanId = $(this).attr('id');
-        clickOnComment(commentSpanId, evt);
+        console.log(evt);
+        clickOnComment(commentSpanId,dataForSave["work"],dataForSave["author"],evt);
       });
     }
   });
 }
 
-function getDataForEditOrDelete(literatureName,hash,commentCreatorEppn,commentType,commentText){
+function getDataForEditOrDelete(creator,literatureName,hash,commentCreatorEppn,commentType,commentText){
   var common = {
-    creator: $(".chosenUser").text().split(":")[0],
+    creator: creator,
     work: literatureName,
     commenter: commentCreatorEppn,
     hash: hash

@@ -21,7 +21,7 @@ init = async ({api = api, users = users} = {}) => {
   $("#text").hide();
   $("#addLitBase").hide();
   createUserSelectScreen({users: users});
-  createSettingScreen({users:users});
+  //createSettingScreen({users:users});
 
   $(window).on("resize", function() {
     var stageWidth = $(window).width();
@@ -48,7 +48,7 @@ function buildHTMLFile(litContents, selected_eppn,textChosen) {
   if (!$(".commentTypeDropdown").length) {
     //TODO make drop down combine with commentbox
     makeDropDown();
-    makeDraggableCommentBox();
+    makeDraggableCommentBox(selected_eppn,textChosen);
     makeDraggableReplyBox();
     hideAllBoxes();
   }
@@ -130,16 +130,15 @@ loadUserComments = (selected_eppn,textChosen) => {
   $("#textSpace").hide();
   $("#textTitle").hide();
   $(".loader").show();
-  //TODO get rid of textChosen
   let endpoint = "get_highlights/" + selected_eppn + "/" + textChosen;
   API.request({endpoint}).then((data) => {
       console.log(data);
-      renderComments(data,selected_eppn);
+      renderComments(data,selected_eppn,textChosen);
       makeSelector(createListOfCommenter(data));
   });
 }
 
-renderComments = (commentData, selected_eppn) => {
+renderComments = (commentData, selected_eppn,textChosen) => {
     $(".loader").hide();
     $("#text").fadeIn();
     $("#textSpace").fadeIn();
@@ -164,7 +163,7 @@ renderComments = (commentData, selected_eppn) => {
     $(".commented-selection").off().on("click", function(evt) {
       var commentSpanId = $(this).attr('id');
       console.log(commentSpanId);
-      clickOnComment(commentSpanId, evt);
+      clickOnComment(commentSpanId,textChosen,selected_eppn,evt);
     });
 }
 
@@ -314,49 +313,48 @@ highlightText = ({startIndex, endIndex, commentType, eppn, hash , approved} = {}
 //if current user is admin for the current work, they are able to approve the unapproved comments
 //if current user is creator of the comment, they are able to edit and delete the unapproved comment
 //approved comments don't need to check anyPermission stuff
-function clickOnComment(commentSpanId , evt){
+function clickOnComment(commentSpanId,workChosen,workCreator,evt){
   $("#replies").empty();
   $("#commentBox").removeAttr("data-replyToEppn");
   $("#commentBox").removeAttr("data-replyToHash");
   $("#commentBox").attr("data-editCommentId","-1");
 
-  let comment_data = JSON.stringify({
-      creator: $(".chosenUser").text().split(":")[0],
-      work: $(".chosenFile").text(),
+  let comment_data = {
+      creator: workCreator,
+      work: workChosen,
       commenter: $("#"+commentSpanId).attr("creator"),
       hash: $("#"+commentSpanId).attr("id"),
-  });
-
-  get_comment_chain_API_request(comment_data, commentSpanId,$("#"+commentSpanId).attr("approved"));
+  };
+  get_comment_chain_API_request(comment_data,commentSpanId);
   evt.stopPropagation();
   displayReplyBox(evt);
   displayCommentBox(evt,commentSpanId);
 }
 
-//TODO unapproved comments are not shown rn on purpose
-function get_comment_chain_API_request(jsonData, commentSpanId, commentApproved){
+function get_comment_chain_API_request(jsonData, commentSpanId){
+  let work = jsonData.work;
+  let workCreator = jsonData.creator;
+  console.log(work);
+  let jsonDataStr = JSON.stringify(jsonData);
   API.request({
       endpoint: "get_comment_chain",
-      data: jsonData,
+      data: jsonDataStr,
       method: "POST"
   }).then((data) => {
-    if(commentApproved){
-      readThreads(data);
-    }
-    else{
-      //readThreads(data);
-    }
+    console.log(data);
+    readThreads(data,work,workCreator);
     $("#commentBox").parent().hide();
   });
 }
 
 //read the thread (threads is the reply array, parentId is the hash, parentReplyBox is the replyBox returned by the showReply())
-function readThreads(threads, parentId = null){
+function readThreads(threads, work, workCreator, parentId = null){
   if (threads.length==0){
     return;
   }
   else{
     for(var i =0; i<threads.length ; i++){
+      //TODO make it pass a object instead of every thing
       // also pass the parentId
         createReplies(
           threads[i].eppn,
@@ -369,9 +367,12 @@ function readThreads(threads, parentId = null){
           btoa(threads[i].commentText),
           threads[i].threads,
           threads[i].hash,
-          parentId
+          threads[i].approved,
+          parentId,
+          work,
+          workCreator
         );
-      readThreads(threads[i].threads, threads[i].hash);
+      readThreads(threads[i].threads,work,workCreator,threads[i].hash);
     }
   }
 }
@@ -390,18 +391,30 @@ function refreshSelector(hash, type){
 
 function refreshReplyBox(creator,work,commenter,hash){
   $("#replies").empty();
-  let comment_data = JSON.stringify({
+  let comment_data = {
       creator: creator,
       work: work,
       commenter: commenter,
       hash: hash
-  });
-  get_comment_chain_API_request(comment_data, hash, undefined);
+  };
+  get_comment_chain_API_request(comment_data, hash);
 }
 
-//TODO cant access value out side then()
-function checkPermission(selected_eppn, litId){
-  //check if current user is in whiteList or is the creator
+
+function checkCurrentUserPermission(selected_eppn,needNotification){
+  console.log(selected_eppn)
+  if(selected_eppn == currentUser.eppn){
+    return true;
+  }
+  else{
+    if(needNotification){
+      launchToastNotifcation("You don't have permission to do this action");
+    }
+    return false;
+  }
+}
+
+function checkworkAdminList(selected_eppn,litId){
   var endPoint = "get_permissions_list/"+selected_eppn+"/"+litId;
   let x = true;
   API.request({
@@ -410,11 +423,11 @@ function checkPermission(selected_eppn, litId){
   }).then((data)=>{
     let isInWhiteList = false
     for (var i =0; i<data["admins"].length;i++){
-      if(selected_eppn == data["admins"][i]){
+      if(currentUser.eppn == data["admins"][i]){
         isInWhiteList = true;
+        console.log("in admins");
       }
     }
-    //figure out a way to return the boolean
     if(isInWhiteList){
       x = true;
     }
@@ -423,7 +436,6 @@ function checkPermission(selected_eppn, litId){
       x = false;
     }
   });
-  return x;
 }
 
 function launchToastNotifcation(data){

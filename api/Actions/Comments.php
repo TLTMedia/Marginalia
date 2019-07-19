@@ -528,6 +528,7 @@ class Comments
                     if ($jsonData->approved) {
                         // comment is approved
                         $jsonData->hash = $this->getEppnHashFromPath($jsonData->path, "hash");
+                        $jsonData->approved = true;
                         array_push($commentsPointer, $jsonData);
                     } else {
                         // comment is not approved
@@ -535,6 +536,7 @@ class Comments
                         if ($this->permissions->userOnPermissionsList($workPath, $readerEppn) || $readerEppn == $jsonData->eppn) {
                             // reader is admin so can see the comment
                             $jsonData->hash = $this->getEppnHashFromPath($jsonData->path, "hash");
+                            $jsonData->approved = false;
                             array_push($commentsPointer, $jsonData);
                         } else {
                             // reader is not an admin, so can't see the comment
@@ -563,6 +565,7 @@ class Comments
                             if ($jsonData->approved) {
                                 // comment is approved
                                 $jsonData->hash = $this->getEppnHashFromPath($jsonData->path, "hash");
+                                $jsonData->approved = true;
                                 array_push($commentsPointer[$amt]->threads, $jsonData);
                             } else {
                                 // comment is not approved
@@ -570,6 +573,8 @@ class Comments
                                 if ($this->permissions->userOnPermissionsList($workPath, $readerEppn) || $readerEppn == $jsonData->eppn) {
                                     // reader is admin so can see the comment
                                     $jsonData->hash = $this->getEppnHashFromPath($jsonData->path, "hash");
+                                    //CHANGE JUN 25 (add a new value in the json data the "approved")
+                                    $jsonData->approved = false;
                                     array_push($commentsPointer[$amt]->threads, $jsonData);
                                 } else {
                                     // reader is not an admin, so can't see the comment

@@ -28,9 +28,9 @@ function escapeHTMLPtag(text){
   return text.replace(/<p>(.*)<\/p>/,` $1\n`);
 }
 
-function createReplies(eppn, firstName, lastName, startDex, endDex, isVisible, type, commentText, threads, hash, parentHash = null) {
+function createReplies(eppn, firstName, lastName, startDex, endDex, isVisible, type, commentText, threads, hash, approved, parentHash = null, work, workCreator) {
   var replyBox = $('<div/>', {
-    class: "replies",
+    class: approved?"replies" : "replies unapproved",
     commentid: hash,
     name: eppn,
     haschild:0,
@@ -39,14 +39,18 @@ function createReplies(eppn, firstName, lastName, startDex, endDex, isVisible, t
   });
   var userName = firstName + " " + lastName;
   var hashForReply = 'r'+hash;
-  var hashForReplyButton = 'b'+hash;
   var inText = atob(commentText);
   inText = escapeHTMLPtag(inText);
   if(firstName == 'deleted' && lastName == 'deleted'){
-    //if the comment is deleted then it don't have buttons <span>
     replyBox.html("<span class = 'replyText' id = '"+hashForReply+"'>"+inText+"</span>");
-  }else{
-    replyBox.html("<span class = 'replyText' id = '"+hashForReply+"'>"+userName + ": " +inText+"</span> <span class = 'commentButtonSpan' id = '"+hashForReplyButton+"'></span>");
+  }
+  else{
+    if(approved){
+      replyBox.html("<span class = 'replyText' id = '"+hashForReply+"'>"+userName + ": " +inText+"</span>");
+    }
+    else{
+      replyBox.html("<span class = 'replyText' id = '"+hashForReply+"'>"+userName + ": " +inText+"<i>(comment needs approvement)</i></span>");
+    }
   }
   // this reply has a parent
   if (parentHash != null) {
@@ -67,10 +71,11 @@ function createReplies(eppn, firstName, lastName, startDex, endDex, isVisible, t
     $("#replies").append(replyBox);
     $("#r"+hash).addClass("firstComment");
   }
-  createMenuForComment(inText,hash,eppn,hashForReply);
+  createMenuForComment(inText,hash,eppn,hashForReply,approved,work,workCreator)
 }
 
-function createMenuForComment(inText,hash,eppn,hashForReply){
+
+function createMenuForComment(inText,hash,eppn,hashForReply,approved,work,workCreator){
   var commentMenuButton = $("<button/>",{
     class: "commentMenuButton mdl-button mdl-js-button mdl-button--icon",
     id:"m"+hash,
@@ -109,7 +114,7 @@ function createMenuForComment(inText,hash,eppn,hashForReply){
     text: "Delete",
     commentid:hash,
     click: ()=>{
-      deleteButtonOnClick(hash,eppn,hashForReply);
+      deleteButtonOnClick(hash,eppn,hashForReply,work,workCreator);
     }
   });
   var menuSetPrivate = $("<li/>",{
@@ -117,7 +122,7 @@ function createMenuForComment(inText,hash,eppn,hashForReply){
     text: "Set Private",
     commentid: hash,
     click : (evt)=>{
-      commentPrivateButtonOnClick(evt,false);
+      commentPrivateButtonOnClick(evt,work,workCreator,false);
     }
   });
   var menuSetPublic = $("<li/>",{
@@ -125,11 +130,34 @@ function createMenuForComment(inText,hash,eppn,hashForReply){
     text: "Set Public",
     commentid: hash,
     click : (evt)=>{
-      commentPrivateButtonOnClick(evt,true);
+      commentPrivateButtonOnClick(evt,work,workCreator,false);
+    }
+  });
+  var menuApprove = $("<li/>",{
+    class: "approveComments mdl-menu__item",
+    text: "Approve",
+    commentid: hash,
+    click: (evt)=>{
+      console.log("approve "+hash+" comment");
     }
   });
   $(commentMenuButton).append(icon);
-  $(menu).append(menuReply,menuEdit,menuDelete,menuSetPrivate,menuSetPublic);
+  //comment is approved and currentUser is the comment creator
+  if(approved && checkCurrentUserPermission(eppn,false)){
+    $(menu).append(menuReply,menuEdit,menuDelete,menuSetPrivate,menuSetPublic);
+  }
+  //comment is approved and currentUser is not the comment creator
+  else if(approved && !checkCurrentUserPermission(eppn,false)){
+    $(menu).append(menuReply);
+  }
+  // comment is unapproved and currentUser is the comment creator
+  else if(!approved && checkCurrentUserPermission(eppn,false)){
+    $(menu).append(menuEdit,menuDelete,menuSetPrivate,menuSetPublic);
+  }
+  //comment is unapproved and currentUser is not the comment creator
+  else{
+    $(menu).append(menuApprove,menuDelete);
+  }
   var span = $("#r"+hash);
   if(span.text() != 'deleted'){
     span.append(commentMenuButton,menu);
@@ -147,16 +175,17 @@ function commentMenuOnClick(rid){
   $("#commentSave").show();
   $("#commentExit").text("Exit");
   $(".commentMenu").children("li").hide();
-  if (currentUser.eppn == replyToEppn) {
-    $(".commentMenu").children("li"+"[commentid = '" + rid + "']").show();
-    // $(".editComments" + "[commentid = '" + rid + "']").show();
-    // $(".deleteComments" + "[commentid = '" + rid + "']").show();
-    // $(".setCommentsPrivate" +"[commentid = '" + rid + "']").show();
-    // $(".setCommentsPublic" +"[commentid = '" + rid + "']").show();
-  }
-  else {
-      $(".replyToComments" + "[commentid = '" + rid + "']").show();
-  }
+  $(".commentMenu").children("li"+"[commentid = '"+rid+"']").show();
+  // if (currentUser.eppn == replyToEppn) {
+  //   $(".commentMenu").children("li"+"[commentid = '" + rid + "']").show();
+  //   // $(".editComments" + "[commentid = '" + rid + "']").show();
+  //   // $(".deleteComments" + "[commentid = '" + rid + "']").show();
+  //   // $(".setCommentsPrivate" +"[commentid = '" + rid + "']").show();
+  //   // $(".setCommentsPublic" +"[commentid = '" + rid + "']").show();
+  // }
+  // else {
+  //     $(".replyToComments" + "[commentid = '" + rid + "']").show();
+  // }
   CKEDITOR.instances.textForm.setReadOnly(false);
 }
 
@@ -181,20 +210,19 @@ function editButtonOnClick(inText,hash){
   $('.commentTypeDropdown').val($("#"+firstCommentId).attr("typeof"));
 }
 
-function deleteButtonOnClick(hash,eppn,hashForReply){
+function deleteButtonOnClick(hash,eppn,hashForReply,work,workCreator){
   var deletedId = hash;
   $("#replies").attr("deletedId",deletedId);
-  var literatureName = $(".chosenFile").text();;
-  var data = getDataForEditOrDelete(literatureName,hash,eppn,null,null);
+  var data = getDataForEditOrDelete(workCreator,work,hash,eppn,null,null);
   editOrDelete(data,false);
 }
 
-function commentPrivateButtonOnClick(evt,setPrivate){
+function commentPrivateButtonOnClick(evt,work,workCreator,setPrivate){
   var commentId = evt["currentTarget"]["attributes"]["commentid"]["value"];
   console.log(commentId);
   var data = JSON.stringify({
-    creator: $(".chosenUser").text().split(":")[0],
-    work: $(".chosenFile").text(),
+    creator: workCreator,
+    work: work,
     comment_hash: commentId,
     public: setPrivate ? true: false
   });
