@@ -65,10 +65,9 @@ html {
   float: right;
 }
 
-.commented-selection {
-  background-color: rgba(100, 255, 100);
-  cursor: context-menu;
-}
+
+
+
 
 #type-of-work {
   box-sizing: border-box;
@@ -686,7 +685,8 @@ div[id='textSpace'] {
   padding-left: .5%;
 }
 
-.allButtons, .allCommenters{
+/*-----------------Commenters/Type Selector----------------*/
+.allTypes, .allCommenters{
   -moz-user-select: -moz-none;
   -khtml-user-select: none;
   -webkit-user-select: none;
@@ -706,9 +706,34 @@ div[id='textSpace'] {
   border: 2px solid rgba(0, 0, 0, 0.5);
 }
 
+.notUsedType{
+  color: lightGrey;
+}
+
 .mdl-radio__inner-circle {
   /* color: #CA99FA; */
   color: #4db6ac;
+}
+
+.allCommenters{
+  overflow-y: scroll;
+  overflow-x: scroll;
+}
+
+.allCommenters::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+  background: #f3f1ef;
+}
+
+.allCommenters::-webkit-scrollbar-track {
+  border-radius: 5px;
+}
+
+.allCommenters::-webkit-scrollbar-thumb {
+  border-radius: 5px;
+  background: #4db6ac;
+  -webkit-box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.5);
 }
 
 .choiceList {
@@ -946,7 +971,7 @@ input[type='radio']:active {
 
 ::-webkit-scrollbar {
   width: 10px;
-  background: white;
+  background: #f0edeb;
 }
 
 ::-webkit-scrollbar-track {
@@ -1107,7 +1132,6 @@ div[aria-describedby="inputDialog"] {
   border: 1px solid #c13328;
   margin: 1px 3px 1px 0px;
   font-size: 10px;
-
 }
 
 .closeReplyBox:hover , .closeCommentBox:hover{
@@ -1154,12 +1178,34 @@ input[type="file"] {
 #userSelector {
     font-style: italic;
 }
+/*-----------------commentHighlightColor-----------*/
+.commented-selection {
+  background-color: rgba(100, 255, 100);
+  cursor: context-menu;
+}
 
 /*-----------------selectingMenu-------------------*/
 .userSelectMenu ul, .workSelectMenu ul{
   height: 96px;
   overflow: hidden;
   overflow-y: scroll;
+}
+
+.usersMenuOptions , .worksMenuOptions{
+  background-color: #efebe9;
+  font-weight: bold;
+}
+
+.usersMenuOptions:hover,.worksMenuOptions:hover{
+  background-color:#bfbcba;
+}
+
+.searchUser, .searchLit, .searchWhiteList{
+  width: 85%;
+  font-size: 16px;
+  padding: 12px 20px 12px 20px;
+  background-color: #f3f1ef;
+  margin-bottom: 12px;
 }
 /*-----------------settingPage---------------------*/
 .disabledHeaderTab{
@@ -1176,22 +1222,11 @@ input[type="file"] {
   font-weight: bold;
 }
 
-
-
-.settingUserDiv ul, .settingLitDiv ul , .whiteListSettingBase ul{
+.whiteListSettingBase ul{
   height: 96px;
   overflow: hidden;
   overflow-y: scroll;
 }
-
-.searchUser, .searchLit, .searchWhiteList{
-  width: 85%;
-  font-size: 16px;
-  padding: 12px 20px 12px 20px;
-  background-color: #f3f1ef;
-  margin-bottom: 12px;
-}
-
 
 .settingUsers , .settingLit{
   background-color: #efebe9;

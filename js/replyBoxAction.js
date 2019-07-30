@@ -28,6 +28,10 @@ function escapeHTMLPtag(text){
   return text.replace(/<p>(.*)<\/p>/,` $1\n`);
 }
 
+/*
+* eppn : commenterEppn
+* approved : if the comment is approved or not
+*/
 function createReplies(eppn, firstName, lastName, startDex, endDex, isVisible, type, commentText, threads, hash, approved, parentHash = null, work, workCreator) {
   var replyBox = $('<div/>', {
     class: approved?"replies" : "replies unapproved",
@@ -75,6 +79,7 @@ function createReplies(eppn, firstName, lastName, startDex, endDex, isVisible, t
 }
 
 
+//TODO this function can be shorter
 function createMenuForComment(inText,hash,eppn,hashForReply,approved,work,workCreator){
   var commentMenuButton = $("<button/>",{
     class: "commentMenuButton mdl-button mdl-js-button mdl-button--icon",
@@ -138,7 +143,8 @@ function createMenuForComment(inText,hash,eppn,hashForReply,approved,work,workCr
     text: "Approve",
     commentid: hash,
     click: (evt)=>{
-      console.log("approve "+hash+" comment");
+      var commenterEppn = eppn;
+      commentApprovedButtonOnClick(hash,commenterEppn,work,workCreator);
     }
   });
   $(commentMenuButton).append(icon);
@@ -152,11 +158,14 @@ function createMenuForComment(inText,hash,eppn,hashForReply,approved,work,workCr
   }
   // comment is unapproved and currentUser is the comment creator
   else if(!approved && checkCurrentUserPermission(eppn,false)){
-    $(menu).append(menuEdit,menuDelete,menuSetPrivate,menuSetPublic);
+    $(menu).append(menuEdit,menuDelete);
   }
   //comment is unapproved and currentUser is not the comment creator
   else{
-    $(menu).append(menuApprove,menuDelete);
+    console.log($("#replies").attr("iscurrentuseradmin"))
+    if($("#replies").attr("isCurrentUserAdmin")){
+      $(menu).append(menuApprove,menuDelete);
+    }
   }
   var span = $("#r"+hash);
   if(span.text() != 'deleted'){
@@ -234,7 +243,28 @@ function commentPrivateButtonOnClick(evt,work,workCreator,setPrivate){
     console.log(data);
   });
 }
-
+//TODO not working
+function commentApprovedButtonOnClick(hash,commenterEppn,work,workCreator){
+  var data = JSON.stringify({
+    creator: workCreator,
+    work: work,
+    commenterEppn: commenterEppn,
+    comment_hash: hash,
+    approved: true
+  });
+  API.request({
+    endpoint: "approve_comment",
+    method:"POST",
+    data: data
+  }).then((data)=>{
+    console.log(data);
+    $("#"+hash).attr("approved",true);
+    let currentSelectedType = $(".typeSelector").attr("currentTarget");
+    let currentSelectedCommenter = $(".commenterSelector").attr("currentTarget");
+    console.log(currentSelectedType,currentSelectedCommenter);
+    markUnapprovedComments(currentSelectedType,currentSelectedCommenter);
+  });
+}
 // This displays the replies for the current comment box
 function displayReplyBox(evt) {
   var newTop = evt.pageY + "px";
@@ -245,4 +275,8 @@ function displayReplyBox(evt) {
     'left': newLeft
   })
   $("#replies").parent().fadeIn();
+}
+
+function hideReplyBox(){
+  $("#replies").parent().hide();
 }

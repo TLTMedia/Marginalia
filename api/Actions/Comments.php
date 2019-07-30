@@ -288,7 +288,8 @@ class Comments
             return json_encode(array(
                 "status" => "ok",
                 "message" => "comment saved",
-                "commentHash" =>  $commentHash
+                "commentHash" =>  $commentHash,
+                "additional" => $approved
             ));
         } else {
             return json_encode(array(
@@ -390,6 +391,34 @@ class Comments
             ));
         }
     }
+
+    public function approvedComment($creator, $work, $commentHash, $commenterEppn, $approved)
+    {
+        $fileToModify = $this->getCommentPathByHash($creator, $work, $commentHash, $commenterEppn);
+        if (!$fileToModify) {
+            return json_encode(array(
+                "status" => "error",
+                "message" => "unable to approve comment1"
+            ));
+        }
+
+        $fileData = json_decode(file_get_contents($fileToModify));
+        $fileData->approved = true;
+        $fileData->public = true;
+        if (file_put_contents($fileToModify, json_encode($fileData))) {
+            return json_encode(array(
+                "status" => "ok",
+                "data" => "successfully approved comment"
+            ));
+        } else {
+            return json_encode(array(
+                "status" => "error",
+                "message" => "unable to approve comment"
+            ));
+        }
+    }
+
+
 
     /**
      * Path property in a comment is needed to construct the comments in the proper order.

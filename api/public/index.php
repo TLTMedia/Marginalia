@@ -277,6 +277,38 @@ $app->post('/set_comment_public', function () use ($app) {
     );
 });
 
+//TODO approve comments
+$app->post('/approve_comment',function() use ($app){
+  $json = $app->request->getBody();
+  $data = json_decode($json, true);
+  if (!array_equal(array_keys($data), array("creator", "work", "commenterEppn", "comment_hash", "approved"))) {
+      echo json_encode(array(
+          "status" => "error",
+          "message" => "missing a parameter"
+      ));
+      return;
+  }
+
+  require '../Actions/Comments.php';
+  $comments = new Comments($data["creator"], $data["work"]);
+
+  if (!in_array(json_encode($data['approved']), array('true', 'false'))) {
+      echo json_encode(array(
+          "status" => "error",
+          "message" => "unable to edit comment"
+      ));
+      return;
+  }
+
+  echo $comments->approvedComment(
+      $data['creator'],
+      $data['work'],
+      $data['comment_hash'],
+      $data['commenterEppn'],
+      $data['approved']
+  );
+});
+
 /**
  * Set an existing comment public/privacy status
  */

@@ -43,23 +43,30 @@ $(window).ready(function() {
                 }
             });
         });
+        //TODO find a better way to add this in here
+        resetWhiteListPage();
     });
 
     $("#setting").addClass("disabledHeaderTab");
     $("#setting").off().on("click",()=>{
+      let author =$("#setting").attr("author");
+      let work = $("#setting").attr("work");
+      console.log(author, work);
+      //TODO setting page sometimes shows up before the checking authority works
       if($("#setting").hasClass("disabledHeaderTab")){
-          console.log("disabled");
+        launchToastNotifcation("Please select a work first");
+      }
+      else if($("#setting").hasClass("noPermission")){
+        launchToastNotifcation("You don't have the permission to do this action");
       }
       else{
-        let author =$("#setting").attr("author");
-        let work = $("#setting").attr("work");
-        console.log(author, work);
         litSettingButtonOnClick(work,author);
       }
     });
 
     $("#home").off().on("click",function(){
       homeButtonAction();
+      resetWhiteListPage();
     });
 });
 
@@ -107,6 +114,10 @@ function homeButtonAction(){
   //disable the setting header tab
   $("#setting").addClass("disabledHeaderTab");
   resetSettingTitle();
+  //TODO this is the old hide box with wierd query
+  hideAllBoxes();
+  //hideReplyBox();
+  //hideCommentBox();
 }
 //----------------------------------------------------------
 
@@ -157,6 +168,7 @@ function showUsersLit(users,selected_eppn){
           $(this).addClass("settingLitSelected");
           let selectedWorkId = evt["currentTarget"]["id"];
           selectLit(selected_eppn,selectedWorkId);
+
         }
       });
       $(".worksMenu").append(litButton);
@@ -249,13 +261,25 @@ function showUsersLit(users,selected_eppn){
    let endpoint = 'get_work/' +selected_eppn + '/' + textChosen;
    showLink(endpoint);
    API.request({endpoint}).then((data) => {
-       let literatureText = data;
-       buildHTMLFile(data,selected_eppn,textChosen);
-       $("#setting").removeClass("disabledHeaderTab");
-       $("#setting").attr({
-         "author":selected_eppn,
-         "work": textChosen
-       });
-       $("#settingBase").hide();
+       let literatureText = data['data'];
+       let workIsPublic;
+       buildHTMLFile(literatureText,selected_eppn,textChosen);
+       updateSettingPage(selected_eppn,textChosen,data['additional']);
    });
+   //auto scroll to the text part
+   window.scrollTo(0,$("#cardbox").position().top+$("#cardbox").height());
+   //check the permission for settings
+   checkworkAdminList(selected_eppn,textChosen,"setting");
+   //check the permission for approving comments
+   checkworkAdminList(selected_eppn,textChosen,"approvedComments");
+ }
+
+ function updateSettingPage(selected_eppn,textChosen,workIsPublic){
+   $("#setting").removeClass("disabledHeaderTab");
+   $("#setting").attr({
+     "author":selected_eppn,
+     "work": textChosen,
+     "isWorkPublic": workIsPublic
+   });
+   $("#settingBase").hide();
  }

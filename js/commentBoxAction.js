@@ -69,7 +69,7 @@ function saveButtonOnClick(workCreator,work) {
     var replyTo = $("#commentBox").attr("data-replytoeppn");
     var replyHash = $('#commentBox').attr("data-replytohash");
     var dataForSave = getDataForSave(creator,literatureName,commentText,commentType,span,replyTo,replyHash);
-    console.log(dataForSave);
+    //console.log(dataForSave);
     var editCommentID = $("#commentBox").attr("data-editCommentID");
     if(editCommentID!="-1"){
       var commentCreatorEppn = $(".replies"+"[commentid = '"+editCommentID+"']").attr('name');
@@ -156,29 +156,37 @@ function saveCommentOrReply(dataForSave,isComment){
       data: savedData,
       callback: null
   }).then((data) => {
-    //console.log(data);
     launchToastNotifcation(data['message']);
     if(!isComment){
       var firstCommentId = $("#replies").attr("data-firstCommentId");
       refreshReplyBox(dataForSave["author"],dataForSave["work"],$("#"+firstCommentId).attr("creator"),firstCommentId);
     }
     else{
-      //console.log(remSpan);
+      let approved;
       $('.'+escapeSpecialChar(remSpan)).removeAttr('startindex endIndex');
+      if(data["additonal"] == true){
+        approved = true;
+      }
+      else{
+        approved = false;
+      }
       $('.'+escapeSpecialChar(remSpan)).attr({
         'id':data['commentHash'],
         'creator':currentUser.eppn,
-        'typeof':dataForSave['commentType']
+        'typeof':dataForSave['commentType'],
+        'approved':approved
       });
       $('.'+escapeSpecialChar(remSpan)).removeClass(remSpan);
-      refreshSelector(dataForSave["replyHash"],dataForSave["commentType"]);
+      updateTypeSelector(dataForSave["replyHash"],dataForSave["commentType"]);
       updateCommenterSelectors();
+
       //update the click event on this new added comment
       $("#"+data['commentHash']).off().on("click", function(evt) {
         var commentSpanId = $(this).attr('id');
         console.log(evt);
         clickOnComment(commentSpanId,dataForSave["work"],dataForSave["author"],evt);
       });
+      markUnapprovedComments();
     }
   });
 }
@@ -221,7 +229,7 @@ function editOrDelete(dataForEditOrDelete,isEdit){
     endPoint = "delete_comment";
   }
   sendData = JSON.stringify(commonData);
-  console.log(sendData);
+  //console.log(sendData);
   API.request({
     endpoint:endPoint,
     method: "POST",
@@ -233,15 +241,16 @@ function editOrDelete(dataForEditOrDelete,isEdit){
     refreshReplyBox(dataForEditOrDelete["creator"],dataForEditOrDelete["work"],$("#"+firstCommentId).attr("creator"),firstCommentId);
     if(isEdit){
       if(dataForEditOrDelete["type"]){
-        refreshSelector(dataForEditOrDelete["hash"],dataForEditOrDelete["type"]);
+        updateTypeSelector(dataForEditOrDelete["hash"],dataForEditOrDelete["type"]);
       }
     }
     //unhighlight the deleted comment
-    //update the commenterSelector
+    //update the commenterSelector and the typeSelector
     if(firstCommentId == $("#replies").attr("deletedid")){
       console.log("should unwrap");
       removeDeletedSpan(firstCommentId);
       updateCommenterSelectors(firstCommentId);
+      updateTypeSelector(undefined,"All");
       $("#replies").parent().hide();
     }
     $("#replies").removeAttr("deletedid");
@@ -275,4 +284,8 @@ function displayCommentBox(evt,id) {
   $("#commentBox").attr("data-editcommentid","-1");
   $("#commentBox").parent().find("#ui-id-1").contents().filter(function(){ return this.nodeType == 3; }).first().replaceWith("Annotation by: " + currentUser['firstname'] + " " + currentUser['lastname']);
   $("#commentBox").parent().fadeIn();
+}
+
+function hideCommentBox(){
+  $("#commentBox").parent().hide();
 }

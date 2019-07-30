@@ -14,6 +14,20 @@ function resetWhiteListSearch(){
   searchAction($(".searchWhiteList"),$(".whiteList"),"user");
 }
 
+function resetWhiteListPage(){
+  enableAllWhiteListOption();
+  let whiteList = $(".whiteListCheckBox");
+  for(var i =0; i< whiteList.length ; i++){
+    console.log(whiteList[i]["attributes"]["id"]["value"]);
+    let id = whiteList[i]["attributes"]["id"]["value"];
+    //checkbox is still checked
+    if($("#"+escapeSpecialChar(id)).parent("label").hasClass("is-checked")){
+      console.log("uncheck");
+      $("#"+escapeSpecialChar(id)).off().click();
+    }
+  }
+}
+
 function settingGoBackButtonOnClick(){
   if ($("#settingBase").is(":visible")) {
     if($(".litSettingBase").is(":visible")){
@@ -23,36 +37,37 @@ function settingGoBackButtonOnClick(){
     else if($(".whiteListSettingBase").is(":visible")){
       $(".whiteListSettingBase").hide();
       resetWhiteListSearch();
+      resetWhiteListPage();
       $(".litSettingBase").show();
     }
   }
 }
 
-function makeWorkSettingButton(selected_eppn,selectedLitId){
-  $("#litSettingButton").remove();
-  let id = "litSettingButton";
-  let dest = ".settingLitDiv";
-  var button = $("<button/>",{
-    class: "mdl-button mdl-js-button mdl-button--icon",
-    click: (evt)=>{
-      let litId = selectedLitId.slice(1,selectedLitId.length);
-      if(checkCurrentUserPermission(selected_eppn,true)){
-        litSettingButtonOnClick(selectedLitId, selected_eppn);
-      }
-    }
-  });
-  var icon = $("<i/>",{
-    class: "material-icons",
-    text: "settings"
-  });
-  var settingButtons = $('<span/>',{
-    id: id
-  });
-  $(settingButtons).append(button);
-  $(button).append(icon);
-  $(dest).append(settingButtons);
-  componentHandler.upgradeAllRegistered();
-}
+// function makeWorkSettingButton(selected_eppn,selectedLitId){
+//   $("#litSettingButton").remove();
+//   let id = "litSettingButton";
+//   let dest = ".settingLitDiv";
+//   var button = $("<button/>",{
+//     class: "mdl-button mdl-js-button mdl-button--icon",
+//     click: (evt)=>{
+//       let litId = selectedLitId.slice(1,selectedLitId.length);
+//       if(checkCurrentUserPermission(selected_eppn,true)){
+//         litSettingButtonOnClick(selectedLitId, selected_eppn);
+//       }
+//     }
+//   });
+//   var icon = $("<i/>",{
+//     class: "material-icons",
+//     text: "settings"
+//   });
+//   var settingButtons = $('<span/>',{
+//     id: id
+//   });
+//   $(settingButtons).append(button);
+//   $(button).append(icon);
+//   $(dest).append(settingButtons);
+//   componentHandler.upgradeAllRegistered();
+// }
 
 // mode will be user/ work
 function searchAction(input, ul, mode){
@@ -196,7 +211,7 @@ function makeWhiteListSettingBase(user_list){
 function litSettingButtonOnClick(selectedLitId, selected_eppn){
   $("#nonTitleContent").hide();
   $("#settingBase").show();
-  $(".whiteListSettingBase").hide();
+  $(".whiteListSettingBase, #addLitBase").hide();
   $(".litSettingBase").empty();
   $(".litSettingBase").fadeIn();
   $("#settingTitle").text("Settings For : " + selected_eppn +"'s " +selectedLitId);
@@ -205,9 +220,9 @@ function litSettingButtonOnClick(selectedLitId, selected_eppn){
   });
   $(".litSettingBase").append(settingOptions);
   //private
-  makeLitPrivacySwitch(selectedLitId, selected_eppn);
+  makeLitPrivacySwitch(selectedLitId, selected_eppn, checkWorkIsPublic);
   //edit
-  makeLitEditButton(selectedLitId, selected_eppn);
+  makeLitEditCommentApprovalButton(selectedLitId, selected_eppn);
   //TODO test for getting whiteList of the work
   makeWhiteListButton(selectedLitId, selected_eppn);
 
@@ -217,7 +232,7 @@ function litSettingButtonOnClick(selectedLitId, selected_eppn){
   });
 }
 
-function makeLitPrivacySwitch(litId, selected_eppn){
+function makeLitPrivacySwitch(litId, selected_eppn, callback){
   let privacyOption =$("<li/>",{
     class: "mdl-list__item",
     text: "Private"
@@ -234,15 +249,25 @@ function makeLitPrivacySwitch(litId, selected_eppn){
   $(".settingOptions").append(privacyOption);
   $(privacyOption).append(privacySwitch);
   $(privacySwitch).append(input);
-  input.on("click",(evt)=>{
+  componentHandler.upgradeAllRegistered();
+  callback();
+  input.off().on("change",(evt)=>{
     litPrivacySwitchOnClick(evt,litId,selected_eppn);
   });
-  componentHandler.upgradeAllRegistered();
 }
 
-function makeLitEditButton(litId, selected_eppn){
+//TODO get the value from back end instead of the setting button
+function checkWorkIsPublic(){
+  console.log($("#setting").attr("isWorkPublic"));
+  if($("#setting").attr("isWorkPublic") == "private"){
+    console.log("work is private");
+    $("#privacySwitch").click();
+  }
+}
+
+function makeLitEditCommentApprovalButton(litId, selected_eppn){
   let editOption =$("<li/>",{
-    class: "mdl-list__item litEditButton",
+    class: "mdl-list__item",
     text: "Comments Need Approval"
   });
   var editSwitch = $("<label/>",{
@@ -279,14 +304,17 @@ function makeWhiteListButton(litId,selected_eppn){
 
 function litPrivacySwitchOnClick(evt,litId,selected_eppn){
   var isSelected = $("#privacySwitch").is(":checked");
-  let endPoint, message;
+  let endPoint, message, isWorkPublic;
   if(isSelected){
     endPoint = "set_privacy/"+selected_eppn+"/"+litId+"/"+false;
     message = "current work is set to private";
+    isWorkPublic = "private";
   }else{
     endPoint = "set_privacy/"+selected_eppn+"/"+litId+"/"+true;
     message = "current work is set to public";
+    isWorkPublic = "public";
   }
+  $("#setting").attr("isWorkPublic",isWorkPublic);
   console.log(endPoint);
   API.request({
     endpoint: endPoint,
@@ -300,23 +328,13 @@ function litEditSwitchOnClick(evt,litId){
   var isSelected = $("#editCommentsNeedAprroval").is(":checked");
   let endPoint,message;
   if(isSelected){
-    message = "comments need approval on the current work";
+    message = "comments need approval on the current work (need add backEnd)";
     console.log(message);
   }
   else{
-    message = "comments don't need approval on the current work";
+    message = "comments don't need approval on the current workm (need add backEnd)";
     console.log(message);
   }
-}
-
-function enableAllWhiteListOption(){
-  $(".whiteListCheckBox").removeAttr("disabled");
-}
-
-//litId = literature name, selected_eppn = creator of the work
-function disableCreatorWhiteListOption(litId,selected_eppn){
-  let inputId = "wl_"+selected_eppn;
-  $("#"+escapeSpecialChar(inputId)).attr("disabled",true);
 }
 
 //litId = literature name , selected_eppn = creator of the literature
@@ -331,15 +349,12 @@ function showWhiteListSettingBase(litId,selected_eppn){
     endpoint: endPoint,
     method: "GET"
   }).then((data)=>{
-    // $(".whiteListCheckBox").off().on("change",(evt)=>{
-    //   console.log("pls")
-    // });
     for (var i =0; i< data["admins"].length; i++){
       let whiteListUser = data["admins"][i];
       let inputs = $(".whiteList").find("input");
       for(var j = 0; j< inputs.length;j++){
         if(inputs[j]["id"].split("_")[1] == whiteListUser){
-          $("#"+escapeSpecialChar(inputs[j]["id"])).parent("label").addClass("is-checked");
+          $("#"+escapeSpecialChar(inputs[j]["id"])).off().click();
           console.log(inputs[j]["id"]);
         }
       }
@@ -350,8 +365,16 @@ function showWhiteListSettingBase(litId,selected_eppn){
       console.log("clicked");
     });
   });
+}
 
+function enableAllWhiteListOption(){
+  $(".whiteListCheckBox").removeAttr("disabled");
+}
 
+//litId = literature name, selected_eppn = creator of the work
+function disableCreatorWhiteListOption(litId,selected_eppn){
+  let inputId = "wl_"+selected_eppn;
+  $("#"+escapeSpecialChar(inputId)).attr("disabled",true);
 }
 
 function addUserToWhiteList(selected_eppn, litId){
@@ -360,12 +383,12 @@ function addUserToWhiteList(selected_eppn, litId){
   if($("#"+escapeSpecialChar(selected_eppn)).is(":checked")){
     endPoint = "add_permission/"+litId+"/"+eppn;
     //TODO notification is not well enough
-    launchToastNotifcation(eppn+"is added to the white list");
+    launchToastNotifcation(eppn+" is added to the white list");
   }
   else{
     endPoint = "remove_permission/"+litId+"/"+eppn;
     //TODO notification is not well enough
-    launchToastNotifcation(eppn+"is removed from the white list");
+    launchToastNotifcation(eppn+" is removed from the white list");
   }
   API.request({
     endpoint: endPoint,

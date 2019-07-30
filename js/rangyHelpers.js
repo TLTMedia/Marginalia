@@ -10,7 +10,6 @@ function highlightCurrentSelection(evt,literatureText) {
   $("#commentBox").removeAttr("data-replyToHash");
   if (selectedRange.endOffset != selectedRange.startOffset) {
     unhighlight();
-    $(".loader").show();
     CKEDITOR.instances.textForm.setData("");
     $("#commentExit").text("Unselect");
     let range = selectedRange.toCharacterRange(document.getElementById('textSpace'));

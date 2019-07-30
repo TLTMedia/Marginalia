@@ -23,11 +23,12 @@ export class APIHandler {
                 console.log("NOK", data);
                 return;
             } else {
+              //TODO add additional part
               var returnMessages = {
                 data: data['data'],
                 message: data['message'],
                 commentHash: data['commentHash'],
-                parentDeleted: data['parentDeleted']
+                additional: data['additional']
               }
                 if (callback) {
                     if( data['commentHash'] == undefined){
@@ -38,11 +39,11 @@ export class APIHandler {
                     }
                 }
                 else {
-                    if( data['commentHash'] == undefined){
-                        defer.resolve(data['data'] || data['message']);
+                    if( data['commentHash'] == undefined && data['additional'] == undefined){
+                      defer.resolve(data['data'] || data['message']);
                     }
                     else{
-                        defer.resolve(returnMessages);
+                      defer.resolve(returnMessages);
                     }
                 }
             }

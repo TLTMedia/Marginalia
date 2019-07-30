@@ -98,25 +98,36 @@ function makeDropDown(){
     dropdown.append(option);
     $("#commentTypeDropdown").val(option);
   });
-
 }
 
+//TODO need the author and the work name to enable the click event for the comments
+//TODO use a better way to store the work and author instead of getting it from DOM
 function selectorOnSelect(currentSelectedType, currentSelectedCommenter){
-  console.log('type : ',currentSelectedType);
-  console.log('commenter: ',currentSelectedCommenter);
-  $(".commented-selection").css({"background-color": "rgba(100, 255, 100, 0.0)"});
+  // console.log('type : ',currentSelectedType);
+  // console.log('commenter: ',currentSelectedCommenter);
+  let selectedComments;
+  $(".commented-selection").off().css({
+    "background-color": "rgba(100, 255, 100, 0.0)"
+  });
   if (currentSelectedType == "All" && currentSelectedCommenter == "AllCommenters"){
-    $(".commented-selection").css({"background-color": "rgba(100, 255, 100, 1.0)"});
+    selectedComments = $(".commented-selection").css({"background-color": "rgba(100, 255, 100, 1.0)"});
   }
   else if(currentSelectedCommenter == "AllCommenters"){
-    $(".commented-selection" + "[typeof='" + currentSelectedType + "']").css({"background-color": "rgba(100, 255, 100, 1.0)"});
+    selectedComments = $(".commented-selection" + "[typeof='" + currentSelectedType + "']").css({"background-color": "rgba(100, 255, 100, 1.0)"});
   }
   else if(currentSelectedType == "All"){
-    $(".commented-selection" + "[creator ='" + currentSelectedCommenter + "']").css({"background-color": "rgba(100, 255, 100, 1.0)"});
+    selectedComments = $(".commented-selection" + "[creator ='" + currentSelectedCommenter + "']").css({"background-color": "rgba(100, 255, 100, 1.0)"});
   }
   else{
-    $(".commented-selection" + "[creator ='" + currentSelectedCommenter + "'][typeof = '" + currentSelectedType + "']").css({"background-color": "rgba(100, 255, 100, 1.0)"});
+    selectedComments = $(".commented-selection" + "[creator ='" + currentSelectedCommenter + "'][typeof = '" + currentSelectedType + "']").css({"background-color": "rgba(100, 255, 100, 1.0)"});
   }
+  selectedComments.off().on("click",(evt)=>{
+    let commentSpanId = evt["currentTarget"]["id"];
+    let work = $("#setting").attr("work");
+    let author = $("#setting").attr("author");
+    clickOnComment(commentSpanId,work,author,evt);
+  });
+  markUnapprovedComments(currentSelectedType,currentSelectedCommenter);
 }
 
 // Load the user's comments after a work button is clicked
@@ -129,17 +140,15 @@ loadUserComments = (selected_eppn,textChosen) => {
   $("#text").hide();
   $("#textSpace").hide();
   $("#textTitle").hide();
-  $(".loader").show();
   let endpoint = "get_highlights/" + selected_eppn + "/" + textChosen;
   API.request({endpoint}).then((data) => {
       console.log(data);
       renderComments(data,selected_eppn,textChosen);
-      makeSelector(createListOfCommenter(data));
+      makeSelector(createListOfCommenter(data),colorNotUsedTypeSelector);
   });
 }
 
 renderComments = (commentData, selected_eppn,textChosen) => {
-    $(".loader").hide();
     $("#text").fadeIn();
     $("#textSpace").fadeIn();
     $("#textTitle").fadeIn();
@@ -162,9 +171,38 @@ renderComments = (commentData, selected_eppn,textChosen) => {
     // click on comment to reply the post
     $(".commented-selection").off().on("click", function(evt) {
       var commentSpanId = $(this).attr('id');
-      console.log(commentSpanId);
       clickOnComment(commentSpanId,textChosen,selected_eppn,evt);
     });
+}
+
+function markUnapprovedComments(type,commenter){
+  //change everything to color black
+  $(".commented-selection").css({"color" : "black"});
+  let unapprovedCommentsId =[];
+  let unapprovedComments;
+  if(commenter == "AllCommenters"){
+    if(type == "All"){
+      unapprovedComments = $("#text").find(".commented-selection" + "[approved = "+false+"]");
+    }
+    else{
+      unapprovedComments = $("#text").find(".commented-selection" + "[approved = "+false+"][typeof = '"+type+"']");
+    }
+  }
+  else{
+    if(type == "All"){
+      unapprovedComments = $("#text").find(".commented-selection" + "[approved = "+false+"][creator = '"+commenter+"']");
+    }
+    else{
+      unapprovedComments = $("#text").find(".commented-selection" + "[approved = "+false+"][typeof = '"+type+"'][creator = '"+commenter+"']");
+    }
+  }
+  for(var i = 0; i < unapprovedComments.length; i++){
+    let id = unapprovedComments[i]["attributes"]["id"]["value"];
+    unapprovedCommentsId.push(id);
+  }
+  unapprovedCommentsId.forEach((element)=>{
+    $("#"+element).css({"color" : "red"});
+  });
 }
 
 function createListOfCommenter(data){
@@ -186,7 +224,7 @@ function createListOfCommenter(data){
   return commenters;
 }
 
-function makeSelector(commenters){
+function makeSelector(commenters,callback){
   let buttonTypes = [
     'All',
     'Historical',
@@ -197,24 +235,25 @@ function makeSelector(commenters){
   ];
   makeTypeSelector(buttonTypes);
   makeCommentersSelector(commenters);
+  callback();
 }
 
 function makeTypeSelector(buttonTypes) {
   $("#loadlist").empty();
-  let allButtons = $('<ul/>', {
-    class: "allButtons"
+  let allTypes = $('<ul/>', {
+    class: "allTypes"
   });
 
   let selectorHeader = $('<li>',{
     class: "selectorHeader",
     text: "Filter By:"
   });
-  $(allButtons).append(selectorHeader);
+  $(allTypes).append(selectorHeader);
   buttonTypes.forEach(function(type) {
     let list = makeSelectorOptions(type,'typeSelector');
-    $(allButtons).append(list);
+    $(allTypes).append(list);
   });
-  $('#loadlist').append(allButtons);
+  $('#loadlist').append(allTypes);
   $("#All").click();
 }
 
@@ -323,7 +362,7 @@ function clickOnComment(commentSpanId,workChosen,workCreator,evt){
       creator: workCreator,
       work: workChosen,
       commenter: $("#"+commentSpanId).attr("creator"),
-      hash: $("#"+commentSpanId).attr("id"),
+      hash: commentSpanId,
   };
   get_comment_chain_API_request(comment_data,commentSpanId);
   evt.stopPropagation();
@@ -334,7 +373,6 @@ function clickOnComment(commentSpanId,workChosen,workCreator,evt){
 function get_comment_chain_API_request(jsonData, commentSpanId){
   let work = jsonData.work;
   let workCreator = jsonData.creator;
-  console.log(work);
   let jsonDataStr = JSON.stringify(jsonData);
   API.request({
       endpoint: "get_comment_chain",
@@ -377,9 +415,35 @@ function readThreads(threads, work, workCreator, parentId = null){
   }
 }
 
-function refreshSelector(hash, type){
-  console.log(type);
-  $("#"+hash).attr("typeof",type);
+function colorNotUsedTypeSelector(){
+  var comments = $("#text").find(".commented-selection");
+  let key = ["Historical","Analytical","Comment","Definition","Question"];
+  let buttonTypes = {
+    "Historical":0,
+    "Analytical":0,
+    "Comment":0,
+    "Definition":0,
+    "Question":0
+  };
+  for(var i = 0;i < comments.length; i++){
+    let type = comments[i]["attributes"]["typeof"]["value"];
+    buttonTypes[type] +=1;
+  }
+  key.forEach((element)=>{
+    if(buttonTypes[element]==0){
+      $("#button"+element).addClass("notUsedType");
+    }
+    else{
+      $("#button"+element).removeClass("notUsedType");
+    }
+  });
+}
+
+// hash is not needed if the comment is deleted
+function updateTypeSelector(hash, type){
+  if(hash != "undefined"){
+    $("#"+hash).attr("typeof",type);
+  }
   var currentSelectedType = $("#loadlist").attr("currentTarget");
   var currentSelectedCommenter = $("#commenterSelector").attr("currentTarget");
   //reselect the type selector
@@ -387,6 +451,8 @@ function refreshSelector(hash, type){
   $("#button"+type).addClass("is-checked");
   $("#loadlist").attr("currentTarget",type);
   selectorOnSelect(type,currentSelectedCommenter);
+  //update the notUsedType
+  colorNotUsedTypeSelector();
 }
 
 function refreshReplyBox(creator,work,commenter,hash){
@@ -401,6 +467,7 @@ function refreshReplyBox(creator,work,commenter,hash){
 }
 
 
+// this function only check if the selected_eppn is same as the current user or not
 function checkCurrentUserPermission(selected_eppn,needNotification){
   console.log(selected_eppn)
   if(selected_eppn == currentUser.eppn){
@@ -414,9 +481,11 @@ function checkCurrentUserPermission(selected_eppn,needNotification){
   }
 }
 
-function checkworkAdminList(selected_eppn,litId){
+//TODO this only blocks the Setting button:    mode = setting, mode = approvedComments
+//need to update this function with other things that need to check if user is in whiteList
+//ex: approve comments
+function checkworkAdminList(selected_eppn,litId,mode){
   var endPoint = "get_permissions_list/"+selected_eppn+"/"+litId;
-  let x = true;
   API.request({
     endpoint: endPoint,
     method: "GET"
@@ -425,15 +494,24 @@ function checkworkAdminList(selected_eppn,litId){
     for (var i =0; i<data["admins"].length;i++){
       if(currentUser.eppn == data["admins"][i]){
         isInWhiteList = true;
-        console.log("in admins");
+        console.log(currentUser.eppn," in admins");
       }
     }
-    if(isInWhiteList){
-      x = true;
+    if(!isInWhiteList){
+      if(mode == "setting"){
+        $("#setting").addClass("noPermission");
+      }
+      else if(mode == "approvedComments"){
+        $("#replies").attr("isCurrentUserAdmin",false);
+      }
     }
     else{
-      launchToastNotifcation("You don't have the permission to do this action");
-      x = false;
+      if(mode == "setting"){
+        $("#setting").removeClass("noPermission");
+      }
+      else if(mode == "approvedComments"){
+        $("#replies").attr("isCurrentUserAdmin",true);
+      }
     }
   });
 }
