@@ -212,6 +212,28 @@ $app->get('/set_privacy/:creator/:work/:privacy', function ($creator, $work, $pr
     );
 });
 
+//TODO set commentsNeedApproval of a specified work
+$app->get('/set_CNA/:creator/:work/:approval', function ($creator, $work, $approval) use ($app) {
+    require '../Actions/Permissions.php';
+    $permissions = new Permissions;
+
+    echo $permissions->setPermissionsCNA(
+        $creator,
+        $work,
+        $_SERVER['eppn'],
+        $approval
+    );
+});
+
+//TODO function not working
+//(check the work's privacy)
+// $app->get('/is_work_public/:eppn/:work', function ($eppn, $work) use ($app){
+//   require '../Actions/Permissions.php';
+//   $permissions = new Permissions;
+//   $workFullPath = __PATH__ . $eppn . "/works/" . $work;
+//   echo $permissions->isWorkPublic($workFullPath);
+// });
+
 /**
  * Create a new work
  */
@@ -277,7 +299,7 @@ $app->post('/set_comment_public', function () use ($app) {
     );
 });
 
-//TODO approve comments
+//TODO might need some edit
 $app->post('/approve_comment',function() use ($app){
   $json = $app->request->getBody();
   $data = json_decode($json, true);

@@ -139,6 +139,40 @@ class Permissions
         ));
     }
 
+//TODO might need some edit
+    public function setPermissionsCNA($creator, $work, $currentUser, $approval)
+    {
+        $pathOfWork = __PATH__ . "$creator/works/$work";
+        /**
+         * if $approval isn't either 'true' or 'false' return error
+         */
+        if (!in_array($approval, array('true', 'false'))) {
+            return json_encode(array(
+                "status" => "error",
+                "message" => "invalid privacy type"
+            ));
+        }
+        /**
+         * if the current user isn't on the permissions list return error
+         */
+        $hasPermissions = $this->userOnPermissionsList($pathOfWork, $currentUser);
+        if (!$hasPermissions) {
+            return json_encode(array(
+                "status" => "error",
+                "message" => "invalid permissions to set work privacy"
+            ));
+        }
+
+        $permissionsData = json_decode($this->getRawPermissionsList($pathOfWork));
+        $permissionsData->comments_require_approval = json_decode($approval);
+        $filePath = $pathOfWork . "/permissions.json";
+        file_put_contents($filePath, json_encode($permissionsData));
+
+        return json_encode(array(
+            "status" => "ok"
+        ));
+    }
+
     /**
      * Get the permissions list of a specified $pathOfWork...
      * No padding/extra json garbage for user friendliness...

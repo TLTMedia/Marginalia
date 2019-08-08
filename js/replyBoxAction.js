@@ -58,9 +58,9 @@ function createReplies(eppn, firstName, lastName, startDex, endDex, isVisible, t
   }
   // this reply has a parent
   if (parentHash != null) {
-    //if this is a deleted comment
     $(".replies"+"[commentid = '"+parentHash+"']").append(replyBox);
     $(".replies"+"[commentid = '"+parentHash+"']").attr("haschild","1");
+    //if this is a deleted comment
     // hide the dev if the current comment is a deleted comment
     if(firstName == 'deleted' && lastName == 'deleted'){
       $(".replies"+"[commentid = '"+hash+"']").hide();
@@ -149,23 +149,27 @@ function createMenuForComment(inText,hash,eppn,hashForReply,approved,work,workCr
   });
   $(commentMenuButton).append(icon);
   //comment is approved and currentUser is the comment creator
-  if(approved && checkCurrentUserPermission(eppn,false)){
+  if(approved && isCurrentUserSelectedUser(eppn,false)){
     $(menu).append(menuReply,menuEdit,menuDelete,menuSetPrivate,menuSetPublic);
   }
   //comment is approved and currentUser is not the comment creator
-  else if(approved && !checkCurrentUserPermission(eppn,false)){
+  else if(approved && !isCurrentUserSelectedUser(eppn,false)){
     $(menu).append(menuReply);
   }
   // comment is unapproved and currentUser is the comment creator
-  else if(!approved && checkCurrentUserPermission(eppn,false)){
-    $(menu).append(menuEdit,menuDelete);
-  }
-  //comment is unapproved and currentUser is not the comment creator
-  else{
-    console.log($("#replies").attr("iscurrentuseradmin"))
-    if($("#replies").attr("isCurrentUserAdmin")){
+  else if(!approved){
+    if(isCurrentUserSelectedUser(eppn,false)){
+      $(menu).append(menuEdit);
+    }
+    //TODO not sure why it only works when set it to string
+    //Assuming that no boolean can be stored on DOM element attr
+    if($("#replies").attr("isCurrentUserAdmin") == "true"){
       $(menu).append(menuApprove,menuDelete);
     }
+    else{
+      $(menu).append(menuDelete);
+    }
+
   }
   var span = $("#r"+hash);
   if(span.text() != 'deleted'){
@@ -185,16 +189,6 @@ function commentMenuOnClick(rid){
   $("#commentExit").text("Exit");
   $(".commentMenu").children("li").hide();
   $(".commentMenu").children("li"+"[commentid = '"+rid+"']").show();
-  // if (currentUser.eppn == replyToEppn) {
-  //   $(".commentMenu").children("li"+"[commentid = '" + rid + "']").show();
-  //   // $(".editComments" + "[commentid = '" + rid + "']").show();
-  //   // $(".deleteComments" + "[commentid = '" + rid + "']").show();
-  //   // $(".setCommentsPrivate" +"[commentid = '" + rid + "']").show();
-  //   // $(".setCommentsPublic" +"[commentid = '" + rid + "']").show();
-  // }
-  // else {
-  //     $(".replyToComments" + "[commentid = '" + rid + "']").show();
-  // }
   CKEDITOR.instances.textForm.setReadOnly(false);
 }
 
@@ -243,7 +237,7 @@ function commentPrivateButtonOnClick(evt,work,workCreator,setPrivate){
     console.log(data);
   });
 }
-//TODO not working
+
 function commentApprovedButtonOnClick(hash,commenterEppn,work,workCreator){
   var data = JSON.stringify({
     creator: workCreator,
@@ -257,12 +251,21 @@ function commentApprovedButtonOnClick(hash,commenterEppn,work,workCreator){
     method:"POST",
     data: data
   }).then((data)=>{
-    console.log(data);
+    launchToastNotifcation(data);
     $("#"+hash).attr("approved",true);
     let currentSelectedType = $(".typeSelector").attr("currentTarget");
     let currentSelectedCommenter = $(".commenterSelector").attr("currentTarget");
     console.log(currentSelectedType,currentSelectedCommenter);
-    markUnapprovedComments(currentSelectedType,currentSelectedCommenter);
+    let firstCommentHash = $("#replies").attr("data-firstCommentId");
+    let  firstCommenter = $(".replies" + "[commentId = '"+firstCommentHash+"']").attr("name");
+    let firstCommentData = {
+      creator:workCreator,
+      work:work,
+      commenter: firstCommenter,
+      hash: firstCommentHash
+    }
+    checkThreadUnapprovedComments(firstCommentData,currentSelectedType,currentSelectedCommenter,markUnapprovedComments);
+    refreshReplyBox(workCreator,work,firstCommenter,firstCommentHash);
   });
 }
 // This displays the replies for the current comment box
@@ -279,4 +282,17 @@ function displayReplyBox(evt) {
 
 function hideReplyBox(){
   $("#replies").parent().hide();
+}
+
+//commenter : the first commenter
+//hash : the first comment hash
+function refreshReplyBox(creator,work,commenter,hash){
+  $("#replies").empty();
+  let comment_data = {
+      creator: creator,
+      work: work,
+      commenter: commenter,
+      hash: hash
+  };
+  get_comment_chain_API_request(comment_data, hash);
 }

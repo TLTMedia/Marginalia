@@ -157,14 +157,23 @@ function saveCommentOrReply(dataForSave,isComment){
       callback: null
   }).then((data) => {
     launchToastNotifcation(data['message']);
+    let firstCommentData;
+    //reply to other user's comment
     if(!isComment){
       var firstCommentId = $("#replies").attr("data-firstCommentId");
       refreshReplyBox(dataForSave["author"],dataForSave["work"],$("#"+firstCommentId).attr("creator"),firstCommentId);
+      firstCommentData = {
+        creator: dataForSave["author"],
+        work: dataForSave["work"],
+        commenter:$("#"+firstCommentId).attr("creator"),
+        hash: firstCommentId
+      }
     }
+    // the first comment
     else{
       let approved;
       $('.'+escapeSpecialChar(remSpan)).removeAttr('startindex endIndex');
-      if(data["additonal"] == true){
+      if(data["additional"] == true){
         approved = true;
       }
       else{
@@ -179,15 +188,21 @@ function saveCommentOrReply(dataForSave,isComment){
       $('.'+escapeSpecialChar(remSpan)).removeClass(remSpan);
       updateTypeSelector(dataForSave["replyHash"],dataForSave["commentType"]);
       updateCommenterSelectors();
-
       //update the click event on this new added comment
       $("#"+data['commentHash']).off().on("click", function(evt) {
         var commentSpanId = $(this).attr('id');
         console.log(evt);
         clickOnComment(commentSpanId,dataForSave["work"],dataForSave["author"],evt);
       });
-      markUnapprovedComments();
+      firstCommentData = {
+        creator: dataForSave["author"],
+        work: dataForSave["work"],
+        commenter: currentUser.eppn,
+        hash: dataForSave["replyHash"]
+      }
     }
+    // this function takes the first comment data
+    checkThreadUnapprovedComments(firstCommentData,dataForSave['commentType'],"AllCommenters",markUnapprovedComments);
   });
 }
 
@@ -252,6 +267,17 @@ function editOrDelete(dataForEditOrDelete,isEdit){
       updateCommenterSelectors(firstCommentId);
       updateTypeSelector(undefined,"All");
       $("#replies").parent().hide();
+    }
+    else{
+      // if the first comment is deleted, no checking required
+      // update and mark the unapproved comments
+      let firstCommentData = {
+        creator: dataForEditOrDelete["creator"],
+        work: dataForEditOrDelete["work"],
+        commenter: $("#"+firstCommentId).attr("creator"),
+        hash: firstCommentId
+      }
+      checkThreadUnapprovedComments(firstCommentData,undefined,undefined,markUnapprovedComments);
     }
     $("#replies").removeAttr("deletedid");
   });

@@ -1,14 +1,3 @@
-function resetSettingTitle(){
-  $("#settingTitle").text("Settings");
-}
-function resetUserSearch(){
-  $(".searchUser").val("");
-  searchAction($(".searchUser"),$(".users"),"user");
-}
-function resetLitSearch(){
-  $(".searchLit").val("");
-  searchAction($(".searchLit"),$(".literatures"),"work");
-}
 function resetWhiteListSearch(){
   $(".searchWhiteList").val("");
   searchAction($(".searchWhiteList"),$(".whiteList"),"user");
@@ -31,6 +20,7 @@ function resetWhiteListPage(){
 function settingGoBackButtonOnClick(){
   if ($("#settingBase").is(":visible")) {
     if($(".litSettingBase").is(":visible")){
+      $("#setting").removeClass("active");
       $("#settingBase").hide();
       $("#nonTitleContent").show();
     }
@@ -43,33 +33,7 @@ function settingGoBackButtonOnClick(){
   }
 }
 
-// function makeWorkSettingButton(selected_eppn,selectedLitId){
-//   $("#litSettingButton").remove();
-//   let id = "litSettingButton";
-//   let dest = ".settingLitDiv";
-//   var button = $("<button/>",{
-//     class: "mdl-button mdl-js-button mdl-button--icon",
-//     click: (evt)=>{
-//       let litId = selectedLitId.slice(1,selectedLitId.length);
-//       if(checkCurrentUserPermission(selected_eppn,true)){
-//         litSettingButtonOnClick(selectedLitId, selected_eppn);
-//       }
-//     }
-//   });
-//   var icon = $("<i/>",{
-//     class: "material-icons",
-//     text: "settings"
-//   });
-//   var settingButtons = $('<span/>',{
-//     id: id
-//   });
-//   $(settingButtons).append(button);
-//   $(button).append(icon);
-//   $(dest).append(settingButtons);
-//   componentHandler.upgradeAllRegistered();
-// }
-
-// mode will be user/ work
+// mode will be user / work
 function searchAction(input, ul, mode){
   searchKey = input.val();
   list = ul.find("li");
@@ -84,11 +48,22 @@ function searchAction(input, ul, mode){
 function searchUser(list,searchKey){
   list.each((index,element)=>{
     let commenterId = $(element).attr("commenterId");
-    if(commenterId.toUpperCase().indexOf(searchKey.toUpperCase())>-1){
-      $(element).show();
+    let skip = false;
+    if(commenterId == undefined){
+      if($(element).hasClass("selectorHeader") || $(element).find("input").attr("id")=="AllCommenters"){
+        skip = true;
+      }
+      else{
+        commenterId = $(element).find("input").attr("id");
+      }
     }
-    else{
-      $(element).hide();
+    if(!skip){
+      if(commenterId.toUpperCase().indexOf(searchKey.toUpperCase())>-1){
+        $(element).show();
+      }
+      else{
+        $(element).hide();
+      }
     }
   });
 }
@@ -104,35 +79,6 @@ function searchWork(list,searchKey){
     }
   });
 }
-
-
-// createSettingScreen = async ({users = users} = {}) =>{
-//   $("#settingBase").hide();
-//   user_list = users.creator_list;
-//   for(i in user_list){
-//     var user = $("<li/>",{
-//       text:user_list[i],
-//       class:'mdl-list__item settingUsers',
-//       commenterId: user_list[i],
-//       click: function(evt){
-//         $(".settingUsers").removeClass("settingUserSelected");
-//         $(this).addClass("settingUserSelected");
-//         $("#litSettingButton").remove();
-//         let selected_eppn = evt["currentTarget"]["attributes"]["commenterid"]["value"];
-//         showUsersLit(users,selected_eppn);
-//       }
-//     });
-//     $(".users").append(user);
-//   }
-//   //activate the search bar
-//   $(".searchUser").on("keyup",()=>{
-//     console.log("temperory disabled")
-//     // let ul = $(".users");
-//     // let input = $(".searchUser");
-//     // searchAction(input,ul,"user");
-//   });
-//   makeWhiteListSettingBase(user_list);
-// }
 
 function makeWhiteListSettingBase(user_list){
   var whiteList = $("<ul/>",{
@@ -178,113 +124,61 @@ function makeWhiteListSettingBase(user_list){
   componentHandler.upgradeAllRegistered();
 }
 
-// function showUsersLit(users,selected_eppn){
-//   $(".literatures").empty();
-//   $(".settingLitDiv").fadeIn();
-//   $(".settingLitDiv").find(".settingTitles").text(selected_eppn+"'s works:");
-//   users.get_user_works(selected_eppn).then((works) => {
-//     for (var lit in works) {
-//       var fileWithoutExt = works[lit].substr(0, works[lit].lastIndexOf('.')) || works[lit];
-//       var litButton = $('<li/>', {
-//         class: "mdl-list__item settingLit",
-//         id: "s"+works[lit],
-//         text: fileWithoutExt,
-//         click: function(evt){
-//           $(".settingLit").removeClass("settingLitSelected");
-//           $(this).addClass("settingLitSelected");
-//           $("#litSettingButton").remove();
-//           let selectedLitId = evt["currentTarget"]["id"];
-//           makeWorkSettingButton(selected_eppn, selectedLitId);
-//         }
-//       });
-//       $(".literatures").append(litButton);
-//     }
-//   });
-//   $(".searchLit").on("keyup",()=>{
-//     console.log("temperory diabled");
-//     // let ul = $(".literatures");
-//     // let input = $(".searchLit");
-//     // searchAction(input,ul,"work");
-//   });
-// }
-
-function litSettingButtonOnClick(selectedLitId, selected_eppn){
-  $("#nonTitleContent").hide();
-  $("#settingBase").show();
-  $(".whiteListSettingBase, #addLitBase").hide();
-  $(".litSettingBase").empty();
-  $(".litSettingBase").fadeIn();
-  $("#settingTitle").text("Settings For : " + selected_eppn +"'s " +selectedLitId);
-  var settingOptions = $("<ul/>",{
-    class: "settingOptions mdl-list"
-  });
-  $(".litSettingBase").append(settingOptions);
-  //private
-  makeLitPrivacySwitch(selectedLitId, selected_eppn, checkWorkIsPublic);
-  //edit
-  makeLitEditCommentApprovalButton(selectedLitId, selected_eppn);
-  //TODO test for getting whiteList of the work
-  makeWhiteListButton(selectedLitId, selected_eppn);
-
-  //activate the go back button
-  $("#settingGoBack").children().off().on("click",()=>{
-    settingGoBackButtonOnClick();
-  });
-}
-
-function makeLitPrivacySwitch(litId, selected_eppn, callback){
-  let privacyOption =$("<li/>",{
-    class: "mdl-list__item",
-    text: "Private"
-  });
-  var privacySwitch= $("<label/>",{
-    class: "mdl-switch mdl-js-switch mdl-js-ripple-effect",
-    for: "privacySwitch"
-  });
-  var input = $("<input/>",{
-    type: "checkbox",
-    id: "privacySwitch",
-    class: "mdl-switch__input"
-  });
-  $(".settingOptions").append(privacyOption);
-  $(privacyOption).append(privacySwitch);
-  $(privacySwitch).append(input);
-  componentHandler.upgradeAllRegistered();
-  callback();
-  input.off().on("change",(evt)=>{
-    litPrivacySwitchOnClick(evt,litId,selected_eppn);
-  });
-}
-
 //TODO get the value from back end instead of the setting button
-function checkWorkIsPublic(){
-  console.log($("#setting").attr("isWorkPublic"));
+function checkWorkIsPublic(selected_eppn,litId){
   if($("#setting").attr("isWorkPublic") == "private"){
     console.log("work is private");
     $("#privacySwitch").click();
   }
 }
 
-function makeLitEditCommentApprovalButton(litId, selected_eppn){
-  let editOption =$("<li/>",{
-    class: "mdl-list__item",
-    text: "Comments Need Approval"
+function litSettingButtonOnClick(selectedLitId, selected_eppn){
+  $("#nonTitleContent").hide();
+  $("#settingBase").show();
+  $(".whiteListSettingBase, #addLitBase").hide();
+  $(".litSettingBase").empty().fadeIn();
+  $("#settingTitle").text("Settings For : " + selected_eppn +"'s " +selectedLitId);
+  var settingOptions = $("<ul/>",{
+    class: "settingOptions mdl-list"
   });
-  var editSwitch = $("<label/>",{
+  $(".litSettingBase").append(settingOptions);
+  //privacy Switch
+  makeSettingSwitch("privacy",selectedLitId, selected_eppn,checkWorkIsPublic);
+  //commentNeedApproval switch
+  makeSettingSwitch("commentsNeedApproval",selectedLitId, selected_eppn, undefined);
+  // whiteListPageOpener
+  makeWhiteListButton(selectedLitId, selected_eppn);
+  //activate the go back button
+  $("#settingGoBack").children().off().on("click",()=>{
+    settingGoBackButtonOnClick();
+  });
+}
+
+// purpose : privacy / commentsNeedApproval
+// return the input element and the event will be handle out side this function
+function makeSettingSwitch(purpose,litId,selected_eppn,callback){
+  let option =$("<li/>",{
+    class: "mdl-list__item",
+    text: purpose
+  });
+  var label= $("<label/>",{
     class: "mdl-switch mdl-js-switch mdl-js-ripple-effect",
-    for: "editCommentsNeedAprroval"
+    for: purpose+"Switch"
   });
   var input = $("<input/>",{
     type: "checkbox",
-    id: "editCommentsNeedAprroval",
+    id: purpose+"Switch",
     class: "mdl-switch__input"
-  })
-  $(".settingOptions").append(editOption);
-  $(editOption).append(editSwitch);
-  $(editSwitch).append(input);
+  });
+  $(".settingOptions").append(option);
+  $(option).append(label);
+  $(label).append(input);
   componentHandler.upgradeAllRegistered();
-  input.on("click",(evt)=>{
-    litEditSwitchOnClick(evt,litId);
+  if(callback != undefined){
+    callback(selected_eppn,litId);
+  }
+  input.off().on("change",(evt)=>{
+      workSettingSwitchOnChange(evt,litId,selected_eppn);
   });
 }
 
@@ -302,19 +196,35 @@ function makeWhiteListButton(litId,selected_eppn){
   componentHandler.upgradeAllRegistered();
 }
 
-function litPrivacySwitchOnClick(evt,litId,selected_eppn){
-  var isSelected = $("#privacySwitch").is(":checked");
+//TODO php for commentNeedApproval
+function workSettingSwitchOnChange(evt,litId,selected_eppn){
+  let currentTarget = evt["currentTarget"]["id"];
   let endPoint, message, isWorkPublic;
-  if(isSelected){
-    endPoint = "set_privacy/"+selected_eppn+"/"+litId+"/"+false;
-    message = "current work is set to private";
-    isWorkPublic = "private";
-  }else{
-    endPoint = "set_privacy/"+selected_eppn+"/"+litId+"/"+true;
-    message = "current work is set to public";
-    isWorkPublic = "public";
+  let isSelected;
+  if(currentTarget == "privacySwitch"){
+    isSelected = $("#privacySwitch").is(":checked");
+    if(isSelected){
+      endPoint = "set_privacy/"+selected_eppn+"/"+litId+"/"+false;
+      message = "current work is set to private";
+      isWorkPublic = "private";
+    }else{
+      endPoint = "set_privacy/"+selected_eppn+"/"+litId+"/"+true;
+      message = "current work is set to public";
+      isWorkPublic = "public";
+    }
+    $("#setting").attr("isWorkPublic",isWorkPublic);
   }
-  $("#setting").attr("isWorkPublic",isWorkPublic);
+  else{
+    isSelected = $("#commentsNeedApprovalSwitch").is(":checked");
+    if(isSelected){
+      message = "current work's comment needs approval";
+      endPoint = "set_CNA/"+selected_eppn+"/"+litId+"/"+true;
+    }
+    else{
+      message = "current work's comment don't need approval";
+      endPoint = "set_CNA/"+selected_eppn+"/"+litId+"/"+false;
+    }
+  }
   console.log(endPoint);
   API.request({
     endpoint: endPoint,
@@ -322,19 +232,6 @@ function litPrivacySwitchOnClick(evt,litId,selected_eppn){
   }).then((data)=>{
     launchToastNotifcation(message);
   });
-}
-
-function litEditSwitchOnClick(evt,litId){
-  var isSelected = $("#editCommentsNeedAprroval").is(":checked");
-  let endPoint,message;
-  if(isSelected){
-    message = "comments need approval on the current work (need add backEnd)";
-    console.log(message);
-  }
-  else{
-    message = "comments don't need approval on the current workm (need add backEnd)";
-    console.log(message);
-  }
 }
 
 //litId = literature name , selected_eppn = creator of the literature

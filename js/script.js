@@ -53,7 +53,11 @@ function buildHTMLFile(litContents, selected_eppn,textChosen) {
     hideAllBoxes();
   }
   loadUserComments(selected_eppn,textChosen);
-
+  let workTitle = $("<div/>",{
+    id : "workTitle",
+    text : textChosen
+  });
+  $("#text").append(workTitle);
   var litDiv = $("<div/>", {
     "id": "litDiv"
   });
@@ -100,36 +104,6 @@ function makeDropDown(){
   });
 }
 
-//TODO need the author and the work name to enable the click event for the comments
-//TODO use a better way to store the work and author instead of getting it from DOM
-function selectorOnSelect(currentSelectedType, currentSelectedCommenter){
-  // console.log('type : ',currentSelectedType);
-  // console.log('commenter: ',currentSelectedCommenter);
-  let selectedComments;
-  $(".commented-selection").off().css({
-    "background-color": "rgba(100, 255, 100, 0.0)"
-  });
-  if (currentSelectedType == "All" && currentSelectedCommenter == "AllCommenters"){
-    selectedComments = $(".commented-selection").css({"background-color": "rgba(100, 255, 100, 1.0)"});
-  }
-  else if(currentSelectedCommenter == "AllCommenters"){
-    selectedComments = $(".commented-selection" + "[typeof='" + currentSelectedType + "']").css({"background-color": "rgba(100, 255, 100, 1.0)"});
-  }
-  else if(currentSelectedType == "All"){
-    selectedComments = $(".commented-selection" + "[creator ='" + currentSelectedCommenter + "']").css({"background-color": "rgba(100, 255, 100, 1.0)"});
-  }
-  else{
-    selectedComments = $(".commented-selection" + "[creator ='" + currentSelectedCommenter + "'][typeof = '" + currentSelectedType + "']").css({"background-color": "rgba(100, 255, 100, 1.0)"});
-  }
-  selectedComments.off().on("click",(evt)=>{
-    let commentSpanId = evt["currentTarget"]["id"];
-    let work = $("#setting").attr("work");
-    let author = $("#setting").attr("author");
-    clickOnComment(commentSpanId,work,author,evt);
-  });
-  markUnapprovedComments(currentSelectedType,currentSelectedCommenter);
-}
-
 // Load the user's comments after a work button is clicked
 /*
   Fills the 3 comment variables with the comment/reply data
@@ -148,21 +122,52 @@ loadUserComments = (selected_eppn,textChosen) => {
   });
 }
 
-renderComments = (commentData, selected_eppn,textChosen) => {
+//selected_eppn : work creator
+renderComments = (commentData, selected_eppn,textChosen,callback) => {
     $("#text").fadeIn();
     $("#textSpace").fadeIn();
     $("#textTitle").fadeIn();
     console.log(selected_eppn);
-    for (let i = 0; i < commentData.length; ++i) {
-        highlightText({
-            startIndex: commentData[i].startIndex,
-            endIndex: commentData[i].endIndex,
-            commentType: commentData[i].commentType,
-            eppn: commentData[i].eppn,
-            hash: commentData[i].hash,
-            approved: commentData[i].approved
-        });
+    // let overLapHash = checkOverLapSpans(commentData);
+    // let overLapCommentsData =[];
+    // for (let i = 0; i < commentData.length; ++i) {
+    //   console.log(commentData[i].hash)
+    //   for(let j = 0; j< overLapHash.length; j++){
+    //     if(commentData[i].hash == overLapHash[j]){
+    //       overLapCommentsData.push(commentData[i]);
+    //       commentData.splice(i,1);
+    //     }
+    //   }
+    // }
+    for(let i = 0; i < commentData.length;i++){
+      highlightText({
+          startIndex: commentData[i].startIndex,
+          endIndex: commentData[i].endIndex,
+          commentType: commentData[i].commentType,
+          eppn: commentData[i].eppn,
+          hash: commentData[i].hash,
+          approved: commentData[i].approved
+      });
+      let comment_data = {
+          creator: selected_eppn,
+          work: textChosen,
+          commenter: commentData[i].eppn,
+          hash: commentData[i].hash
+      };
+      checkThreadUnapprovedComments(comment_data,undefined,undefined,markUnapprovedComments);
     }
+
+    // for(let i = 0; i < overLapCommentsData.length; i++){
+    //   console.log(overLapCommentsData)
+    //   highlightOverLapText({
+    //       startIndex: overLapCommentsData[i].startIndex,
+    //       endIndex: overLapCommentsData[i].endIndex,
+    //       commentType: overLapCommentsData[i].commentType,
+    //       eppn: overLapCommentsData[i].eppn,
+    //       hash: overLapCommentsData[i].hash,
+    //       approved: overLapCommentsData[i].approved
+    //   });
+    // }
     $("#text").css("height", $("#litDiv").height() + "px");
     //highlight to post comments
     $("#litDiv").on("mouseup", function(evt) {
@@ -174,165 +179,6 @@ renderComments = (commentData, selected_eppn,textChosen) => {
       clickOnComment(commentSpanId,textChosen,selected_eppn,evt);
     });
 }
-
-function markUnapprovedComments(type,commenter){
-  //change everything to color black
-  $(".commented-selection").css({"color" : "black"});
-  let unapprovedCommentsId =[];
-  let unapprovedComments;
-  if(commenter == "AllCommenters"){
-    if(type == "All"){
-      unapprovedComments = $("#text").find(".commented-selection" + "[approved = "+false+"]");
-    }
-    else{
-      unapprovedComments = $("#text").find(".commented-selection" + "[approved = "+false+"][typeof = '"+type+"']");
-    }
-  }
-  else{
-    if(type == "All"){
-      unapprovedComments = $("#text").find(".commented-selection" + "[approved = "+false+"][creator = '"+commenter+"']");
-    }
-    else{
-      unapprovedComments = $("#text").find(".commented-selection" + "[approved = "+false+"][typeof = '"+type+"'][creator = '"+commenter+"']");
-    }
-  }
-  for(var i = 0; i < unapprovedComments.length; i++){
-    let id = unapprovedComments[i]["attributes"]["id"]["value"];
-    unapprovedCommentsId.push(id);
-  }
-  unapprovedCommentsId.forEach((element)=>{
-    $("#"+element).css({"color" : "red"});
-  });
-}
-
-function createListOfCommenter(data){
-  var commenters=[];
-  if(data.length){
-    commenters.push(data[0].eppn);
-    for (var i = 1; i < data.length; i ++){
-      var eppn = data[i].eppn;
-      var eppnExist = false;
-      for(var j = 0; j< commenters.length; j++){
-        if(commenters[j] == eppn){
-          eppnExist = true;
-        }
-      }
-      if(!eppnExist)
-        commenters.push(eppn);
-    }
-  }
-  return commenters;
-}
-
-function makeSelector(commenters,callback){
-  let buttonTypes = [
-    'All',
-    'Historical',
-    'Analytical',
-    'Comment',
-    'Definition',
-    'Question'
-  ];
-  makeTypeSelector(buttonTypes);
-  makeCommentersSelector(commenters);
-  callback();
-}
-
-function makeTypeSelector(buttonTypes) {
-  $("#loadlist").empty();
-  let allTypes = $('<ul/>', {
-    class: "allTypes"
-  });
-
-  let selectorHeader = $('<li>',{
-    class: "selectorHeader",
-    text: "Filter By:"
-  });
-  $(allTypes).append(selectorHeader);
-  buttonTypes.forEach(function(type) {
-    let list = makeSelectorOptions(type,'typeSelector');
-    $(allTypes).append(list);
-  });
-  $('#loadlist').append(allTypes);
-  $("#All").click();
-}
-
-function makeCommentersSelector(commenters){
-  $("#commenterSelector").empty();
-  commenters.unshift("AllCommenters");
-  let allCommenters = $('<ul/>', {
-    class: "allCommenters"
-  });
-
-  let selectorHeader = $('<li>',{
-    class: "selectorHeader",
-    text: "Filter By:"
-  });
-  $(allCommenters).append(selectorHeader);
-  commenters.forEach((data)=>{
-    let list = makeSelectorOptions(data,'commenterSelector');
-    $(allCommenters).append(list);
-  });
-  $('#commenterSelector').append(allCommenters);
-  $("#AllCommenters").click();
-}
-
-function makeSelectorOptions(option,mode){
-  let data = option;
-  let name;
-  let text;
-  if(mode == 'commenterSelector'){
-    name = 'commenterSelector';
-    text = data.split("@")[0];
-  }
-  else if (mode == 'typeSelector'){
-    name = 'typeSelector';
-    text = data;
-  }
-
-  let list = $('<li/>', {
-    class: "buttons"
-  });
-
-  let radioLabel = $("<label>", {
-    class: "mdl-radio mdl-js-radio",
-    id: "button" + data,
-    for: data
-  });
-
-  let input = $('<input/>', {
-    type: "radio",
-    id: data,
-    name: name,
-    class: "mdl-radio__button",
-  });
-
-  let spanText = $("<span>", {
-    class: "mdl-radio__label",
-    text: text
-  });
-
-  $(list).append(radioLabel);
-  $(radioLabel).append(input, spanText);
-  input.on("click", (evt)=>{
-    let currentSelectedType;
-    let currentSelectedCommenter;
-    if(evt["currentTarget"]["attributes"]["name"]["value"] == 'commenterSelector'){
-      currentSelectedType = $("#loadlist").attr("currentTarget");
-      currentSelectedCommenter = evt["currentTarget"]["id"];
-      $("#commenterSelector").attr('currentTarget',currentSelectedCommenter);
-    }
-    else if(evt["currentTarget"]["attributes"]["name"]["value"] == 'typeSelector'){
-      currentSelectedType = evt["currentTarget"]["id"];
-      currentSelectedCommenter = $("#commenterSelector").attr('currentTarget') ? $("#commenterSelector").attr('currentTarget') : 'AllCommenters';
-      $("#loadlist").attr('currentTarget',currentSelectedType);
-    }
-    selectorOnSelect(currentSelectedType, currentSelectedCommenter);
-  });
-  componentHandler.upgradeElement($(radioLabel)[0]);
-  return list;
-}
-
 
 highlightText = ({startIndex, endIndex, commentType, eppn, hash , approved} = {}) => {
     let range = rangy.createRange();
@@ -415,60 +261,222 @@ function readThreads(threads, work, workCreator, parentId = null){
   }
 }
 
-function colorNotUsedTypeSelector(){
-  var comments = $("#text").find(".commented-selection");
-  let key = ["Historical","Analytical","Comment","Definition","Question"];
-  let buttonTypes = {
-    "Historical":0,
-    "Analytical":0,
-    "Comment":0,
-    "Definition":0,
-    "Question":0
-  };
-  for(var i = 0;i < comments.length; i++){
-    let type = comments[i]["attributes"]["typeof"]["value"];
-    buttonTypes[type] +=1;
-  }
-  key.forEach((element)=>{
-    if(buttonTypes[element]==0){
-      $("#button"+element).addClass("notUsedType");
+function checkThreadUnapprovedComments(commentData,type,commenter,callback){
+  console.log(commentData)
+  let jsonDataStr = JSON.stringify(commentData);
+  API.request({
+      endpoint: "get_comment_chain",
+      data: jsonDataStr,
+      method: "POST"
+  }).then((data) => {
+    let isThreadApproved = checkIsThreadApprovedHelper(data,commentData.work,commentData.creator);
+    if(isThreadApproved == false){
+      //TODO if approved == false then remove the threadNotApproved
+      $("#"+commentData.hash).addClass("threadNotApproved");
     }
     else{
-      $("#button"+element).removeClass("notUsedType");
+      $("#"+commentData.hash).removeClass("threadNotApproved");
     }
+    var callBackType = type != undefined ? type : "All";
+    var callBackCommenter = commenter != undefined ? commenter : "AllCommenters";
+    callback(callBackType,callBackCommenter);
   });
 }
+
+function checkIsThreadApprovedHelper(threads, work, workCreator){
+  if (threads.length==0){
+    return true;
+  }
+  else{
+    let isApproved;
+    let isCurrentCommentApproved = true;
+    let isChildApproved = true;
+    for(var i =0; i<threads.length ; i++){
+      if(threads[i].approved == false){
+        isCurrentCommentApproved = false;
+        break;
+      }
+      isChildApproved = checkIsThreadApprovedHelper(threads[i].threads,work,workCreator,threads[i].hash);
+      if(isChildApproved == false){
+        break;
+      }
+    }
+    isApproved = isCurrentCommentApproved && isChildApproved;
+    return isApproved;
+  }
+}
+
+function markUnapprovedComments(type,commenter){
+  //change everything to color black
+  $(".commented-selection").css({"color" : "black"});
+  let unapprovedThreadCommentsId = [];
+  let unapprovedThreadComments;
+  let unapprovedCommentsId =[];
+  let unapprovedComments;
+  if(commenter == "AllCommenters"){
+    if(type == "All"){
+      unapprovedComments = $("#text").find(".commented-selection" + "[approved = "+false+"]");
+      //only select comments that is approved, the unapproved first comment is going to be in unapprovedComments
+      unapprovedThreadComments = $(".commented-selection.threadNotApproved" + "[approved = "+true+"]");
+      //$("#text").find(".commented-selection.threadNotApproved" + "[approved = "+true+"]");
+    }
+    else{
+      unapprovedComments = $("#text").find(".commented-selection" + "[approved = "+false+"][typeof = '"+type+"']");
+      unapprovedThreadComments = $("#text").find(".commented-selection.threadNotApproved" + "[approved = "+true+"][typeof = '"+type+"']");
+    }
+  }
+  else{
+    if(type == "All"){
+      unapprovedComments = $("#text").find(".commented-selection" + "[approved = "+false+"][creator = '"+commenter+"']");
+      unapprovedThreadComments = $("#text").find(".commented-selection.threadNotApproved" + "[approved = "+true+"][creator = '"+commenter+"']");
+    }
+    else{
+      unapprovedComments = $("#text").find(".commented-selection" + "[approved = "+false+"][typeof = '"+type+"'][creator = '"+commenter+"']");
+      unapprovedThreadComments = $("#text").find(".commented-selection.threadNotApproved" + "[approved = "+true+"][typeof = '"+type+"'][creator = '"+commenter+"']");
+    }
+  }
+  console.log(unapprovedComments);
+  console.log(unapprovedThreadComments);
+  for(var i = 0; i < unapprovedComments.length; i++){
+    let id = unapprovedComments[i]["attributes"]["id"]["value"];
+    unapprovedCommentsId.push(id);
+  }
+  unapprovedCommentsId.forEach((element)=>{
+    $("#"+element).css({"color" : "red"});
+  });
+  for(var i = 0; i < unapprovedThreadComments.length; i++){
+   let id = unapprovedThreadComments[i]["attributes"]["id"]["value"];
+   unapprovedThreadCommentsId.push(id);
+  }
+  unapprovedThreadCommentsId.forEach((element)=>{
+    $("#"+element).css({"color" : "darkOrange"});
+  });
+}
+
+
+// function checkOverLapSpans(commentData){
+//   let overLapHash =[];
+//   var indexArray = [];
+//   for(var i = 0 ; i < commentData.length; i++){
+//     let index = {
+//       start: commentData[i].startIndex,
+//       end: commentData[i].endIndex,
+//       hash : commentData[i].hash
+//     }
+//     if(indexArray.length !=0){
+//       for(let j = 0; j< indexArray.length ; j++){
+//         let index1 = {
+//           start: indexArray[j].start,
+//           end: indexArray[j].end,
+//           hash: indexArray[j].hash
+//         }
+//         //--==-
+//         if((index.start < index1.start && index.end > index1.end) || (index.start > index1.start && index.end < index1.end)){
+//           overLapHash.push(overLapCommentHelper(index,index1));
+//         }
+//         //==--
+//         else if ((index.start == index1.start && index.end < index1.end) || (index.start == index1.start && index.end > index1.end)){
+//           overLapHash.push(overLapCommentHelper(index,index1));
+//         }
+//         //--==
+//         else if ((index.start < index1.start && index.end == index1.end) || (index.start > index1.start && index.end == index1.end)){
+//           overLapHash.push(overLapCommentHelper(index,index1));
+//         }
+//       }
+//     }
+//     indexArray.push(index);
+//   }
+//   var hash = [];
+//   for (var i = 0 ; i < overLapHash.length; i++){
+//     if(hash.length ==0){
+//       hash.push(overLapHash[i]);
+//     }
+//     else{
+//       let hashExist = false;
+//       for(var j = 0 ; j<hash.length; j++){
+//         if(hash[j] == overLapHash[i]){
+//           hashExist == true;
+//           break;
+//         }
+//       }
+//       if(!hashExist){
+//         hash.push(overLapHash[i]);
+//       }
+//     }
+//   }
+//   console.log(hash);
+//   return hash;
+// }
+//this helper function returns the shorter comment
+// return the first comment if the length is the same
+overLapCommentHelper = (comment1,comment2) =>{
+  let length1 = comment1.end - comment1.start;
+  let length2 = comment2.end - comment2.start;
+  if(length1 > length2){
+    return comment2.hash;
+  }
+  else if(length1 < length2){
+    return comment1.hash;
+  }
+  else{
+    return comment1.hash;
+  }
+}
+
+function createListOfCommenter(data){
+  var commenters=[];
+  if(data.length){
+    commenters.push(data[0].eppn);
+    for (var i = 1; i < data.length; i ++){
+      var eppn = data[i].eppn;
+      var eppnExist = false;
+      for(var j = 0; j< commenters.length; j++){
+        if(commenters[j] == eppn){
+          eppnExist = true;
+        }
+      }
+      if(!eppnExist)
+        commenters.push(eppn);
+    }
+  }
+  return commenters;
+}
+
+// highlightOverLapText = ({startIndex, endIndex, commentType, eppn, hash , approved} = {}) => {
+//     let range = rangy.createRange();
+//     range.selectCharacters(document.getElementById(TEXTSPACE), startIndex, endIndex);
+//     let area = rangy.createClassApplier("overLapComments", {
+//         useExistingElements: false,
+//         elementAttributes: {
+//             "id": hash,
+//             "creator": eppn,
+//             "typeof": commentType,
+//             "approved": approved
+//         }
+//     });
+//     area.applyToRange(range);
+//     //$("#"+hash).addClass("commented-selection");
+// }
 
 // hash is not needed if the comment is deleted
 function updateTypeSelector(hash, type){
   if(hash != "undefined"){
     $("#"+hash).attr("typeof",type);
   }
-  var currentSelectedType = $("#loadlist").attr("currentTarget");
+  var currentSelectedType = $("#typeSelector").attr("currentTarget");
   var currentSelectedCommenter = $("#commenterSelector").attr("currentTarget");
   //reselect the type selector
   $("#button"+currentSelectedType).removeClass("is-checked");
   $("#button"+type).addClass("is-checked");
-  $("#loadlist").attr("currentTarget",type);
+  $("#typeSelector").attr("currentTarget",type);
   selectorOnSelect(type,currentSelectedCommenter);
   //update the notUsedType
   colorNotUsedTypeSelector();
 }
 
-function refreshReplyBox(creator,work,commenter,hash){
-  $("#replies").empty();
-  let comment_data = {
-      creator: creator,
-      work: work,
-      commenter: commenter,
-      hash: hash
-  };
-  get_comment_chain_API_request(comment_data, hash);
-}
-
 
 // this function only check if the selected_eppn is same as the current user or not
-function checkCurrentUserPermission(selected_eppn,needNotification){
+function isCurrentUserSelectedUser(selected_eppn,needNotification){
   console.log(selected_eppn)
   if(selected_eppn == currentUser.eppn){
     return true;

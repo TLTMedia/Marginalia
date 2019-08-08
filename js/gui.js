@@ -1,5 +1,7 @@
 $(window).ready(function() {
     $("#litadd").on("click", function(evt) {
+        $(".headerTab").removeClass("active");
+        $(this).addClass("active");
         $("#settingBase").hide();
         $("#addLitBase").load("parts/upload.htm", function() {
             $(this).fadeIn();
@@ -8,8 +10,11 @@ $(window).ready(function() {
             componentHandler.upgradeElement($("#privateCheck")[0]);
             $("#goBack").on("click", function() {
                 if ($("#addLitBase").is(":visible")) {
-                    $("#addLitBase").hide();
-                    $("#nonTitleContent").show();
+                  $("#litadd").removeClass("active");
+                  $("#litadd").fadeIn();
+                  $("#nonTitleContent").hide();
+                  $("#addLitBase").hide();
+                  $("#nonTitleContent").show();
                 }
             });
             var fileToSave;
@@ -60,14 +65,20 @@ $(window).ready(function() {
         launchToastNotifcation("You don't have the permission to do this action");
       }
       else{
+        $(".headerTab").removeClass("active");
+        $("#setting").addClass("active");
         litSettingButtonOnClick(work,author);
       }
     });
 
     $("#home").off().on("click",function(){
+      $(".headerTab").removeClass("active");
+      $(this).addClass("active");
       homeButtonAction();
       resetWhiteListPage();
     });
+
+
 });
 
 saveLit = ({work, privacy, data} = {}) => {
@@ -113,7 +124,8 @@ function homeButtonAction(){
   $(".chosenUser, .chosenFile, .typeSelector, .commenterSelector").empty();
   //disable the setting header tab
   $("#setting").addClass("disabledHeaderTab");
-  resetSettingTitle();
+  $(".headerTab").removeClass("active");
+  $("#home").addClass("active");
   //TODO this is the old hide box with wierd query
   hideAllBoxes();
   //hideReplyBox();
@@ -129,13 +141,12 @@ createUserSelectScreen = async ({users = users} = {}) =>{
   width = $(document).width();
   for(i in user_list){
     var user = $("<li/>",{
-      text:user_list[i],
       class:'mdl-list__item usersMenuOptions',
       commenterId: user_list[i],
+      text:user_list[i],
       click: function(evt){
-        $(".usersMenuOptions").removeClass("settingUserSelected");
-        $(this).addClass("settingUserSelected");
-        $("#litSettingButton").remove();
+        $(".usersMenuOptions").removeClass("usersMenuSelected");
+        $(this).addClass("usersMenuSelected");
         let selected_eppn = evt["currentTarget"]["attributes"]["commenterid"]["value"];
         showUsersLit(users,selected_eppn);
       }
@@ -164,11 +175,10 @@ function showUsersLit(users,selected_eppn){
         id: works[lit],
         text: fileWithoutExt,
         click: function(evt){
-          $(".worksMenuOptions").removeClass("settingLitSelected");
-          $(this).addClass("settingLitSelected");
+          $(".worksMenuOptions").removeClass("workMenuSelected");
+          $(this).addClass("workMenuSelected");
           let selectedWorkId = evt["currentTarget"]["id"];
           selectLit(selected_eppn,selectedWorkId);
-
         }
       });
       $(".worksMenu").append(litButton);
@@ -180,78 +190,6 @@ function showUsersLit(users,selected_eppn){
     searchAction(input,ul,"work");
   });
 }
-
-//------- old ui for selecting users and their works-----------------
-
-// createUserSelectScreen = async ({users = users} = {}) => {
-//   user_list = users.creator_list;
-//   width = $(document).width();
-//   var userWorks = [];
-//   var selector = $("#userSelector");
-//   var usersItems = $("<ul/>", {
-//     id: "usersItems",
-//     class: "mdl-menu mdl-menu--bottom-left mdl-js-menu mdl-js-ripple-effect",
-//     for: "pickUser"
-//   });
-//   selector.append(usersItems);
-//   var length = user_list.length;
-//   var rows = 0;
-//   while (length >= 1) {
-//     length -= 3;
-//     rows++;
-//   }
-//   for (let userNum in user_list) {
-//     let userItem = $("<li/>", {
-//       text: user_list[userNum],
-//       class: "mdl-menu__item userButton"
-//     });
-//
-//     usersItems.append(userItem);
-//   }
-//   $(".userButton").click(function() {
-//     //  console.log($.address.value());
-//       $(".userFiles").show();
-//       let selected_eppn = $(this).text();
-//       $(".chosenUser").text(selected_eppn + ":");
-//       $(".chosenFile").text("");
-//       $("#worksButtons").remove();
-//       createLitSelectorScreen({users: users, selected_eppn: selected_eppn});
-//   });
-//   componentHandler.upgradeElement($('#usersItems')[0]);
-//   $(".userFiles").hide();
-// }
-
-/**
- * Temporary pass the api object to 'everything'...
- * So that any ~global~ function can make an api call...
- */
- // createLitSelectorScreen = ({users = users, selected_eppn = selected_eppn} = {}) => {
- //   var selector = $(".userFiles");
- //   var worksButtons = $("<ul/>", {
- //     id: "worksButtons",
- //     class: "mdl-menu mdl-menu--bottom-left mdl-js-menu mdl-js-ripple-effect",
- //     for: "pickLit"
- //   });
- //   selector.append(worksButtons);
- //   users.get_user_works(selected_eppn).then((works) => {
- //       for (var lit in works) {
- //         var fileWithoutExt = works[lit].substr(0, works[lit].lastIndexOf('.')) || works[lit];
- //         var litButton = $('<li/>', {
- //           class: "mdl-menu__item",
- //           id: works[lit],
- //           text: fileWithoutExt,
- //           click: function(evt) {
- //             hideAllBoxes();
- //             $(".nameMenu").remove();
- //             let textChosen = evt['currentTarget']['id'];
- //             selectLit(selected_eppn,textChosen);
- //           }
- //         });
- //         worksButtons.append(litButton);
- //       }
- //       componentHandler.upgradeElement($('#worksButtons')[0]);
- //   });
- // }
 
  function selectLit(selected_eppn,textChosen){
    console.log(selected_eppn,textChosen)
