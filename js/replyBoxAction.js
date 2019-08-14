@@ -13,8 +13,8 @@ function makeDraggableReplyBox() {
       class:"closeReplyBox",
       click:function(){
           $("#replies").parent().fadeOut();
-          $("#replies").parent().css("z-index","0");
-          $("#commentBox").parent().css("z-index","1");
+          // $("#replies").parent().css("z-index","0");
+          // $("#commentBox").parent().css("z-index","1");
       }
     });
     // TODO find a better way to add it
@@ -32,30 +32,56 @@ function escapeHTMLPtag(text){
 * eppn : commenterEppn
 * approved : if the comment is approved or not
 */
-function createReplies(eppn, firstName, lastName, startDex, endDex, isVisible, type, commentText, threads, hash, approved, parentHash = null, work, workCreator) {
-  var replyBox = $('<div/>', {
-    class: approved?"replies" : "replies unapproved",
-    commentid: hash,
-    name: eppn,
-    haschild:0,
-    flname:firstName+lastName,
-    type:type,
-  });
+function createReplies(dataForReplies) {
+  let eppn = dataForReplies["eppn"];
+  let firstName = dataForReplies["firstName"];
+  let lastName = dataForReplies["lastName"];
+  let public = dataForReplies["public"];
+  let type = dataForReplies["type"];
+  let commentText = dataForReplies["commentText"];
+  let hash = dataForReplies["hash"];
+  let approved = dataForReplies["approved"];
+  let parentHash = dataForReplies["parentId"];
+  let work = dataForReplies["work"];
+  let workCreator = dataForReplies["workCreator"];
   var userName = firstName + " " + lastName;
   var hashForReply = 'r'+hash;
   var inText = atob(commentText);
   inText = escapeHTMLPtag(inText);
+  var repliesClass;
+  var repliesSpan;
+  //check if this relpy is deleted
   if(firstName == 'deleted' && lastName == 'deleted'){
-    replyBox.html("<span class = 'replyText' id = '"+hashForReply+"'>"+inText+"</span>");
+    repliesSpan = "<span class = 'replyText' id = '"+hashForReply+"'>"+inText+"</span>";
+    repliesClass = "replies";
   }
   else{
-    if(approved){
-      replyBox.html("<span class = 'replyText' id = '"+hashForReply+"'>"+userName + ": " +inText+"</span>");
+    if(!approved){
+      repliesSpan = "<span class = 'replyText' id = '"+hashForReply+"'>"+userName + ": " +inText+"<i>(comment needs approvement)</i></span>";
+      repliesClass = "replies unapproved";
     }
     else{
-      replyBox.html("<span class = 'replyText' id = '"+hashForReply+"'>"+userName + ": " +inText+"<i>(comment needs approvement)</i></span>");
+      if(!public){
+        repliesSpan = "<span class = 'replyText' id = '"+hashForReply+"'>"+userName + ": " +inText+"<i>(private comment)</i></span>";
+        repliesClass = "replies private";
+      }
+      else{
+        repliesSpan = "<span class = 'replyText' id = '"+hashForReply+"'>"+userName + ": " +inText+"</span>";
+        repliesClass = "replies";
+      }
     }
   }
+  var replyBox = $('<div/>', {
+    class: repliesClass,
+    commentid: hash,
+    name: eppn,
+    haschild:0,
+    flname:firstName+lastName,
+    type:type
+  });
+
+  replyBox.html(repliesSpan);
+
   // this reply has a parent
   if (parentHash != null) {
     $(".replies"+"[commentid = '"+parentHash+"']").append(replyBox);
@@ -75,12 +101,12 @@ function createReplies(eppn, firstName, lastName, startDex, endDex, isVisible, t
     $("#replies").append(replyBox);
     $("#r"+hash).addClass("firstComment");
   }
-  createMenuForComment(inText,hash,eppn,hashForReply,approved,work,workCreator)
+  createMenuForComment(inText,hash,eppn,hashForReply,approved,public,work,workCreator)
 }
 
 
 //TODO this function can be shorter
-function createMenuForComment(inText,hash,eppn,hashForReply,approved,work,workCreator){
+function createMenuForComment(inText,hash,eppn,hashForReply,approved,public,work,workCreator){
   var commentMenuButton = $("<button/>",{
     class: "commentMenuButton mdl-button mdl-js-button mdl-button--icon",
     id:"m"+hash,
@@ -94,7 +120,7 @@ function createMenuForComment(inText,hash,eppn,hashForReply,approved,work,workCr
   });
   //create Buttons
   var menu = $("<ul/>",{
-    class: "commentMenu mdl-menu mdl-js-menu",
+    class: "commentMenu mdl-menu--bottom-right mdl-menu mdl-js-menu",
     for: "m"+hash,
     commentid: hash
   });
@@ -135,7 +161,7 @@ function createMenuForComment(inText,hash,eppn,hashForReply,approved,work,workCr
     text: "Set Public",
     commentid: hash,
     click : (evt)=>{
-      commentPrivateButtonOnClick(evt,work,workCreator,false);
+      commentPrivateButtonOnClick(evt,work,workCreator,true);
     }
   });
   var menuApprove = $("<li/>",{
@@ -150,7 +176,13 @@ function createMenuForComment(inText,hash,eppn,hashForReply,approved,work,workCr
   $(commentMenuButton).append(icon);
   //comment is approved and currentUser is the comment creator
   if(approved && isCurrentUserSelectedUser(eppn,false)){
-    $(menu).append(menuReply,menuEdit,menuDelete,menuSetPrivate,menuSetPublic);
+    $(menu).append(menuReply,menuEdit,menuDelete);
+    if(public){
+      $(menu).append(menuSetPrivate);
+    }
+    else{
+      $(menu).append(menuSetPublic);
+    }
   }
   //comment is approved and currentUser is not the comment creator
   else if(approved && !isCurrentUserSelectedUser(eppn,false)){
@@ -220,21 +252,29 @@ function deleteButtonOnClick(hash,eppn,hashForReply,work,workCreator){
   editOrDelete(data,false);
 }
 
-function commentPrivateButtonOnClick(evt,work,workCreator,setPrivate){
+function commentPrivateButtonOnClick(evt,work,workCreator,setPublic){
   var commentId = evt["currentTarget"]["attributes"]["commentid"]["value"];
   console.log(commentId);
   var data = JSON.stringify({
     creator: workCreator,
     work: work,
     comment_hash: commentId,
-    public: setPrivate ? true: false
+    public: setPublic ? true: false
   });
   API.request({
     endpoint: "set_comment_public",
     method: "POST",
     data: data
   }).then((data)=>{
-    console.log(data);
+    if(setPublic){
+      launchToastNotifcation("successfully set comment to public");
+    }
+    else{
+      launchToastNotifcation("successfully set comment to private");
+    }
+    let firstCommentId = $("#replies").attr("data-firstCommentId");
+    let firstCommentCommenter = $("#"+firstCommentId).attr("creator");
+    refreshReplyBox(workCreator,work,firstCommentCommenter,firstCommentId);
   });
 }
 

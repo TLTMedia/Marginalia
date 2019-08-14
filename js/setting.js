@@ -125,10 +125,17 @@ function makeWhiteListSettingBase(user_list){
 }
 
 //TODO get the value from back end instead of the setting button
-function checkWorkIsPublic(selected_eppn,litId){
+function checkIsWorkPublic(selected_eppn,litId){
   if($("#setting").attr("isWorkPublic") == "private"){
     console.log("work is private");
     $("#privacySwitch").click();
+  }
+}
+
+function checkIsCommentNeedApproval(selected_eppn,litId){
+  if($("#setting").attr("commentsNeedApproval") == "needApproval"){
+    console.log("comments need approval");
+    $("#commentsNeedApprovalSwitch").click();
   }
 }
 
@@ -143,9 +150,9 @@ function litSettingButtonOnClick(selectedLitId, selected_eppn){
   });
   $(".litSettingBase").append(settingOptions);
   //privacy Switch
-  makeSettingSwitch("privacy",selectedLitId, selected_eppn,checkWorkIsPublic);
+  makeSettingSwitch("privacy",selectedLitId, selected_eppn,checkIsWorkPublic);
   //commentNeedApproval switch
-  makeSettingSwitch("commentsNeedApproval",selectedLitId, selected_eppn, undefined);
+  makeSettingSwitch("commentsNeedApproval",selectedLitId, selected_eppn, checkIsCommentNeedApproval);
   // whiteListPageOpener
   makeWhiteListButton(selectedLitId, selected_eppn);
   //activate the go back button
@@ -196,10 +203,10 @@ function makeWhiteListButton(litId,selected_eppn){
   componentHandler.upgradeAllRegistered();
 }
 
-//TODO php for commentNeedApproval
+//TODO php for commentsNeedApproval
 function workSettingSwitchOnChange(evt,litId,selected_eppn){
   let currentTarget = evt["currentTarget"]["id"];
-  let endPoint, message, isWorkPublic;
+  let endPoint, message, isWorkPublic , commentsNeedApproval;
   let isSelected;
   if(currentTarget == "privacySwitch"){
     isSelected = $("#privacySwitch").is(":checked");
@@ -217,15 +224,17 @@ function workSettingSwitchOnChange(evt,litId,selected_eppn){
   else{
     isSelected = $("#commentsNeedApprovalSwitch").is(":checked");
     if(isSelected){
-      message = "current work's comment needs approval";
+      message = "comments needs approval for current work";
       endPoint = "set_CNA/"+selected_eppn+"/"+litId+"/"+true;
+      commentsNeedApproval = "needApproval";
     }
     else{
-      message = "current work's comment don't need approval";
+      message = "comments donot needs approval for current work";
       endPoint = "set_CNA/"+selected_eppn+"/"+litId+"/"+false;
+      commentsNeedApproval = "noApproval";
     }
+    $("#setting").attr("commentsNeedApproval",commentsNeedApproval);
   }
-  console.log(endPoint);
   API.request({
     endpoint: endPoint,
     method: "GET"

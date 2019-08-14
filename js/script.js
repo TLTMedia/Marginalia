@@ -240,29 +240,34 @@ function readThreads(threads, work, workCreator, parentId = null){
     for(var i =0; i<threads.length ; i++){
       //TODO make it pass a object instead of every thing
       // also pass the parentId
-        createReplies(
-          threads[i].eppn,
-          threads[i].firstName,
-          threads[i].lastName,
-          threads[i].startIndex,
-          threads[i].endIndex,
-          threads[i].visibility,
-          threads[i].commentType,
-          btoa(threads[i].commentText),
-          threads[i].threads,
-          threads[i].hash,
-          threads[i].approved,
-          parentId,
-          work,
-          workCreator
-        );
+      // let dataForReplies = {
+      //   eppn : ,
+      //   firstName:,
+      //   lasName:,
+      //   startIndex:,
+      //   endIndex:,
+      //   visibility
+      // }
+      let dataForReplies = {
+        eppn: threads[i].eppn,
+        firstName: threads[i].firstName,
+        lastName: threads[i].lastName,
+        public: threads[i].public,
+        type: threads[i].commentType,
+        commentText: btoa(threads[i].commentText),
+        hash: threads[i].hash,
+        approved: threads[i].approved,
+        parentId: parentId,
+        work: work,
+        workCreator: workCreator
+      }
+      createReplies(dataForReplies);
       readThreads(threads[i].threads,work,workCreator,threads[i].hash);
     }
   }
 }
 
 function checkThreadUnapprovedComments(commentData,type,commenter,callback){
-  console.log(commentData)
   let jsonDataStr = JSON.stringify(commentData);
   API.request({
       endpoint: "get_comment_chain",
@@ -271,7 +276,7 @@ function checkThreadUnapprovedComments(commentData,type,commenter,callback){
   }).then((data) => {
     let isThreadApproved = checkIsThreadApprovedHelper(data,commentData.work,commentData.creator);
     if(isThreadApproved == false){
-      //TODO if approved == false then remove the threadNotApproved
+      //TODO if approved == true then remove the threadNotApproved
       $("#"+commentData.hash).addClass("threadNotApproved");
     }
     else{
@@ -335,8 +340,6 @@ function markUnapprovedComments(type,commenter){
       unapprovedThreadComments = $("#text").find(".commented-selection.threadNotApproved" + "[approved = "+true+"][typeof = '"+type+"'][creator = '"+commenter+"']");
     }
   }
-  console.log(unapprovedComments);
-  console.log(unapprovedThreadComments);
   for(var i = 0; i < unapprovedComments.length; i++){
     let id = unapprovedComments[i]["attributes"]["id"]["value"];
     unapprovedCommentsId.push(id);
@@ -457,23 +460,6 @@ function createListOfCommenter(data){
 //     area.applyToRange(range);
 //     //$("#"+hash).addClass("commented-selection");
 // }
-
-// hash is not needed if the comment is deleted
-function updateTypeSelector(hash, type){
-  if(hash != "undefined"){
-    $("#"+hash).attr("typeof",type);
-  }
-  var currentSelectedType = $("#typeSelector").attr("currentTarget");
-  var currentSelectedCommenter = $("#commenterSelector").attr("currentTarget");
-  //reselect the type selector
-  $("#button"+currentSelectedType).removeClass("is-checked");
-  $("#button"+type).addClass("is-checked");
-  $("#typeSelector").attr("currentTarget",type);
-  selectorOnSelect(type,currentSelectedCommenter);
-  //update the notUsedType
-  colorNotUsedTypeSelector();
-}
-
 
 // this function only check if the selected_eppn is same as the current user or not
 function isCurrentUserSelectedUser(selected_eppn,needNotification){

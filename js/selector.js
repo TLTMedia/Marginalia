@@ -76,7 +76,6 @@ function makeCommentersSelector(commenters){
   let allCommenters = $('<ul/>', {
     class: "allCommenters"
   });
-
   let selectorHeader = $('<li>',{
     class: "selectorHeader"
   });
@@ -210,4 +209,44 @@ function colorNotUsedTypeSelector(){
       $("#button"+element).removeClass("notUsedType");
     }
   });
+}
+
+function updateCommenterSelectors(){
+  var newCommenters = [];
+  var comments = $("#textSpace").find('span');
+  for(var i = 0 ; i < comments.length ; i++){
+    //check if this is the commentSpan or not (only commentSpan has a creator attribute)
+    if(comments[i]['attributes']['creator']){
+      var commenter = comments[i]['attributes']['creator']['value'];
+      var isCommenterExist = false;
+      for(var j = 0 ; j < newCommenters.length ; j++){
+        if(commenter == newCommenters[j]){
+          isCommenterExist = true;
+        }
+      }
+      if(!isCommenterExist){
+        newCommenters.push(commenter);
+      }
+    }
+  }
+  makeCommentersSelector(newCommenters);
+  if(!$("#typeSelector").find("ul").is(":visible")){
+    hideAllSelector();
+  }
+}
+
+// hash is not needed if the comment is deleted
+function updateTypeSelector(hash, type){
+  if(hash != "undefined"){
+    $("#"+hash).attr("typeof",type);
+  }
+  var currentSelectedType = $("#typeSelector").attr("currentTarget");
+  var currentSelectedCommenter = $("#commenterSelector").attr("currentTarget");
+  //reselect the type selector
+  $("#button"+currentSelectedType).removeClass("is-checked");
+  $("#button"+type).addClass("is-checked");
+  $("#typeSelector").attr("currentTarget",type);
+  selectorOnSelect(type,currentSelectedCommenter);
+  //update the notUsedType
+  colorNotUsedTypeSelector();
 }

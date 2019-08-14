@@ -198,11 +198,13 @@ function showUsersLit(users,selected_eppn){
    $(".chosenFile").text(textChosen);
    let endpoint = 'get_work/' +selected_eppn + '/' + textChosen;
    showLink(endpoint);
+   console.log(endpoint);
    API.request({endpoint}).then((data) => {
        let literatureText = data['data'];
-       let workIsPublic;
+       let isWorkPublic = data['additional'];
+       let commentsNeedApproval = data['additional2'];
        buildHTMLFile(literatureText,selected_eppn,textChosen);
-       updateSettingPage(selected_eppn,textChosen,data['additional']);
+       updateSettingPage(selected_eppn,textChosen,isWorkPublic,commentsNeedApproval);
    });
    //auto scroll to the text part
    window.scrollTo(0,$("#cardbox").position().top+$("#cardbox").height());
@@ -212,12 +214,13 @@ function showUsersLit(users,selected_eppn){
    checkworkAdminList(selected_eppn,textChosen,"approvedComments");
  }
 
- function updateSettingPage(selected_eppn,textChosen,workIsPublic){
+ function updateSettingPage(selected_eppn,textChosen,isWorkPublic,commentsNeedApproval){
    $("#setting").removeClass("disabledHeaderTab");
    $("#setting").attr({
      "author":selected_eppn,
      "work": textChosen,
-     "isWorkPublic": workIsPublic
+     "isWorkPublic": isWorkPublic,
+     "commentsNeedApproval": commentsNeedApproval
    });
    $("#settingBase").hide();
  }

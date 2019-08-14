@@ -44,8 +44,8 @@ function makeDraggableCommentBox(workCreator,work) {
       class:"closeCommentBox",
       click:function(){
           exitButtonOnClick();
-          $("#replies").parent().css("z-index","1");
-          $("#commentBox").parent().css("z-index","0");
+          // $("#replies").parent().css("z-index","1");
+          // $("#commentBox").parent().css("z-index","0");
       }
     });
     // TODO find a better way to add it
@@ -99,27 +99,6 @@ function saveButtonOnClick(workCreator,work) {
       $("#commentBox").parent().fadeOut();
     }
   }
-}
-
-function updateCommenterSelectors(){
-  var newCommenters = [];
-  var comments = $("#textSpace").find('span');
-  for(var i = 0 ; i < comments.length ; i++){
-    //check if this is the commentSpan or not (only commentSpan has a creator attribute)
-    if(comments[i]['attributes']['creator']){
-      var commenter = comments[i]['attributes']['creator']['value'];
-      var isCommenterExist = false;
-      for(var j = 0 ; j < newCommenters.length ; j++){
-        if(commenter == newCommenters[j]){
-          isCommenterExist = true;
-        }
-      }
-      if(!isCommenterExist){
-        newCommenters.push(commenter);
-      }
-    }
-  }
-  makeCommentersSelector(newCommenters);
 }
 
 //return a dictionary with the data we need to save
