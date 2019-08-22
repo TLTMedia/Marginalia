@@ -8,20 +8,50 @@ function makeDraggableReplyBox() {
       width: 500,
       title: "Comments"
     });
-    var closeReplyBox =  $("<button/>",{
-      text:"X",
-      class:"closeReplyBox",
-      click:function(){
-          $("#replies").parent().fadeOut();
-          // $("#replies").parent().css("z-index","0");
-          // $("#commentBox").parent().css("z-index","1");
-      }
-    });
-    // TODO find a better way to add it
-    $("#replies").parent().find("#ui-id-2").prepend(closeReplyBox);
+    let closeReplyBox = createCloseReplyBoxButton();
+    let replyTips = createReplyBoxTips();
+    $("#replies").parent().find(".ui-dialog-titlebar").prepend(closeReplyBox);
+    $("#replies").parent().find(".ui-dialog-titlebar").append(replyTips);
     $(".closeReplyBox").parent().css({position: 'relative'});
     $(".closeReplyBox").css({top: 0, left: 0, position:'absolute'});
   }
+}
+
+function createCloseReplyBoxButton(){
+  var closeReplyBoxDiv = $("<div>",{
+    class: "closeReplyBoxDiv"
+  })
+  var closeReplyBox =  $("<button/>",{
+    // text:"X",
+    class:"closeReplyBox",
+    click:function(){
+        $("#replies").parent().fadeOut();
+    }
+  });
+  var closeReplyBoxIcon = $("<i>",{
+    class: "material-icons closeReplyBoxIcon",
+    text: "highlight_off"
+  });
+  closeReplyBox.append(closeReplyBoxIcon);
+  closeReplyBoxDiv.append(closeReplyBox);
+  return closeReplyBoxDiv;
+}
+
+function createReplyBoxTips(){
+  var replyTips = $("<div>",{
+    class: "replyBoxTips"
+  });
+  var replyTipsIcon = $("<i/>",{
+    class: "material-icons replyBoxTipsIcon",
+    text: "help"
+  });
+
+  var replyTipsText = $("<span>",{
+    class: "replyBoxTipsText"
+  });
+  replyTipsText.html("The <span style = 'color: blue'>Blue</span> comments with<i class = 'material-icons lock'>lock</i>icon are private comments.\n The <span style = 'color : grey'>Grey</span> comments with <i class = 'material-icons unapproved'>hourglass_full</i> icon are unapproved commments");
+  replyTips.append(replyTipsIcon,replyTipsText);
+  return replyTips;
 }
 
 function escapeHTMLPtag(text){
@@ -57,12 +87,12 @@ function createReplies(dataForReplies) {
   }
   else{
     if(!approved){
-      repliesSpan = "<span class = 'replyText' id = '"+hashForReply+"'>"+userName + ": " +inText+"<i>(comment needs approvement)</i></span>";
+      repliesSpan = "<span class = 'replyText' id = '"+hashForReply+"'>"+userName + ": " +inText+"<i class = 'material-icons unapproved'>hourglass_full</i></span>";
       repliesClass = "replies unapproved";
     }
     else{
       if(!public){
-        repliesSpan = "<span class = 'replyText' id = '"+hashForReply+"'>"+userName + ": " +inText+"<i>(private comment)</i></span>";
+        repliesSpan = "<span class = 'replyText' id = '"+hashForReply+"'>"+userName + ": " +inText+"<i class = 'material-icons lock'>lock</i></span>";
         repliesClass = "replies private";
       }
       else{
@@ -79,7 +109,6 @@ function createReplies(dataForReplies) {
     flname:firstName+lastName,
     type:type
   });
-
   replyBox.html(repliesSpan);
 
   // this reply has a parent

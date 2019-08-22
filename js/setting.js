@@ -150,9 +150,9 @@ function litSettingButtonOnClick(selectedLitId, selected_eppn){
   });
   $(".litSettingBase").append(settingOptions);
   //privacy Switch
-  makeSettingSwitch("privacy",selectedLitId, selected_eppn,checkIsWorkPublic);
+  makeSettingSwitch("privacy","Private Work",selectedLitId, selected_eppn,checkIsWorkPublic);
   //commentNeedApproval switch
-  makeSettingSwitch("commentsNeedApproval",selectedLitId, selected_eppn, checkIsCommentNeedApproval);
+  makeSettingSwitch("commentsNeedApproval","Does Comments Requires Approval",selectedLitId, selected_eppn, checkIsCommentNeedApproval);
   // whiteListPageOpener
   makeWhiteListButton(selectedLitId, selected_eppn);
   //activate the go back button
@@ -163,10 +163,10 @@ function litSettingButtonOnClick(selectedLitId, selected_eppn){
 
 // purpose : privacy / commentsNeedApproval
 // return the input element and the event will be handle out side this function
-function makeSettingSwitch(purpose,litId,selected_eppn,callback){
+function makeSettingSwitch(purpose,text,litId,selected_eppn,callback){
   let option =$("<li/>",{
     class: "mdl-list__item",
-    text: purpose
+    text: text
   });
   var label= $("<label/>",{
     class: "mdl-switch mdl-js-switch mdl-js-ripple-effect",

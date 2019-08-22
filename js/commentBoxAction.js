@@ -37,22 +37,34 @@ function makeDraggableCommentBox(workCreator,work) {
     $(comForm).append(textForm);
     $('#commentBox').append(comForm);
     CKEDITOR.replace('textForm');
-
-    //close button
-    var closeCommentBox =  $("<button/>",{
-      text:"X",
-      class:"closeCommentBox",
-      click:function(){
-          exitButtonOnClick();
-          // $("#replies").parent().css("z-index","1");
-          // $("#commentBox").parent().css("z-index","0");
-      }
-    });
+    let closeCommentBox = createCloseCommentBoxButton();
     // TODO find a better way to add it
-    $("#commentBox").parent().find("#ui-id-1").prepend(closeCommentBox);
+    $("#commentBox").parent().find(".ui-dialog-titlebar").prepend(closeCommentBox);
     $(".closeCommentBox").parent().css({position: 'relative'});
     $(".closeCommentBox").css({top: 0, left: 0, position:'absolute'});
   }
+}
+
+function createCloseCommentBoxButton(){
+  var closeCommentBoxDiv = $("<div>",{
+    class: "closeCommentBoxDiv"
+  });
+  //close button
+  var closeCommentBox =  $("<button/>",{
+    class:"closeCommentBox",
+    click:function(){
+        exitButtonOnClick();
+        // $("#replies").parent().css("z-index","1");
+        // $("#commentBox").parent().css("z-index","0");
+    }
+  });
+  var closeCommentBoxIcon = $("<i/>",{
+    class: "material-icons closeCommentBoxIcon",
+    text: "highlight_off"
+  });
+  closeCommentBox.append(closeCommentBoxIcon);
+  closeCommentBoxDiv.append(closeCommentBox);
+  return closeCommentBoxDiv;
 }
 
 function saveButtonOnClick(workCreator,work) {
@@ -136,7 +148,7 @@ function saveCommentOrReply(dataForSave,isComment){
       callback: null
   }).then((data) => {
     launchToastNotifcation(data['message']);
-    let firstCommentData;
+    let firstCommentData,type;
     //reply to other user's comment
     if(!isComment){
       var firstCommentId = $("#replies").attr("data-firstCommentId");
@@ -146,7 +158,8 @@ function saveCommentOrReply(dataForSave,isComment){
         work: dataForSave["work"],
         commenter:$("#"+firstCommentId).attr("creator"),
         hash: firstCommentId
-      }
+      };
+      type = undefined;
     }
     // the first comment
     else{
@@ -178,10 +191,13 @@ function saveCommentOrReply(dataForSave,isComment){
         work: dataForSave["work"],
         commenter: currentUser.eppn,
         hash: dataForSave["replyHash"]
-      }
+      };
+      type = dataForSave['commentType'];
     }
+    console.log(dataForSave['commentType']);
     // this function takes the first comment data
-    checkThreadUnapprovedComments(firstCommentData,dataForSave['commentType'],"AllCommenters",markUnapprovedComments);
+
+    checkThreadUnapprovedComments(firstCommentData,type,"AllCommenters",markUnapprovedComments);
   });
 }
 
@@ -238,27 +254,30 @@ function editOrDelete(dataForEditOrDelete,isEdit){
         updateTypeSelector(dataForEditOrDelete["hash"],dataForEditOrDelete["type"]);
       }
     }
-    //unhighlight the deleted comment
-    //update the commenterSelector and the typeSelector
-    if(firstCommentId == $("#replies").attr("deletedid")){
-      console.log("should unwrap");
-      removeDeletedSpan(firstCommentId);
-      updateCommenterSelectors(firstCommentId);
-      updateTypeSelector(undefined,"All");
-      $("#replies").parent().hide();
-    }
     else{
-      // if the first comment is deleted, no checking required
-      // update and mark the unapproved comments
-      let firstCommentData = {
-        creator: dataForEditOrDelete["creator"],
-        work: dataForEditOrDelete["work"],
-        commenter: $("#"+firstCommentId).attr("creator"),
-        hash: firstCommentId
+      //unhighlight the deleted comment
+      //update the commenterSelector and the typeSelector
+      if(firstCommentId == $("#replies").attr("deletedid")){
+        console.log("should unwrap");
+        removeDeletedSpan(firstCommentId);
+        updateCommenterSelectors(firstCommentId);
+        updateTypeSelector(undefined,"All");
+        $("#replies").parent().hide();
       }
-      checkThreadUnapprovedComments(firstCommentData,undefined,undefined,markUnapprovedComments);
+      else{
+        // if the first comment is deleted, no checking required
+        // update and mark the unapproved comments
+        let firstCommentData = {
+          creator: dataForEditOrDelete["creator"],
+          work: dataForEditOrDelete["work"],
+          commenter: $("#"+firstCommentId).attr("creator"),
+          hash: firstCommentId
+        }
+        checkThreadUnapprovedComments(firstCommentData,undefined,undefined,markUnapprovedComments);
+      }
+      $("#replies").removeAttr("deletedid");
     }
-    $("#replies").removeAttr("deletedid");
+
   });
 }
 

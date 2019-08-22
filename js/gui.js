@@ -1,3 +1,4 @@
+//TODO clean this function
 $(window).ready(function() {
     $("#litadd").on("click", function(evt) {
         $(".headerTab").removeClass("active");
@@ -40,9 +41,13 @@ $(window).ready(function() {
             $("#addUploadButton").on("click", function() {
                 var name = $("#addNameInput").val();
                 if (name == "" || name.length > 100) {
-                    alert("Please choose a file name no longer than 100 characters");
-                } else if (!/^[a-zA-Z0-9_\-\s\.\%\(\)]+$/.test(name)) {
-                    alert("Please choose a file name with no special characters");
+                    launchToastNotifcation("Please choose a file name no longer than 100 characters");
+                }
+                else if(/^[\s]+$/.test(name)){
+                    launchToastNotifcation("Please chosse a file name without space");
+                }
+                else if (!/^[a-zA-Z0-9_\-\.]+$/.test(name)) {
+                    launchToastNotifcation("Please choose a file name with no special characters");
                 } else {
                     saveLit({work: name, privacy: $("#privateCheck").is('.is-checked'), data: fileToSave});
                 }
@@ -81,7 +86,7 @@ $(window).ready(function() {
 
 });
 
-saveLit = ({work, privacy, data} = {}) => {
+function saveLit ({work, privacy, data} = {}){
   if (data.size > 2000000) {
     alert("Error: File too large. Can't be larger than 2Mb.");
     return;
@@ -93,11 +98,29 @@ saveLit = ({work, privacy, data} = {}) => {
   formData.append("privacy", privacy);
 
   API.request({
+    endpoint: "get_creators",
+    method: "GET"
+  }).then((data)=>{
+      console.log(data);
+      let isCurrentUserNewCreator = true;
+      for(var i = 0 ; i < data.length ; i++){
+        if(data[i] == currentUser.eppn){
+          console.log(currentUser.eppn);
+          isCurrentUserNewCreator = false;
+        }
+      }
+      let newCreator = createUserMenuOption(currentUser.eppn);
+      $(".usersMenu").append(newCreator);
+  });
+
+
+  API.request({
     endpoint: "create_work",
     method: "POST",
     data: formData,
     callback: launchToastNotifcation
   });
+
 }
 
 function showLink(value){
@@ -140,17 +163,7 @@ createUserSelectScreen = async ({users = users} = {}) =>{
   // figure out why this is here
   width = $(document).width();
   for(i in user_list){
-    var user = $("<li/>",{
-      class:'mdl-list__item usersMenuOptions',
-      commenterId: user_list[i],
-      text:user_list[i],
-      click: function(evt){
-        $(".usersMenuOptions").removeClass("usersMenuSelected");
-        $(this).addClass("usersMenuSelected");
-        let selected_eppn = evt["currentTarget"]["attributes"]["commenterid"]["value"];
-        showUsersLit(users,selected_eppn);
-      }
-    });
+    var user = createUserMenuOption(user_list[i],users);
     $(".usersMenu").append(user);
   }
   //activate the search bar
@@ -161,6 +174,21 @@ createUserSelectScreen = async ({users = users} = {}) =>{
   });
   //make the white list
   makeWhiteListSettingBase(user_list);
+}
+
+function createUserMenuOption(commenterId,users){
+  var user = $("<li/>",{
+    class:'mdl-list__item usersMenuOptions',
+    commenterId: commenterId,
+    text:commenterId,
+    click: function(evt){
+      $(".usersMenuOptions").removeClass("usersMenuSelected");
+      $(this).addClass("usersMenuSelected");
+      let selected_eppn = evt["currentTarget"]["attributes"]["commenterid"]["value"];
+      showUsersLit(users,selected_eppn);
+    }
+  });
+  return user;
 }
 
 function showUsersLit(users,selected_eppn){
@@ -198,13 +226,19 @@ function showUsersLit(users,selected_eppn){
    $(".chosenFile").text(textChosen);
    let endpoint = 'get_work/' +selected_eppn + '/' + textChosen;
    showLink(endpoint);
-   console.log(endpoint);
    API.request({endpoint}).then((data) => {
-       let literatureText = data['data'];
-       let isWorkPublic = data['additional'];
-       let commentsNeedApproval = data['additional2'];
-       buildHTMLFile(literatureText,selected_eppn,textChosen);
-       updateSettingPage(selected_eppn,textChosen,isWorkPublic,commentsNeedApproval);
+       if(data["status"] != "error"){
+         let literatureText = data['data'];
+         let isWorkPublic = data['additional'];
+         let commentsNeedApproval = data['additional2'];
+         buildHTMLFile(literatureText,selected_eppn,textChosen);
+         updateSettingPage(selected_eppn,textChosen,isWorkPublic,commentsNeedApproval);
+       }
+       else{
+         //if work doesn't exist redirect to home
+         $("#home").click();
+         launchToastNotifcation("")
+       }
    });
    //auto scroll to the text part
    window.scrollTo(0,$("#cardbox").position().top+$("#cardbox").height());

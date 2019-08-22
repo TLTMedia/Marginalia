@@ -17,7 +17,7 @@ export class APIHandler {
         }).done((data) => {
             if (data['status'] == 'error') {
                 console.log("ERROR", data);
-                alert(data['message']);
+                //alert(data['message']);
                 return;
             } else if (data['status'] !== 'ok') {
                 console.log("NOK", data);

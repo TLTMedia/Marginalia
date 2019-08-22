@@ -4,7 +4,6 @@ var TEXTSPACE = "textSpace";
 
 var currentUser = {};
 // Adminstrative helpers, first of multiple checks
-var whitelist = []; // the admins of the website, double checked in PHP
 
 var remSpan; // holds the name of made and clicked spans
 
@@ -21,7 +20,7 @@ init = async ({api = api, users = users} = {}) => {
   $("#text").hide();
   $("#addLitBase").hide();
   createUserSelectScreen({users: users});
-  //createSettingScreen({users:users});
+
 
   $(window).on("resize", function() {
     var stageWidth = $(window).width();
@@ -53,11 +52,8 @@ function buildHTMLFile(litContents, selected_eppn,textChosen) {
     hideAllBoxes();
   }
   loadUserComments(selected_eppn,textChosen);
-  let workTitle = $("<div/>",{
-    id : "workTitle",
-    text : textChosen
-  });
-  $("#text").append(workTitle);
+  createWorkTitle(textChosen);
+
   var litDiv = $("<div/>", {
     "id": "litDiv"
   });
@@ -87,6 +83,35 @@ function buildHTMLFile(litContents, selected_eppn,textChosen) {
 
   litDiv.append(metaChar, metaName, link, script, preText);
   $("#text").append(litDiv);
+}
+
+function createWorkTitle(textChosen){
+  let workTitle = $("<div/>",{
+    id: "workTitle"
+  });
+  let workTitleSpan = $("<span/>",{
+    id : "workTitleSpan",
+    text: textChosen
+  });
+  workTitle.append(workTitleSpan);
+  $("#text").append(workTitle);
+  createTips(workTitle);
+}
+
+function createTips(workTitle){
+  let tips = $("<div/>",{
+    id: "tips"
+  });
+  let icon = $("<i/>",{
+    class: "material-icons tipsIcon",
+    text: "help"
+  });
+  let text = $("<span/>",{
+    class: "tipsText"
+  });
+  text.html("The <span style = 'color : red'>Red</span> comments are the comments that are not approved yet.\nThe <span style = 'color : orange'>Orange</span> comments are comments that has unapproved replies.");
+  tips.append(icon,text);
+  workTitle.prepend(tips);
 }
 
 function makeDropDown(){
@@ -180,7 +205,7 @@ renderComments = (commentData, selected_eppn,textChosen,callback) => {
     });
 }
 
-highlightText = ({startIndex, endIndex, commentType, eppn, hash , approved} = {}) => {
+function highlightText({startIndex, endIndex, commentType, eppn, hash, approved}){
     let range = rangy.createRange();
     range.selectCharacters(document.getElementById(TEXTSPACE), startIndex, endIndex);
     let area = rangy.createClassApplier("commented-selection", {
@@ -208,7 +233,7 @@ function clickOnComment(commentSpanId,workChosen,workCreator,evt){
       creator: workCreator,
       work: workChosen,
       commenter: $("#"+commentSpanId).attr("creator"),
-      hash: commentSpanId,
+      hash: commentSpanId
   };
   get_comment_chain_API_request(comment_data,commentSpanId);
   evt.stopPropagation();
@@ -225,7 +250,6 @@ function get_comment_chain_API_request(jsonData, commentSpanId){
       data: jsonDataStr,
       method: "POST"
   }).then((data) => {
-    console.log(data);
     readThreads(data,work,workCreator);
     $("#commentBox").parent().hide();
   });
@@ -239,15 +263,6 @@ function readThreads(threads, work, workCreator, parentId = null){
   else{
     for(var i =0; i<threads.length ; i++){
       //TODO make it pass a object instead of every thing
-      // also pass the parentId
-      // let dataForReplies = {
-      //   eppn : ,
-      //   firstName:,
-      //   lasName:,
-      //   startIndex:,
-      //   endIndex:,
-      //   visibility
-      // }
       let dataForReplies = {
         eppn: threads[i].eppn,
         firstName: threads[i].firstName,
@@ -276,8 +291,12 @@ function checkThreadUnapprovedComments(commentData,type,commenter,callback){
   }).then((data) => {
     let isThreadApproved = checkIsThreadApprovedHelper(data,commentData.work,commentData.creator);
     if(isThreadApproved == false){
-      //TODO if approved == true then remove the threadNotApproved
-      $("#"+commentData.hash).addClass("threadNotApproved");
+      let targetComment = $("#"+commentData.hash);
+      targetComment.addClass("threadNotApproved");
+      targetComment.children("span").addClass("threadNotApproved");
+      if(!targetComment.children("span").hasClass("commentNotApproved")){
+        targetComment.children("span").text("Orange comment means there are unapproved replies");
+      }
     }
     else{
       $("#"+commentData.hash).removeClass("threadNotApproved");
@@ -314,6 +333,7 @@ function checkIsThreadApprovedHelper(threads, work, workCreator){
 function markUnapprovedComments(type,commenter){
   //change everything to color black
   $(".commented-selection").css({"color" : "black"});
+  console.log(type,commenter);
   let unapprovedThreadCommentsId = [];
   let unapprovedThreadComments;
   let unapprovedCommentsId =[];
