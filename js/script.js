@@ -16,6 +16,7 @@ var remSpan; // holds the name of made and clicked spans
 init = async ({api = api, users = users} = {}) => {
   API = api;
   currentUser = users.current_user;
+  width = $(document).width();
   $(".loader").hide();
   $("#text").hide();
   $("#addLitBase").hide();
@@ -332,7 +333,7 @@ function checkIsThreadApprovedHelper(threads, work, workCreator){
 
 function markUnapprovedComments(type,commenter){
   //change everything to color black
-  $(".commented-selection").css({"color" : "black"});
+  //$(".commented-selection").css({"color" : "black"});
   console.log(type,commenter);
   let unapprovedThreadCommentsId = [];
   let unapprovedThreadComments;
@@ -365,15 +366,15 @@ function markUnapprovedComments(type,commenter){
     unapprovedCommentsId.push(id);
   }
   unapprovedCommentsId.forEach((element)=>{
-    $("#"+element).css({"color" : "red"});
+    $("#"+element).addClass("unapprovedComments");
   });
   for(var i = 0; i < unapprovedThreadComments.length; i++){
    let id = unapprovedThreadComments[i]["attributes"]["id"]["value"];
    unapprovedThreadCommentsId.push(id);
   }
-  unapprovedThreadCommentsId.forEach((element)=>{
-    $("#"+element).css({"color" : "darkOrange"});
-  });
+  // unapprovedThreadCommentsId.forEach((element)=>{
+  //   $("#"+element).css({"color" : "darkOrange"});
+  // });
 }
 
 

@@ -12,6 +12,7 @@ html {
   overflow-y: scroll;
 }
 
+
 /* the whole replybox*/
 #replies {
   margin-top: -10px;
@@ -104,12 +105,6 @@ html {
 }
 
 
-#goBack {
-    display: inline-block;
-    cursor: pointer;
-    margin-bottom: 0px;
-}
-
 .nameContainer {
     display: none;
 }
@@ -159,11 +154,6 @@ html {
 .chosenFile {
   font-weight: bold;
   font-size: .60rem;
-}
-
-#addLitBase {
-  font-weight: bold;
-  font-size:.55rem;
 }
 
 #submitLit {
@@ -1152,6 +1142,32 @@ input[type="file"] {
 #userSelector {
     font-style: italic;
 }
+/*-----------------addLitPage----------------------*/
+#addLitBase {
+  font-weight: bold;
+  font-size:.55rem;
+}
+
+.uploadNotification{
+  text-align: center;
+  vertical-align: center;
+  font-size: 15px;
+}
+
+#doneAddLit{
+  display: inline-block;
+  font-size: .55rem;
+  margin-bottom: 0px;
+  right: 0px;
+  margin-left: 115px;
+}
+
+#goBack {
+  display: inline-block;
+  cursor: pointer;
+  margin-bottom: 0px;
+}
+
 /*=================headerTab=======================*/
 #header {
   background-color: #4db6ac;
@@ -1186,11 +1202,42 @@ input[type="file"] {
   background-color: #4CAF50;
   color: white;
 }
+/*-----------------colorsForComments---------------*/
+
+.unapprovedComments{
+  color: red;
+}
+
+.unapprovedComments.threadNotApproved{
+  color: red;
+}
+
+.threadNotApproved{
+  color: orange;
+}
 
 /*-----------------commentHighlightColor-----------*/
 .commented-selection {
   background-color: rgba(100, 255, 100);
   cursor: context-menu;
+}
+
+.hiddenComments{
+  background-color: rgba(100,255,100,0.0);
+  color: black!important;
+  cursor:default;
+}
+
+#text span span {
+  background-color: #309b30;
+}
+
+#text span span span {
+  background-color: #238423;
+}
+
+#text span span span span {
+  background-color: #186818;
 }
 
 .overLapComments{

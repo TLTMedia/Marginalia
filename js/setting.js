@@ -194,9 +194,11 @@ function makeWhiteListButton(litId,selected_eppn){
     class: "mdl-list__item litWhiteListButton",
     text: "Manage White List",
     click: (evt)=>{
-      $(".litSettingOptionSelected").removeClass("litSettingOptionSelected");
-      $(this).addClass("litSettingOptionSelected");
-      showWhiteListSettingBase(litId,selected_eppn);
+      if(isCurrentUserSelectedUser(selected_eppn,true)){
+        $(".litSettingOptionSelected").removeClass("litSettingOptionSelected");
+        $(this).addClass("litSettingOptionSelected");
+        showWhiteListSettingBase(litId,selected_eppn);
+      }
     }
   });
   $(".settingOptions").append(whiteListOption);

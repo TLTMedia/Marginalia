@@ -163,21 +163,29 @@ function selectorOnSelect(currentSelectedType, currentSelectedCommenter){
   // console.log('type : ',currentSelectedType);
   // console.log('commenter: ',currentSelectedCommenter);
   let selectedComments;
-  $(".commented-selection").off().css({
-    "background-color": "rgba(100, 255, 100, 0.0)"
-  });
+  // $(".commented-selection").off().css({
+  //   "background-color": "rgba(100, 255, 100, 0.0)"
+  // });
+  $(".hiddenComments").addClass("commented-selection");
+  $(".commented-selection").off().addClass("hiddenComments");
   if (currentSelectedType == "All" && currentSelectedCommenter == "AllCommenters"){
-    selectedComments = $(".commented-selection").css({"background-color": "rgba(100, 255, 100, 1.0)"});
+    //selectedComments = $(".commented-selection").css({"background-color": "rgba(100, 255, 100, 1.0)"});
+    selectedComments = $(".commented-selection").removeClass("hiddenComments");
   }
   else if(currentSelectedCommenter == "AllCommenters"){
-    selectedComments = $(".commented-selection" + "[typeof='" + currentSelectedType + "']").css({"background-color": "rgba(100, 255, 100, 1.0)"});
+    //selectedComments = $(".commented-selection" + "[typeof='" + currentSelectedType + "']").css({"background-color": "rgba(100, 255, 100, 1.0)"});
+    selectedComments = $(".commented-selection" + "[typeof='" + currentSelectedType + "']").removeClass("hiddenComments");
   }
   else if(currentSelectedType == "All"){
-    selectedComments = $(".commented-selection" + "[creator ='" + currentSelectedCommenter + "']").css({"background-color": "rgba(100, 255, 100, 1.0)"});
+    //selectedComments = $(".commented-selection" + "[creator ='" + currentSelectedCommenter + "']").css({"background-color": "rgba(100, 255, 100, 1.0)"});
+    selectedComments = $(".commented-selection" + "[creator ='" + currentSelectedCommenter + "']").removeClass("hiddenComments");
+
   }
   else{
-    selectedComments = $(".commented-selection" + "[creator ='" + currentSelectedCommenter + "'][typeof = '" + currentSelectedType + "']").css({"background-color": "rgba(100, 255, 100, 1.0)"});
+    //selectedComments = $(".commented-selection" + "[creator ='" + currentSelectedCommenter + "'][typeof = '" + currentSelectedType + "']").css({"background-color": "rgba(100, 255, 100, 1.0)"});
+    selectedComments = $(".commented-selection" + "[creator ='" + currentSelectedCommenter + "'][typeof = '" + currentSelectedType + "']").removeClass("hiddenComments");
   }
+  $(".commented-selection.hiddenComments").removeClass("commented-selection");
   selectedComments.on("click",(evt)=>{
     let commentSpanId = evt["currentTarget"]["id"];
     let work = $("#setting").attr("work");

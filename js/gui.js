@@ -1,65 +1,13 @@
 //TODO clean this function
 $(window).ready(function() {
     $("#litadd").on("click", function(evt) {
-        $(".headerTab").removeClass("active");
-        $(this).addClass("active");
-        $("#settingBase").hide();
-        $("#addLitBase").load("parts/upload.htm", function() {
-            $(this).fadeIn();
-            $("#nonTitleContent").hide();
-            /* Makes the checkbox button ('page is private') clickable ... */
-            componentHandler.upgradeElement($("#privateCheck")[0]);
-            $("#goBack").on("click", function() {
-                if ($("#addLitBase").is(":visible")) {
-                  $("#litadd").removeClass("active");
-                  $("#litadd").fadeIn();
-                  $("#nonTitleContent").hide();
-                  $("#addLitBase").hide();
-                  $("#nonTitleContent").show();
-                }
-            });
-            var fileToSave;
-            $("#addFileButton").on("change", function(e) {
-                fileToSave = e.target.files[0];
-                if (fileToSave === undefined || fileToSave === null) {
-                    // Can occur when user cancels file-choosing view
-                    return;
-                }
-
-                var fileName = fileToSave.name;
-                if (fileName.length > 100) {
-                    alert("File name can't exceed 100 characters");
-                    return;
-                }
-
-                $("#fileName").text(fileName);
-                $(".tempNameContainer").hide();
-                $(".nameContainer").show();
-                $("#addNameInput").val(fileName.substr(0, fileName.lastIndexOf('.')) || fileName);
-            });
-
-            $("#addUploadButton").on("click", function() {
-                var name = $("#addNameInput").val();
-                if (name == "" || name.length > 100) {
-                    launchToastNotifcation("Please choose a file name no longer than 100 characters");
-                }
-                else if(/^[\s]+$/.test(name)){
-                    launchToastNotifcation("Please chosse a file name without space");
-                }
-                else if (!/^[a-zA-Z0-9_\-\.]+$/.test(name)) {
-                    launchToastNotifcation("Please choose a file name with no special characters");
-                } else {
-                    saveLit({work: name, privacy: $("#privateCheck").is('.is-checked'), data: fileToSave});
-                }
-            });
-        });
-        //TODO find a better way to add this in here
+        showAddLitPage();
         resetWhiteListPage();
     });
 
     $("#setting").addClass("disabledHeaderTab");
     $("#setting").off().on("click",()=>{
-      let author =$("#setting").attr("author");
+      let author = $("#setting").attr("author");
       let work = $("#setting").attr("work");
       console.log(author, work);
       //TODO setting page sometimes shows up before the checking authority works
@@ -97,28 +45,34 @@ function saveLit ({work, privacy, data} = {}){
   formData.append("work", work);
   formData.append("privacy", privacy);
 
-  API.request({
-    endpoint: "get_creators",
-    method: "GET"
-  }).then((data)=>{
-      console.log(data);
-      let isCurrentUserNewCreator = true;
-      for(var i = 0 ; i < data.length ; i++){
-        if(data[i] == currentUser.eppn){
-          console.log(currentUser.eppn);
-          isCurrentUserNewCreator = false;
-        }
-      }
-      let newCreator = createUserMenuOption(currentUser.eppn);
-      $(".usersMenu").append(newCreator);
-  });
-
+  //TODO this should be another function with the async users parameter to send in createUserMenuOption();
+  // API.request({
+  //   endpoint: "get_creators",
+  //   method: "GET"
+  // }).then((data)=>{
+  //     console.log(data);
+  //     let isCurrentUserNewCreator = true;
+  //     for(var i = 0 ; i < data.length ; i++){
+  //       if(data[i] == currentUser.eppn){
+  //         console.log(currentUser.eppn);
+  //         isCurrentUserNewCreator = false;
+  //       }
+  //     }
+  //     let newCreator = createUserMenuOption(currentUser.eppn,users);
+  //     console.log(users);
+  //     $(".usersMenu").append(newCreator);
+  // });
 
   API.request({
     endpoint: "create_work",
     method: "POST",
-    data: formData,
-    callback: launchToastNotifcation
+    data: formData
+  }).then((data)=>{
+    launchToastNotifcation(work + " is successfully created");
+    $("#addLitSecondPage").show();
+    $("#doneAddLit").show();
+    $("#addLitFirstPage").hide();
+    $(".uploadNotification").html('"<i>'+work + '</i>" is successfully created');
   });
 
 }
@@ -161,7 +115,7 @@ createUserSelectScreen = async ({users = users} = {}) =>{
   user_list = users.creator_list;
   // TODO need to check what does this width thing do
   // figure out why this is here
-  width = $(document).width();
+  
   for(i in user_list){
     var user = createUserMenuOption(user_list[i],users);
     $(".usersMenu").append(user);
@@ -177,6 +131,7 @@ createUserSelectScreen = async ({users = users} = {}) =>{
 }
 
 function createUserMenuOption(commenterId,users){
+  console.log(users)
   var user = $("<li/>",{
     class:'mdl-list__item usersMenuOptions',
     commenterId: commenterId,

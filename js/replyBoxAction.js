@@ -322,6 +322,7 @@ function commentApprovedButtonOnClick(hash,commenterEppn,work,workCreator){
   }).then((data)=>{
     launchToastNotifcation(data);
     $("#"+hash).attr("approved",true);
+    $("#"+hash).removeClass("unapprovedComments");
     let currentSelectedType = $(".typeSelector").attr("currentTarget");
     let currentSelectedCommenter = $(".commenterSelector").attr("currentTarget");
     console.log(currentSelectedType,currentSelectedCommenter);

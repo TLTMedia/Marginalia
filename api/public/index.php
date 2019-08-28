@@ -409,6 +409,46 @@ $app->get('/has_access/:creator/:work', function ($creator, $work) use ($app) {
 });
 
 /**
+ * Checks whether the currently logged in user can comment without requiring approval.
+ * In addition, it first checks whether the user can even access the work.
+ */
+$app->get('/comments_need_approval/:creator/:work', function ($creator, $work) use ($app) {
+		require '../Actions/Permissions.php';
+		$permissions = new Permissions;
+
+		$workFullPath = __PATH__ . $creator . "/works/" . $work;
+		if ($permissions->isWorkPublic($workFullPath)) {
+				if ($permissions->commentsNeedsApproval($workFullPath)) {
+						if ($permissions->userOnPermissionsList($workFullPath, $_SERVER['eppn'])) {
+								echo json_encode(array(
+										"needApproval" => "false"
+								));
+						} else {
+								echo json_encode(array(
+										"needApproval" => "true"
+								));
+						}
+				} else {
+						echo json_encode(array(
+								"needApproval" => "false"
+						));
+				}
+		} else {
+				if ($permissions->userOnPermissionsList($workFullPath, $_SERVER['eppn'])) {
+						// current user is on the permission list, so even if comments required approval - they'd be able to comment without requiring it...
+						// Hence, we don't need to even check if comments require approval here.
+						echo json_encode(array(
+								"needApproval" => "false"
+						));
+				} else {
+						echo json_encode(array(
+								"needApproval" => "true"
+						));
+				}
+		}
+});
+
+/**
  * Force the server to git-pull from github develop branch
  * - Because FTP & SSH access to the 'http://apps.tlt.stonybrook.edu' is restricted from IPs not on the local network...
  */
