@@ -393,15 +393,18 @@ $app->get('/has_access/:creator/:work', function ($creator, $work) use ($app) {
 		$workFullPath = __PATH__ . $creator . "/works/" . $work;
 		if ($permissions->isWorkPublic($workFullPath)) {
 				echo json_encode(array(
+						"status" => "ok",
 						"access" => "true"
 				));
 		} else {
 				if ($permissions->userOnPermissionsList($workFullPath, $_SERVER['eppn'])) {
 						echo json_encode(array(
+								"status" => "ok",
 								"access" => "true"
 						));
 				} else {
 						echo json_encode(array(
+								"status" => "error",
 								"access" => "false"
 						));
 				}
@@ -421,15 +424,18 @@ $app->get('/comments_need_approval/:creator/:work', function ($creator, $work) u
 				if ($permissions->commentsNeedsApproval($workFullPath)) {
 						if ($permissions->userOnPermissionsList($workFullPath, $_SERVER['eppn'])) {
 								echo json_encode(array(
+										"status" => "ok",
 										"needApproval" => "false"
 								));
 						} else {
 								echo json_encode(array(
+										"status" => "error",
 										"needApproval" => "true"
 								));
 						}
 				} else {
 						echo json_encode(array(
+								"status" => "ok",
 								"needApproval" => "false"
 						));
 				}
@@ -438,10 +444,12 @@ $app->get('/comments_need_approval/:creator/:work', function ($creator, $work) u
 						// current user is on the permission list, so even if comments required approval - they'd be able to comment without requiring it...
 						// Hence, we don't need to even check if comments require approval here.
 						echo json_encode(array(
+								"status" => "ok",
 								"needApproval" => "false"
 						));
 				} else {
 						echo json_encode(array(
+								"status" => "error",
 								"needApproval" => "true"
 						));
 				}
