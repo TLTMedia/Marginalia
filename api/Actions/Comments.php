@@ -113,7 +113,6 @@ class Comments
             $jsonData->lastName = "deleted";
             $jsonData->deleted = true;
             if (file_put_contents($fileToModify, json_encode($jsonData))) {
-
                 return json_encode(array(
                     "status" => "ok",
                     "message" => "successfully deleted comment"
@@ -127,8 +126,6 @@ class Comments
         } else {
             if ($this->deleteDir($commentDirectoryHash, true)) {
                 $parentDeleted = !file_exists(dirname($commentDirectoryHash));
-
-
                 return json_encode(array(
                     "status" => "ok",
                     "message" => "successfully deleted comment"
@@ -352,6 +349,13 @@ class Comments
      */
     public function setCommentPublic($creator, $work, $commentHash, $commenterEppn, $privacy)
     {
+        if (!in_array(json_encode($privacy), array('true', 'false'))) {
+            return json_encode(array(
+                "status" => "error",
+                "message" => "unable to edit comment, unknown privacy"
+            ));
+        }
+
         $fileToModify = $this->getCommentPathByHash($creator, $work, $commentHash, $commenterEppn);
         if (!$fileToModify) {
             return json_encode(array(
@@ -382,7 +386,7 @@ class Comments
         if (file_put_contents($fileToModify, json_encode($fileData))) {
             return json_encode(array(
                 "status" => "ok",
-                "data" => "successfully changed comment to " . json_encode($privacy)
+                "message" => "successfully changed comment to " . json_encode($privacy)
             ));
         } else {
             return json_encode(array(
@@ -392,23 +396,23 @@ class Comments
         }
     }
 
-    public function approvedComment($creator, $work, $commentHash, $commenterEppn, $approved)
+    public function approveComment($approverEppn, $creator, $work, $commentHash, $commenterEppn)
     {
         $fileToModify = $this->getCommentPathByHash($creator, $work, $commentHash, $commenterEppn);
         if (!$fileToModify) {
             return json_encode(array(
                 "status" => "error",
-                "message" => "unable to approve comment1"
+                "message" => "unable to approve comment"
             ));
         }
 
         $fileData = json_decode(file_get_contents($fileToModify));
         $fileData->approved = true;
-        $fileData->public = true;
+        $fileData->public = true; // does this need to be here?
         if (file_put_contents($fileToModify, json_encode($fileData))) {
             return json_encode(array(
                 "status" => "ok",
-                "data" => "successfully approved comment"
+                "message" => "successfully approved comment"
             ));
         } else {
             return json_encode(array(
@@ -557,7 +561,6 @@ class Comments
                     if ($jsonData->approved) {
                         // comment is approved
                         $jsonData->hash = $this->getEppnHashFromPath($jsonData->path, "hash");
-                        $jsonData->approved = true;
                         array_push($commentsPointer, $jsonData);
                     } else {
                         // comment is not approved
@@ -594,7 +597,6 @@ class Comments
                             if ($jsonData->approved) {
                                 // comment is approved
                                 $jsonData->hash = $this->getEppnHashFromPath($jsonData->path, "hash");
-                                $jsonData->approved = true;
                                 array_push($commentsPointer[$amt]->threads, $jsonData);
                             } else {
                                 // comment is not approved
@@ -602,7 +604,6 @@ class Comments
                                 if ($this->permissions->userOnPermissionsList($workPath, $readerEppn) || $readerEppn == $jsonData->eppn) {
                                     // reader is admin so can see the comment
                                     $jsonData->hash = $this->getEppnHashFromPath($jsonData->path, "hash");
-                                    //CHANGE JUN 25 (add a new value in the json data the "approved")
                                     $jsonData->approved = false;
                                     array_push($commentsPointer[$amt]->threads, $jsonData);
                                 } else {
@@ -746,9 +747,11 @@ class Comments
         if (!is_dir($dirPath)) {
             return false;
         }
+
         if (substr($dirPath, strlen($dirPath) - 1, 1) != '/') {
             $dirPath .= '/';
         }
+
         $files = glob($dirPath . '{,.}[!.,!..]*', GLOB_MARK|GLOB_BRACE);
         foreach ($files as $file) {
             if (is_dir($file)) {
@@ -757,6 +760,7 @@ class Comments
                 unlink($file);
             }
         }
+
         rmdir($dirPath);
         $parent = dirname($dirPath);
         if (count(glob("$parent/*")) === 0 && $removeEmptyParent) {
@@ -765,18 +769,24 @@ class Comments
 
         return true;
     }
+
     private function isCommentRoot($dirPath)
     {
-        $afterDataDir=preg_split("/data/", $dirPath);
+        $afterDataDir = preg_split("/data/", $dirPath);
 
-        return ($this->dirLength($afterDataDir[1])) ==5;
+        return ($this->dirLength($afterDataDir[1]) == 5);
     }
-    //count slashes to find directory depth
+
+    /*
+     * Counts slashes to find directory depth
+     */
     private function dirLength($dirPath)
     {
-        return count(preg_split("/\//",$dirPath));
+        return count(preg_split("/\//", $dirPath));
     }
+
 }
+
 class Comment
 {
     public function __construct(

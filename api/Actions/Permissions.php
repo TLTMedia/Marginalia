@@ -7,7 +7,6 @@ class Permissions
      */
     public function getPermissionsList($pathOfWork)
     {
-        // $pathOfWork = ../../users/ikleiman@stonybrook.edu/works_data/Something
         $filePath = $pathOfWork . "/permissions.json";
         if (!is_dir($pathOfWork)) {
             return json_encode(array(
@@ -139,27 +138,24 @@ class Permissions
         ));
     }
 
-//TODO might need some edit
-    public function setPermissionsCNA($creator, $work, $currentUser, $approval)
+    /**
+     * Change whether a works' comments need approval or not
+     */
+    public function setWorkRequiresApproval($creator, $work, $currentUser, $approval)
     {
         $pathOfWork = __PATH__ . "$creator/works/$work";
-        /**
-         * if $approval isn't either 'true' or 'false' return error
-         */
         if (!in_array($approval, array('true', 'false'))) {
             return json_encode(array(
                 "status" => "error",
                 "message" => "invalid privacy type"
             ));
         }
-        /**
-         * if the current user isn't on the permissions list return error
-         */
+
         $hasPermissions = $this->userOnPermissionsList($pathOfWork, $currentUser);
         if (!$hasPermissions) {
             return json_encode(array(
                 "status" => "error",
-                "message" => "invalid permissions to set work privacy"
+                "message" => "invalid permissions to change works' comments approval"
             ));
         }
 
@@ -169,7 +165,8 @@ class Permissions
         file_put_contents($filePath, json_encode($permissionsData));
 
         return json_encode(array(
-            "status" => "ok"
+            "status" => "ok",
+            "message" => "successfully changed work approval status to '$approval'"
         ));
     }
 
@@ -245,6 +242,76 @@ class Permissions
         }
 
         return FALSE;
+    }
+
+    /**
+     * Can comment without requiring approval
+     *
+     * NOTE: This logic may need to be checked - Ilan 9/3/19
+     */
+    public function canCommentWithoutApproval($creator, $work, $commenterEppn)
+    {
+        $workFullPath = __PATH__ . $creator . "/works/" . $work;
+        if ($this->isWorkPublic($workFullPath)) {
+            if ($this->commentsNeedsApproval($workFullPath)) {
+                if ($this->userOnPermissionsList($workFullPath, $commenterEppn)) {
+                    return json_encode(array(
+                        "status" => "ok",
+                        "needApproval" => "false"
+                    ));
+                } else {
+                    return json_encode(array(
+                        "status" => "error",
+                        "needApproval" => "true"
+                    ));
+                }
+            } else {
+                return json_encode(array(
+                    "status" => "ok",
+                    "needApproval" => "false"
+                ));
+            }
+        } else {
+            if ($this->userOnPermissionsList($workFullPath, $commenterEppn)) {
+                // current user is on the permission list, so even if comments required approval - they'd be able to comment without requiring it...
+                // Hence, we don't need to even check if comments require approval here.
+                return json_encode(array(
+                    "status" => "ok",
+                    "needApproval" => "false"
+                ));
+            } else {
+                return json_encode(array(
+                    "status" => "error",
+                    "needApproval" => "true"
+                ));
+            }
+        }
+    }
+
+    /**
+     * Can the current user view the specified work
+     */
+    public function canUserViewWork($creator, $work, $currentUser)
+    {
+        $workFullPath = __PATH__ . $creator . "/works/" . $work;
+        if ($this->isWorkPublic($workFullPath)) {
+            return json_encode(array(
+                "status" => "ok",
+                "access" => "true"
+            ));
+        } else {
+            if ($this->userOnPermissionsList($workFullPath, $currentUser)) {
+                return json_encode(array(
+                    "status" => "ok",
+                    "access" => "true"
+                ));
+            } else {
+                return json_encode(array(
+                    "status" => "error",
+                    "access" => "false"
+                ));
+            }
+        }
     }
 }
 

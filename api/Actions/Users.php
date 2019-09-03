@@ -10,7 +10,7 @@ class Users
         $userFolder = glob("../../users/*");
         $allNetIDs = array();
 
-        foreach($userFolder as $userid) {
+        foreach ($userFolder as $userid) {
             $netid = substr($userid, strrpos($userid, '/') + 1);;
             array_push($allNetIDs, $netid);
         }
@@ -46,7 +46,7 @@ class Users
         $permissions = new Permissions;
         $allWorks = array();
         $userWorksPath = __PATH__ . $eppn . "/works/";
-        foreach(glob($userWorksPath . "*") as $work) {
+        foreach (glob($userWorksPath . "*") as $work) {
             $workName = substr($work, strrpos($work, '/') + 1);
             if (!$permissions->isWorkPublic($work)) {
                 if ($permissions->userOnPermissionsList($work, $currentEppn)) {
@@ -67,7 +67,6 @@ class Users
         ));
     }
 
-//TODO changed Aug 14 (need review)
     /**
      * Grab user work data...
      */
@@ -80,56 +79,53 @@ class Users
                 "message" => "work does not exist"
             ));
         }
+
         require 'Permissions.php';
         $permissions = new Permissions;
         if (!$permissions->isWorkPublic($pathOfWork)) {
             if ($permissions->userOnPermissionsList($pathOfWork, $currentEppn)) {
-              if($permissions->commentsNeedsApproval($pathOfWork)){
-                return json_encode(array(
-                    "status" => "ok",
-                    "data" => file_get_contents($workIndex),
-                    "admin" => true, // must be to reach here,
-                    "additional" => "private",
-                    "additional2" => "needApproval"
-                ));
-              }
-              else{
-                return json_encode(array(
-                    "status" => "ok",
-                    "data" => file_get_contents($workIndex),
-                    "admin" => true, // must be to reach here,
-                    "additional" => "private",
-                    "additional2" => "noApproval"
-                ));
-              }
-            }
-            else {
+                if ($permissions->commentsNeedsApproval($pathOfWork)){
+                    return json_encode(array(
+                        "status" => "ok",
+                        "data" => file_get_contents($workIndex),
+                        "admin" => true, // must be to reach here,
+                        "privacy" => "private",
+                        "approval" => "needApproval"
+                    ));
+                } else {
+                    return json_encode(array(
+                        "status" => "ok",
+                        "data" => file_get_contents($workIndex),
+                        "admin" => true, // must be to reach here,
+                        "privacy" => "private",
+                        "approval" => "noApproval"
+                    ));
+                }
+            } else {
                 return json_encode(array(
                     "status" => "error",
                     "message" => "invalid permissions to view work"
                 ));
             }
-        }
-        else {
-          // work is public
-            if($permissions->commentsNeedsApproval($pathOfWork)){
-              return json_encode(array(
-                  "status" => "ok",
-                  "data" => file_get_contents($workIndex),
-                  "admin" => $permissions->userOnPermissionsList($pathOfWork, $currentEppn),
-                  "additional" => "public",
-                  "additional2" => "needApproval"
-              ));
-            }
-            else{
-              return json_encode(array(
-                  "status" => "ok",
-                  "data" => file_get_contents($workIndex),
-                  "admin" => $permissions->userOnPermissionsList($pathOfWork, $currentEppn),
-                  "additional" => "public",
-                  "additional2" => "noApproval"
-              ));
+        } else {
+            if ($permissions->commentsNeedsApproval($pathOfWork)) {
+                return json_encode(array(
+                    "status" => "ok",
+                    "data" => file_get_contents($workIndex),
+                    "admin" => $permissions->userOnPermissionsList($pathOfWork, $currentEppn),
+                    "privacy" => "public",
+                    "approval" => "needApproval"
+                ));
+            } else {
+                return json_encode(array(
+                    "status" => "ok",
+                    "data" => file_get_contents($workIndex),
+                    "admin" => $permissions->userOnPermissionsList($pathOfWork, $currentEppn),
+                    "privacy" => "public",
+                    "approval" => "noApproval"
+                ));
             }
         }
     }
+
 }
