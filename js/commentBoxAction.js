@@ -240,7 +240,6 @@ function editOrDelete(dataForEditOrDelete,isEdit){
     endPoint = "delete_comment";
   }
   sendData = JSON.stringify(commonData);
-  //console.log(sendData);
   API.request({
     endpoint:endPoint,
     method: "POST",
@@ -252,8 +251,10 @@ function editOrDelete(dataForEditOrDelete,isEdit){
     refreshReplyBox(dataForEditOrDelete["creator"],dataForEditOrDelete["work"],$("#"+firstCommentId).attr("creator"),firstCommentId);
     if(isEdit){
       if(dataForEditOrDelete["type"]){
+        $("#"+dataForEditOrDelete["hash"]).attr("typeof",dataForEditOrDelete["type"]);
         updateTypeSelector(dataForEditOrDelete["hash"],dataForEditOrDelete["type"]);
       }
+      autoApprove(dataForEditOrDelete["hash"],dataForEditOrDelete["commenter"],dataForEditOrDelete["work"],dataForEditOrDelete["creator"]);
     }
     else{
       //unhighlight the deleted comment
@@ -279,6 +280,18 @@ function editOrDelete(dataForEditOrDelete,isEdit){
       $("#replies").removeAttr("deletedid");
     }
 
+  });
+}
+
+//ADDED SEP 4 Can remove if backend is fixed
+function autoApprove(hash,commenterEppn,work,workCreator){
+  API.request({
+    endpoint: "comments_need_approval/"+commenterEppn+"/"+work,
+    method: "GET"
+  }).then((data)=>{
+    if(data == "false"){
+      commentApprovedButtonOnClick(hash,commenterEppn,work,workCreator);
+    }
   });
 }
 

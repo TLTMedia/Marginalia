@@ -196,7 +196,7 @@ function selectorOnSelect(currentSelectedType, currentSelectedCommenter){
 }
 
 function colorNotUsedTypeSelector(){
-  var comments = $("#text").find(".commented-selection");
+  var comments = $("#text").find(".commented-selection, .hiddenComments");
   let key = ["Historical","Analytical","Comment","Definition","Question"];
   let buttonTypes = {
     "Historical":0,
@@ -245,9 +245,6 @@ function updateCommenterSelectors(){
 
 // hash is not needed if the comment is deleted
 function updateTypeSelector(hash, type){
-  if(hash != "undefined"){
-    $("#"+hash).attr("typeof",type);
-  }
   var currentSelectedType = $("#typeSelector").attr("currentTarget");
   var currentSelectedCommenter = $("#commenterSelector").attr("currentTarget");
   //reselect the type selector
