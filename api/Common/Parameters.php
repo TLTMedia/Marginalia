@@ -6,7 +6,7 @@ class Parameters {
      */
     public function paramCheck($a, $b)
     {
-        if (!array_equal(array_keys($a), $b)) {
+        if (!$this->array_equal(array_keys($a), $b)) {
             echo json_encode(array(
                 "status" => "error",
                 "message" => "invalid parameters"

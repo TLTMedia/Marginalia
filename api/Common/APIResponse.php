@@ -8,6 +8,17 @@ class APIResponse
     /**
      * Formats and returns the api data format which can be printed out directly
      */
+    public function data($status, $data)
+    {
+        return json_encode(array(
+            "status" => $status,
+            "data" => json_encode($data)
+        ));
+    }
+
+    /**
+     * Formats and returns the api data format which can be printed out directly
+     */
     public function message($status, $message)
     {
         return json_encode(array(

@@ -1,7 +1,7 @@
 <?php
-// ini_set('display_errors', 1);
-// ini_set('display_startup_errors', 1);
-// error_reporting(E_ALL);
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
 // Necessary b/c of server PHP config
 date_default_timezone_set('America/New_York');
@@ -59,7 +59,7 @@ $app->get('/', function () use ($app) {
  */
 $app->get('/get_creators', function () use ($app) {
     require '../Actions/Users.php';
-    $userList = new Users;
+	$userList = new Users;
     echo $userList->getCreators();
 });
 
@@ -80,7 +80,7 @@ $app->get('/get_current_user', function () use ($app) {
 /**
  * Get the permissions list of a specified $work of the current logged in user ($eppn)
  */
-$app->get('/get_permissions_list/:eppn/:work', function ($eppn,$work) use ($app) {
+$app->get('/get_permissions_list/:eppn/:work', function ($eppn, $work) use ($app) {
     require '../Actions/Permissions.php';
     $permissions = new Permissions;
     $workFullPath = __PATH__ . $eppn . "/works/" . $work;
@@ -141,7 +141,7 @@ $app->get('/get_work/:eppn/:work', function ($eppn, $work) use ($app) {
 /**
  * Save a comment on a work
  */
-$app->post('/save_comments', function () use ($app) {
+$app->post('/save_comments', function () use ($app, $Parameters) {
 	$json = $app->request->getBody();
 	$data = json_decode($json, true);
     $Parameters->paramCheck($data, array(
@@ -169,7 +169,7 @@ $app->post('/save_comments', function () use ($app) {
 /**
  * Save a comment on a work
  */
-$app->post('/edit_comment', function () use ($app) {
+$app->post('/edit_comment', function () use ($app, $Parameters) {
 	$json = $app->request->getBody();
 	$data = json_decode($json, true);
     $Parameters->paramCheck($data, array(
@@ -236,7 +236,7 @@ $app->get('/set_require_approval/:creator/:work/:approval', function ($creator, 
 /**
  * Create a new work
  */
-$app->post('/create_work', function () use ($app) {
+$app->post('/create_work', function () use ($app, $Parameters) {
 	$json = $app->request->getBody();
     // TODO test to see if I can replace this with $Parameters->paramCheck()
 	try {
@@ -265,7 +265,7 @@ $app->post('/create_work', function () use ($app) {
  * Set an existing comment public/privacy status
  * If the current user is on the permissions list, then it's auto-approved.
  */
-$app->post('/set_comment_public', function () use ($app) {
+$app->post('/set_comment_public', function () use ($app, $Parameters) {
 	$json = $app->request->getBody();
 	$data = json_decode($json, true);
     $Parameters->paramCheck($data, array(
@@ -286,7 +286,7 @@ $app->post('/set_comment_public', function () use ($app) {
 /**
  * Approve a comment for public viewing
  */
-$app->post('/approve_comment', function () use ($app) {
+$app->post('/approve_comment', function () use ($app, $Parameters) {
 	$json = $app->request->getBody();
 	$data = json_decode($json, true);
     $Parameters->paramCheck($data, array(
@@ -307,7 +307,7 @@ $app->post('/approve_comment', function () use ($app) {
 /**
  * Set an existing comment public/privacy status
  */
-$app->post('/get_comment_chain', function () use ($app) {
+$app->post('/get_comment_chain', function () use ($app, $Parameters) {
 	$json = $app->request->getBody();
 	$data = json_decode($json, true);
     $Parameters->paramCheck($data, array(
@@ -328,7 +328,7 @@ $app->post('/get_comment_chain', function () use ($app) {
 /**
  * Delete comment
  */
-$app->post('/delete_comment', function () use ($app) {
+$app->post('/delete_comment', function () use ($app, $Parameters) {
 	$json = $app->request->getBody();
 	$data = json_decode($json, true);
     $Parameters->paramCheck($data, array(
@@ -356,6 +356,21 @@ $app->get('/has_access/:creator/:work', function ($creator, $work) use ($app) {
 		$creator,
 		$work,
 		$_SERVER['eppn']
+	);
+});
+
+/**
+ * Checks whether the specified work is public, regardless of who the user is
+ */
+$app->get('/is_public/:creator/:work', function ($creator, $work) use ($app, $APIResponse) {
+	require '../Actions/Permissions.php';
+	$permissions = new Permissions;
+	$workFullPath = __PATH__ . $creator . "/works/" . $work;
+	echo $APIResponse->data(
+		"ok",
+		$permissions->isWorkPublic(
+			$workFullPath
+		)
 	);
 });
 

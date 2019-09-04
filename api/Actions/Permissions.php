@@ -257,18 +257,18 @@ class Permissions
                 if ($this->userOnPermissionsList($workFullPath, $commenterEppn)) {
                     return json_encode(array(
                         "status" => "ok",
-                        "needApproval" => "false"
+                        "data" => "false"
                     ));
                 } else {
                     return json_encode(array(
                         "status" => "error",
-                        "needApproval" => "true"
+                        "data" => "true"
                     ));
                 }
             } else {
                 return json_encode(array(
                     "status" => "ok",
-                    "needApproval" => "false"
+                    "data" => "false"
                 ));
             }
         } else {
@@ -277,12 +277,12 @@ class Permissions
                 // Hence, we don't need to even check if comments require approval here.
                 return json_encode(array(
                     "status" => "ok",
-                    "needApproval" => "false"
+                    "data" => "false"
                 ));
             } else {
                 return json_encode(array(
                     "status" => "error",
-                    "needApproval" => "true"
+                    "data" => "true"
                 ));
             }
         }
@@ -297,18 +297,18 @@ class Permissions
         if ($this->isWorkPublic($workFullPath)) {
             return json_encode(array(
                 "status" => "ok",
-                "access" => "true"
+                "data" => "true"
             ));
         } else {
             if ($this->userOnPermissionsList($workFullPath, $currentUser)) {
                 return json_encode(array(
                     "status" => "ok",
-                    "access" => "true"
+                    "data" => "true"
                 ));
             } else {
                 return json_encode(array(
                     "status" => "error",
-                    "access" => "false"
+                    "data" => "false"
                 ));
             }
         }

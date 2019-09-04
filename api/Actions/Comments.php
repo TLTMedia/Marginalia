@@ -166,7 +166,7 @@ class Comments
     /**
      * Returns the meta data for first level comments
      */
-    public function getHighlights($creator, $work, $reader)
+    public function getHighlights($creator, $work, $readerEppn)
     {
         try {
             $commentFilePaths = $this->getCommentFiles($creator, $work, false);
@@ -180,7 +180,7 @@ class Comments
 
         return json_encode(array(
             "status" => "ok",
-            "data" => $this->getFileMetaData($commentFilePaths, $reader)
+            "data" => $this->getFileMetaData($commentFilePaths, $readerEppn)
         ));
     }
 
@@ -286,7 +286,7 @@ class Comments
                 "status" => "ok",
                 "message" => "comment saved",
                 "commentHash" =>  $commentHash,
-                "additional" => $approved
+                "approval" => $approved
             ));
         } else {
             return json_encode(array(
@@ -457,33 +457,29 @@ class Comments
                 // comment is public
                 if ($jsonData->approved) {
                     // comment is approved
-                    array_push(
-                        $data,
-                        array(
-                            "startIndex" => $jsonData->startIndex,
-                            "endIndex" => $jsonData->endIndex,
-                            "commentType" => $jsonData->commentType,
-                            "eppn" => $jsonData->eppn,
-                            "hash" => end(explode("/", $filePath)),
-                            "approved" => $jsonData->approved
-                        )
-                    );
+                    array_push($data, array(
+                        "startIndex" => $jsonData->startIndex,
+                        "endIndex" => $jsonData->endIndex,
+                        "commentType" => $jsonData->commentType,
+                        "eppn" => $jsonData->eppn,
+                        "hash" => end(explode("/", $filePath)),
+                        "approved" => $jsonData->approved,
+                        "hasUnapproved" => false
+                    ));
                 } else {
                     // comment is not approved
                     // only work admins should be able to see it OR the creator of the comment
                     if ($this->permissions->userOnPermissionsList($this->workPath, $reader) || $reader == $jsonData->eppn) {
                         // reader is admin so can see the comment
-                        array_push(
-                            $data,
-                            array(
-                                "startIndex" => $jsonData->startIndex,
-                                "endIndex" => $jsonData->endIndex,
-                                "commentType" => $jsonData->commentType,
-                                "eppn" => $jsonData->eppn,
-                                "hash" => end(explode("/", $filePath)),
-                                "approved" => $jsonData->approved
-                            )
-                        );
+                        array_push($data, array(
+                            "startIndex" => $jsonData->startIndex,
+                            "endIndex" => $jsonData->endIndex,
+                            "commentType" => $jsonData->commentType,
+                            "eppn" => $jsonData->eppn,
+                            "hash" => end(explode("/", $filePath)),
+                            "approved" => $jsonData->approved,
+                            "hasUnapproved" => false
+                        ));
                     } else {
                         // reader is not an admin, so can't see the comment
                     }
@@ -493,16 +489,14 @@ class Comments
                 // only the comment creator should be able to see it
                 if ($jsonData->eppn == $reader) {
                     // comment creator is also the reader
-                    array_push(
-                        $data,
-                        array(
-                            "startIndex" => $jsonData->startIndex,
-                            "endIndex" => $jsonData->endIndex,
-                            "commentType" => $jsonData->commentType,
-                            "eppn" => $jsonData->eppn,
-                            "hash" => end(explode("/", $filePath)),
-                        )
-                    );
+                    array_push($data, array(
+                        "startIndex" => $jsonData->startIndex,
+                        "endIndex" => $jsonData->endIndex,
+                        "commentType" => $jsonData->commentType,
+                        "eppn" => $jsonData->eppn,
+                        "hash" => end(explode("/", $filePath)),
+                        "hasUnapproved" => false
+                    ));
                 } else {
                     // no one else can see this comment
                 }
@@ -655,7 +649,8 @@ class Comments
     }
 
     /**
-     * Recursive starter function... returns an array of all the file paths to comment.json files that're associated with $author and $work
+     * Recursive starter function... 
+     * Returns an array of all the file paths to comment.json files that're associated with $author and $work
      *
      * NOTE: specifying a $commenter and $hash only works when $recursive = TRUE
      */
