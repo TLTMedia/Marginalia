@@ -126,17 +126,30 @@ function makeWhiteListSettingBase(user_list){
 
 //TODO get the value from back end instead of the setting button
 function checkIsWorkPublic(selected_eppn,litId){
-  if($("#setting").attr("isWorkPublic") == "private"){
-    console.log("work is private");
-    $("#privacySwitch").click();
-  }
+  API.request({
+    endpoint:"is_public/"+selected_eppn+"/"+litId,
+    method: "GET"
+  }).then((data)=>{
+    console.log("isPublic",data);
+    if(data == "false"){
+      $("#privacySwitch").addClass("disabled").click();
+      $("#privacySwitch").removeClass("disabled");
+    }
+  });
 }
 
 function checkIsCommentNeedApproval(selected_eppn,litId){
-  if($("#setting").attr("commentsNeedApproval") == "needApproval"){
-    console.log("comments need approval");
-    $("#commentsNeedApprovalSwitch").click();
-  }
+  console.log("is_comments_require_approval/"+selected_eppn+"/"+litId);
+  API.request({
+    endpoint: "is_comments_require_approval/"+selected_eppn+"/"+litId,
+    method: "GET"
+  }).then((data)=>{
+    console.log("need approval ",data);
+    if(data == "true"){
+      $("#commentsNeedApprovalSwitch").addClass("disabled").click();
+      $("#commentsNeedApprovalSwitch").removeClass("disabled");
+    }
+  });
 }
 
 function litSettingButtonOnClick(selectedLitId, selected_eppn){
@@ -185,7 +198,9 @@ function makeSettingSwitch(purpose,text,litId,selected_eppn,callback){
     callback(selected_eppn,litId);
   }
   input.off().on("change",(evt)=>{
+    if(!input.hasClass("disabled")){
       workSettingSwitchOnChange(evt,litId,selected_eppn);
+    }
   });
 }
 
@@ -226,13 +241,13 @@ function workSettingSwitchOnChange(evt,litId,selected_eppn){
   else{
     isSelected = $("#commentsNeedApprovalSwitch").is(":checked");
     if(isSelected){
-      message = "comments needs approval for current work";
-      endPoint = "set_CNA/"+selected_eppn+"/"+litId+"/"+true;
+      message = "comments need approval for current work";
+      endPoint = "set_require_approval/"+selected_eppn+"/"+litId+"/"+true;
       commentsNeedApproval = "needApproval";
     }
     else{
-      message = "comments donot needs approval for current work";
-      endPoint = "set_CNA/"+selected_eppn+"/"+litId+"/"+false;
+      message = "comments don't need approval for current work";
+      endPoint = "set_require_approval/"+selected_eppn+"/"+litId+"/"+false;
       commentsNeedApproval = "noApproval";
     }
     $("#setting").attr("commentsNeedApproval",commentsNeedApproval);

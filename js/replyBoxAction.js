@@ -312,8 +312,7 @@ function commentApprovedButtonOnClick(hash,commenterEppn,work,workCreator){
     creator: workCreator,
     work: work,
     commenterEppn: commenterEppn,
-    comment_hash: hash,
-    approved: true
+    comment_hash: hash
   });
   API.request({
     endpoint: "approve_comment",

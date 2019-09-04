@@ -28,8 +28,8 @@ export class APIHandler {
                 data: data['data'],
                 message: data['message'],
                 commentHash: data['commentHash'],
-                additional: data['additional'],
-                additional2:data['additional2']
+                privacy: data['privacy'],
+                approval:data['approval']
               }
                 if (callback) {
                     if( data['commentHash'] == undefined){

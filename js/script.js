@@ -149,7 +149,7 @@ loadUserComments = (selected_eppn,textChosen) => {
 }
 
 //selected_eppn : work creator
-renderComments = (commentData, selected_eppn,textChosen,callback) => {
+renderComments = (commentData, selected_eppn,textChosen) => {
     $("#text").fadeIn();
     $("#textSpace").fadeIn();
     $("#textTitle").fadeIn();
@@ -198,6 +198,13 @@ renderComments = (commentData, selected_eppn,textChosen,callback) => {
     //highlight to post comments
     $("#litDiv").on("mouseup", function(evt) {
       highlightCurrentSelection(evt);
+    });
+
+    
+    //highlight on top of other's comment will bring them to the reply box
+    $(".commented-selection").off().on("mouseup", function(evt) {
+      var commentSpanId = $(this).attr('id');
+      clickOnComment(commentSpanId,textChosen,selected_eppn,evt);
     });
     // click on comment to reply the post
     $(".commented-selection").off().on("click", function(evt) {
@@ -251,6 +258,7 @@ function get_comment_chain_API_request(jsonData, commentSpanId){
       data: jsonDataStr,
       method: "POST"
   }).then((data) => {
+    console.log(data);
     readThreads(data,work,workCreator);
     $("#commentBox").parent().hide();
   });
@@ -513,18 +521,18 @@ function checkworkAdminList(selected_eppn,litId,mode){
       }
     }
     if(!isInWhiteList){
-      if(mode == "setting"){
-        $("#setting").addClass("noPermission");
-      }
-      else if(mode == "approvedComments"){
+      // if(mode == "setting"){
+      //   $("#setting").addClass("noPermission");
+      // }
+      if(mode == "approvedComments"){
         $("#replies").attr("isCurrentUserAdmin",false);
       }
     }
     else{
-      if(mode == "setting"){
-        $("#setting").removeClass("noPermission");
-      }
-      else if(mode == "approvedComments"){
+      // if(mode == "setting"){
+      //   $("#setting").removeClass("noPermission");
+      // }
+      if(mode == "approvedComments"){
         $("#replies").attr("isCurrentUserAdmin",true);
       }
     }

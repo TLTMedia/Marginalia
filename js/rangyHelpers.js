@@ -14,7 +14,8 @@ function highlightCurrentSelection(evt,literatureText) {
     $("#commentExit").text("Unselect");
     let range = selectedRange.toCharacterRange(document.getElementById('textSpace'));
     CKEDITOR.instances['textForm'].setReadOnly(false);
-    $(".commentTypeDropdown").removeAttr("disabled")
+    $(".commentTypeDropdown").removeAttr("disabled");
+    console.log(range);
     hlRange(selectedRange,range,literatureText);
     if($("."+escapeSpecialChar(remSpan)).parent().attr("class") != "commented-selection"){
       $("#replies").parent().hide();

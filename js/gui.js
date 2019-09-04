@@ -9,12 +9,11 @@ $(window).ready(function() {
     $("#setting").off().on("click",()=>{
       let author = $("#setting").attr("author");
       let work = $("#setting").attr("work");
-      console.log(author, work);
-      //TODO setting page sometimes shows up before the checking authority works
       if($("#setting").hasClass("disabledHeaderTab")){
         launchToastNotifcation("Please select a work first");
       }
-      else if($("#setting").hasClass("noPermission")){
+      //if user is not the author they don't have the ability to change the setting
+      else if(!isCurrentUserSelectedUser(author)){
         launchToastNotifcation("You don't have the permission to do this action");
       }
       else{
@@ -115,7 +114,7 @@ createUserSelectScreen = async ({users = users} = {}) =>{
   user_list = users.creator_list;
   // TODO need to check what does this width thing do
   // figure out why this is here
-  
+
   for(i in user_list){
     var user = createUserMenuOption(user_list[i],users);
     $(".usersMenu").append(user);
@@ -131,7 +130,6 @@ createUserSelectScreen = async ({users = users} = {}) =>{
 }
 
 function createUserMenuOption(commenterId,users){
-  console.log(users)
   var user = $("<li/>",{
     class:'mdl-list__item usersMenuOptions',
     commenterId: commenterId,
@@ -183,33 +181,28 @@ function showUsersLit(users,selected_eppn){
    showLink(endpoint);
    API.request({endpoint}).then((data) => {
        if(data["status"] != "error"){
-         let literatureText = data['data'];
-         let isWorkPublic = data['additional'];
-         let commentsNeedApproval = data['additional2'];
+         let literatureText = data;
          buildHTMLFile(literatureText,selected_eppn,textChosen);
-         updateSettingPage(selected_eppn,textChosen,isWorkPublic,commentsNeedApproval);
+         updateSettingPage(selected_eppn,textChosen);
        }
        else{
          //if work doesn't exist redirect to home
          $("#home").click();
-         launchToastNotifcation("")
+         launchToastNotifcation("");
        }
    });
    //auto scroll to the text part
    window.scrollTo(0,$("#cardbox").position().top+$("#cardbox").height());
-   //check the permission for settings
-   checkworkAdminList(selected_eppn,textChosen,"setting");
    //check the permission for approving comments
    checkworkAdminList(selected_eppn,textChosen,"approvedComments");
  }
 
- function updateSettingPage(selected_eppn,textChosen,isWorkPublic,commentsNeedApproval){
+ function updateSettingPage(selected_eppn,textChosen){
+   let endPoint = "comments_need_approval/"+selected_eppn+"/"+textChosen;
    $("#setting").removeClass("disabledHeaderTab");
    $("#setting").attr({
      "author":selected_eppn,
-     "work": textChosen,
-     "isWorkPublic": isWorkPublic,
-     "commentsNeedApproval": commentsNeedApproval
+     "work": textChosen
    });
    $("#settingBase").hide();
  }

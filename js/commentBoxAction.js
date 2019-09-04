@@ -165,7 +165,8 @@ function saveCommentOrReply(dataForSave,isComment){
     else{
       let approved;
       $('.'+escapeSpecialChar(remSpan)).removeAttr('startindex endIndex');
-      if(data["additional"] == true){
+      console.log(data);
+      if(data["approval"] == true){
         approved = true;
       }
       else{
