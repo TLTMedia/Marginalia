@@ -283,7 +283,7 @@ function deleteButtonOnClick(hash,eppn,hashForReply,work,workCreator){
 
 function commentPrivateButtonOnClick(evt,work,workCreator,setPublic){
   var commentId = evt["currentTarget"]["attributes"]["commentid"]["value"];
-  console.log(commentId);
+  var commenterEppn = $(".replies" + "[commentId = '"+commentId+"']").attr("name");
   var data = JSON.stringify({
     creator: workCreator,
     work: work,
@@ -297,6 +297,7 @@ function commentPrivateButtonOnClick(evt,work,workCreator,setPublic){
   }).then((data)=>{
     if(setPublic){
       launchToastNotifcation("successfully set comment to public");
+      autoApprove(commentId,commenterEppn,work,workCreator);
     }
     else{
       launchToastNotifcation("successfully set comment to private");
@@ -337,15 +338,17 @@ function commentApprovedButtonOnClick(hash,commenterEppn,work,workCreator){
     refreshReplyBox(workCreator,work,firstCommenter,firstCommentHash);
   });
 }
-// This displays the replies for the current comment box
-function displayReplyBox(evt) {
-  var newTop = evt.pageY + "px";
-  var newLeft = width * .55 + "px";
 
+// This displays the replies for the current comment box
+//TODO find a way to get the height of the replyBox
+function displayReplyBox(evt) {
+  var marginX = 10;
+  var marginY = 50;
+  var newPosition = adjustDialogPosition(evt,500,177,10,50);
   $("#replies").parent().css({
-    'top': newTop,
-    'left': newLeft
-  })
+    'top': newPosition["newTop"],
+    'left': newPosition["newLeft"]
+  });
   $("#replies").parent().fadeIn();
 }
 

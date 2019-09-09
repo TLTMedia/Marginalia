@@ -16,7 +16,7 @@ var remSpan; // holds the name of made and clicked spans
 init = async ({api = api, users = users} = {}) => {
   API = api;
   currentUser = users.current_user;
-  width = $(document).width();
+  //width = $(document).width();
   $(".loader").hide();
   $("#text").hide();
   $("#addLitBase").hide();
@@ -200,7 +200,7 @@ renderComments = (commentData, selected_eppn,textChosen) => {
       highlightCurrentSelection(evt);
     });
 
-    
+
     //highlight on top of other's comment will bring them to the reply box
     $(".commented-selection").off().on("mouseup", function(evt) {
       var commentSpanId = $(this).attr('id');
@@ -492,7 +492,6 @@ function createListOfCommenter(data){
 
 // this function only check if the selected_eppn is same as the current user or not
 function isCurrentUserSelectedUser(selected_eppn,needNotification){
-  console.log(selected_eppn)
   if(selected_eppn == currentUser.eppn){
     return true;
   }
@@ -546,6 +545,19 @@ function launchToastNotifcation(data){
       $("#toast-notification").removeClass("show");
       $("#notification-data").empty();
     }, 3000);
+}
+
+//Make sure the dialog don't exceed the window
+function adjustDialogPosition(evt,width,height,marginX,marginY){
+  let newLeft = (evt.pageX - marginX) + "px";
+  let newTop = (evt.pageY + marginY) + "px";
+  if (evt.clientY + (marginY + height) > $(window).height()) {
+    newTop = (evt.pageY - (marginY + height)) + "px";
+  }
+  if (evt.pageX + width > $(window).width()){
+    newLeft = $(window).width() - (width + marginX) + "px";
+  }
+  return {newTop,newLeft}
 }
 
 //fucntions that were made by ppl before

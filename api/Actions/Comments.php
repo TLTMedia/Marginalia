@@ -464,7 +464,7 @@ class Comments
                         "eppn" => $jsonData->eppn,
                         "hash" => end(explode("/", $filePath)),
                         "approved" => $jsonData->approved,
-                        "hasUnapproved" => false
+                        "hasUnapproved" => false // TODO: get from new file (comment_meta.json) at base of directory
                     ));
                 } else {
                     // comment is not approved
@@ -478,7 +478,7 @@ class Comments
                             "eppn" => $jsonData->eppn,
                             "hash" => end(explode("/", $filePath)),
                             "approved" => $jsonData->approved,
-                            "hasUnapproved" => false
+                            "hasUnapproved" => false // TODO:
                         ));
                     } else {
                         // reader is not an admin, so can't see the comment
@@ -495,7 +495,7 @@ class Comments
                         "commentType" => $jsonData->commentType,
                         "eppn" => $jsonData->eppn,
                         "hash" => end(explode("/", $filePath)),
-                        "hasUnapproved" => false
+                        "hasUnapproved" => false // TODO:
                     ));
                 } else {
                     // no one else can see this comment

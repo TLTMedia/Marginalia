@@ -289,6 +289,7 @@ function autoApprove(hash,commenterEppn,work,workCreator){
     endpoint: "comments_need_approval/"+commenterEppn+"/"+work,
     method: "GET"
   }).then((data)=>{
+    console.log("autoApprove ",data)
     if(data == "false"){
       commentApprovedButtonOnClick(hash,commenterEppn,work,workCreator);
     }
@@ -306,17 +307,15 @@ function exitButtonOnClick(){
   $("#commentBox").parent().fadeOut();
 }
 
+
+//commentBox width: 500 px ,height: 331px , marginX : 10, marginY : 50
 function displayCommentBox(evt,id) {
-  var newLeft = (width * .55) + "px";
-  var newTop = (evt.pageY - 100) + "px";
-  if (evt.pageY + 300 > $(document).height()) {
-    newTop = $(document).height() - 300 + "px";
-  } else if ((evt.pageY - 100) < 0) {
-    newTop = "0px";
-  }
+  var marginX = 10;
+  var marginY = 50;
+  var newPosition = adjustDialogPosition(evt,500,331,10,50);
   $("#commentBox").parent().css({
-    'top': newTop,
-    'left': newLeft
+    'top': newPosition["newTop"],
+    'left': newPosition["newLeft"]
   })
   $("#replies").attr("data-firstCommentId",id);
   $("#commentBox").attr("data-editcommentid","-1");

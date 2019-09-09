@@ -109,15 +109,7 @@ html {
     display: none;
 }
 
-.introBoxes {
-  margin: 5% 30%;
-  align-items: center;
-  background-color: #efebe9;
-  width: 21rem;
-  padding: 4%;
-  box-shadow: 2px 2px 8px #222222;
-  overflow: visible;
-}
+
 
 .titleText {
   font-size: 1.5rem;
@@ -308,9 +300,8 @@ html {
   .firstPage {
     width: auto;
   }
-  s
 }
-
+/*--------------cardbox--------------------*/
 #cardbox {
   border-radius: .75rem;
   -moz-user-select: -moz-none;
@@ -318,6 +309,23 @@ html {
   -webkit-user-select: none;
   -ms-user-select: none;
 }
+
+.introBoxes {
+  margin: 5% 30% 5%;
+  align-items: center;
+  max-width: 450px;
+  background-color: #efebe9;
+  width: 21rem;
+  padding: 4%;
+  box-shadow: 2px 2px 8px #222222;
+  overflow: visible;
+}
+
+#firstPage{
+  max-height: 700px;
+}
+
+/*------------------------------------------*/
 
 .mdl-menu__outline {
   width: 25%;
@@ -627,7 +635,7 @@ text[inputtype='inputFile'] {
 
 #textSpace{
   white-space: pre-line;
-  width: 60%;
+  /* width: 60%; */
   padding-top: 1%;
   padding-left: 1%;
   font-family: monospace;
@@ -1228,7 +1236,7 @@ input[type="file"] {
   cursor:default;
 }
 
-#text span span {
+/* #text span span {
   background-color: #309b30;
 }
 
@@ -1238,7 +1246,7 @@ input[type="file"] {
 
 #text span span span span {
   background-color: #186818;
-}
+} */
 
 .overLapComments{
   background-color: rgba(100, 100, 255);
@@ -1528,6 +1536,7 @@ input[type="file"] {
   }
   #cardbox{
     width: 80%;
+    /*margin is the problem*/
   }
   #nonTitleContent {
     width: 100%;

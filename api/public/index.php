@@ -374,9 +374,26 @@ $app->get('/is_public/:creator/:work', function ($creator, $work) use ($app, $AP
 	);
 });
 
+//ADDED DAVID SEP/4
+/**
+ * Checks whether the specified work's comment need approval, regardless of who the user is
+ */
+$app->get('/is_comments_require_approval/:creator/:work', function ($creator, $work) use ($app, $APIResponse) {
+	require '../Actions/Permissions.php';
+	$permissions = new Permissions;
+	$workFullPath = __PATH__ . $creator . "/works/" . $work;
+	echo $APIResponse->data(
+		"ok",
+		$permissions->commentsNeedsApproval(
+			$workFullPath
+		)
+	);
+});
+
 /**
  * Checks whether the currently logged in user can comment without requiring approval.
  * In addition, it first checks whether the user can even access the work.
+ * return fasle if don't need to get approved, return true if needed to get approved
  */
 $app->get('/comments_need_approval/:creator/:work', function ($creator, $work) use ($app) {
 	require '../Actions/Permissions.php';
