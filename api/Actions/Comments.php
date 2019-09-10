@@ -17,11 +17,11 @@ class Comments
      * @param String $work The work name
      * @param String $creator The EPPN of the creator of the specified work
      */
-    public function __construct($creator, $work)
+    public function __construct($logger, $path, $creator, $work)
     {
         require 'Permissions.php';
         $this->permissions = new Permissions;
-        $this->workPath = __PATH__ . $creator . "/works/" . $work;
+        $this->workPath = $path . $creator . "/works/" . $work;
     }
 
     /**

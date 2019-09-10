@@ -28,9 +28,10 @@ $app = new \Slim\Slim(array(
 /**
  * Create monolog logger and store logger in container as singleton
  * (Singleton resources retrieve the same log resource definition each time)
+ * See Log Levels: https://github.com/Seldaek/monolog/blob/master/doc/01-usage.md
  */
 $app->container->singleton('log', function () {
-	$log = new \Monolog\Logger('slim-skeleton');
+	$log = new \Monolog\Logger('Marginalia');
 	$log->pushHandler(new \Monolog\Handler\StreamHandler('../logs/app.log', \Monolog\Logger::DEBUG));
 	return $log;
 });
@@ -50,7 +51,7 @@ $app->view->parserExtensions = array(new \Slim\Views\TwigExtension());
 
 // Define routes
 $app->get('/', function () use ($app) {
-    $app->log->info("Slim-Skeleton '/' route");
+    $app->log->info("Marginalia '/' route called");
     $app->render('index.html');
 });
 
@@ -149,7 +150,7 @@ $app->post('/save_comments', function () use ($app, $Parameters) {
     ));
 
     require '../Actions/Comments.php';
-	$comments = new Comments($data["author"], $data["work"]);
+	$comments = new Comments($app->log, __PATH__, $data["author"], $data["work"]);
 	echo $comments->saveComment(
 		$data['author'],
 		$data['work'],
@@ -177,7 +178,7 @@ $app->post('/edit_comment', function () use ($app, $Parameters) {
     ));
 
 	require '../Actions/Comments.php';
-	$comments = new Comments($data["creator"], $data["work"]);
+	$comments = new Comments($app->log, __PATH__, $data["creator"], $data["work"]);
 	echo $comments->editComment(
 		$data['creator'],
 		$data['work'],
@@ -195,7 +196,7 @@ $app->post('/edit_comment', function () use ($app, $Parameters) {
  */
 $app->get('/get_highlights/:author/:work', function ($creator, $work) use ($app) {
 	require '../Actions/Comments.php';
-	$comments = new Comments($creator, $work);
+	$comments = new Comments($app->log, __PATH__, $creator, $work);
     // TODO test to see if this is necessary
 	$app->response->header('Content-Type', 'application/json');
 	echo $comments->getHighlights(
@@ -273,7 +274,7 @@ $app->post('/set_comment_public', function () use ($app, $Parameters) {
     ));
 
 	require '../Actions/Comments.php';
-	$comments = new Comments($data["creator"], $data["work"]);
+	$comments = new Comments($app->log, __PATH__, $data["creator"], $data["work"]);
 	echo $comments->setCommentPublic(
 		$data['creator'],
 		$data['work'],
@@ -294,7 +295,7 @@ $app->post('/approve_comment', function () use ($app, $Parameters) {
     ));
 
 	require '../Actions/Comments.php';
-	$comments = new Comments($data["creator"], $data["work"]);
+	$comments = new Comments($app->log, __PATH__, $data["creator"], $data["work"]);
 	echo $comments->approveComment(
 		$_SERVER['eppn'],
 		$data['creator'],
@@ -315,7 +316,7 @@ $app->post('/get_comment_chain', function () use ($app, $Parameters) {
     ));
 
 	require '../Actions/Comments.php';
-	$comments = new Comments($data["creator"], $data["work"]);
+	$comments = new Comments($app->log, __PATH__, $data["creator"], $data["work"]);
 	echo $comments->getCommentChain(
         $data['creator'],
         $data['work'],
@@ -336,7 +337,7 @@ $app->post('/delete_comment', function () use ($app, $Parameters) {
     ));
 
 	require '../Actions/Comments.php';
-	$comments = new Comments($data["creator"], $data["work"]);
+	$comments = new Comments($app->log, __PATH__, $data["creator"], $data["work"]);
 	echo $comments->deleteComment(
 		$data['creator'],
 		$data['work'],
@@ -366,15 +367,13 @@ $app->get('/is_public/:creator/:work', function ($creator, $work) use ($app, $AP
 	require '../Actions/Permissions.php';
 	$permissions = new Permissions;
 	$workFullPath = __PATH__ . $creator . "/works/" . $work;
-	echo $APIResponse->data(
-		"ok",
+	echo $APIResponse->data("ok",
 		$permissions->isWorkPublic(
 			$workFullPath
 		)
 	);
 });
 
-//ADDED DAVID SEP/4
 /**
  * Checks whether the specified work's comment need approval, regardless of who the user is
  */
@@ -382,8 +381,7 @@ $app->get('/is_comments_require_approval/:creator/:work', function ($creator, $w
 	require '../Actions/Permissions.php';
 	$permissions = new Permissions;
 	$workFullPath = __PATH__ . $creator . "/works/" . $work;
-	echo $APIResponse->data(
-		"ok",
+	echo $APIResponse->data("ok",
 		$permissions->commentsNeedsApproval(
 			$workFullPath
 		)
@@ -405,6 +403,17 @@ $app->get('/comments_need_approval/:creator/:work', function ($creator, $work) u
 	);
 });
 
+// /**
+//  * Gets a list of the unapproved comments of a specified work.
+//  */
+// $app->get('/unapproved_comments/:creator/:work', function ($creator, $work) use ($app, $APIResponse) {
+// 	require '../Actions/Metadata.php';
+// 	$metadata = new Metadata($app->log, __PATH__, $creator, $work);
+// 	echo $APIResponse->data("ok",
+// 		$metadata->getUnapprovedComments()
+// 	);
+// });
+
 /**
  * Force the server to git-pull from github develop branch
  * - Because FTP & SSH access to the 'http://apps.tlt.stonybrook.edu' is restricted from IPs not on the local network...
@@ -414,9 +423,9 @@ $app->get('/git/pull/:code', function ($code) use ($app) {
 	$real = trim(preg_replace('/\s\s+/', '', $real));
 	if ($real != $code) {
 		$APIResponse->printMessage(
-            "error",
-            "invalid code"
-        );
+			"error",
+			"invalid code"
+		);
 		return;
 	}
 	system("git pull --all");
