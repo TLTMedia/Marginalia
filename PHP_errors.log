@@ -1,0 +1,91 @@
+[20-Sep-2018 17:31:59] PHP Notice:  Undefined variable: localAdmin in /home1/tltsecure/apache2/htdocs/SelectionDev/isAdmin.php on line 10
+[20-Sep-2018 17:31:59] PHP Notice:  Undefined property: stdClass::$timeID in /home1/tltsecure/apache2/htdocs/SelectionDev/remove.php on line 31
+[20-Sep-2018 17:31:59] PHP Notice:  Undefined property: stdClass::$removalID in /home1/tltsecure/apache2/htdocs/SelectionDev/remove.php on line 34
+[20-Sep-2018 17:32:39] PHP Notice:  Undefined variable: localAdmin in /home1/tltsecure/apache2/htdocs/SelectionDev/isAdmin.php on line 10
+[20-Sep-2018 17:32:39] PHP Notice:  Undefined property: stdClass::$timeID in /home1/tltsecure/apache2/htdocs/SelectionDev/remove.php on line 31
+[20-Sep-2018 17:32:39] PHP Notice:  Undefined property: stdClass::$removalID in /home1/tltsecure/apache2/htdocs/SelectionDev/remove.php on line 34
+[01-Oct-2018 13:37:59] PHP Notice:  Undefined property: stdClass::$firstname in /home1/tltsecure/apache2/htdocs/marginalia/save.php on line 50
+[01-Oct-2018 13:37:59] PHP Notice:  Undefined property: stdClass::$lastname in /home1/tltsecure/apache2/htdocs/marginalia/save.php on line 51
+[01-Oct-2018 13:38:07] PHP Notice:  Undefined property: stdClass::$firstname in /home1/tltsecure/apache2/htdocs/marginalia/save.php on line 50
+[01-Oct-2018 13:38:07] PHP Notice:  Undefined property: stdClass::$lastname in /home1/tltsecure/apache2/htdocs/marginalia/save.php on line 51
+[01-Oct-2018 13:38:41] PHP Notice:  Undefined variable: localAdmin in /home1/tltsecure/apache2/htdocs/marginalia/isAdmin.php on line 10
+[01-Oct-2018 13:38:41] PHP Notice:  Undefined property: stdClass::$comCreator in /home1/tltsecure/apache2/htdocs/marginalia/remove.php on line 33
+[01-Oct-2018 13:41:34] PHP Notice:  Undefined property: stdClass::$firstname in /home1/tltsecure/apache2/htdocs/marginalia/save.php on line 50
+[01-Oct-2018 13:41:34] PHP Notice:  Undefined property: stdClass::$lastname in /home1/tltsecure/apache2/htdocs/marginalia/save.php on line 51
+[18-Oct-2018 15:44:45] PHP Notice:  Undefined property: stdClass::$firstname in /home1/tltsecure/apache2/htdocs/marginalia/save.php on line 50
+[18-Oct-2018 15:44:45] PHP Notice:  Undefined property: stdClass::$lastname in /home1/tltsecure/apache2/htdocs/marginalia/save.php on line 51
+[18-Oct-2018 15:45:24] PHP Notice:  Undefined property: stdClass::$firstname in /home1/tltsecure/apache2/htdocs/marginalia/save.php on line 50
+[18-Oct-2018 15:45:24] PHP Notice:  Undefined property: stdClass::$lastname in /home1/tltsecure/apache2/htdocs/marginalia/save.php on line 51
+[18-Oct-2018 17:58:51] PHP Notice:  Undefined property: stdClass::$firstname in /home1/tltsecure/apache2/htdocs/marginalia/save.php on line 50
+[18-Oct-2018 17:58:51] PHP Notice:  Undefined property: stdClass::$lastname in /home1/tltsecure/apache2/htdocs/marginalia/save.php on line 51
+[18-Oct-2018 17:59:02] PHP Notice:  Undefined property: stdClass::$firstname in /home1/tltsecure/apache2/htdocs/marginalia/save.php on line 50
+[18-Oct-2018 17:59:02] PHP Notice:  Undefined property: stdClass::$lastname in /home1/tltsecure/apache2/htdocs/marginalia/save.php on line 51
+[19-Oct-2018 00:49:50] PHP Notice:  Undefined property: stdClass::$firstname in /home1/tltsecure/apache2/htdocs/marginalia/save.php on line 50
+[19-Oct-2018 00:49:50] PHP Notice:  Undefined property: stdClass::$lastname in /home1/tltsecure/apache2/htdocs/marginalia/save.php on line 51
+[19-Oct-2018 00:51:41] PHP Notice:  Undefined property: stdClass::$firstname in /home1/tltsecure/apache2/htdocs/marginalia/save.php on line 50
+[19-Oct-2018 00:51:41] PHP Notice:  Undefined property: stdClass::$lastname in /home1/tltsecure/apache2/htdocs/marginalia/save.php on line 51
+[19-Oct-2018 12:53:07] PHP Notice:  Undefined property: stdClass::$firstname in /home1/tltsecure/apache2/htdocs/marginalia/save.php on line 50
+[19-Oct-2018 12:53:07] PHP Notice:  Undefined property: stdClass::$lastname in /home1/tltsecure/apache2/htdocs/marginalia/save.php on line 51
+[19-Oct-2018 12:53:25] PHP Notice:  Undefined property: stdClass::$firstname in /home1/tltsecure/apache2/htdocs/marginalia/save.php on line 50
+[19-Oct-2018 12:53:25] PHP Notice:  Undefined property: stdClass::$lastname in /home1/tltsecure/apache2/htdocs/marginalia/save.php on line 51
+[19-Oct-2018 17:57:18] PHP Notice:  Undefined property: stdClass::$firstname in /home1/tltsecure/apache2/htdocs/marginalia/save.php on line 50
+[19-Oct-2018 17:57:18] PHP Notice:  Undefined property: stdClass::$lastname in /home1/tltsecure/apache2/htdocs/marginalia/save.php on line 51
+[19-Oct-2018 18:00:19] PHP Notice:  Undefined variable: localAdmin in /home1/tltsecure/apache2/htdocs/marginalia/isAdmin.php on line 10
+[19-Oct-2018 18:00:19] PHP Warning:  file_get_contents(users/msaltzman/msaltzman_whitelist) [<a href='function.file-get-contents'>function.file-get-contents</a>]: failed to open stream: No such file or directory in /home1/tltsecure/apache2/htdocs/marginalia/isAdmin.php on line 20
+[19-Oct-2018 18:00:19] PHP Notice:  Undefined property: stdClass::$comData in /home1/tltsecure/apache2/htdocs/marginalia/remove.php on line 25
+[22-Oct-2018 03:30:41] PHP Notice:  Undefined property: stdClass::$firstname in /home1/tltsecure/apache2/htdocs/marginalia/save.php on line 50
+[22-Oct-2018 03:30:41] PHP Notice:  Undefined property: stdClass::$lastname in /home1/tltsecure/apache2/htdocs/marginalia/save.php on line 51
+[22-Oct-2018 03:31:31] PHP Notice:  Undefined property: stdClass::$firstname in /home1/tltsecure/apache2/htdocs/marginalia/save.php on line 50
+[22-Oct-2018 03:31:31] PHP Notice:  Undefined property: stdClass::$lastname in /home1/tltsecure/apache2/htdocs/marginalia/save.php on line 51
+[22-Oct-2018 19:25:25] PHP Notice:  Undefined variable: localAdmin in /home1/tltsecure/apache2/htdocs/marginalia/isAdmin.php on line 10
+[22-Oct-2018 19:25:25] PHP Warning:  file_get_contents(users/cyseo/cyseo_whitelist) [<a href='function.file-get-contents'>function.file-get-contents</a>]: failed to open stream: No such file or directory in /home1/tltsecure/apache2/htdocs/marginalia/isAdmin.php on line 20
+[22-Oct-2018 19:25:25] PHP Notice:  Undefined property: stdClass::$comData in /home1/tltsecure/apache2/htdocs/marginalia/remove.php on line 25
+[22-Oct-2018 19:26:10] PHP Notice:  Undefined variable: localAdmin in /home1/tltsecure/apache2/htdocs/marginalia/isAdmin.php on line 10
+[22-Oct-2018 19:26:10] PHP Warning:  file_get_contents(users/cyseo/cyseo_whitelist) [<a href='function.file-get-contents'>function.file-get-contents</a>]: failed to open stream: No such file or directory in /home1/tltsecure/apache2/htdocs/marginalia/isAdmin.php on line 20
+[22-Oct-2018 19:26:10] PHP Notice:  Undefined property: stdClass::$comData in /home1/tltsecure/apache2/htdocs/marginalia/remove.php on line 25
+[23-Oct-2018 23:12:29] PHP Notice:  Undefined property: stdClass::$firstname in /home1/tltsecure/apache2/htdocs/marginalia/save.php on line 50
+[23-Oct-2018 23:12:29] PHP Notice:  Undefined property: stdClass::$lastname in /home1/tltsecure/apache2/htdocs/marginalia/save.php on line 51
+[23-Oct-2018 23:48:07] PHP Notice:  Undefined property: stdClass::$firstname in /home1/tltsecure/apache2/htdocs/marginalia/save.php on line 50
+[23-Oct-2018 23:48:07] PHP Notice:  Undefined property: stdClass::$lastname in /home1/tltsecure/apache2/htdocs/marginalia/save.php on line 51
+[23-Oct-2018 23:54:42] PHP Notice:  Undefined variable: localAdmin in /home1/tltsecure/apache2/htdocs/marginalia/isAdmin.php on line 10
+[23-Oct-2018 23:54:42] PHP Warning:  file_get_contents(users/mbushee/mbushee_whitelist) [<a href='function.file-get-contents'>function.file-get-contents</a>]: failed to open stream: No such file or directory in /home1/tltsecure/apache2/htdocs/marginalia/isAdmin.php on line 20
+[23-Oct-2018 23:54:42] PHP Notice:  Undefined property: stdClass::$comData in /home1/tltsecure/apache2/htdocs/marginalia/remove.php on line 25
+[24-Oct-2018 14:49:40] PHP Notice:  Undefined property: stdClass::$firstname in /home1/tltsecure/apache2/htdocs/marginalia/save.php on line 50
+[24-Oct-2018 14:49:40] PHP Notice:  Undefined property: stdClass::$lastname in /home1/tltsecure/apache2/htdocs/marginalia/save.php on line 51
+[24-Oct-2018 14:51:51] PHP Notice:  Undefined property: stdClass::$firstname in /home1/tltsecure/apache2/htdocs/marginalia/save.php on line 50
+[24-Oct-2018 14:51:51] PHP Notice:  Undefined property: stdClass::$lastname in /home1/tltsecure/apache2/htdocs/marginalia/save.php on line 51
+[24-Oct-2018 14:52:36] PHP Notice:  Undefined variable: localAdmin in /home1/tltsecure/apache2/htdocs/marginalia/isAdmin.php on line 10
+[24-Oct-2018 14:52:36] PHP Warning:  file_get_contents(users/haohli/haohli_whitelist) [<a href='function.file-get-contents'>function.file-get-contents</a>]: failed to open stream: No such file or directory in /home1/tltsecure/apache2/htdocs/marginalia/isAdmin.php on line 20
+[24-Oct-2018 14:52:36] PHP Notice:  Undefined property: stdClass::$comData in /home1/tltsecure/apache2/htdocs/marginalia/remove.php on line 25
+[24-Oct-2018 15:25:45] PHP Notice:  Undefined property: stdClass::$firstname in /home1/tltsecure/apache2/htdocs/marginalia/save.php on line 50
+[24-Oct-2018 15:25:45] PHP Notice:  Undefined property: stdClass::$lastname in /home1/tltsecure/apache2/htdocs/marginalia/save.php on line 51
+[24-Oct-2018 15:31:24] PHP Notice:  Undefined property: stdClass::$firstname in /home1/tltsecure/apache2/htdocs/marginalia/save.php on line 50
+[24-Oct-2018 15:31:24] PHP Notice:  Undefined property: stdClass::$lastname in /home1/tltsecure/apache2/htdocs/marginalia/save.php on line 51
+[24-Oct-2018 19:03:12] PHP Notice:  Undefined variable: localAdmin in /home1/tltsecure/apache2/htdocs/marginalia/isAdmin.php on line 10
+[24-Oct-2018 19:03:12] PHP Warning:  file_get_contents(users/yewwang/yewwang_whitelist) [<a href='function.file-get-contents'>function.file-get-contents</a>]: failed to open stream: No such file or directory in /home1/tltsecure/apache2/htdocs/marginalia/isAdmin.php on line 20
+[24-Oct-2018 19:03:12] PHP Notice:  Undefined property: stdClass::$comData in /home1/tltsecure/apache2/htdocs/marginalia/remove.php on line 25
+[24-Oct-2018 19:12:48] PHP Notice:  Undefined variable: localAdmin in /home1/tltsecure/apache2/htdocs/marginalia/isAdmin.php on line 10
+[24-Oct-2018 19:12:48] PHP Warning:  file_get_contents(users/yewwang/yewwang_whitelist) [<a href='function.file-get-contents'>function.file-get-contents</a>]: failed to open stream: No such file or directory in /home1/tltsecure/apache2/htdocs/marginalia/isAdmin.php on line 20
+[24-Oct-2018 19:12:48] PHP Notice:  Undefined property: stdClass::$comData in /home1/tltsecure/apache2/htdocs/marginalia/remove.php on line 25
+[24-Oct-2018 20:29:07] PHP Notice:  Undefined property: stdClass::$firstname in /home1/tltsecure/apache2/htdocs/marginalia/save.php on line 50
+[24-Oct-2018 20:29:07] PHP Notice:  Undefined property: stdClass::$lastname in /home1/tltsecure/apache2/htdocs/marginalia/save.php on line 51
+[24-Oct-2018 20:29:18] PHP Notice:  Undefined property: stdClass::$firstname in /home1/tltsecure/apache2/htdocs/marginalia/save.php on line 50
+[24-Oct-2018 20:29:18] PHP Notice:  Undefined property: stdClass::$lastname in /home1/tltsecure/apache2/htdocs/marginalia/save.php on line 51
+[24-Oct-2018 20:50:00] PHP Notice:  Undefined variable: localAdmin in /home1/tltsecure/apache2/htdocs/marginalia/isAdmin.php on line 10
+[24-Oct-2018 20:50:00] PHP Warning:  file_get_contents(users/qiyzhang/qiyzhang_whitelist) [<a href='function.file-get-contents'>function.file-get-contents</a>]: failed to open stream: No such file or directory in /home1/tltsecure/apache2/htdocs/marginalia/isAdmin.php on line 20
+[24-Oct-2018 20:50:00] PHP Notice:  Undefined property: stdClass::$comData in /home1/tltsecure/apache2/htdocs/marginalia/remove.php on line 25
+[24-Oct-2018 20:50:39] PHP Notice:  Undefined property: stdClass::$firstname in /home1/tltsecure/apache2/htdocs/marginalia/save.php on line 50
+[24-Oct-2018 20:50:39] PHP Notice:  Undefined property: stdClass::$lastname in /home1/tltsecure/apache2/htdocs/marginalia/save.php on line 51
+[24-Oct-2018 20:52:12] PHP Notice:  Undefined property: stdClass::$firstname in /home1/tltsecure/apache2/htdocs/marginalia/save.php on line 50
+[24-Oct-2018 20:52:12] PHP Notice:  Undefined property: stdClass::$lastname in /home1/tltsecure/apache2/htdocs/marginalia/save.php on line 51
+[24-Oct-2018 20:52:24] PHP Notice:  Undefined property: stdClass::$firstname in /home1/tltsecure/apache2/htdocs/marginalia/save.php on line 50
+[24-Oct-2018 20:52:24] PHP Notice:  Undefined property: stdClass::$lastname in /home1/tltsecure/apache2/htdocs/marginalia/save.php on line 51
+[24-Oct-2018 20:56:04] PHP Notice:  Undefined property: stdClass::$firstname in /home1/tltsecure/apache2/htdocs/marginalia/save.php on line 50
+[24-Oct-2018 20:56:04] PHP Notice:  Undefined property: stdClass::$lastname in /home1/tltsecure/apache2/htdocs/marginalia/save.php on line 51
+[24-Oct-2018 21:03:22] PHP Notice:  Undefined variable: localAdmin in /home1/tltsecure/apache2/htdocs/marginalia/isAdmin.php on line 10
+[24-Oct-2018 21:03:22] PHP Warning:  file_get_contents(users/cmonis/cmonis_whitelist) [<a href='function.file-get-contents'>function.file-get-contents</a>]: failed to open stream: No such file or directory in /home1/tltsecure/apache2/htdocs/marginalia/isAdmin.php on line 20
+[24-Oct-2018 21:03:22] PHP Notice:  Undefined property: stdClass::$comData in /home1/tltsecure/apache2/htdocs/marginalia/remove.php on line 25
+[25-Oct-2018 18:28:48] PHP Notice:  Undefined property: stdClass::$firstname in /home1/tltsecure/apache2/htdocs/marginalia/save.php on line 50
+[25-Oct-2018 18:28:48] PHP Notice:  Undefined property: stdClass::$lastname in /home1/tltsecure/apache2/htdocs/marginalia/save.php on line 51
+[11-Feb-2019 21:19:56] PHP Notice:  Undefined property: stdClass::$firstname in /home1/tltsecure/apache2/htdocs/marginalia/save.php on line 50
+[11-Feb-2019 21:19:56] PHP Notice:  Undefined property: stdClass::$lastname in /home1/tltsecure/apache2/htdocs/marginalia/save.php on line 51

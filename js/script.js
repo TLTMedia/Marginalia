@@ -1,11 +1,42 @@
-var API;
-var TEXTSPACE = "textSpace";
+/*
+  TODO:
+  • Give them unique admin privelages to their own works
+*/
 
+// It should open to the literature selection window prior to initialization
+$(function() {
+  init();
+})
+// Holds beginning information for user folder selection
+var userFolderSelected; // The User-folder they've selected to view
+var userFolderWorks = []; // The works that the user has
 
-var currentUser = {};
+// Holds user information
+var user;
+var currentUser;
+
+// Assists with comment saving
+var isEdit = false; // If the sent text is an edit to a previous text
+var isReply = false; // If the send text is a reply
+var isReplyEdit = false; // If the sent text is an edit to a reply
+
 // Adminstrative helpers, first of multiple checks
+var whitelist = []; // the admins of the website, double checked in PHP
+var idName = [0]; // The name and id of the span clicked on
 
+// Holds comment and reply information
+var userComMap = new Map(); // id and map of user comments
+var userReplyMap = new Map(); // id and map of user replies
+var adminApproveMap = new Map(); // map of admin approved comments
+var allModeratedPages; // All pages that have moderation
+var allUserComments; // All comments within this text
+var textChosen; // the name of the beginning text chosen
+var literatureText = ""; // The literal string of all the text
 var remSpan; // holds the name of made and clicked spans
+
+// The height and width of the webpage
+var height = 0;
+var width = 0;
 
 // Initialization function
 /*
@@ -13,27 +44,20 @@ var remSpan; // holds the name of made and clicked spans
   Loads the userdata obtained by the netID login
   Loads the users folder and creates a button for each user
 */
-init = async ({api = api, users = users} = {}) => {
-  API = api;
-  currentUser = users.current_user;
-  //width = $(document).width();
+function init() {
   $(".loader").hide();
-  $("#text").hide();
-  $("#addLitBase").hide();
-  createUserSelectScreen({users: users});
-
+  makeCommmentObject().then(data => {
+    comment = data;
+    user = data;
+    createUserSelectScreen();
+    // will be made into a system button
+    console.log(user);
+  });
 
   $(window).on("resize", function() {
     var stageWidth = $(window).width();
-    $("#text").css("height", $("#litDiv").height() + "px");
     $("html").css("font-size", (stageWidth / 60) + "px");
   }).trigger("resize")
-
-
-  $.address.externalChange((evt)=>{
-    console.log("externalChange");
-    loadFromDeepLink();
-  });
 
 }
 
@@ -43,26 +67,717 @@ init = async ({api = api, users = users} = {}) => {
   When the button is clicked the variable userFolderSelected is the work's name
   The cooresponding work then has it's text and comment/reply data loaded
 */
-function buildHTMLFile(litContents, selected_eppn,textChosen) {
-  // TODO check this logic
-  if (!$(".commentTypeDropdown").length) {
-    //TODO make drop down combine with commentbox
-    makeDropDown();
-    makeDraggableCommentBox(selected_eppn,textChosen);
-    makeDraggableReplyBox();
-    hideAllBoxes();
-  }
-  loadUserComments(selected_eppn,textChosen);
-  createWorkTitle(textChosen);
+function createUserSelectScreen() {
+  width = $(document).width();
+  console.log("first Width :" + width);
+  var userWorks = [];
+  var selector = $(".litSelector");
+  var marginalia = $("<text/>", {
+    text: "Marginalia",
+    id: "marginTitle"
+  });
+  var worksButtons = $("<div/>", {
+    id: "worksButtons"
+  });
+  selector.append(marginalia, worksButtons);
+  selector.css({
+    "font-style": "italic"
+  });
 
+  $.get("grabUsers.php", function(data) {
+    // Add all users Folders
+    var length = data.length;
+    var rows = 0;
+    while (length >= 1) {
+      length -= 3;
+      rows++;
+    }
+    var heightrem = 5 + (rows * 1.75);
+    $(".litSelector").css({
+      "height": heightrem + "rem",
+      "width": "20%",
+      "left": "40%"
+    });
+    for (var userNum in data) {
+      var userButton = $("<button/>", {
+        text: data[userNum],
+        id: "userButton",
+        click: function(evt) {
+          userFolderSelected = $(this).text();
+          readWhiteList();
+          console.log($(this).text());
+          $(this).parent().parent().empty();
+          createLitSelectorScreen();
+        }
+      });
+      worksButtons.append(userButton);
+    }
+    // Add the literature upload button
+    var addLitButton = $('<button/>', {
+      class: "addLiterature",
+      id: "addLit",
+      text: "+ Add Literature +",
+      click: function(evt) {
+        $.get("grabUserWorks.php", {
+          folder: user.getUserNetID()
+        }).done(function(data) {
+          console.log(data);
+          userWorks = JSON.parse(data);
+          var worksSlider = $("#allFiles");
+          $("#deleteFileChoice").dialog({
+            width: 190,
+            height: 40,
+            title: "Delete File:",
+            buttons: [{
+                text: "Cancel",
+                id: "cancelFile",
+                width: 90,
+                click: function() {
+                  $(this).parent().hide();
+                }
+              },
+              {
+                text: "Delete",
+                id: "deleteFile",
+                width: 90,
+                click: function() {
+                  if ($(".ui-dialog-title").text().substring(0, 6) == "Delete") {
+                    console.log($(".ui-dialog-title").text().substring(13, $(".ui-dialog-title").text().length - 4));
+                    $(this).attr("file", $(".ui-dialog-title").text().substring(13, $(".ui-dialog-title").text().length - 4));
+                    $(".ui-dialog-title").text("Are you Sure?");
+                  } else if ($(".ui-dialog-title").text() == "Are you Sure?") {
+                    $(".ui-dialog-title").text("This will delete your Text");
+                  } else if ($(".ui-dialog-title").text() == "This will delete your Text") {
+                    $(".ui-dialog-title").text("And all of the Data");
+                  } else if ($(".ui-dialog-title").text() == "And all of the Data") {
+                    $(".ui-dialog-title").text("Final Warning!");
+                  } else if ($(".ui-dialog-title").text() == "Final Warning!") {
+                    $(".ui-dialog-title").text("File Deleted");
+                    $("#deleteFile").hide();
+                    $("#cancelFile").hide();
+                    console.log($(this).attr("file"));
+                    $.post("removeTextFile.php", {
+                      data: $(this).attr("file")
+                    });
+                    $(".litSelector").empty();
+                    $(".litSelector").css({
+                      "text-align": "center",
+                      "left": "40%"
+                    });
+                    $(".litSelector").text("File Deleted")
+                    window.location.reload();
+                  }
+                }
+              }
+            ]
+          });
+
+          $('div[aria-describedby="deleteFileChoice"]').hide();
+          if (userWorks.length < 9) {
+
+          }
+          for (var title in userWorks) {
+            // If the user hit's the X they are given the
+            // choice to delete the file or not
+            var workName = $("<span/>", {
+              id: "fileView",
+              file: userWorks[title]
+            });
+
+            var fileName = userWorks[title] + ".txt";
+            workName.text(fileName);
+
+            worksSlider.append(workName, "<br>");
+            var file = "span[file='" + userWorks[title] + "']";
+            $(file).on("click", function(evt) {
+              $('div[aria-describedby="deleteFileChoice"]').show();
+              console.log($(this).attr("file"));
+              $('div[aria-describedby="deleteFileChoice"]').find("span").text("Delete File: " + $(this).attr("file") + ".txt");
+              $("#cancelFile").css({
+                "margin-right": "8px"
+              });
+
+              $('div[aria-describedby="deleteFileChoice"]').css({
+                'top': (evt.clientY - 25) + "px",
+                'left': (evt.clientX + 75) + "px",
+              })
+
+            });
+          }
+          $("#allFiles").css({
+            "height": userWorks.length * .7 + "rem"
+          })
+        });
+        var format = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
+        var nameOk;
+        var name = "";
+        // Use the same div as the litSelector
+        selector.empty();
+        console.log("User wants to add Literature");
+        selector.removeClass("litSelector");
+        selector.addClass("userInput");
+        // selector.children().css({
+        //   "margin-left": ".25rem"
+        // });
+
+        // Create the input buttons
+        var inputTitle = $("<text/>", {
+          text: "Literature Import Menu",
+          id: "inputTitle"
+        })
+        var inputName = $("<text/>", {
+          text: "Name of text:",
+          inputType: "inputName"
+        })
+        var inputFile = $("<text/>", {
+          text: "File Selection (.txt): ",
+          inputType: "inputFile"
+        })
+
+        var textName = $("<input/>", {
+          id: "inputTextName",
+          placeholder: "No spaces please..."
+        }).on("keypress", function(evt) {
+          if ($("#inputTextName").val().length > 9) {
+            $("#inputTextName").val($("#inputTextName").val().substring(0, 9));
+          }
+        });
+
+        var nameDisabler = $("<button/>", {
+          id: "inputNameDisabler",
+          text: "Choose name",
+          click: function(evt) {
+            nameOk = false;
+            name = $("#inputTextName").val().trim();
+            name = name.replace(/ /g, "");
+            name = name.toLowerCase();
+            console.log("Input Text: " + name);
+            if (textName.attr("disabled") == "disabled") {
+              textName.attr("disabled", false);
+              textName.css({
+                "color": "black"
+              });
+            } else {
+              var special = format.test(name);
+
+              if (name == "") {
+                alert("You have given no name to the file");
+              } else if (userWorks.includes(name)) {
+                alert("You already have a work named after this");
+              } else if (special) {
+                alert("Please no special characters in the name");
+              } else if (name.length > 10) {
+                alert("Please no name larger than 10 characters");
+              } else if (name.length < 2) {
+                alert("Please no name smaller than 2 characters");
+              } else {
+                nameOk = true;
+              }
+
+              if (name != "" && nameOk) {
+                textName.attr("disabled", true);
+                textName.css({
+                  "color": "grey"
+                });
+              }
+            }
+          }
+        });
+
+        var textFile = document.createElement("INPUT");
+        textFile.setAttribute("type", "file");
+        textFile.setAttribute("id", "inputButton");
+        textFile.setAttribute("accept", ".txt");
+
+        var textModeration = $("<text/>", {
+          text: "Private Page:",
+          id: "textModeration",
+          inputtype: "textModeration"
+        })
+        var pageModeration = $("<input/>", {
+          type: "checkbox",
+          id: "fileModeration"
+        }).on("click", function(evt) {
+          $(this).attr('checked', !($(this).attr('checked')));
+        })
+
+        var userFiles = $("<text/>", {
+          "id": "userFiles"
+        });
+
+        var fileHolder = $("<div/>", {
+          "id": "allFiles",
+          "class": "vertical-menu"
+        });
+        userFiles.text(user.getUserNetID() + "'s Files: ");
+
+        var textAdder = $("<button/>", {
+          text: "Add Text",
+          id: "inputTextAdder",
+          click: function(evt) {
+            var val = $("#inputButton").val().trim();
+            console.log("TEST: " + $("#inputTextName").val().trim());
+            if (val == "") {
+              alert("You have not chosen a file");
+            } else if (val.substring(val.length - 3) != "txt") {
+              alert("Please choose a Text File (Ex: name.txt)");
+            } else if (textFile.files.length > 1) {
+              alert("Please select one text file at a time");
+            } else {
+              //storeFile(name, textFile.files[0]);
+              if (nameOk && textName.attr("disabled") == "disabled") {
+                console.log("Text Added " + name + ".txt");
+                getLitContentsToSave(name, textFile.files[0]);
+              } else {
+                alert("You have given no name to the file");
+              }
+            }
+          }
+        });
+
+        var inputLeave = makeCrossX();
+        selector.append(inputTitle, inputLeave, "<br/>", userFiles, inputName, "<br/>", textName,
+          nameDisabler, "<br/>", inputFile, "<br/>", textFile, "<br/>", textModeration, pageModeration, textAdder);
+        userFiles.append(fileHolder);
+        // Edit the attributes of each of the inputs pieces
+
+        $(".crossX").attr("id", "inputLeave");
+        $(".crossX").removeAttr("class");
+        $("#inputLeave").on("click", function(evt) {
+          $(".userInput").addClass("litSelector");
+          $(".userInput").removeClass("userInput");
+          $(this).parent().empty();
+          createUserSelectScreen();
+          var length = data.length;
+          console.log(data);
+          var rows = 0;
+          while (length >= 1) {
+            length -= 3;
+            rows++;
+          }
+          console.log(rows);
+          var heightrem = 5 + (rows * 2);
+          $(".litSelector").css({
+            "height": heightrem + "rem",
+            "width": "25%",
+            "text-align": "center",
+            "left": "40%"
+          });
+        });
+      }
+    });
+    worksButtons.append(addLitButton);
+  });
+}
+
+// Creates the main selector screen once a netid is chosen
+/*
+  For every .txt read within the user's works folder a button is made
+  a return button is made in the event that clicking this user was a mistake
+*/
+function createLitSelectorScreen() {
+  var selector = $(".litSelector");
+
+  var marginalia = $("<text/>", {
+    text: "Marginalia",
+    id: "marginTitle"
+  });
+  var worksButtons = $("<div/>", {
+    id: "worksButtons"
+  });
+  selector.append(marginalia, worksButtons);
+  selector.css({
+    "font-style": "italic"
+  });
+  var dataString = userFolderSelected;
+
+  $.get("grabUserWorks.php", {
+    folder: dataString
+  }).done(function(data) {
+    var works = JSON.parse(data);
+    console.log(works);
+
+    var length = works.length;
+    var rows = 0;
+    while (length >= 1) {
+      length -= 3;
+      rows++;
+    }
+    console.log(rows);
+    var heightrem = 4 + (rows * 1.75);
+    $(".litSelector").css({
+      "height": heightrem + "rem",
+      "width": "25%",
+      "left": "40%"
+    });
+
+    for (var lit in works) {
+      var litButton = $('<button/>', {
+        name: works[lit],
+        id: "inputLitButton",
+        text: works[lit].charAt(0).toUpperCase() + works[lit].substr(1),
+        click: function(evt) {
+          $("div[aria-describedby='moderateFileChoice']").hide();
+          textChosen = $(this).attr("name");
+          getLitContents();
+          $(this).parent().parent().remove();
+          //init();
+        }
+      });
+
+      if (userFolderSelected == user.getUserNetID() || whitelist.includes(user.getUserNetID())) {
+        litButton.on('contextmenu', function(evt) {
+          evt.preventDefault();
+          setFileModeration(evt);
+          $('div[aria-describedby="moderateFileChoice"]').css({
+            'top': (evt.clientY - 25) + "px",
+            'left': (evt.clientX + 25) + "px",
+          })
+          $('div[aria-describedby="userPrivateList"]').css({
+            'top': (evt.clientY - 50) + "px",
+            'left': (evt.clientX + 150) + "px",
+          })
+        });
+      }
+      worksButtons.append(litButton);
+    }
+    var userReturnButton = $("<button/>", {
+      id: "userReturnButton",
+      text: "- Return to User Select -"
+    }).on("click", function(evt) {
+      $(".litSelector").empty();
+      $('div[aria-describedby="userPrivateList"]').hide();
+      $('div[aria-describedby="moderateFileChoice"]').hide();
+      // $(".litSelector").css({
+      //   "text-align": "center",
+      //   "left": "40%"
+      // });
+      createUserSelectScreen();
+    });
+    worksButtons.append("<br/>", userReturnButton);
+  });
+
+  $.get("grabModeratedPages.php", {
+    folder: dataString
+  }).done(function(data) {
+    var moderation = JSON.parse(data);
+    console.log(moderation);
+    allModeratedPages = moderation;
+    for (var lit in moderation) {
+      if (!moderation[lit].includes(user.getUserNetID())) {
+        var buttonMod = $("button[name='" + lit + "']");
+        buttonMod.addClass("moderatedUserButton");
+        console.log(whitelist);
+        if (!whitelist.includes(user.getUserNetID())) {
+          buttonMod.attr("disabled", "disabled");
+        }
+      }
+    }
+  })
+}
+
+// opens the menu for file moderation Selection
+/*
+  When the user right clicks this element a checkbox
+  is displayed and if activated the user selects to make
+  the page moderated.
+
+  This only works if the user is the owner of the page
+*/
+function setFileModeration(clicked) {
+  var target = $(clicked.currentTarget).attr("name").toLowerCase();
+  console.log(target.toLowerCase());
+
+  $("#moderateFileChoice").dialog({
+    width: "14%",
+    height: "1.5%",
+    title: "Private " + target
+  });
+
+  $("div[aria-describedby='moderateFileChoice']").show();
+
+  if ($("ul[class='choiceList']").length < 1) {
+
+    var choiceList = $('<ul/>', {
+      class: "choiceList"
+    });
+
+    var moderateButton = $('<input/>', {
+      type: "checkbox",
+      id: "moderateButton"
+    });
+
+    var doneButton = $("<button/>", {
+      id: "doneButton",
+      text: "Done",
+      click: function(evt) {
+        var send = !(allModeratedPages.hasOwnProperty(target)) && $("#moderateButton").prop("checked");
+        $("div[aria-describedby='userPrivateList']").hide();
+        // Check to make sure file doesn't exist with a check or doesn't without
+        // No post request will be made then
+        var alreadyChecked = allModeratedPages.hasOwnProperty(target) && $("#moderateButton").prop("checked");
+        var dontHave = !(allModeratedPages.hasOwnProperty(target)) && !$("#moderateButton").prop("checked");
+
+        if (send) {
+          allModeratedPages[target] = [user.getUserNetID()];
+        }
+        var dataString = JSON.stringify({
+          "type": $("#moderateButton").prop("checked"),
+          "work": target
+        })
+
+        if (!alreadyChecked && !dontHave) {
+          console.log(target)
+          $.post("moderatepage.php", {
+            data: dataString
+          }).done(function(data) {
+            console.log("Private Status Changed");
+          });
+        }
+        $(this).parent().parent().hide();
+      }
+    });
+    choiceList.append("Private: ", moderateButton, doneButton);
+    $("div[aria-describedby='moderateFileChoice']").append(choiceList);
+  }
+  openFileModerators(clicked);
+
+  console.log(target, allModeratedPages);
+  $("#moderateButton").prop("checked", allModeratedPages.hasOwnProperty(target));
+
+}
+
+// Opens the user's private page when this is clicked, giving those people access
+/*
+  This is getting confused with moderation which for now means privatization
+  When a user right clicks the file button the list of private users access displays
+  Those given access to the privatization can then be given access to this text
+*/
+function openFileModerators(clicked) {
+  var target = $(clicked.currentTarget).attr("name").toLowerCase();
+  if (!($("#addPrivateUser").length > 0)) {
+    var privatePlane = $("<div/>", {
+      id: "privatePlane"
+    });
+    var addPrivateUser = $("<input/>", {
+      id: "addPrivateUser",
+      placeholder: "Enter netID",
+      width: "3.5rem"
+    }).on("keypress", function(evt) {
+      if ($("#addPrivateUser").val().length > 9) {
+        $("#addPrivateUser").val($("#addPrivateUser").val().substring(0, 9));
+      }
+    });
+
+
+    var addPrivateButton = $("<button/>", {
+      id: "addPrivateButton",
+      text: "Add",
+      width: "2.5rem",
+      click: function(evt) {
+        var text = $("#addPrivateUser").val();
+        var pass = true;
+        var givenNetIDs = $("#privateNamePlane").children();
+
+        for (var privateNetID in givenNetIDs) {
+          if (!(isNaN(privateNetID)))
+          {
+            console.log($(givenNetIDs[privateNetID]).text(), text);
+            if ($(givenNetIDs[privateNetID]).text() == text.toUpperCase()) {
+              pass = false;
+            }
+          }
+          else {
+            continue;
+          }
+        }
+
+        if (pass) {
+          var dataString = JSON.stringify(text);
+          // $.post("moderatepage.php",{
+          //   data:dataString
+          // }).done(console.log("Hello"));
+          var count = $("#privateNamePlane").children().length;
+
+          var newDiv = $("<div/>", {
+            text: text.toUpperCase(),
+            id: "privateName_" + count
+          });
+          $("#privateNamePlane").append(newDiv);
+          $("#privateNamePlane").css({
+            "height": (count + 1) + "rem"
+          });
+
+          newDiv.on("click", function(evt) {
+            var idNum = $(this).attr("id").substring($(this).attr("id").length - 1);
+
+            if ($("#removePrivateName_" + idNum).length == 0) {
+              var removeNameButton = $("<button/>", {
+                text: "Delete?",
+                id: "removePrivateName_" + idNum,
+                click: function(evt) {
+                  $(this).parent().remove();
+                  var count = $("#privateNamePlane").children().length;
+                  $("#privateNamePlane").css({
+                    "height": count + "rem"
+                  });
+                }
+              });
+              $("#privateName_" + idNum).append(removeNameButton);
+            } else {
+              $("#removePrivateName_" + idNum).remove();
+            }
+          });
+
+        }
+      }
+    });
+    var privateNamePlane = $("<div/>", {
+      id: "privateNamePlane"
+    });
+    privatePlane.append(addPrivateUser, addPrivateButton, privateNamePlane);
+
+    $("div[aria-describedby='moderateFileChoice']").append(privatePlane);
+  }
+  $("#addPrivateUser").val("");
+  $.get("loadPrivateUsers.php", {
+    file: target
+  }).done(function(data) {
+    var nameArray = JSON.parse(data);
+    console.log(nameArray);
+    fillUserPrivateList(nameArray);
+
+  });
+
+  $("div[aria-describedby='userPrivateList']").show();
+}
+
+
+function fillUserPrivateList(nameArray) {
+  $("#privateNamePlane").empty();
+  var namePlane = $("#privateNamePlane");
+
+  if (nameArray) {
+    $("#privateNamePlane").css({
+      "height": 1 * nameArray.length + "rem"
+    });
+    for (var name in nameArray) {
+      var addName = $("<div/>", {
+        text: (nameArray[name].toUpperCase()),
+        id: "privateName_" + name
+      });
+      addName.on("click", function(evt) {
+        var idNum = $(this).attr("id").substring($(this).attr("id").length - 1);
+
+        if ($("#removePrivateName_" + idNum).length == 0) {
+          var removeNameButton = $("<button/>", {
+            text: "Delete?",
+            id: "removePrivateName_" + idNum,
+            click: function(evt) {
+              $(this).parent().remove();
+              var count = $("#privateNamePlane").children().length;
+              $("#privateNamePlane").css({
+                "height": count + "rem"
+              });
+            }
+          });
+          $("#privateName_" + idNum).append(removeNameButton);
+        } else {
+          $("#removePrivateName_" + idNum).remove();
+        }
+      });
+      $("#privateNamePlane").append(addName);
+    }
+  } else {
+    $("#privateNamePlane").css({
+      "height": 0
+    });
+  }
+}
+
+
+
+// Gets the textual contents of a file
+/*
+  Loads the text contents of the selected works file
+  Instead of having an html file for each work this
+  just fills the text div with its contents
+*/
+function getLitContents() {
+  var dataString = JSON.stringify({
+    thisUser: user.getUserNetID(),
+    userFolder: userFolderSelected,
+    work: textChosen
+  });
+  $.get("grabUserWorkText.php", {
+    data: dataString,
+  }).done(function(data) {
+    literatureText = data;
+    buildHTMLFile(literatureText, $(this).attr("class"))
+    makeBoxes();
+  });
+}
+
+// Rips the data from the file and reposts it with a new name
+/*
+  When a user submits a text file this will rip the contents straight from it
+  and make a new text file with the replaced name
+*/
+function getLitContentsToSave(litName, litFile) {
+  //console.log(litName, litFile);
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var contents = e.target.result;
+    console.log("Got the file.\n" +
+      "name: " + litFile.name + "\n" +
+      "size: " + litFile.size + " bytes\n"
+      // +"File Contents:\n" + contents
+    );
+    // if (litFile.size > 600000) {
+    //   alert("Please Choose a File smaller than 600 KB\nTry splitting your file into several parts");
+    // } else {
+      var text = contents;
+      var dataString = JSON.stringify({
+        content: text,
+        name: litName,
+        userFolder: user.getUserNetID(),
+        isModerated: $("#fileModeration").is(':checked')
+      });
+      $.post("saveInput.php", {
+        data: dataString
+      }).done(function(data) {
+        console.log(JSON.parse(data));
+      });
+      $(".userInput").empty();
+      $(".userInput").css({
+        "text-align": "center",
+        "left": "40%"
+      });
+      $(".userInput").addClass("litSelector");
+      $(".userInput").removeClass("userInput");
+      // Once the data is placed return to the start screen
+      createUserSelectScreen();
+  //  }
+
+  };
+  reader.readAsText(litFile);
+}
+
+// Makes the html file to be put within $(#textspace)
+/*
+  This builds the table in which the user's work's text contents are placed
+*/
+function buildHTMLFile(litContents, litName) {
+  //console.log(litContents);
   var litDiv = $("<div/>", {
     "id": "litDiv"
+  }).on("mouseup", function(evt) {
+    highlightCurrentSelection(evt, user.getUserNetID()).then(function(data) {})
   });
 
   var metaChar = $("<meta/>", {
     "charset": "utf-8"
   });
-
   var metaName = $("<meta/>", {
     "name": "viewport",
     "content": 'width=device-width, initial-scale=1.0'
@@ -75,60 +790,47 @@ function buildHTMLFile(litContents, selected_eppn,textChosen) {
     href: "css/style.css"
   });
 
+  var script = $("<script/>", {
+    "src": "//code.jquery.com/jquery-3.3.1.js",
+    "integrity": "sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=",
+    "crossorigin": "anonymous"
+  });
 
   var preText = $("<div/>", {
     "id": "textSpace"
   });
-
-  preText.html(litContents);
+  preText.hide();
+  //litContents = litContents.replace(/\n\n/g, "\n");
+  //litContents = litContents.replace(/\n/g, "<br/>");
+  preText.text(litContents);
 
   litDiv.append(metaChar, metaName, link, script, preText);
   $("#text").append(litDiv);
 }
 
-function createWorkTitle(textChosen){
-  let workTitle = $("<div/>",{
-    id: "workTitle"
-  });
-  let workTitleSpan = $("<span/>",{
-    id : "workTitleSpan",
-    text: textChosen
-  });
-  workTitle.append(workTitleSpan);
-  $("#text").append(workTitle);
-  createTips(workTitle);
-}
-
-function createTips(workTitle){
-  let tips = $("<div/>",{
-    id: "tips"
-  });
-  let icon = $("<i/>",{
-    class: "material-icons tipsIcon",
-    text: "help"
-  });
-  let text = $("<span/>",{
-    class: "tipsText"
-  });
-  text.html("The <span style = 'color : red'>Red</span> comments are the comments that are not approved yet.\nThe <span style = 'color : orange'>Orange</span> comments are comments that has unapproved replies.");
-  tips.append(icon,text);
-  workTitle.prepend(tips);
-}
-
-function makeDropDown(){
-  let buttonTypes = ['Historical','Analytical','Comment','Definition','Question'];
-  dropdown = $("<select>", {
-    class: "commentTypeDropdown",
-  });
-  buttonTypes.forEach((type)=>{
-    var option = $("<option>", {
-      name: type,
-      text: type
-    });
-    dropdown.append(option);
-    $("#commentTypeDropdown").val(option);
-  });
-}
+// This function is not used but can be looked at for reference
+// function init() {
+//   // Holds information on input comments, the literature shown
+//   // and the different buttons that can be made
+//   var dropdown;
+//   var lit;
+//   var comment;
+//
+//   getLit(textChosen).then(function(data) {
+//     lit = data;
+//     makeBoxes();
+//   }).fail(function(data) {
+//     lit = data
+//   }).always(function() {
+//     var litDiv = $('<div/>', {
+//       id: "litDiv",
+//       html: lit
+//     }).on("mouseup", function(evt) {
+//       highlightCurrentSelection(evt, user.getUserNetID())
+//     });
+//     $('#text').append(litDiv);
+//   })
+// }
 
 // Load the user's comments after a work button is clicked
 /*
@@ -136,435 +838,1146 @@ function makeDropDown(){
   Each is mapped with its cooresponding Hex-Encoded UNIX timestamp
   The student selection menu is filled with each student's netid
 */
-loadUserComments = (selected_eppn,textChosen) => {
-  $("#text").hide();
+function loadUserComments() {
+  $(".allButtons").hide();
   $("#textSpace").hide();
-  $("#textTitle").hide();
-  let endpoint = "get_highlights/" + selected_eppn + "/" + textChosen;
-  API.request({endpoint}).then((data) => {
-      console.log(data);
-      renderComments(data,selected_eppn,textChosen);
-      makeSelector(createListOfCommenter(data),colorNotUsedTypeSelector);
-  });
-}
+  $(".loader").show();
+  userComMap = new Map();
+  userReplyMap = new Map();
 
-//selected_eppn : work creator
-renderComments = (commentData, selected_eppn,textChosen) => {
-    $("#text").fadeIn();
-    $("#textSpace").fadeIn();
-    $("#textTitle").fadeIn();
-    console.log(selected_eppn);
-    // let overLapHash = checkOverLapSpans(commentData);
-    // let overLapCommentsData =[];
-    // for (let i = 0; i < commentData.length; ++i) {
-    //   console.log(commentData[i].hash)
-    //   for(let j = 0; j< overLapHash.length; j++){
-    //     if(commentData[i].hash == overLapHash[j]){
-    //       overLapCommentsData.push(commentData[i]);
-    //       commentData.splice(i,1);
-    //     }
-    //   }
-    // }
-    for(let i = 0; i < commentData.length;i++){
-      highlightText({
-          startIndex: commentData[i].startIndex,
-          endIndex: commentData[i].endIndex,
-          commentType: commentData[i].commentType,
-          eppn: commentData[i].eppn,
-          hash: commentData[i].hash,
-          approved: commentData[i].approved
-      });
-      let comment_data = {
-          creator: selected_eppn,
-          work: textChosen,
-          commenter: commentData[i].eppn,
-          hash: commentData[i].hash
-      };
-      checkThreadUnapprovedComments(comment_data,undefined,undefined,markUnapprovedComments);
-    }
-
-    // for(let i = 0; i < overLapCommentsData.length; i++){
-    //   console.log(overLapCommentsData)
-    //   highlightOverLapText({
-    //       startIndex: overLapCommentsData[i].startIndex,
-    //       endIndex: overLapCommentsData[i].endIndex,
-    //       commentType: overLapCommentsData[i].commentType,
-    //       eppn: overLapCommentsData[i].eppn,
-    //       hash: overLapCommentsData[i].hash,
-    //       approved: overLapCommentsData[i].approved
-    //   });
-    // }
-    $("#text").css("height", $("#litDiv").height() + "px");
-    //highlight to post comments
-    $("#litDiv").on("mouseup", function(evt) {
-      highlightCurrentSelection(evt);
-    });
-
-
-    //highlight on top of other's comment will bring them to the reply box
-    $(".commented-selection").off().on("mouseup", function(evt) {
-      var commentSpanId = $(this).attr('id');
-      clickOnComment(commentSpanId,textChosen,selected_eppn,evt);
-    });
-    // click on comment to reply the post
-    $(".commented-selection").off().on("click", function(evt) {
-      var commentSpanId = $(this).attr('id');
-      clickOnComment(commentSpanId,textChosen,selected_eppn,evt);
-    });
-}
-
-function highlightText({startIndex, endIndex, commentType, eppn, hash, approved}){
-    let range = rangy.createRange();
-    range.selectCharacters(document.getElementById(TEXTSPACE), startIndex, endIndex);
-    let area = rangy.createClassApplier("commented-selection", {
-        useExistingElements: false,
-        elementAttributes: {
-            "id": hash,
-            "creator": eppn,
-            "typeof": commentType,
-            "approved": approved
-        }
-    });
-    area.applyToRange(range);
-}
-
-//if current user is admin for the current work, they are able to approve the unapproved comments
-//if current user is creator of the comment, they are able to edit and delete the unapproved comment
-//approved comments don't need to check anyPermission stuff
-function clickOnComment(commentSpanId,workChosen,workCreator,evt){
-  $("#replies").empty();
-  $("#commentBox").removeAttr("data-replyToEppn");
-  $("#commentBox").removeAttr("data-replyToHash");
-  $("#commentBox").attr("data-editCommentId","-1");
-
-  let comment_data = {
-      creator: workCreator,
-      work: workChosen,
-      commenter: $("#"+commentSpanId).attr("creator"),
-      hash: commentSpanId
-  };
-  get_comment_chain_API_request(comment_data,commentSpanId);
-  evt.stopPropagation();
-  displayReplyBox(evt);
-  displayCommentBox(evt,commentSpanId);
-}
-
-function get_comment_chain_API_request(jsonData, commentSpanId){
-  let work = jsonData.work;
-  let workCreator = jsonData.creator;
-  let jsonDataStr = JSON.stringify(jsonData);
-  API.request({
-      endpoint: "get_comment_chain",
-      data: jsonDataStr,
-      method: "POST"
-  }).then((data) => {
+  var dfd = new $.Deferred();
+  $.get("load.php", {
+    text: textChosen,
+    userFolder: userFolderSelected
+  }).done(function(data) {
+    $(".allButtons").show();
+    $("#textSpace").show();
+    $(".loader").hide();
     console.log(data);
-    readThreads(data,work,workCreator);
-    $("#commentBox").parent().hide();
-  });
-}
+    console.log(data.userLoggedIn);
+    currentUser = data.userLoggedIn;
+    currentUser.fullname = currentUser.firstname + " " + currentUser.lastname;
+    var selRange = rangy.createRange();
+    var stud = [];
+    allUserComments = $(data)[0].arrayOfComments;
+    console.log("Users and their comments: \n", allUserComments);
+    for (var numStud in allUserComments) {
+      for (var user in $(allUserComments[numStud])) {
+        if (!(isNaN(user))) {
+          var student = $(allUserComments[numStud])[user];
+          console.log("Student: ", student);
+          if (student.comments.length > 0) {
+            stud.push(student.netID);
+          }
+          for (var com in student.comments) {
+            if (!(isNaN(user))) {
+              // Create a span and set it so that attributes are added and
+              // global parameters are notified of change+
+              var comment = student.comments[com];
+              if (comment.isVisible == "true") {
+                var id = student.netID + "_" + comment.timeStamp;
+                selRange.selectCharacters(document.getElementById("textSpace"), comment.startIndex, comment.endIndex);
+                hlRange(selRange);
 
-//read the thread (threads is the reply array, parentId is the hash, parentReplyBox is the replyBox returned by the showReply())
-function readThreads(threads, work, workCreator, parentId = null){
-  if (threads.length==0){
-    return;
-  }
-  else{
-    for(var i =0; i<threads.length ; i++){
-      //TODO make it pass a object instead of every thing
-      let dataForReplies = {
-        eppn: threads[i].eppn,
-        firstName: threads[i].firstName,
-        lastName: threads[i].lastName,
-        public: threads[i].public,
-        type: threads[i].commentType,
-        commentText: btoa(threads[i].commentText),
-        hash: threads[i].hash,
-        approved: threads[i].approved,
-        parentId: parentId,
-        work: work,
-        workCreator: workCreator
-      }
-      createReplies(dataForReplies);
-      readThreads(threads[i].threads,work,workCreator,threads[i].hash);
-    }
-  }
-}
+                userReplyMap.set(comment.timeStamp, student.comments[com].replies);
 
-function checkThreadUnapprovedComments(commentData,type,commenter,callback){
-  let jsonDataStr = JSON.stringify(commentData);
-  API.request({
-      endpoint: "get_comment_chain",
-      data: jsonDataStr,
-      method: "POST"
-  }).then((data) => {
-    let isThreadApproved = checkIsThreadApprovedHelper(data,commentData.work,commentData.creator);
-    if(isThreadApproved == false){
-      let targetComment = $("#"+commentData.hash);
-      targetComment.addClass("threadNotApproved");
-      targetComment.children("span").addClass("threadNotApproved");
-      if(!targetComment.children("span").hasClass("commentNotApproved")){
-        targetComment.children("span").text("Orange comment means there are unapproved replies");
-      }
-    }
-    else{
-      $("#"+commentData.hash).removeClass("threadNotApproved");
-    }
-    var callBackType = type != undefined ? type : "All";
-    var callBackCommenter = commenter != undefined ? commenter : "AllCommenters";
-    callback(callBackType,callBackCommenter);
-  });
-}
+                var span = $("." + remSpan);
+                $("span[class^='hl_']").off().on("click", function(evt) {
+                  if ($(this).attr("class").substring(0, 3) != "hl_") {
+                    var type = $(this).attr("type");
+                    $(".commentTypeDropdown").val(type.charAt(0).toUpperCase() + type.substr(1));
 
-function checkIsThreadApprovedHelper(threads, work, workCreator){
-  if (threads.length==0){
-    return true;
-  }
-  else{
-    let isApproved;
-    let isCurrentCommentApproved = true;
-    let isChildApproved = true;
-    for(var i =0; i<threads.length ; i++){
-      if(threads[i].approved == false){
-        isCurrentCommentApproved = false;
-        break;
-      }
-      isChildApproved = checkIsThreadApprovedHelper(threads[i].threads,work,workCreator,threads[i].hash);
-      if(isChildApproved == false){
-        break;
-      }
-    }
-    isApproved = isCurrentCommentApproved && isChildApproved;
-    return isApproved;
-  }
-}
+                    $("[id='ui-id-1']").text("Annotation by: " + $(this).attr("firstname") + " " + $(this).attr("lastname"));
+                    idName = $(this).attr("class").split("_");
 
-function markUnapprovedComments(type,commenter){
-  //change everything to color black
-  //$(".commented-selection").css({"color" : "black"});
-  console.log(type,commenter);
-  let unapprovedThreadCommentsId = [];
-  let unapprovedThreadComments;
-  let unapprovedCommentsId =[];
-  let unapprovedComments;
-  if(commenter == "AllCommenters"){
-    if(type == "All"){
-      unapprovedComments = $("#text").find(".commented-selection" + "[approved = "+false+"]");
-      //only select comments that is approved, the unapproved first comment is going to be in unapprovedComments
-      unapprovedThreadComments = $(".commented-selection.threadNotApproved" + "[approved = "+true+"]");
-      //$("#text").find(".commented-selection.threadNotApproved" + "[approved = "+true+"]");
-    }
-    else{
-      unapprovedComments = $("#text").find(".commented-selection" + "[approved = "+false+"][typeof = '"+type+"']");
-      unapprovedThreadComments = $("#text").find(".commented-selection.threadNotApproved" + "[approved = "+true+"][typeof = '"+type+"']");
-    }
-  }
-  else{
-    if(type == "All"){
-      unapprovedComments = $("#text").find(".commented-selection" + "[approved = "+false+"][creator = '"+commenter+"']");
-      unapprovedThreadComments = $("#text").find(".commented-selection.threadNotApproved" + "[approved = "+true+"][creator = '"+commenter+"']");
-    }
-    else{
-      unapprovedComments = $("#text").find(".commented-selection" + "[approved = "+false+"][typeof = '"+type+"'][creator = '"+commenter+"']");
-      unapprovedThreadComments = $("#text").find(".commented-selection.threadNotApproved" + "[approved = "+true+"][typeof = '"+type+"'][creator = '"+commenter+"']");
-    }
-  }
-  for(var i = 0; i < unapprovedComments.length; i++){
-    let id = unapprovedComments[i]["attributes"]["id"]["value"];
-    unapprovedCommentsId.push(id);
-  }
-  unapprovedCommentsId.forEach((element)=>{
-    $("#"+element).addClass("unapprovedComments");
-  });
-  for(var i = 0; i < unapprovedThreadComments.length; i++){
-   let id = unapprovedThreadComments[i]["attributes"]["id"]["value"];
-   unapprovedThreadCommentsId.push(id);
-  }
-  // unapprovedThreadCommentsId.forEach((element)=>{
-  //   $("#"+element).css({"color" : "darkOrange"});
-  // });
-}
+                    CKEDITOR.instances.textForm.setData(userComMap.get(idName[1]));
+                    if (idName[0] == currentUser.netid || whitelist.includes(currentUser.netid)) {
+                      CKEDITOR.instances['textForm'].setReadOnly(false);
+                      $(".commentTypeDropdown").removeAttr("disabled")
+                      $("#commentSave").show();
+                      $("#commentRemove").show();
+                      $("#commentExit").hide("Exit");
 
+                    } else {
+                      CKEDITOR.instances['textForm'].setReadOnly(true);
+                      $(".commentTypeDropdown").attr("disabled", "disabled");
+                      $("#commentSave").hide();
+                      $("#commentRemove").hide();
+                      $("#commentExit").show("Exit");
+                    }
+                    if (idName[0] != currentUser.netid && whitelist.includes(currentUser.netid)) {
+                      isEdit = true;
+                    }
 
-// function checkOverLapSpans(commentData){
-//   let overLapHash =[];
-//   var indexArray = [];
-//   for(var i = 0 ; i < commentData.length; i++){
-//     let index = {
-//       start: commentData[i].startIndex,
-//       end: commentData[i].endIndex,
-//       hash : commentData[i].hash
-//     }
-//     if(indexArray.length !=0){
-//       for(let j = 0; j< indexArray.length ; j++){
-//         let index1 = {
-//           start: indexArray[j].start,
-//           end: indexArray[j].end,
-//           hash: indexArray[j].hash
-//         }
-//         //--==-
-//         if((index.start < index1.start && index.end > index1.end) || (index.start > index1.start && index.end < index1.end)){
-//           overLapHash.push(overLapCommentHelper(index,index1));
-//         }
-//         //==--
-//         else if ((index.start == index1.start && index.end < index1.end) || (index.start == index1.start && index.end > index1.end)){
-//           overLapHash.push(overLapCommentHelper(index,index1));
-//         }
-//         //--==
-//         else if ((index.start < index1.start && index.end == index1.end) || (index.start > index1.start && index.end == index1.end)){
-//           overLapHash.push(overLapCommentHelper(index,index1));
-//         }
-//       }
-//     }
-//     indexArray.push(index);
-//   }
-//   var hash = [];
-//   for (var i = 0 ; i < overLapHash.length; i++){
-//     if(hash.length ==0){
-//       hash.push(overLapHash[i]);
-//     }
-//     else{
-//       let hashExist = false;
-//       for(var j = 0 ; j<hash.length; j++){
-//         if(hash[j] == overLapHash[i]){
-//           hashExist == true;
-//           break;
-//         }
-//       }
-//       if(!hashExist){
-//         hash.push(overLapHash[i]);
-//       }
-//     }
-//   }
-//   console.log(hash);
-//   return hash;
-// }
-//this helper function returns the shorter comment
-// return the first comment if the length is the same
-overLapCommentHelper = (comment1,comment2) =>{
-  let length1 = comment1.end - comment1.start;
-  let length2 = comment2.end - comment2.start;
-  if(length1 > length2){
-    return comment2.hash;
-  }
-  else if(length1 < length2){
-    return comment1.hash;
-  }
-  else{
-    return comment1.hash;
-  }
-}
+                    evt.stopPropagation();
 
-function createListOfCommenter(data){
-  var commenters=[];
-  if(data.length){
-    commenters.push(data[0].eppn);
-    for (var i = 1; i < data.length; i ++){
-      var eppn = data[i].eppn;
-      var eppnExist = false;
-      for(var j = 0; j< commenters.length; j++){
-        if(commenters[j] == eppn){
-          eppnExist = true;
+                    displayChoiceBox(evt);
+                    remSpan = $(evt.currentTarget).attr("class");
+                  }
+                });
+
+                // A table with all comments in it that can be accessed easily
+                userComMap.set(comment.timeStamp, comment.commentData);
+                // Create the attributes for each span
+
+                span.attr("firstname", comment.firstname);
+                span.attr("lastname", comment.lastname);
+                span.attr("startIndex", comment.startIndex);
+                span.attr("endIndex", comment.endIndex);
+                span.attr("innertext", comment.commentData);
+                span.attr("isVisible", comment.isVisible);
+                span.attr("userID", comment.userID);
+                span.attr("type", comment.type);
+                span.attr("class", id);
+              } else {
+                adminApproveMap.set(comment.timeStamp, comment);
+              }
+            } else {
+              continue;
+            }
+          }
+        } else {
+          continue;
         }
       }
-      if(!eppnExist)
-        commenters.push(eppn);
     }
-  }
-  return commenters;
+    console.log("Mapped User Comments: ", userComMap);
+    console.log("Mapped User Replies: ", userReplyMap);
+    console.log("Admin Approve Comments: ", adminApproveMap);
+    if (whitelist.includes(currentUser.netid) && adminApproveMap.size > 0) {
+      fillAdminApprovalMap();
+      $('[aria-describedby="comApproval"]').show();
+    } else {
+      $('[aria-describedby="comApproval"]').remove();
+    }
+
+
+    makeStudentSelectors(stud);
+
+
+  });
+  $("body").on("click", function(evt) {
+    width = $(document).width();
+    if (height != $(document).height() && width != $(document).width()) {
+      height = $(document).height();
+    }
+    console.log("X-Y\n", evt.pageX, evt.pageY);
+  });
+
+  width = $(document).width();
+  //$("#textSpace").css("width", width * .45);
+  return dfd;
 }
 
-// highlightOverLapText = ({startIndex, endIndex, commentType, eppn, hash , approved} = {}) => {
-//     let range = rangy.createRange();
-//     range.selectCharacters(document.getElementById(TEXTSPACE), startIndex, endIndex);
-//     let area = rangy.createClassApplier("overLapComments", {
-//         useExistingElements: false,
-//         elementAttributes: {
-//             "id": hash,
-//             "creator": eppn,
-//             "typeof": commentType,
-//             "approved": approved
-//         }
-//     });
-//     area.applyToRange(range);
-//     //$("#"+hash).addClass("commented-selection");
-// }
+// Makes the clickable buttons under Students: if there are any, if not then no
+/*
+  Using an array from loadUserComments() the student tab is filled with the
+  names of each student who has comment data
+*/
+function makeStudentSelectors(studArray) {
+  var students = $('<div/>', {
+    class: "nameMenu"
+  });
 
-// this function only check if the selected_eppn is same as the current user or not
-function isCurrentUserSelectedUser(selected_eppn,needNotification){
-  if(selected_eppn == currentUser.eppn){
-    return true;
-  }
-  else{
-    if(needNotification){
-      launchToastNotifcation("You don't have permission to do this action");
+  var nameList = $('<div/>', {
+    class: "nameList"
+  });
+
+  for (var stud in studArray) {
+    if (!(isNaN(stud))) {
+      var list = $('<li/>', {
+        class: "button"
+      });
+
+      var input = $('<input/>', {
+        name: "contact",
+        type: "radio",
+        id: studArray[stud]
+      });
+
+      var label = $('<label/>');
+
+      label = studArray[stud];
+
+      list.append(input, label);
+      nameList.append(list);
+
+      input.on("click", function(evt) {
+        if (!($(this).parent().attr("class") == "button active")) {
+          loadCommentsByType($(this).attr("id").toLowerCase(), true);
+          $(".active").removeClass("active");
+          $(this).parent().addClass("active");
+        }
+      });
+
+    } else {
+      continue;
     }
-    return false;
+  }
+  if (studArray.length == 0) {
+    students.append("No Student ");
+  } else {
+    students.append("Students: ", nameList);
+  }
+
+  $(".allButtons").append(students);
+}
+
+// Who is able to edit every comment or reply
+/*
+  This adds together both the site-admins along with the student's relative
+  admin powers, if requested the user can ask to give other people admin powers
+*/
+function readWhiteList() {
+  $.get("grabWhitelist.php", {
+    localAdmin: userFolderSelected
+  }).done(function(data) {
+    whitelist = data.split("\n");
+    console.log("Whitelist: ", whitelist);
+  });
+
+}
+
+// Admin approval form where all comments go to at first
+/*
+  When a comment is made by a user and they are not any sort of admin it goes
+  though a comment approval form which is visible to admins, once allowed it
+  becomes visible to every user
+*/
+function createCommentAprovalForm() {
+  $("#comApproval").dialog({
+    width: 500,
+    title: "Approval Box"
+  });
+  $('[aria-describedby="comApproval"]').hide();
+}
+
+// Using the approval map this fill in the admin ability to approve a person comment
+function fillAdminApprovalMap() {
+  $('div[id="comApproval"]').empty();
+  var keys = adminApproveMap.keys();
+
+  console.log(adminApproveMap.size + " Approvals")
+  if (adminApproveMap.size == 0) {
+    $('[aria-describedby="comApproval"]').hide();
+  } else {
+    for (var i = 0; i < adminApproveMap.size; i++) {
+      var value = adminApproveMap.get(keys.next().value)
+
+      // console.log(value);
+      var approveBase = $('<div/>', {
+        class: "approve_" + i,
+        id: value.timeStamp
+
+      });
+
+      var approveName = $('<text/>', {
+        class: "approveName"
+      });
+
+      approveName.text(value.firstname + " " + value.lastname);
+
+      var approveArea = $('<textArea/>', {
+        class: "approveArea"
+      });
+      // Gives the admin a look into what the student quoted on and what the quote was
+      var comment = value.commentData.replace(/<\/p>/g, "\n");
+      comment = comment.replace(/<[^>]*>/g, "");
+      comment = comment.replace(/<p>/g, "");
+      approveArea.text("User Input:\n" + comment + "\n\nFor Text Selection: \n" +
+        literatureText.substring(value.startIndex, value.endIndex));
+
+      approveArea[0].disabled = true;
+
+      var replyApproveButton = $('<button/>', {
+        class: "replyApproveButton",
+        click: function(evt) {
+          $(this).parent().remove();
+          commentApproval(true, $(this).parent().attr("id"));
+          if ($("#comApproval div").length == 0) {
+            $('[aria-describedby="comApproval"]').remove();
+          }
+        }
+      });
+
+      var replyDisapproveButton = $('<button/>', {
+        class: "replyDisapproveButton",
+        click: function(evt) {
+          $(this).parent().remove();
+          commentApproval(false, $(this).parent().attr("id"));
+          if ($("#comApproval div").length == 0) {
+            $('[aria-describedby="comApproval"]').remove();
+          }
+          console.log("Disapprove Comment")
+        }
+      });
+
+      replyApproveButton.text("Approve");
+      replyDisapproveButton.text("Disapprove");
+      approveBase.append(approveName, approveArea, replyApproveButton, replyDisapproveButton);
+      $("#comApproval").append(approveBase);
+
+    }
+
+    var newLeft = width * .55 + "px";
+
+    $('[aria-describedby="comApproval"]').css({
+      'top': -($(document).height() - (200 * adminApproveMap.size) - 50) + "px",
+      'left': width * .55 + "px",
+    });
+  }
+
+  height = $(document).height();
+  console.log("Hello There");
+}
+
+// If true then go the path of approving the comment
+// If false then remove the comment
+function commentApproval(approved, id) {
+  var yetApprove = adminApproveMap.get(id);
+  console.log(yetApprove)
+  var dataString;
+  if (approved) {
+    console.log("APPROVE COMMENT");
+    var dataString = JSON.stringify({
+      user: yetApprove.userID,
+      firstname: yetApprove.firstname,
+      lastname: yetApprove.lastname,
+      type: yetApprove.type,
+      comData: yetApprove.commentData,
+      startDex: yetApprove.startIndex,
+      endDex: yetApprove.endIndex,
+      timeStamp: yetApprove.timeStamp,
+      textChosen: textChosen,
+      userFolder: userFolderSelected
+    });
+    $.post("save.php", {
+        data: dataString
+      })
+      .done(function(msg) {
+        console.log('Data Sent')
+      }).fail(function(msg) {
+        console.log("Data Failed to Send")
+      });
+  } else {
+    console.log("DISAPPROVE COMMENT");
+
+    var dataString = JSON.stringify({
+      user: yetApprove.userID,
+      removalID: yetApprove.userID,
+      timeID: yetApprove.timeStamp,
+      isReply: false,
+      textChosen: textChosen,
+      userFolder: userFolderSelected
+    });
+    console.log(dataString)
+    $.post("remove.php", {
+        data: dataString
+      })
+      .done(function(msg) {
+        console.log('Comment Removed ')
+      }).fail(function(msg) {
+        console.log("Comment Failed to Remove " + msg[0])
+      });
+  }
+
+}
+
+// Compilation of creating the userBoxes
+function makeBoxes() {
+  makeSelectionButtons();
+  makeDraggableCommentBox();
+  makeDraggableReplyBox();
+  makeChoicesBox();
+  hideAllBoxes();
+}
+
+// Make the X-Cross that will be used to close out of the comments / reply box
+function makeCrossX() {
+  return `<svg width="15px" height ="15px" class = "crossX" viewBox="0 0 100 100">
+    <line x1="0" y1="0" x2="15px" y2="15px" style="stroke:#ff0000; stroke-width:1.5"></line>
+    <line x1="0" y1="15px" x2="15px" y2="0" style="stroke:#ff0000; stroke-width:1.5"></line>
+    </svg>`;
+}
+
+// This will consturct the selection buttons within the grey box to the top right
+// Good HTML is Short HTML
+function makeSelectionButtons() {
+  dropdown = $("<select>", {
+    class: "commentTypeDropdown",
+  });
+
+  var buttonTypes = ['All', 'Historical', 'Analytical', 'Comment', 'Definition', 'Question', 'Private', 'Students'];
+
+  var allButtons = $('<ul/>', {
+    class: "allButtons"
+  });
+
+  buttonTypes.forEach(function(type) {
+    if (type != "All" && type != "Students") {
+      var option = $("<option>", {
+        name: type,
+        text: type
+      });
+
+      $(buttonTypes).css("background-color", "#DEDEDE");
+      dropdown.append(option);
+    }
+    if (type != "Students") {
+      var list = $('<li/>', {
+        class: "button"
+      });
+
+      var input = $('<input/>', {
+        name: "contact",
+        type: "radio",
+        id: type
+      });
+
+      var label = $('<label/>');
+      label = type;
+
+      $(list).append(input, label);
+      $(allButtons).append(list);
+
+      input.on("click", function(evt) {
+        if (!($(this).parent().attr("class") == "button active")) {
+          loadCommentsByType($(this).attr("id").toLowerCase(), false);
+          $(".active").removeClass("active");
+          $(this).parent().addClass("active");
+
+        }
+      });
+
+    }
+  })
+  $('#loadlist').append(allButtons);
+  $("[id='All']").click();
+  $("[id='All']").parent().addClass("active");
+  loadUserComments();
+}
+
+// Loads all comments of a certain type whether it be a student name or type
+function loadCommentsByType(type, isNetID) {
+
+  var allComsOfType = [];
+
+  if (isNetID) {
+    for (var student in allUserComments) {
+      if (allUserComments[student].netID == type) {
+        var account = allUserComments[student];
+        console.log(account);
+        for (var com in account.comments) {
+          var comment = account.comments[com];
+          $(comment).attr("netID", account.netID)
+          allComsOfType.push(comment);
+        }
+      }
+    }
+  } else {
+    for (var student in allUserComments) {
+
+      var account = allUserComments[student];
+
+      for (var com in account.comments) {
+        var comment = account.comments[com];
+        $(comment).attr("netID", account.netID)
+        if (comment.type == type || type == "all") {
+          allComsOfType.push(comment);
+        }
+      }
+    }
+  }
+  removeSpans();
+  loadArrayOfComments(allComsOfType);
+}
+
+// loads all the comments from an array, used when a type button is pressed
+function loadArrayOfComments(comments) {
+  var selRange = rangy.createRange();
+  for (var i in comments) {
+    var comment = comments[i];
+    var id = comment.netID + "_" + comment.timeStamp;
+    selRange.selectCharacters(document.getElementById("textSpace"), comment.startIndex, comment.endIndex);
+
+    hlRange(selRange)
+    var span = $("." + remSpan);
+
+    $("span[class^='hl']").off().on("click", function(evt) {
+      if ($(this).attr("class").substring(0, 3) != "hl_") {
+        $("[id='ui-id-1']").text("Annotation by: " + $(this).attr("firstname") + " " + $(this).attr("lastname"));
+        idName = $(this).attr("class").split("_");
+        if (idName[0] == currentUser.netid || whitelist.includes(currentUser.netid)) {
+          CKEDITOR.instances['textForm'].setReadOnly(false);
+          $(".commentTypeDropdown").removeAttr("disabled")
+          $("#commentSave").show();
+          $("#commentRemove").show();
+          $("#commentExit").hide("Exit");
+        } else {
+          CKEDITOR.instances['textForm'].setReadOnly(true);
+          $(".commentTypeDropdown").attr("disabled", "disabled");
+          $("#commentSave").hide();
+          $("#commentRemove").hide();
+          $("#commentExit").show("Exit");
+        }
+        evt.stopPropagation();
+        displayChoiceBox(evt);
+        remSpan = $(evt.currentTarget).attr("class");
+      }
+    });
+
+    span.attr("firstname", comment.firstname);
+    span.attr("lastname", comment.lastname);
+    span.attr("startIndex", comment.startIndex);
+    span.attr("endIndex", comment.endIndex);
+    span.attr("innertext", comment.commentData);
+    span.attr("type", comment.type);
+    span.attr("class", id);
   }
 }
 
-//TODO this only blocks the Setting button:    mode = setting, mode = approvedComments
-//need to update this function with other things that need to check if user is in whiteList
-//ex: approve comments
-function checkworkAdminList(selected_eppn,litId,mode){
-  var endPoint = "get_permissions_list/"+selected_eppn+"/"+litId;
-  API.request({
-    endpoint: endPoint,
-    method: "GET"
-  }).then((data)=>{
-    let isInWhiteList = false
-    for (var i =0; i<data["admins"].length;i++){
-      if(currentUser.eppn == data["admins"][i]){
-        isInWhiteList = true;
-        console.log(currentUser.eppn," in admins");
-      }
+// Removes all highlights on the text
+function removeSpans() {
+  var spanArray = $("span[startindex]").toArray();
+  for (var i = 0; i < spanArray.length; i++) {
+
+    remSpan = $(spanArray[i]).attr("class");
+    resetCkeAndHide();
+  }
+}
+
+// This displays the comment box after a user has clicked a comment made already
+function clickDisplayComments(evt, id) {
+  console.log(remSpan);
+  var span = $("." + remSpan);
+  console.log(span.attr("innertext"))
+  CKEDITOR.instances.textForm.setData(span.attr("innertext"));
+
+  var newTop = evt.pageY + "px";
+  var newLeft = width * .55 + "px";
+
+  $("[aria-describedby='commentBox']").css({
+    'top': newTop,
+    'left': newLeft
+  })
+
+  $("div[aria-describedby='commentBox']").attr('comID', id);
+
+  $("[aria-describedby='commentBox']").show();
+
+
+}
+
+// This displays the comment box in a position near where the user ends their hl
+function displayCommentBox(evt) {
+  // console.log($(document).height());
+  // console.log("Mouse Pos: " + evt.clientX, evt.clientY + "\nScroll Position: " + $(window).scrollTop());
+  var newLeft = (width * .55) + "px";
+  var newTop = (evt.pageY - 100) + "px";
+
+
+  if (evt.pageY + 300 > $(document).height()) {
+    newTop = $(document).height() - 300 + "px";
+  } else if ((evt.pageY - 100) < 0) {
+    newTop = "0px";
+  }
+  $("[aria-describedby='commentBox']").css({
+    'top': newTop,
+    'left': newLeft
+  })
+
+  $("[aria-describedby='commentBox']").show();
+}
+
+// This displays the replies for the current comment box
+function displayReplyBox(evt) {
+  var newTop = evt.pageY + "px";
+
+  var newLeft = width * .55 + "px";
+
+  $("[aria-describedby='replies']").css({
+    'top': newTop,
+    'left': newLeft
+  })
+
+  $("[aria-describedby='replies']").show();
+}
+
+// Displays the box given after a highlight is clicked
+// If the view comment is clicked and the user is the creator then
+// the power of editing the text is given d
+function displayChoiceBox(evt) {
+  $("[aria-describedby='commentBox']").hide();
+  $("[aria-describedby='replies']").hide();
+
+  var newTop = evt.pageY + "px";
+
+  var newLeft = width * .55 + "px";
+
+  $("[aria-describedby='choices']").css({
+    'top': newTop,
+    'left': newLeft
+  })
+
+  $("[aria-describedby='choices']").show();
+}
+
+// This is the box that will house the various replies a comment thread may hold
+function makeDraggableReplyBox() {
+  $("#replies").dialog({
+    dialogClass: "no-close",
+    use: 'reply',
+    modal: true,
+    width: 500,
+    title: "Reply Box"
+  });
+
+  createCommentAprovalForm();
+
+}
+
+// When opened, the reply box will have a place for you to type in the commentbox
+function createSelfReplyBoxButton() {
+
+  var makeReplyBox = $('<button/>', {
+    class: "makeReplyBox",
+    text: "Make a Reply",
+    click: function(evt) {
+      $("[id='ui-id-1']").text("Reply by: " + currentUser.fullname);
+      $(this).remove();
+      $(".leaveReplyBox").remove();
+      comBoxReply(evt);
+      $("#commentSave").show();
+      $("#commentRemove").show();
+      $("#commentExit").hide();
+      $(".commentTypeDropdown").hide();
+      CKEDITOR.instances['textForm'].setReadOnly(false);
+
+      //addSelfReplyBox();
     }
-    if(!isInWhiteList){
-      // if(mode == "setting"){
-      //   $("#setting").addClass("noPermission");
-      // }
-      if(mode == "approvedComments"){
-        $("#replies").attr("isCurrentUserAdmin",false);
-      }
+  });
+
+  var leaveReplyBox = $('<button/>', {
+    class: "leaveReplyBox",
+    text: "Exit Reply Box",
+    click: function(evt) {
+      $("[aria-describedby='commentBox']").hide();
+      $(this).parent().parent().hide();
     }
-    else{
-      // if(mode == "setting"){
-      //   $("#setting").removeClass("noPermission");
-      // }
-      if(mode == "approvedComments"){
-        $("#replies").attr("isCurrentUserAdmin",true);
+  });
+  $("#replies").append(makeReplyBox, leaveReplyBox);
+}
+
+// This makes the box of which will be used to place text into
+// only one will be made and it will be emptied and repurposed to save computing power
+// It then hides it
+function makeDraggableCommentBox() {
+
+  var crossx = makeCrossX();
+  //$("#commentBox").append(crossx);
+  $("#commentBox").append(dropdown);
+
+  remSpan = null;
+
+  $(this).parent().parent().hide();
+
+  $("#commentBox").dialog({
+    dialogClass: "no-close",
+    modal: true,
+    width: 500,
+    use: 'comments',
+    buttons: [{
+        text: "Save",
+        id: "commentSave",
+        click: function() {
+          // First check if there is any content within the commentBox to prevent empty saves
+          // Sanatize imputs to prevent unintended text from coming through
+          var editorText = CKEDITOR.instances.textForm.getData();
+
+          // Removes all textArea additions to check raw text
+          editorText = editorText.replace(/<[^>]*>/g, "");
+          var origText = editorText;
+
+          editorText = editorText.replace(/&nbsp;/g, "");
+          editorText = editorText.replace(/<p>/g, "");
+          editorText = editorText.replace(/<p\/>/g, "");
+          editorText = editorText.replace(/ /g, "");
+
+          console.log("RAW TEXT:\n", editorText);
+
+          var noComment = (editorText.length < 1);
+
+          // Checks if it isnt the error text
+          var notNormalComment = (origText.includes("You have to put a comment here first!")) || (origText.includes("Not this comment!"));
+
+          // if it's the first error text then replaces
+          if (!noComment && notNormalComment) {
+
+            CKEDITOR.instances.textForm.setData("Not this comment!");
+
+          } else if (noComment || notNormalComment) {
+
+            CKEDITOR.instances.textForm.setData("You have to put a comment here first!");
+
+          } else {
+            // if it is neither then it goes forwards with the save
+            // If this is a reply to a comment then it saves the reply
+            // otherwise it is a comment save/edit/overwrite
+            if (isReply) {
+              $(this).parent().hide();
+              $("[aria-describedby='commentBox']").hide();
+              $("div[aria-describedby='replies']").hide();
+              saveUserReply();
+            } else {
+              console.log("Saved As Comment");
+              saveUserComment();
+            }
+            $(this).parent().hide();
+          }
+        }
+      }, {
+        text: "Remove",
+        id: "commentRemove",
+        click: function() {
+          $("#commentRemove").text("Remove");
+          if (!isReply) {
+            resetCkeAndHide();
+            removeUserComment();
+            remSpan = null;
+          } else {
+            $("[aria-describedby='commentBox']").hide();
+            $("[aria-describedby='commentBox']").hide();
+          }
+        }
+      },
+      {
+        text: "Exit",
+        id: "commentExit",
+        click: function() {
+          CKEDITOR.instances.textForm.setData("");
+          $("[aria-describedby='replies']").hide();
+          $("[aria-describedby='commentBox']").hide();
+        }
+      },
+    ],
+    title: "Annotation by: "
+  });
+
+  // Making the actual commentForm system
+  var comForm = $('<form/>');
+  var textForm = $('<textarea/>', {
+    id: "textForm",
+    rows: "10",
+    cols: "80"
+  });
+
+  $(comForm).append(textForm);
+  $('#commentBox').append(comForm);
+  $('#commentExit').hide();
+  CKEDITOR.replace('textForm');
+}
+
+// When you click a hled comment you'll be given the chance to view the
+// comment or replies based on the button you click on this div
+function makeChoicesBox() {
+  $("#choices").dialog({
+    dialogClass: "no-close",
+    use: 'choose',
+    modal: true,
+    buttons: [{
+      text: "View Comment",
+      click: function(evt) {
+        $("#commentSave").text("Save & Exit");
+        console.log("REMSPAN: ", remSpan.split("_"))
+        $(this).parent().hide();
+        if (currentUser.netid == remSpan.split("_")[0]) {
+          isEdit = true;
+        }
+        clickDisplayComments(evt, remSpan.split("_")[1]);
       }
-    }
+    }, {
+      text: "View Replies",
+      click: function(evt) {
+        console.log("View Replies");
+        fillReplyBox(evt);
+        $(this).parent().hide();
+        displayReplyBox(evt);
+        displayCommentBox(evt);
+        textShowReply();
+      }
+    }, ],
+    title: "Choose an option: "
+
   });
 }
 
-function launchToastNotifcation(data){
-    $("#toast-notification").addClass("show");
-    $("#notification-data").html(data);
-    setTimeout(function(){
-      $("#toast-notification").removeClass("show");
-      $("#notification-data").empty();
-    }, 3000);
+// Retreives the literature .html from a folder and displays it on the site
+function getLit(lit) {
+  var dfd = new $.Deferred();
+  $.get("works/" + lit + ".html").done(function(data) {
+      console.log("Text has Loaded")
+      dfd.resolve(data);
+    })
+    .fail(function() {
+      console.log("fail")
+      dfd.reject("Work Not found!");
+    })
+  return dfd;
 }
-
-//Make sure the dialog don't exceed the window
-function adjustDialogPosition(evt,width,height,marginX,marginY){
-  let newLeft = (evt.pageX - marginX) + "px";
-  let newTop = (evt.pageY + marginY) + "px";
-  if (evt.clientY + (marginY + height) > $(window).height()) {
-    newTop = (evt.pageY - (marginY + height)) + "px";
-  }
-  if (evt.pageX + width > $(window).width()){
-    newLeft = $(window).width() - (width + marginX) + "px";
-  }
-  return {newTop,newLeft}
-}
-
-//fucntions that were made by ppl before
-//------------------------------------------------------------------------------
 
 // Hides all movable and visable boxes on the screen
 function hideAllBoxes() {
   $("[aria-describedby='replies']").hide();
   $("[aria-describedby='commentBox']").hide();
+  $("[aria-describedby='choices']").hide();
+}
+
+// When a user clicks to show the replies the comment box is displayed
+// So that they can view the comment they're replying to
+function textShowReply() {
+  var position = $("[aria-describedby='replies']").css("top");
+  position = parseInt(position.substring(0, position.length - 2));
+  position = (position - 325);
+  if (position < 0) {
+    $("[aria-describedby='replies']").css({
+      "top": -(position) + 200 + "px"
+    });
+    position = 0;
+  }
+  $("[aria-describedby='commentBox']").css({
+    "top": position + "px"
+  });
+  $("#commentSave").hide();
+  $("#commentRemove").hide();
+  $("#commentExit").show();
+
+  CKEDITOR.instances['textForm'].setReadOnly(true);
+
+  $(".commentTypeDropdown").attr("disabled", "disabled");
+}
+
+// fills the replyBox with comments linked to it
+// Fills with comments from idName value
+function fillReplyBox(evt) {
+  console.log("hello");
+  $('div[id="replies"]').empty();
+
+  var replies = userReplyMap.get(idName[1]);
+
+  $(".makeReplyBox").css("margin-top", 0);
+  for (var replyNum in replies) {
+    var reply = JSON.parse(replies[replyNum]);
+
+    var replyBase = $('<div/>', {
+      class: "replyBase_" + replyNum,
+      replyID: reply.timeStamp,
+      userID: currentUser.netID
+    });
+
+    var replyName = $('<text/>', {
+      class: "replyName"
+    });
+
+    var fullname = reply.firstname + " " + reply.lastname;
+    var userReply = (fullname == currentUser.fullname);
+    replyName.text(fullname);
+    var replyArea = $('<textArea/>', {
+      class: "replyArea"
+    });
+
+    var inText = reply.commentData;
+
+    replyArea[0].disabled = true;
+    inText = inText.replace(/<\/p>/g, "\n");
+    inText = inText.replace(/<[^>]*>/g, "");
+
+    replyArea.text(inText);
+
+    var replyDeleteButton = $('<button/>', {
+      class: "replyDeleteButton",
+      text: "Delete",
+      click: function(evt) {
+        if ($(this).text() == "Delete") {
+          $(this).parent().children(".replyEditButton").hide();
+          $(this).text("Are you sure?")
+        } else if ($(this).text() == "Are you sure?") {
+          removeUserReply(evt);
+        }
+      }
+    });
+
+    var replyEditButton = $('<button/>', {
+      class: "replyEditButton",
+      text: "Edit",
+      click: function(evt) {
+        CKEDITOR.instances.textForm.setData((($(this).siblings())[1]).innerHTML);
+        comBoxReply(evt);
+        $("#commentSave").show();
+        $(".makeReplyBox").hide();
+        $(".leaveReplyBox").hide();
+        CKEDITOR.instances['textForm'].setReadOnly(false);
+        console.log("Edit this Reply");
+        isReplyEdit = true;
+        isEdit = $(this).parent().attr("replyid");
+      }
+    });
+
+    if (!userReply && !whitelist.includes(currentUser.netid)) {
+      replyDeleteButton.attr("disabled", "disabled");
+      replyEditButton.attr("disabled", "disabled");
+    }
+
+    replyBase.append(replyName, replyArea, replyDeleteButton, replyEditButton);
+
+    $("#replies").append(replyBase);
+  }
+
+  createSelfReplyBoxButton();
+
+  if (replies.length == 0) {
+    $(".makeReplyBox").css("margin-top", "40px");
+  }
+}
+
+// opens the commentBox in order for a reply to be made
+function comBoxReply(evt) {
+  CKEDITOR.instances.textForm.setData("");
+  $(".commentTypeDropdown").hide()
+  //$("#commentRemove").hide()
+  $("id[ui-id-1]").text("Reply by: " + currentUser.fullname);
+
+  var newTop = evt.pageY + "px";
+
+  var newLeft = width * .50 + "px";
+
+  if (!$("div[aria-describedby='commentBox']").is(":visible")) {
+    $("div[aria-describedby='commentBox']").css({
+      'top': newTop,
+      'left': newLeft,
+    });
+
+    $("div[aria-describedby='replies']").css({
+      'top': evt.pageY,
+      'left': "5%",
+    });
+  }
+
+  $("div[aria-describedby='commentBox']").show();
+  $("div[aria-describedby='replies']").show();
+
+
+
+  isReply = true;
+}
+
+// This function will reset the CKEditor and all attributes
+function resetCkeAndHide() {
+  $("." + remSpan).each(function() {
+    var attributes = this.attributes;
+    var i = attributes.length;
+    while (i-- && i != 0) {
+      this.removeAttributeNode(attributes[i]);
+    }
+  })
+  unhighlight(remSpan);
+  CKEDITOR.instances.textForm.setData("");
+  $("[aria-describedby='commentBox']").hide();
+  $("[aria-describedby='replies']").hide();
+}
+
+// From here on are the php applicable functions and all things "offsite"
+
+// This removes a reply from the reply list if it's the user's or is an admin
+function removeUserReply(evt) {
+
+  var replyID = ($(evt.currentTarget).parent()).attr("replyID");
+  //userReplyMap.delete(idName[1]);
+
+  var dataString = JSON.stringify({
+    replyID: replyID,
+    user: currentUser.netid,
+    comCreator: idName[0],
+    directoryPath: idName[1],
+    isReply: true,
+    textChosen: textChosen,
+    userFolder: userFolderSelected
+  })
+  console.log(JSON.parse(dataString));
+  $.post("remove.php", {
+      data: dataString
+    })
+    .done(function(msg) {
+      console.log('Data Sent');
+      $(evt.currentTarget).parent().remove();
+      if ($("#replies").length == 1) {
+        $(".makeReplyBox").css("margin-top", "40px");
+      }
+    }).fail(function(msg) {
+      console.log("Data Failed to Send")
+    });
+}
+
+// This will remove the selected user comment from the system
+function removeUserComment() {
+  var time = 0;
+  console.log(isEdit);
+  if (isEdit) {
+
+    time = $("[aria-describedby='commentBox']").attr("comID");
+    $("[aria-describedby='commentBox']").attr("comID", undefined);
+  }
+  var dataString;
+
+  // will do another check within the php file for admin powers
+  if (idName != [0]) {
+    dataString = JSON.stringify({
+      user: currentUser.netid,
+      timeID: time,
+      removalID: idName[0],
+      isReply: false,
+      textChosen: textChosen,
+      userFolder: userFolderSelected
+    });
+  } else {
+    dataString = JSON.stringify({
+      user: currentUser.netid,
+      timeID: time,
+      isReply: false,
+      textChosen: textChosen,
+      userFolder: userFolderSelected
+    });
+  }
+  console.log(JSON.parse(dataString));
+  isEdit = false;
+  isReplyEdit = false;
+  if (time != 0) {
+    $.post("remove.php", {
+        data: dataString
+      })
+      .done(function(msg) {
+        console.log('Comment Removed ')
+      }).fail(function(msg) {
+        console.log("Comment Failed to Remove " + msg[0])
+      });
+  }
+}
+
+// Saves a users comment, edits it whether it is the one who made it or an admin
+function saveUserComment() {
+  // double check if the send comment comes from admin access
+
+  var timeSt = Math.floor(Date.now() / 1000).toString(16);
+  var cData = CKEDITOR.instances.textForm.getData();
+  var newSpanClass = currentUser.netid + "_" + timeSt;
+  var span = $("." + remSpan);
+  var type = $(".commentTypeDropdown").val().toLowerCase();
+
+  // Sending information
+  var firstName = currentUser.firstname;
+  var lastName = currentUser.lastname;
+  var netID = currentUser.netid;
+
+  CKEDITOR.instances.textForm.setData("");
+
+  if (isEdit) {
+    var span = $("." + remSpan);
+    timeSt = idName[1];
+    netID = idName[0];
+    firstName = span.attr("firstname");
+    lastName = span.attr("lastname");
+    newSpanClass = netID + "_" + timeSt;
+
+    $("[aria-describedby='commentBox']").attr("comID", undefined);
+  } else {
+    console.log("USER IS TRYING TO SAVE COMMENT: " + timeSt);
+    span.attr("class", newSpanClass);
+  }
+
+  span.attr("Innertext", cData);
+
+  // Everything below here is PHP
+
+  // If the user is editing a text then the unique comment ID will stay the same
+  // That is, the hex unix timestamp. The name of the class will also stay the same
+
+
+  var dataString = JSON.stringify({
+    user: netID,
+    firstname: firstName,
+    lastname: lastName,
+    type: type,
+    comData: cData,
+    startDex: span.attr("startIndex"),
+    endDex: span.attr("endIndex"),
+    timeStamp: timeSt,
+    textChosen: textChosen,
+    userFolder: userFolderSelected
+  });
+
+  // Saves a client version of the comment as a refresh would be required
+  /*******/
+  if (!(userReplyMap.has(timeSt))) {
+    userReplyMap.set(timeSt, []);
+  }
+  /*******/
+  console.log(JSON.parse(dataString));
+
+  $.post("save.php", {
+      data: dataString
+    })
+    .done(function(msg) {
+      console.log('Data Sent')
+    }).fail(function(msg) {
+      console.log("Data Failed to Send")
+    });
+}
+
+// Saves a user's reply to a thread
+function saveUserReply() {
+
+  var timeSt = Math.floor(Date.now() / 1000).toString(16);
+  var firstName = currentUser.firstname;
+  var lastName = currentUser.lastname;
+  var netID = currentUser.netid;
+
+  if (isReplyEdit) {
+    timeSt = isEdit;
+  } else {
+    // Saves a client version of the comment map as a refresh would be required
+    /*******/
+    var comArray = userReplyMap.get(idName[1]);
+    var clientReply = JSON.stringify({
+      commentData: CKEDITOR.instances.textForm.getData(),
+      timeStamp: timeSt,
+      firstname: currentUser.firstname,
+      lastname: currentUser.lastname
+    });
+    comArray.push(clientReply);
+    /*******/
+  }
+  console.log(CKEDITOR.instances.textForm.getData())
+  var dataString = JSON.stringify({
+    mainUser: idName[0],
+    comID: idName[1],
+    repData: CKEDITOR.instances.textForm.getData(),
+    timeStamp: timeSt,
+    firstname: firstName,
+    lastname: lastName,
+    netID: netID,
+    textChosen: textChosen,
+    userFolder: userFolderSelected
+  });
+  console.log(JSON.parse(dataString));
+
+  isEdit = false;
+  isReplyEdit = false;
+  CKEDITOR.instances.textForm.setData("");
+  $.post("reply.php", {
+      data: dataString
+    })
+    .done(function(msg) {
+      console.log('Data Sent')
+    }).fail(function(msg) {
+      console.log("Data Failed to Send")
+    });
 }

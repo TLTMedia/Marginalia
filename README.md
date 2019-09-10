@@ -1,3 +1,0 @@
-# Marginalia
-
-## README description coming soon...

@@ -1,8 +1,0 @@
-._*
-PHP_errors.log
-.git_secret.txt
-users/
-composer.json
-composer.lock
-composer.phar
-vendor/
