@@ -16,32 +16,6 @@ class UnapprovedComments
         $this->fileExtension = ".json";
     }
 
-    // /**
-    //  * Returns the given param bool, but also removes/adds the comment from the metadata file.
-    //  *
-    //  * @return bool
-    //  * @return int -1 on error
-    //  */
-    // public function applyApproved($approved, $commenterEppn, $commentHash)
-    // {
-    //     if ($approved) {
-    //         if (!$this->removeUnapprovedComment($commenterEppn, $commentHash)) {
-    //             $this->logger->error("Unable to remove comment from unapproval list");
-    //             return -1;
-    //         } else {
-    //             return $approved;
-    //         }
-    //     } else {
-    //         if (!$this->addUnapprovedComment($commentEppn, $commentHash)) {
-    //             $this->logger->error("Unable to add comment from unapproval list");
-    //             return -1;
-    //         } else {
-    //             return $approved;
-    //         }
-    //     }
-    //     return $approved;
-    // }
-
     /**
      * Adds an unapproved comment to the unapproved directory
      * 
@@ -66,7 +40,7 @@ class UnapprovedComments
      * 
      * @return bool | TRUE on success, FALSE on failure
      */
-    public function removeUnapprovedComment($filename)
+    public function unregisterUnapprovedComment($filename)
     {
         return unlink($this->unapprovedDirPath . "/" . $filename);
     }
@@ -173,13 +147,6 @@ class UnapprovedComments
         }
         return TRUE;
     }
-
-    /**
-     * TODO: Caching implemented here too
-     */
-    // every time a new comment is created on a work (even replies), add its path to the file
-    // public function addFullCommentPath()
-
 }
 
 /**

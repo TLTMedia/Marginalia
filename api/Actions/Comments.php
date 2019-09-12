@@ -44,7 +44,7 @@ class Comments
      *
      * @param String $creator The EPPN of the creator of the specified work
      * @param String $work The work name
-     * @param String $commenter The EPPN of the comment creator
+     * @param String $commenterHash The EPPN of the comment creator
      * @param String $hash The hash (unique ID) of the comment to edit
      * @param String $type The new "type" the comment should be (historical, question, analytical, definition...)
      * @param String $text The new comment-text that this comment should be changed to
@@ -52,16 +52,16 @@ class Comments
      * @param String $editor The EPPN of the user attempting to edit the comment. Obtained via $_SERVER['eppn']... Used to check whether the user has permissions to edit the comment
      * @return JSON Representing the success status of editing a comment
      */
-    public function editComment($creator, $work, $commenter, $hash, $type, $text, $public, $editor)
+    public function editComment($creator, $work, $commenterEppn, $commentHash, $type, $text, $public, $editor)
     {
-        if (!($commenter == $editor || $this->permissions->userOnPermissionsList($this->workPath, $editor))) {
+        if (!($commenterEppn == $editor || $this->permissions->userOnPermissionsList($this->workPath, $editor))) {
             return json_encode(array(
                 "status" => "error",
                 "message" => "only the comment creator can delete this comment"
             ));
         }
 
-        $fileToModify = $this->getCommentPathByHash($creator, $work, $hash, $commenter);
+        $fileToModify = $this->getCommentPathByHash($creator, $work, $commentHash, $commenterEppn);
         if (!$fileToModify) {
             return json_encode(array(
                 "status" => "error",
@@ -72,6 +72,22 @@ class Comments
         $jsonData = json_decode(file_get_contents($fileToModify));
         if ($public && $this->permissions->commentsNeedsApproval($this->workPath)) {
             $jsonData->approved = FALSE;
+            /**
+             * Register a comment with the unapproved "registry"
+             */
+            $ancestorData = $this->getFirstLevelMetaFromCommentPath($fileToModify);
+            if (is_int($ancestorData) && $ancestorData == -1) {
+                return json_encode(array(
+                    "status" => "error",
+                    "message" => "unable to get ancestor info for the new comment"
+                ));
+            }
+            if (!$this->unapprovedComments->registerUnapprovedComment($ancestorData["eppn"], $ancestorData["hash"], $commenterEppn, $commentHash, $fileToModify)) {
+                return json_encode(array(
+                    "status" => "error",
+                    "message" => "unable to unregister an unapproved comment"
+                ));
+            }
         }
         $jsonData->commentText = $text;
         $jsonData->commentType = $type;
@@ -403,9 +419,34 @@ class Comments
              */
             $workPath = __PATH__ . $creator . "/works/" . $work;
             if ($this->permissions->commentsNeedsApproval($workPath)) {
-                $fileData->approved = false;
+                $fileData->approved = FALSE;
+                /*
+                 * TODO: Get ancestor info here
+                 */
+                /**
+                 * Register a comment with the unapproved "registry"
+                 */
+                $ancestorData = $this->getFirstLevelMetaFromCommentPath($fileToModify);
+                if (is_int($ancestorData) && $ancestorData == -1) {
+                    return json_encode(array(
+                        "status" => "error",
+                        "message" => "unable to get ancestor info for the new comment"
+                    ));
+                }
+                if (!$this->unapprovedComments->registerUnapprovedComment($ancestorData["eppn"], $ancestorData["hash"], $commenterEppn, $commentHash, $fileToModify)) {
+                    return json_encode(array(
+                        "status" => "error",
+                        "message" => "unable to unregister an unapproved comment"
+                    ));
+                }
             } else {
-                $fileData->approved = true;
+                $fileData->approved = TRUE;
+                if (!$this->unapprovedComments->unregisterUnapprovedComment($fileToModify)) {
+                    return json_encode(array(
+                        "status" => "error",
+                        "message" => "unable to unregister an unapproved comment"
+                    ));
+                }
             }
         }
 
@@ -433,10 +474,10 @@ class Comments
         }
 
         $fileData = json_decode(file_get_contents($fileToModify));
-        $fileData->approved = true;
-        $fileData->public = true; // does this need to be here?
+        $fileData->approved = TRUE;
+        $fileData->public = TRUE; // For a comment to be unapproved - it must've been public to begin with... Leaving this here just in case though.
         if (file_put_contents($fileToModify, json_encode($fileData))) {
-            if (!$this->unapprovedComments->removeUnapprovedComment($fileToModify)) {
+            if (!$this->unapprovedComments->unregisterUnapprovedComment($fileToModify)) {
                 return json_encode(array(
                     "status" => "error",
                     "message" => "unable to unregister an unapproved comment"
@@ -594,7 +635,7 @@ class Comments
                         if ($this->permissions->userOnPermissionsList($workPath, $readerEppn) || $readerEppn == $jsonData->eppn) {
                             // reader is admin so can see the comment
                             $jsonData->hash = $this->getEppnHashFromPath($jsonData->path, "hash");
-                            $jsonData->approved = false;
+                            $jsonData->approved = FALSE; // this is "just in case" it's set to something else other than true/false
                             array_push($commentsPointer, $jsonData);
                         } else {
                             // reader is not an admin, so can't see the comment
@@ -614,7 +655,7 @@ class Comments
             } else {
                 // recursively iterate through the next level comments and see if they 'fit' in a pre-existing higher level comment
                 // if $jsonData == NULL, then we've finally found a spot for the comment in the $comments tree...
-                while ($jsonData != null) {
+                while ($jsonData != NULL) {
                     if (($amt2 = $this->isThreadOf($filePath, $commentsPointer[$amt]->threads)) == -1) {
                         $jsonData->isReply = true; // NOT NECESSARY FOR BACKEND. This was wanted by frontend development
                         // checking if the comment is hidden of not (only show the public == false comments to the owner of the comment)
@@ -630,7 +671,7 @@ class Comments
                                 if ($this->permissions->userOnPermissionsList($workPath, $readerEppn) || $readerEppn == $jsonData->eppn) {
                                     // reader is admin so can see the comment
                                     $jsonData->hash = $this->getEppnHashFromPath($jsonData->path, "hash");
-                                    $jsonData->approved = false;
+                                    $jsonData->approved = FALSE; // this is just in casse it's set to something else other than true/false
                                     array_push($commentsPointer[$amt]->threads, $jsonData);
                                 } else {
                                     // reader is not an admin, so can't see the comment
@@ -647,7 +688,7 @@ class Comments
                                 // no one else can see this comment
                             }
                         }
-                        $jsonData = null;
+                        $jsonData = NULL;
                     } else {
                         $commentsPointer = &$commentsPointer[$amt]->threads;
                         $amt = $amt2;
@@ -670,7 +711,7 @@ class Comments
         foreach ($array as $somePath) {
             $truncatedPath = substr($somePath->path, 0, strrpos($somePath->path, '/'));
             // maybe use preg_match ? ... I don't think it's necessary,... but maybe when comment nesting gets extremely large it'd cause issues with strrpos?
-            if (strpos($path, $truncatedPath) !== false) {
+            if (strpos($path, $truncatedPath) !== FALSE) {
                 return $count;
             }
 
@@ -686,7 +727,7 @@ class Comments
      *
      * NOTE: specifying a $commenter and $hash only works when $recursive = TRUE
      */
-    private function getCommentFiles($author, $work, $recursive, $commenter = null, $hash = null)
+    private function getCommentFiles($author, $work, $recursive, $commenter = NULL, $hash = NULL)
     {
         $initialFiles = array();
         $baseCommentPath = __PATH__ . "$author/works/$work/data/threads";
@@ -703,7 +744,7 @@ class Comments
     /**
      * Recursive helper function in getting the comment-file paths for a specified 'thread' directory path
      */
-    private function getCommentFilesRecursivelyHelper($thread, &$commentsList, $commenter = null, $hash = null)
+    private function getCommentFilesRecursivelyHelper($thread, &$commentsList, $commenter = NULL, $hash = NULL)
     {
         $files = array_diff(scandir($thread), array('.', '..'));
 
@@ -839,7 +880,8 @@ class Comments
         return -1;
     }
 
-    public function tempFunctionToCreateUnapprovedDirs($author, $work) {
+    public function tempFunctionToCreateUnapprovedDirs($author, $work) 
+    {
         $filePaths = $this->getCommentFiles($author, $work, TRUE);
         foreach ($filePaths as $path) {
             $data = json_decode(file_get_contents($path));
@@ -855,7 +897,6 @@ class Comments
             }
         }
     }
-
 }
 
 class Comment
