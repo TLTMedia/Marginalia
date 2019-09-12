@@ -21,6 +21,17 @@ class Comments
     {
         require 'Permissions.php';
         $this->permissions = new Permissions;
+        require 'UnapprovedComments.php';
+        $this->unapprovedComments = new UnapprovedComments(
+            $logger,
+            $path,
+            $creator,
+            $work
+        );
+        $this->logger = $logger;
+        $this->path = $path;
+        $this->creator = $creator;
+        $this->work = $work;
         $this->workPath = $path . $creator . "/works/" . $work;
     }
 
@@ -60,7 +71,7 @@ class Comments
 
         $jsonData = json_decode(file_get_contents($fileToModify));
         if ($public && $this->permissions->commentsNeedsApproval($this->workPath)) {
-            $jsonData->approved = false;
+            $jsonData->approved = FALSE;
         }
         $jsonData->commentText = $text;
         $jsonData->commentType = $type;
@@ -221,6 +232,8 @@ class Comments
          * (Yes, this entire if/else block does that 1 thing)
          * Comments directly on a page (first level comments will send these values when saved)
          */
+        $commentHash = time();
+        $newCommentPath = NULL;
         if (is_null($replyTo) && is_null($replyHash)) {
             // create new top level comment
             $lowestCommentPath = $workPath . "/data/threads/" . $commenterEppn;
@@ -228,7 +241,6 @@ class Comments
                 mkdir($lowestCommentPath);
             }
 
-            $commentHash = time();
             $newCommentPath = $lowestCommentPath . "/" . $commentHash;
             if (!is_dir($newCommentPath)) {
                 mkdir($newCommentPath);
@@ -262,7 +274,7 @@ class Comments
             if (!is_dir($replyPath . "threads/" . $commenterEppn)) {
                 mkdir($replyPath . "threads/" . $commenterEppn);
             }
-            $commentHash = time();
+
             $newCommentPath = $replyPath . "threads/" . $commenterEppn . "/" . $commentHash;
             if (!is_dir($newCommentPath)) {
                 mkdir($newCommentPath);
@@ -281,11 +293,25 @@ class Comments
             $approved
         );
 
+        /**
+         * Register the comment as unapproved with the unapproved DB
+         */
+        if (!$approved) {
+            $ancestorData = $this->getFirstLevelMetaFromCommentPath($newCommentPath);
+            $this->unapprovedComments->registerUnapprovedComment(
+                $ancestorData["eppn"],
+                $ancestorData["hash"],
+                $commenterEppn,
+                $commentHash,
+                $newCommentPath . "/comment.json"
+            );
+        }
+
         if (file_put_contents($newCommentPath . "/comment.json", json_encode($comment))) {
             return json_encode(array(
                 "status" => "ok",
                 "message" => "comment saved",
-                "commentHash" =>  $commentHash,
+                "commentHash" => $commentHash,
                 "approval" => $approved
             ));
         } else {
@@ -410,6 +436,12 @@ class Comments
         $fileData->approved = true;
         $fileData->public = true; // does this need to be here?
         if (file_put_contents($fileToModify, json_encode($fileData))) {
+            if (!$this->unapprovedComments->removeUnapprovedComment($fileToModify)) {
+                return json_encode(array(
+                    "status" => "error",
+                    "message" => "unable to unregister an unapproved comment"
+                ));
+            }
             return json_encode(array(
                 "status" => "ok",
                 "message" => "successfully approved comment"
@@ -778,6 +810,50 @@ class Comments
     private function dirLength($dirPath)
     {
         return count(preg_split("/\//", $dirPath));
+    }
+
+    /**
+     * Gets the top/first level commenterEppn & commentHash from a comment path
+     * 
+     * @return array || @return int -1 on error
+     */
+    private function getFirstLevelMetaFromCommentPath($commentPath)
+    {
+        $dirs = (explode("/", $commentPath));
+        if (count($dirs) < 4) {
+            return -1;
+        }
+        for ($i = 0; $i < count($dirs); $i++) {
+            if ($dirs[$i] == "data") {
+                if (!array_key_exists($i + 3, $dirs)) {
+                    return -1;
+                }
+                if ($dirs[$i + 1] == "threads") {
+                    return array(
+                        "eppn" => $dirs[$i + 2],
+                        "hash" => $dirs[$i + 3]
+                    );
+                }
+            }
+        }
+        return -1;
+    }
+
+    public function tempFunctionToCreateUnapprovedDirs($author, $work) {
+        $filePaths = $this->getCommentFiles($author, $work, TRUE);
+        foreach ($filePaths as $path) {
+            $data = json_decode(file_get_contents($path));
+            if ($data->approved != TRUE) {
+                $ancestorData = $this->getFirstLevelMetaFromCommentPath($path);
+                $this->unapprovedComments->registerUnapprovedComment(
+                    $ancestorData["eppn"],
+                    $ancestorData["hash"],
+                    $data->eppn,
+                    $this->getEppnHashFromPath($path, "hash"),
+                    $path
+                );
+            }
+        }
     }
 
 }

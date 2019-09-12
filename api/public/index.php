@@ -1,4 +1,6 @@
 <?php
+header("Access-Control-Allow-Origin: *");
+
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
@@ -403,16 +405,25 @@ $app->get('/comments_need_approval/:creator/:work', function ($creator, $work) u
 	);
 });
 
-// /**
-//  * Gets a list of the unapproved comments of a specified work.
-//  */
-// $app->get('/unapproved_comments/:creator/:work', function ($creator, $work) use ($app, $APIResponse) {
-// 	require '../Actions/Metadata.php';
-// 	$metadata = new Metadata($app->log, __PATH__, $creator, $work);
-// 	echo $APIResponse->data("ok",
-// 		$metadata->getUnapprovedComments()
-// 	);
-// });
+/**
+ * Gets a list of the unapproved comments of a specified work.
+ */
+$app->get('/unapproved_comments/:creator/:work', function ($creator, $work) use ($app, $APIResponse) {
+	require '../Actions/UnapprovedComments.php';
+	$unapprovedComments = new UnapprovedComments($app->log, __PATH__, $creator, $work);
+	echo $APIResponse->message("ok",
+		$unapprovedComments->getAllUnapprovedCommentData()
+	);
+});
+
+/**
+ * Temp function to create the unapproved directory for a work
+ */
+$app->get('/unapproved_init/:creator/:work', function ($creator, $work) use ($app, $APIResponse) {
+	require '../Actions/Comments.php';
+	$comments = new Comments($app->log, __PATH__, $creator, $work);
+	$comments->tempFunctionToCreateUnapprovedDirs($creator, $work);
+});
 
 /**
  * Force the server to git-pull from github develop branch

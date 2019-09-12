@@ -56,10 +56,20 @@ class CreateWork
          * Creating the index.html file with Mammoth
          */
         $destinationPath = $pathOfWork . "/index.html";
-        $execString = "/home1/tltsecure/.local/bin/mammoth $tmpFilePath $destinationPath";
+        $execString = "/home1/tltsecure/.local/bin/mammoth $tmpFilePath $destinationPath 2>${tmpFilePath}.out.txt";
         system($execString);
-        //unlink($tmpFilePath);
+        unlink($tmpFilePath);
 
+        $result = file_get_contents("${tmpFilePath}.out.txt");
+        unlink("${tmpFilePath}.out.txt");
+        if ($result != "") {
+            return json_encode(array(
+                "status" => "error",
+                "message" => "unable to create work: " . $work,
+                "raw" => $result
+            ));
+        }
+        
         /**
          * Creating the default permissions.json file
          */
