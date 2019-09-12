@@ -44,7 +44,7 @@ class Comments
      *
      * @param String $creator The EPPN of the creator of the specified work
      * @param String $work The work name
-     * @param String $commenterHash The EPPN of the comment creator
+     * @param String $commenterEppn The EPPN of the comment creator
      * @param String $hash The hash (unique ID) of the comment to edit
      * @param String $type The new "type" the comment should be (historical, question, analytical, definition...)
      * @param String $text The new comment-text that this comment should be changed to
@@ -420,9 +420,6 @@ class Comments
             $workPath = __PATH__ . $creator . "/works/" . $work;
             if ($this->permissions->commentsNeedsApproval($workPath)) {
                 $fileData->approved = FALSE;
-                /*
-                 * TODO: Get ancestor info here
-                 */
                 /**
                  * Register a comment with the unapproved "registry"
                  */
@@ -880,9 +877,27 @@ class Comments
         return -1;
     }
 
-    public function tempFunctionToCreateUnapprovedDirs($author, $work) 
+    private function doesAncestorHaveChildren($creator, $work, $ancestorEppn, $ancestorHash)
+    {   
+        // TODO:
+        // function called by the function that wants to know whether or not a specific comment has any children
+        // iterate through all the unapproved comments for a creator/work
+        // if the unapproved comment ancestor matches the provided param ancestor, return TRUE?
+
+        // foreach ($this->getUnapprovedCommentFiles() as $file) {
+        //     $data = $this->getUnapprovedCommentData($file);
+        //     if ($data == "") {
+        //         // error getting data; check logs
+        //         continue;
+        //     }
+        //     $commentData[] = $data;
+        //     // array_push($commentData, $data);
+        // }
+    }
+
+    public function tempFunctionToCreateUnapprovedDirs($creator, $work) 
     {
-        $filePaths = $this->getCommentFiles($author, $work, TRUE);
+        $filePaths = $this->getCommentFiles($creator, $work, TRUE);
         foreach ($filePaths as $path) {
             $data = json_decode(file_get_contents($path));
             if ($data->approved != TRUE) {
