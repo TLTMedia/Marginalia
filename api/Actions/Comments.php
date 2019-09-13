@@ -460,6 +460,11 @@ class Comments
         }
     }
 
+    /**
+     * Approves a comment.
+     * Removes the file from the unapproved registry.
+     * And sets the comments' "approved" property to "true".
+     */
     public function approveComment($approverEppn, $creator, $work, $commentHash, $commenterEppn)
     {
         $fileToModify = $this->getCommentPathByHash($creator, $work, $commentHash, $commenterEppn);
@@ -492,8 +497,6 @@ class Comments
         }
     }
 
-
-
     /**
      * Path property in a comment is needed to construct the comments in the proper order.
      * Once the object is created with all the linkings, we can then remove the path.
@@ -511,8 +514,10 @@ class Comments
 
     /**
      * Returns meta data of the given file-comment paths
-     * @param  array $arrayOfFullCommentPath array of full file paths to comments
-     * @return array JSON of the meta data for each of the comment files... no comment text, just location of the comments
+     * No comment text, just frontend positional logic of the comments (for highlighting)
+     * 
+     * @param array $arrayOfFullCommentPath array of full file paths to comments
+     * @return array 
      */
     private function getFileMetaData($arrayOfFullCommentPath, $reader)
     {
@@ -534,7 +539,9 @@ class Comments
                         "eppn" => $jsonData->eppn,
                         "hash" => end(explode("/", $filePath)),
                         "approved" => $jsonData->approved,
-                        "hasUnapproved" => false // TODO: get from new file (comment_meta.json) at base of directory
+                        "unapprovedChildren" => $this->doesCommentHaveUnapprovedReplies(
+                            $jsonData->eppn, end(explode("/", $filePath))
+                        )
                     ));
                 } else {
                     // comment is not approved
@@ -548,7 +555,9 @@ class Comments
                             "eppn" => $jsonData->eppn,
                             "hash" => end(explode("/", $filePath)),
                             "approved" => $jsonData->approved,
-                            "hasUnapproved" => false // TODO:
+                            "unapprovedChildren" => $this->doesCommentHaveUnapprovedReplies(
+                                $jsonData->eppn, end(explode("/", $filePath))
+                            )
                         ));
                     } else {
                         // reader is not an admin, so can't see the comment
@@ -565,7 +574,9 @@ class Comments
                         "commentType" => $jsonData->commentType,
                         "eppn" => $jsonData->eppn,
                         "hash" => end(explode("/", $filePath)),
-                        "hasUnapproved" => false // TODO:
+                        "unapprovedChildren" => $this->doesCommentHaveUnapprovedReplies(
+                            $jsonData->eppn, end(explode("/", $filePath))
+                        )
                     ));
                 } else {
                     // no one else can see this comment
@@ -877,22 +888,24 @@ class Comments
         return -1;
     }
 
-    private function doesAncestorHaveChildren($creator, $work, $ancestorEppn, $ancestorHash)
+    /**
+     * Returns TRUE when the specified @param $ancestorEppn & @param $ancestorHash
+     * are matches with any unapproved comments' ancestor data.
+     * 
+     * TODO: We can optimize this function by rebuilding getAllUnapprovedCommentData() inline.
+     * Read file by file and parse out the properties after each file read... 
+     * Rather than read everything then parse 1 by 1.
+     * 
+     * @return bool
+     */
+    private function doesCommentHaveUnapprovedReplies($ancestorEppn, $ancestorHash)
     {   
-        // TODO:
-        // function called by the function that wants to know whether or not a specific comment has any children
-        // iterate through all the unapproved comments for a creator/work
-        // if the unapproved comment ancestor matches the provided param ancestor, return TRUE?
-
-        // foreach ($this->getUnapprovedCommentFiles() as $file) {
-        //     $data = $this->getUnapprovedCommentData($file);
-        //     if ($data == "") {
-        //         // error getting data; check logs
-        //         continue;
-        //     }
-        //     $commentData[] = $data;
-        //     // array_push($commentData, $data);
-        // }
+        foreach ($this->unapprovedComments->getAllUnapprovedCommentData() as $unapprovedCommentData) {
+            if ($unapprovedCommentData->AncestorEppn == $ancestorEppn && $unapprovedCommentData->AncestorHash == $ancestorHash) {
+                return TRUE;
+            }
+        }
+        return FALSE;
     }
 
     public function tempFunctionToCreateUnapprovedDirs($creator, $work) 
