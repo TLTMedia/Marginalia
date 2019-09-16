@@ -1,8 +1,10 @@
 //TODO clean this function
 $(window).ready(function() {
     $("#litadd").on("click", function(evt) {
-        showAddLitPage();
-        resetWhiteListPage();
+      $(".headerTab").removeClass("active");
+      $("#litadd").addClass("active");
+      showAddLitPage();
+      resetWhiteListPage();
     });
 
     $("#setting").addClass("disabledHeaderTab");
@@ -38,43 +40,53 @@ function saveLit ({work, privacy, data} = {}){
     alert("Error: File too large. Can't be larger than 2Mb.");
     return;
   }
-
   const formData = new FormData();
   formData.append("file", data);
   formData.append("work", work);
   formData.append("privacy", privacy);
 
-  //TODO this should be another function with the async users parameter to send in createUserMenuOption();
-  // API.request({
-  //   endpoint: "get_creators",
-  //   method: "GET"
-  // }).then((data)=>{
-  //     console.log(data);
-  //     let isCurrentUserNewCreator = true;
-  //     for(var i = 0 ; i < data.length ; i++){
-  //       if(data[i] == currentUser.eppn){
-  //         console.log(currentUser.eppn);
-  //         isCurrentUserNewCreator = false;
-  //       }
-  //     }
-  //     let newCreator = createUserMenuOption(currentUser.eppn,users);
-  //     console.log(users);
-  //     $(".usersMenu").append(newCreator);
-  // });
+
 
   API.request({
     endpoint: "create_work",
     method: "POST",
     data: formData
-  }).then((data)=>{
+  }).then(data => {
     launchToastNotifcation(work + " is successfully created");
     $("#addLitSecondPage").show();
     $("#doneAddLit").show();
     $("#addLitFirstPage").hide();
     $(".uploadNotification").html('"<i>'+work + '</i>" is successfully created');
+    addNewUser();
   });
-
 }
+
+function addNewUser(){
+  API.request({
+    endpoint: "get_creators",
+    method: "GET"
+  }).then((creators)=>{
+      console.log(creators);
+      let isCurrentUserNewCreator = true;
+      let count =0;
+      for(var i = 0 ; i < creators.length ; i++){
+        if(creators[i] == currentUser.eppn){
+          count++;
+          if(count>1){
+            isCurrentUserNewCreator = false;
+          }
+        }
+      }
+      if(isCurrentUserNewCreator){
+        console.log("adddddddd")
+        let newCreator = createUserMenuOption(currentUser.eppn);
+        if(newCreator){
+          $(".usersMenu").append(newCreator);
+        }
+      }
+  });
+}
+
 
 function showLink(value){
   $.address.value(value);
@@ -129,32 +141,48 @@ createUserSelectScreen = async ({users = users} = {}) =>{
   makeWhiteListSettingBase(user_list);
 }
 
-function createUserMenuOption(commenterId,users){
-  var user = $("<li/>",{
-    class:'mdl-list__item usersMenuOptions',
-    commenterId: commenterId,
-    text:commenterId,
-    click: function(evt){
-      $(".usersMenuOptions").removeClass("usersMenuSelected");
-      $(this).addClass("usersMenuSelected");
-      let selected_eppn = evt["currentTarget"]["attributes"]["commenterid"]["value"];
-      showUsersLit(users,selected_eppn);
-    }
-  });
-  return user;
+function createUserMenuOption(commenterId){
+  if($(".usersMenuOptions"+"[commenterId = '"+commenterId+"']").length==0){
+    var user = $("<li/>",{
+      class:'mdl-list__item usersMenuOptions',
+      commenterId: commenterId,
+      text:commenterId,
+      click: function(evt){
+        $(".usersMenuOptions").removeClass("usersMenuSelected");
+        $(this).addClass("usersMenuSelected");
+        let selected_eppn = evt["currentTarget"]["attributes"]["commenterid"]["value"];
+        showUsersLit(selected_eppn);
+      }
+    });
+    return user;
+  }
+  return undefined;
 }
 
-function showUsersLit(users,selected_eppn){
+function showUsersLit(selected_eppn){
   $(".worksMenu").empty();
   $(".workSelectMenu").fadeIn();
-  $(".workSelectMenu").find(".worksMenuTitle").text(selected_eppn+"'s works:");
-  users.get_user_works(selected_eppn).then((works) => {
-    for (var lit in works) {
-      var fileWithoutExt = works[lit].substr(0, works[lit].lastIndexOf('.')) || works[lit];
-      var litButton = $('<li/>', {
+  $("#selectedUserWorks").text(selected_eppn+"'s works:");
+  getUserWorks(selected_eppn);
+  $(".searchLit").on("keyup",()=>{
+    let ul = $(".worksMenu");
+    let input = $(".searchLit");
+    searchAction(input,ul,"work");
+  });
+}
+
+function getUserWorks(selected_eppn){
+  let endpoint = "get_works/"+selected_eppn;
+  API.request({
+    endpoint: endpoint,
+    method: "GET"
+  }).then((data)=>{
+    for(var work in data){
+      var fileName = data[work].substr(0, data[work].lastIndexOf('.')) || data[work];
+      var litButton = $("<li/>",{
         class: "mdl-list__item worksMenuOptions",
-        id: works[lit],
-        text: fileWithoutExt,
+        id: fileName,
+        text: fileName,
         click: function(evt){
           $(".worksMenuOptions").removeClass("workMenuSelected");
           $(this).addClass("workMenuSelected");
@@ -165,15 +193,9 @@ function showUsersLit(users,selected_eppn){
       $(".worksMenu").append(litButton);
     }
   });
-  $(".searchLit").on("keyup",()=>{
-    let ul = $(".worksMenu");
-    let input = $(".searchLit");
-    searchAction(input,ul,"work");
-  });
 }
 
  function selectLit(selected_eppn,textChosen){
-   console.log(selected_eppn,textChosen)
    $("#text").empty();
    $(".chosenUser").text(selected_eppn+":");
    $(".chosenFile").text(textChosen);

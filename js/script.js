@@ -16,7 +16,6 @@ var remSpan; // holds the name of made and clicked spans
 init = async ({api = api, users = users} = {}) => {
   API = api;
   currentUser = users.current_user;
-  //width = $(document).width();
   $(".loader").hide();
   $("#text").hide();
   $("#addLitBase").hide();
@@ -110,7 +109,7 @@ function createTips(workTitle){
   let text = $("<span/>",{
     class: "tipsText"
   });
-  text.html("The <span style = 'color : red'>Red</span> comments are the comments that are not approved yet.\nThe <span style = 'color : orange'>Orange</span> comments are comments that has unapproved replies.");
+  text.html("The <span style = 'color : red'>Red</span> comments are the comments that are not approved yet.\nThe <span style = 'color : orange'>Orange</span> comments are comments that have unapproved replies.");
   tips.append(icon,text);
   workTitle.prepend(tips);
 }
@@ -245,8 +244,9 @@ function clickOnComment(commentSpanId,workChosen,workCreator,evt){
   };
   get_comment_chain_API_request(comment_data,commentSpanId);
   evt.stopPropagation();
-  displayReplyBox(evt);
-  displayCommentBox(evt,commentSpanId);
+  displayReplyBox(evt,commentSpanId);
+  // displayCommentBox(evt);
+  // hideCommentBox();
 }
 
 function get_comment_chain_API_request(jsonData, commentSpanId){
@@ -260,7 +260,6 @@ function get_comment_chain_API_request(jsonData, commentSpanId){
   }).then((data) => {
     console.log(data);
     readThreads(data,work,workCreator);
-    $("#commentBox").parent().hide();
   });
 }
 
@@ -539,12 +538,16 @@ function checkworkAdminList(selected_eppn,litId,mode){
 }
 
 function launchToastNotifcation(data){
-    $("#toast-notification").addClass("show");
-    $("#notification-data").html(data);
-    setTimeout(function(){
-      $("#toast-notification").removeClass("show");
-      $("#notification-data").empty();
-    }, 3000);
+  // $("#toast-notification").addClass("show");
+  // $("#notification-data").html(data);
+  // setTimeout(function(){
+  //   $("#toast-notification").removeClass("show");
+  //   $("#notification-data").empty();
+  // }, 3000);
+  var message = {message: data}
+  console.log(data)
+  var snackbarContainer = document.querySelector('.mdl-js-snackbar');
+  snackbarContainer.MaterialSnackbar.showSnackbar(message);
 }
 
 //Make sure the dialog don't exceed the window

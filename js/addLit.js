@@ -1,6 +1,4 @@
 function showAddLitPage(){
-  $(".headerTab").removeClass("active");
-  $(this).addClass("active");
   $("#settingBase").hide();
 
   $("#addLitBase").load("parts/upload.htm", function() {

@@ -3,11 +3,12 @@ var remSpan;
 
 
 //applies the hl to the area selected by the user
-function highlightCurrentSelection(evt,literatureText) {
-
+function highlightCurrentSelection(evt) {
   var selectedRange = rangy.getSelection().getRangeAt(0);
-  $("#commentBox").removeAttr("data-replyToEppn");
-  $("#commentBox").removeAttr("data-replyToHash");
+  var lightRange = lightrange.saveSelection();
+  selectedRange["nativeRange"] = lightRange;
+  $("#commentBox").removeAttr("data-replyToEppn data-replyToHash");
+  $("#commentBox").attr("data-editcommentid","-1");
   if (selectedRange.endOffset != selectedRange.startOffset) {
     unhighlight();
     CKEDITOR.instances.textForm.setData("");
@@ -16,7 +17,7 @@ function highlightCurrentSelection(evt,literatureText) {
     CKEDITOR.instances['textForm'].setReadOnly(false);
     $(".commentTypeDropdown").removeAttr("disabled");
     console.log(range);
-    hlRange(selectedRange,range,literatureText);
+    hlRange(selectedRange,range);
     if($("."+escapeSpecialChar(remSpan)).parent().attr("class") != "commented-selection"){
       $("#replies").parent().hide();
       $(".loader").hide();
@@ -33,7 +34,7 @@ function unhighlight(){
   return text;
 }
 
-function hlRange(selectedRange,range,literatureText) {
+function hlRange(selectedRange,range) {
   remSpan = ("hl_" + currentUser.eppn);
   let applierCount = rangy.createClassApplier(remSpan, {
     useExistingElements: false,

@@ -83,6 +83,7 @@ function saveButtonOnClick(workCreator,work) {
     var dataForSave = getDataForSave(creator,literatureName,commentText,commentType,span,replyTo,replyHash);
     //console.log(dataForSave);
     var editCommentID = $("#commentBox").attr("data-editCommentID");
+    //if editCommentId is not -1 it is an edit action
     if(editCommentID!="-1"){
       var commentCreatorEppn = $(".replies"+"[commentid = '"+editCommentID+"']").attr('name');
       var commentType;
@@ -105,7 +106,6 @@ function saveButtonOnClick(workCreator,work) {
       $("#commentBox").parent().fadeOut();
     }
     else{
-      //addNewCommenterToDropDown(currentUser.eppn);
       console.log("Saved As Comment");
       saveCommentOrReply(dataForSave,true);
       $("#commentBox").parent().fadeOut();
@@ -129,6 +129,8 @@ function getDataForSave(creator,literatureName,commentText,commentType,span,repl
   return dataForSave;
 }
 
+// isComment is true then this is the first comment
+// isComment is false mean this is a reply to some other people's comment
 function saveCommentOrReply(dataForSave,isComment){
   let savedData = JSON.stringify({
       author: dataForSave["author"],
@@ -197,7 +199,6 @@ function saveCommentOrReply(dataForSave,isComment){
     }
     console.log(dataForSave['commentType']);
     // this function takes the first comment data
-
     checkThreadUnapprovedComments(firstCommentData,type,"AllCommenters",markUnapprovedComments);
   });
 }
@@ -286,7 +287,7 @@ function editOrDelete(dataForEditOrDelete,isEdit){
 //ADDED SEP 4 Can remove if backend is fixed
 function autoApprove(hash,commenterEppn,work,workCreator){
   API.request({
-    endpoint: "comments_need_approval/"+commenterEppn+"/"+work,
+    endpoint: "comments_need_approval/"+workCreator+"/"+work,
     method: "GET"
   }).then((data)=>{
     console.log("autoApprove ",data)
@@ -296,6 +297,7 @@ function autoApprove(hash,commenterEppn,work,workCreator){
   });
 }
 
+//TODO the id should chan
 function removeDeletedSpan(id){
   $("#"+id).contents().unwrap();
 }
@@ -309,7 +311,7 @@ function exitButtonOnClick(){
 
 
 //commentBox width: 500 px ,height: 331px , marginX : 10, marginY : 50
-function displayCommentBox(evt,id) {
+function displayCommentBox(evt) {
   var marginX = 10;
   var marginY = 50;
   var newPosition = adjustDialogPosition(evt,500,331,10,50);
@@ -317,8 +319,6 @@ function displayCommentBox(evt,id) {
     'top': newPosition["newTop"],
     'left': newPosition["newLeft"]
   })
-  $("#replies").attr("data-firstCommentId",id);
-  $("#commentBox").attr("data-editcommentid","-1");
   $("#commentBox").parent().find("#ui-id-1").contents().filter(function(){ return this.nodeType == 3; }).first().replaceWith("Annotation by: " + currentUser['firstname'] + " " + currentUser['lastname']);
   $("#commentBox").parent().fadeIn();
 }

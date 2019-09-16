@@ -117,9 +117,9 @@ function createReplies(dataForReplies) {
     $(".replies"+"[commentid = '"+parentHash+"']").attr("haschild","1");
     //if this is a deleted comment
     // hide the dev if the current comment is a deleted comment
-    if(firstName == 'deleted' && lastName == 'deleted'){
-      $(".replies"+"[commentid = '"+hash+"']").hide();
-    }
+    // if(firstName == 'deleted' && lastName == 'deleted'){
+    //   $(".replies"+"[commentid = '"+hash+"']").hide();
+    // }
     //shows the deleted reply if it has a child
     if($(".replies"+"[commentid = '"+parentHash+"']").attr("haschild") == 1){
       $(".replies"+"[commentid = '"+parentHash+"']").show();
@@ -157,16 +157,16 @@ function createMenuForComment(inText,hash,eppn,hashForReply,approved,public,work
     class: "replyToComments mdl-menu__item",
     text: "Reply",
     commentid: hash,
-    click: ()=>{
-      replyButtonOnClick();
+    click: (evt)=>{
+      replyButtonOnClick(evt);
     }
   });
   var menuEdit = $("<li/>",{
     class: "editComments mdl-menu__item",
     text: "Edit",
     commentid:hash,
-    click: ()=>{
-      editButtonOnClick(inText,hash);
+    click: (evt)=>{
+      editButtonOnClick(evt,inText,hash);
     }
   });
   var menuDelete = $("<li/>",{
@@ -253,18 +253,18 @@ function commentMenuOnClick(rid){
   CKEDITOR.instances.textForm.setReadOnly(false);
 }
 
-function replyButtonOnClick(){
+function replyButtonOnClick(evt){
   CKEDITOR.instances.textForm.setData("");
   $('.commentTypeDropdown').attr('disabled',true);
   var firstCommentId = $('#replies').attr('data-firstCommentId');
   $('.commentTypeDropdown').val($("#"+firstCommentId).attr("typeof"));
   $("#commentBox").attr("data-editCommentID", "-1");
-  $("#commentBox").parent().fadeIn();
+  displayCommentBox(evt);
 }
 
-function editButtonOnClick(inText,hash){
+function editButtonOnClick(evt,inText,hash){
   $("#commentBox").attr("data-editCommentID",hash);
-  $("#commentBox").parent().fadeIn();
+  displayCommentBox(evt);
   CKEDITOR.instances.textForm.setData(inText);
   $('.commentTypeDropdown').attr('disabled',true);
   if($(".replies"+"[commentid = '"+hash+"']").attr('type')!= undefined){
@@ -341,7 +341,7 @@ function commentApprovedButtonOnClick(hash,commenterEppn,work,workCreator){
 
 // This displays the replies for the current comment box
 //TODO find a way to get the height of the replyBox
-function displayReplyBox(evt) {
+function displayReplyBox(evt,id) {
   var marginX = 10;
   var marginY = 50;
   var newPosition = adjustDialogPosition(evt,500,177,10,50);
@@ -349,6 +349,7 @@ function displayReplyBox(evt) {
     'top': newPosition["newTop"],
     'left': newPosition["newLeft"]
   });
+  $("#replies").attr("data-firstCommentId",id);
   $("#replies").parent().fadeIn();
 }
 
