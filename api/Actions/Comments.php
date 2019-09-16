@@ -49,12 +49,12 @@ class Comments
      * @param String $type The new "type" the comment should be (historical, question, analytical, definition...)
      * @param String $text The new comment-text that this comment should be changed to
      * @param Boolean $public True indicates that the work should be public and viewable to everyone. False indicates it should be viewable to only work admins
-     * @param String $editor The EPPN of the user attempting to edit the comment. Obtained via $_SERVER['eppn']... Used to check whether the user has permissions to edit the comment
+     * @param String $editorEppn The EPPN of the user attempting to edit the comment. Obtained via $_SERVER['eppn']... Used to check whether the user has permissions to edit the comment
      * @return JSON Representing the success status of editing a comment
      */
-    public function editComment($creator, $work, $commenterEppn, $commentHash, $type, $text, $public, $editor)
+    public function editComment($creator, $work, $commenterEppn, $commentHash, $type, $text, $public, $editorEppn)
     {
-        if (!($commenterEppn == $editor || $this->permissions->userOnPermissionsList($this->workPath, $editor))) {
+        if (!($commenterEppn == $editorEppn || $this->permissions->userOnPermissionsList($this->workPath, $editorEppn))) {
             return json_encode(array(
                 "status" => "error",
                 "message" => "only the comment creator can delete this comment"
@@ -71,7 +71,15 @@ class Comments
 
         $jsonData = json_decode(file_get_contents($fileToModify));
         if ($public && $this->permissions->commentsNeedsApproval($this->workPath)) {
-            $jsonData->approved = FALSE;
+            /**
+             * Auto-approve the comment if editorEppn is on the permissions list
+             */
+            if ($this->permissions->userOnPermissionsList($this->workPath, $editorEppn)) {
+                $jsonData->approved = TRUE;
+            } else {
+                $jsonData->approved = FALSE;
+            }
+
             /**
              * Register a comment with the unapproved "registry"
              */
@@ -419,7 +427,15 @@ class Comments
              */
             $workPath = __PATH__ . $creator . "/works/" . $work;
             if ($this->permissions->commentsNeedsApproval($workPath)) {
-                $fileData->approved = FALSE;
+                /**
+                 * Check if user is on permissions list, for auto-approval
+                 */
+                if ($this->permissions->userOnPermissionsList($workPath, $commenterEppn)) {
+                    $fileData->approved = TRUE;
+                } else {
+                    $fileData->approved = FALSE;
+                }
+
                 /**
                  * Register a comment with the unapproved "registry"
                  */
@@ -515,9 +531,9 @@ class Comments
     /**
      * Returns meta data of the given file-comment paths
      * No comment text, just frontend positional logic of the comments (for highlighting)
-     * 
+     *
      * @param array $arrayOfFullCommentPath array of full file paths to comments
-     * @return array 
+     * @return array
      */
     private function getFileMetaData($arrayOfFullCommentPath, $reader)
     {
@@ -730,7 +746,7 @@ class Comments
     }
 
     /**
-     * Recursive starter function... 
+     * Recursive starter function...
      * Returns an array of all the file paths to comment.json files that're associated with $author and $work
      *
      * NOTE: specifying a $commenter and $hash only works when $recursive = TRUE
@@ -863,7 +879,7 @@ class Comments
 
     /**
      * Gets the top/first level commenterEppn & commentHash from a comment path
-     * 
+     *
      * @return array || @return int -1 on error
      */
     private function getFirstLevelMetaFromCommentPath($commentPath)
@@ -891,15 +907,15 @@ class Comments
     /**
      * Returns TRUE when the specified @param $ancestorEppn & @param $ancestorHash
      * are matches with any unapproved comments' ancestor data.
-     * 
+     *
      * TODO: We can optimize this function by rebuilding getAllUnapprovedCommentData() inline.
-     * Read file by file and parse out the properties after each file read... 
+     * Read file by file and parse out the properties after each file read...
      * Rather than read everything then parse 1 by 1.
-     * 
+     *
      * @return bool
      */
     private function doesCommentHaveUnapprovedReplies($ancestorEppn, $ancestorHash)
-    {   
+    {
         foreach ($this->unapprovedComments->getAllUnapprovedCommentData() as $unapprovedCommentData) {
             if ($unapprovedCommentData->AncestorEppn == $ancestorEppn && $unapprovedCommentData->AncestorHash == $ancestorHash) {
                 return TRUE;
@@ -908,7 +924,7 @@ class Comments
         return FALSE;
     }
 
-    public function tempFunctionToCreateUnapprovedDirs($creator, $work) 
+    public function tempFunctionToCreateUnapprovedDirs($creator, $work)
     {
         $filePaths = $this->getCommentFiles($creator, $work, TRUE);
         foreach ($filePaths as $path) {

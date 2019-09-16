@@ -416,14 +416,17 @@ $app->get('/unapproved_comments/:creator/:work', function ($creator, $work) use 
 	);
 });
 
-/**
- * Temp function to create the unapproved directory for a work
- */
-$app->get('/unapproved_init/:creator/:work', function ($creator, $work) use ($app, $APIResponse) {
-	require '../Actions/Comments.php';
-	$comments = new Comments($app->log, __PATH__, $creator, $work);
-	$comments->tempFunctionToCreateUnapprovedDirs($creator, $work);
-});
+// NOTE: this function is used when there's a discrepency between work unapproved registry
+// and the individual comment privacy properties of each comment object.
+//
+// /**
+//  * Temp function to create the unapproved directory for a work
+//  */
+// $app->get('/unapproved_init/:creator/:work', function ($creator, $work) use ($app, $APIResponse) {
+// 	require '../Actions/Comments.php';
+// 	$comments = new Comments($app->log, __PATH__, $creator, $work);
+// 	$comments->tempFunctionToCreateUnapprovedDirs($creator, $work);
+// });
 
 /**
  * Force the server to git-pull from github develop branch
