@@ -2,7 +2,7 @@
 
 class CreateWork
 {
-    public function __construct()
+    public function __construct($path, $skeletonUser)
     {
         /**
          * Empty directories we want to create in the $work directory
@@ -10,6 +10,8 @@ class CreateWork
         $this->directories = array(
             "data/threads"
         );
+        $this->path = $path;
+        $this->skeletonUser = $skeletonUser;
     }
 
     /**
@@ -20,11 +22,11 @@ class CreateWork
         /**
          * Create the user directory if it doesn't exist
          */
-        if (!file_exists(__PATH__ . $creator)) {
-            $this->recurse_copy(__SKELETON_USER__, __PATH__ . $creator);
+        if (!file_exists($this->path . $creator)) {
+            $this->recurse_copy($skeletonUser, $this->path . $creator);
         }
 
-        $pathOfWork = __PATH__ . "" . $creator . "/works/" . $work;
+        $pathOfWork = $this->path . "" . $creator . "/works/" . $work;
 
         if (file_exists($pathOfWork)) {
             return json_encode(array(
@@ -69,7 +71,7 @@ class CreateWork
                 "raw" => $result
             ));
         }
-        
+
         /**
          * Creating the default permissions.json file
          */
@@ -92,12 +94,11 @@ class CreateWork
     private function recurse_copy($src, $dst) {
         $dir = opendir($src);
         @mkdir($dst);
-        while(false !== ( $file = readdir($dir)) ) {
-            if (( $file != '.' ) && ( $file != '..' )) {
-                if ( is_dir($src . '/' . $file) ) {
-                    $this->recurse_copy($src . '/' . $file,$dst . '/' . $file);
-                }
-                else {
+        while(FALSE !== ($file = readdir($dir))) {
+            if ($file != '.' && $file != '..') {
+                if (is_dir($src . '/' . $file)) {
+                    $this->recurse_copy($src . '/' . $file, $dst . '/' . $file);
+                } else {
                     copy($src . '/' . $file,$dst . '/' . $file);
                 }
             }

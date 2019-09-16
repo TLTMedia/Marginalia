@@ -20,7 +20,7 @@ class Comments
     public function __construct($logger, $path, $creator, $work)
     {
         require 'Permissions.php';
-        $this->permissions = new Permissions;
+        $this->permissions = new Permissions($path);
         require 'UnapprovedComments.php';
         $this->unapprovedComments = new UnapprovedComments(
             $logger,
@@ -122,7 +122,7 @@ class Comments
      */
     public function deleteComment($creator, $work, $commenter, $hash, $reader)
     {
-        $workPath = __PATH__ . $creator . "/works/" . $work;
+        $workPath = $this->path . $creator . "/works/" . $work;
 
         if (!($commenter == $reader || $this->permissions->userOnPermissionsList($workPath, $reader))) {
             return json_encode(array(
@@ -237,7 +237,7 @@ class Comments
         $commenterFirstName,
         $commenterLastName
     ) {
-        $workPath = __PATH__ . $workAuthor . "/works/" . $workName;
+        $workPath = $this->path . $workAuthor . "/works/" . $workName;
 
         $approved = $this->commentabilityOfWork($workPath, $commenterEppn, $privacy);
         if ($approved == -1) {
@@ -425,7 +425,7 @@ class Comments
              * ELSE
              *      THEN Approved = TRUE
              */
-            $workPath = __PATH__ . $creator . "/works/" . $work;
+            $workPath = $this->path . $creator . "/works/" . $work;
             if ($this->permissions->commentsNeedsApproval($workPath)) {
                 /**
                  * Check if user is on permissions list, for auto-approval
@@ -632,7 +632,7 @@ class Comments
      */
     private function buildCommentJsonFromPaths(&$commentFilePaths, $readerEppn, $creator, $work)
     {
-        $workPath = __PATH__ . $creator . "/works/" . $work;
+        $workPath = $this->path . $creator . "/works/" . $work;
 
         usort($commentFilePaths, 'self::sortByLengthInc');
         $comments = array();
@@ -754,7 +754,7 @@ class Comments
     private function getCommentFiles($author, $work, $recursive, $commenter = NULL, $hash = NULL)
     {
         $initialFiles = array();
-        $baseCommentPath = __PATH__ . "$author/works/$work/data/threads";
+        $baseCommentPath = $this->path . "$author/works/$work/data/threads";
         if ($recursive) {
             return $this->getCommentFilesRecursivelyHelper($baseCommentPath, $initialFiles, $commenter, $hash);
         } else {
@@ -954,7 +954,7 @@ class Comment
         $firstName,
         $lastName,
         $eppn,
-        $approved = false
+        $approved = FALSE
     ) {
         $this->public = $privacy;
         $this->commentText = $commentText;

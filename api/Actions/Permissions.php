@@ -2,6 +2,11 @@
 
 class Permissions
 {
+    public function __construct($path)
+    {
+        $this->path = $path;
+    }
+
     /**
      * Get the permissions list of a specified $pathOfWork
      */
@@ -105,7 +110,7 @@ class Permissions
      */
     public function setPermissionsPrivacy($creator, $work, $currentUser, $public)
     {
-        $pathOfWork = __PATH__ . "$creator/works/$work";
+        $pathOfWork = $this->path . "$creator/works/$work";
 
         /**
          * if $privacy isn't either 'public' or 'private' return error
@@ -143,7 +148,7 @@ class Permissions
      */
     public function setWorkRequiresApproval($creator, $work, $currentUser, $approval)
     {
-        $pathOfWork = __PATH__ . "$creator/works/$work";
+        $pathOfWork = $this->path . "$creator/works/$work";
         if (!in_array($approval, array('true', 'false'))) {
             return json_encode(array(
                 "status" => "error",
@@ -251,7 +256,7 @@ class Permissions
      */
     public function canCommentWithoutApproval($creator, $work, $commenterEppn)
     {
-        $workFullPath = __PATH__ . $creator . "/works/" . $work;
+        $workFullPath = $this->path . $creator . "/works/" . $work;
         if ($this->isWorkPublic($workFullPath)) {
             if ($this->commentsNeedsApproval($workFullPath)) {
                 if ($this->userOnPermissionsList($workFullPath, $commenterEppn)) {
@@ -293,7 +298,7 @@ class Permissions
      */
     public function canUserViewWork($creator, $work, $currentUser)
     {
-        $workFullPath = __PATH__ . $creator . "/works/" . $work;
+        $workFullPath = $this->path . $creator . "/works/" . $work;
         if ($this->isWorkPublic($workFullPath)) {
             return json_encode(array(
                 "status" => "ok",

@@ -2,6 +2,11 @@
 
 class Users
 {
+    public function __construct($path)
+    {
+        $this->path = $path;
+    }
+
     /**
      * Returns a list of all the work creators
      */
@@ -43,9 +48,9 @@ class Users
     public function getUserWorks($eppn, $currentEppn)
     {
         require 'Permissions.php';
-        $permissions = new Permissions;
+        $permissions = new Permissions($this->path);
         $allWorks = array();
-        $userWorksPath = __PATH__ . $eppn . "/works/";
+        $userWorksPath = $this->path . $eppn . "/works/";
         foreach (glob($userWorksPath . "*") as $work) {
             $workName = substr($work, strrpos($work, '/') + 1);
             if (!$permissions->isWorkPublic($work)) {
@@ -81,14 +86,14 @@ class Users
         }
 
         require 'Permissions.php';
-        $permissions = new Permissions;
+        $permissions = new Permissions($this->path);
         if (!$permissions->isWorkPublic($pathOfWork)) {
             if ($permissions->userOnPermissionsList($pathOfWork, $currentEppn)) {
                 if ($permissions->commentsNeedsApproval($pathOfWork)){
                     return json_encode(array(
                         "status" => "ok",
                         "data" => file_get_contents($workIndex),
-                        "admin" => true, // must be to reach here,
+                        "admin" => TRUE, // must be to reach here,
                         "privacy" => "private",
                         "approval" => "needApproval"
                     ));
@@ -96,7 +101,7 @@ class Users
                     return json_encode(array(
                         "status" => "ok",
                         "data" => file_get_contents($workIndex),
-                        "admin" => true, // must be to reach here,
+                        "admin" => TRUE, // must be to reach here,
                         "privacy" => "private",
                         "approval" => "noApproval"
                     ));

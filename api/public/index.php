@@ -62,7 +62,7 @@ $app->get('/', function () use ($app) {
  */
 $app->get('/get_creators', function () use ($app) {
     require '../Actions/Users.php';
-	$userList = new Users;
+	$userList = new Users(__PATH__);
     echo $userList->getCreators();
 });
 
@@ -72,7 +72,7 @@ $app->get('/get_creators', function () use ($app) {
  */
 $app->get('/get_current_user', function () use ($app) {
 	require '../Actions/Users.php';
-	$user = new Users;
+	$user = new Users(__PATH__);
 	echo $user->getCurrentUser(
         $_SERVER['nickname'],
         $_SERVER['sn'],
@@ -85,7 +85,7 @@ $app->get('/get_current_user', function () use ($app) {
  */
 $app->get('/get_permissions_list/:eppn/:work', function ($eppn, $work) use ($app) {
     require '../Actions/Permissions.php';
-    $permissions = new Permissions;
+    $permissions = new Permissions(__PATH__);
     $workFullPath = __PATH__ . $eppn . "/works/" . $work;
     echo $permissions->getPermissionsList($workFullPath);
 });
@@ -95,7 +95,7 @@ $app->get('/get_permissions_list/:eppn/:work', function ($eppn, $work) use ($app
  */
 $app->get('/add_permission/:work/:user', function ($work, $user) use ($app) {
 	require '../Actions/Permissions.php';
-	$permissions = new Permissions;
+	$permissions = new Permissions(__PATH__);
 	$workFullPath = __PATH__ . $_SERVER['eppn'] . "/works/" . $work;
 	echo $permissions->addPermission(
         $workFullPath,
@@ -108,7 +108,7 @@ $app->get('/add_permission/:work/:user', function ($work, $user) use ($app) {
  */
 $app->get('/remove_permission/:work/:user', function ($work, $user) use ($app) {
 	require '../Actions/Permissions.php';
-	$permissions = new Permissions;
+	$permissions = new Permissions(__PATH__);
 	$workFullPath = __PATH__ . $_SERVER['eppn'] . "/works/" . $work;
 	echo $permissions->removePermission(
         $workFullPath,
@@ -121,7 +121,7 @@ $app->get('/remove_permission/:work/:user', function ($work, $user) use ($app) {
  */
 $app->get('/get_works/:user', function ($eppn) use ($app) {
 	require '../Actions/Users.php';
-	$user = new Users;
+	$user = new Users(__PATH__);
 	echo $user->getUserWorks(
         $eppn,
         $_SERVER['eppn']
@@ -133,7 +133,7 @@ $app->get('/get_works/:user', function ($eppn) use ($app) {
  */
 $app->get('/get_work/:eppn/:work', function ($eppn, $work) use ($app) {
 	require '../Actions/Users.php';
-	$user = new Users;
+	$user = new Users(__PATH__);
 	$workFullPath = __PATH__ . $eppn . "/works/" . $work;
 	echo $user->getUserWork(
         $workFullPath,
@@ -213,7 +213,7 @@ $app->get('/get_highlights/:author/:work', function ($creator, $work) use ($app)
  */
 $app->get('/set_privacy/:creator/:work/:privacy', function ($creator, $work, $privacy) use ($app) {
 	require '../Actions/Permissions.php';
-	$permissions = new Permissions;
+	$permissions = new Permissions(__PATH__);
 	echo $permissions->setPermissionsPrivacy(
 		$creator,
 		$work,
@@ -227,7 +227,7 @@ $app->get('/set_privacy/:creator/:work/:privacy', function ($creator, $work, $pr
  */
 $app->get('/set_require_approval/:creator/:work/:approval', function ($creator, $work, $approval) use ($app) {
 	require '../Actions/Permissions.php';
-	$permissions = new Permissions;
+	$permissions = new Permissions(__PATH__);
 	echo $permissions->setWorkRequiresApproval(
 		$creator,
 		$work,
@@ -255,7 +255,7 @@ $app->post('/create_work', function () use ($app, $Parameters) {
 	}
 
 	require '../Actions/CreateWork.php';
-	$newWork = new CreateWork();
+	$newWork = new CreateWork(__PATH__, __SKELETON_USER__);
 	echo $newWork->init(
 		$_SERVER['eppn'],
 		$work,
@@ -354,7 +354,7 @@ $app->post('/delete_comment', function () use ($app, $Parameters) {
  */
 $app->get('/has_access/:creator/:work', function ($creator, $work) use ($app) {
 	require '../Actions/Permissions.php';
-	$permissions = new Permissions;
+	$permissions = new Permissions(__PATH__);
 	echo $permissions->canUserViewWork(
 		$creator,
 		$work,
@@ -367,7 +367,7 @@ $app->get('/has_access/:creator/:work', function ($creator, $work) use ($app) {
  */
 $app->get('/is_public/:creator/:work', function ($creator, $work) use ($app, $APIResponse) {
 	require '../Actions/Permissions.php';
-	$permissions = new Permissions;
+	$permissions = new Permissions(__PATH__);
 	$workFullPath = __PATH__ . $creator . "/works/" . $work;
 	echo $APIResponse->data("ok",
 		$permissions->isWorkPublic(
@@ -381,7 +381,7 @@ $app->get('/is_public/:creator/:work', function ($creator, $work) use ($app, $AP
  */
 $app->get('/is_comments_require_approval/:creator/:work', function ($creator, $work) use ($app, $APIResponse) {
 	require '../Actions/Permissions.php';
-	$permissions = new Permissions;
+	$permissions = new Permissions(__PATH__);
 	$workFullPath = __PATH__ . $creator . "/works/" . $work;
 	echo $APIResponse->data("ok",
 		$permissions->commentsNeedsApproval(
@@ -397,7 +397,7 @@ $app->get('/is_comments_require_approval/:creator/:work', function ($creator, $w
  */
 $app->get('/comments_need_approval/:creator/:work', function ($creator, $work) use ($app) {
 	require '../Actions/Permissions.php';
-	$permissions = new Permissions;
+	$permissions = new Permissions(__PATH__);
 	echo $permissions->canCommentWithoutApproval(
 		$creator,
 		$work,
