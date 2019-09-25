@@ -23,7 +23,7 @@ class CreateWork
          * Create the user directory if it doesn't exist
          */
         if (!file_exists($this->path . $creator)) {
-            $this->recurse_copy($skeletonUser, $this->path . $creator);
+            $this->recurse_copy($this->skeletonUser, $this->path . $creator);
         }
 
         $pathOfWork = $this->path . "" . $creator . "/works/" . $work;
@@ -64,13 +64,6 @@ class CreateWork
 
         $result = file_get_contents("${tmpFilePath}.out.txt");
         unlink("${tmpFilePath}.out.txt");
-        if ($result != "") {
-            return json_encode(array(
-                "status" => "error",
-                "message" => "unable to create work: " . $work,
-                "raw" => $result
-            ));
-        }
 
         /**
          * Creating the default permissions.json file
@@ -85,6 +78,14 @@ class CreateWork
             "status" => "ok",
             "message" => "successfully created work: " . $work
         ));
+
+        if ($result != "") {
+            return json_encode(array(
+                "status" => "error",
+                "message" => "unable to create work: " . $work,
+                "raw" => $result
+            ));
+        }
     }
 
     /**

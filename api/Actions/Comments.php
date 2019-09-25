@@ -120,22 +120,30 @@ class Comments
      *      and set a property in the comment.json 'deleted => true'
      *    ELSE the comment has no children threads, so the comment.json file gets deleted.
      */
-    public function deleteComment($creator, $work, $commenter, $hash, $reader)
+    public function deleteComment($creator, $work, $commenterEppn, $commentHash, $readerEppn)
     {
         $workPath = $this->path . $creator . "/works/" . $work;
 
-        if (!($commenter == $reader || $this->permissions->userOnPermissionsList($workPath, $reader))) {
+        if (!($commenterEppn == $readerEppn || $this->permissions->userOnPermissionsList($workPath, $readerEppn))) {
             return json_encode(array(
                 "status" => "error",
                 "message" => "only the comment creator can delete this comment"
             ));
         }
 
-        $fileToModify = $this->getCommentPathByHash($creator, $work, $hash, $commenter);
+        $fileToModify = $this->getCommentPathByHash($creator, $work, $commentHash, $commenterEppn);
         if (!$fileToModify) {
             return json_encode(array(
                 "status" => "error",
                 "message" => "unable to find comment"
+            ));
+        }
+
+        /** Remove the deleted comment from the unapproved registry */
+        if (!$this->unapprovedComments->unregisterUnapprovedComment($commenterEppn, $commentHash)) {
+            return json_encode(array(
+                "status" => "error",
+                "message" => "unable to unregister an unapproved comment"
             ));
         }
 
@@ -146,7 +154,7 @@ class Comments
             $jsonData->commentText = "deleted";
             $jsonData->firstName = "deleted";
             $jsonData->lastName = "deleted";
-            $jsonData->deleted = true;
+            $jsonData->deleted = TRUE;
             if (file_put_contents($fileToModify, json_encode($jsonData))) {
                 return json_encode(array(
                     "status" => "ok",
@@ -159,7 +167,7 @@ class Comments
                 ));
             }
         } else {
-            if ($this->deleteDir($commentDirectoryHash, true)) {
+            if ($this->deleteDir($commentDirectoryHash, TRUE)) {
                 $parentDeleted = !file_exists(dirname($commentDirectoryHash));
                 return json_encode(array(
                     "status" => "ok",
@@ -454,7 +462,15 @@ class Comments
                 }
             } else {
                 $fileData->approved = TRUE;
-                if (!$this->unapprovedComments->unregisterUnapprovedComment($fileToModify)) {
+                $ancestorData = $this->getFirstLevelMetaFromCommentPath($fileToModify);
+                if (is_int($ancestorData) && $ancestorData == -1) {
+                    return json_encode(array(
+                        "status" => "error",
+                        "message" => "unable to get ancestor info for the new comment"
+                    ));
+                }
+                /** Remove the deleted comment from the unapproved registry */
+                if (!$this->unapprovedComments->unregisterUnapprovedComment($commenterEppn, $commentHash)) {
                     return json_encode(array(
                         "status" => "error",
                         "message" => "unable to unregister an unapproved comment"
@@ -495,7 +511,8 @@ class Comments
         $fileData->approved = TRUE;
         $fileData->public = TRUE; // For a comment to be unapproved - it must've been public to begin with... Leaving this here just in case though.
         if (file_put_contents($fileToModify, json_encode($fileData))) {
-            if (!$this->unapprovedComments->unregisterUnapprovedComment($fileToModify)) {
+            /** Remove the deleted comment from the unapproved registry */
+            if (!$this->unapprovedComments->unregisterUnapprovedComment($commenterEppn, $commentHash)) {
                 return json_encode(array(
                     "status" => "error",
                     "message" => "unable to unregister an unapproved comment"
@@ -924,8 +941,18 @@ class Comments
         return FALSE;
     }
 
+    /**
+     * Read callee function in index.php
+     */
     public function tempFunctionToCreateUnapprovedDirs($creator, $work)
     {
+        // delete unapproved dir if it already exists
+        if (is_dir($this->workPath . "/unapproved")) {
+            if (!$this->deleteDir($this->workPath . "/unapproved", TRUE)) {
+                return "error clearing dir";
+            }
+        }
+
         $filePaths = $this->getCommentFiles($creator, $work, TRUE);
         foreach ($filePaths as $path) {
             $data = json_decode(file_get_contents($path));
@@ -940,6 +967,7 @@ class Comments
                 );
             }
         }
+        return "done";
     }
 }
 

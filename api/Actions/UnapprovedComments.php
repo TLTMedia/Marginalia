@@ -40,8 +40,12 @@ class UnapprovedComments
      * 
      * @return bool | TRUE on success, FALSE on failure
      */
-    public function unregisterUnapprovedComment($filename)
+    public function unregisterUnapprovedComment($commenterEppn, $commentHash)
     {
+        $filename = $commenterEppn . "." . $commentHash . "." . "unapproved" . $this->fileExtension;
+        if (!file_exists($this->unapprovedDirPath . "/" . $filename)) {
+            return TRUE;
+        }
         return unlink($this->unapprovedDirPath . "/" . $filename);
     }
 
