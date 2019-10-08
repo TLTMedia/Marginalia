@@ -559,14 +559,15 @@ text[inputtype='inputFile'] {
     margin: auto;
     background-color: #EFEBE9;
     font-size: 12px;
-    width: 40px;
     z-index: 1;
     border-top-left-radius: 5px;
     border-bottom-left-radius: 5px;
     border-style: solid;
     border-color: black;
-    border-width: 1px 0px 1px 1px;
+    border-width: 1px 1px 1px 1px;
     cursor: pointer;
+    padding: 10px;
+    box-sizing: border-box;
 }
 
 .selectorHeader {
@@ -576,9 +577,12 @@ text[inputtype='inputFile'] {
 }
 
 .commenterSelectorSearch {
-    height: 20%;
-    width: 90%;
-    margin: auto;
+    margin-top: 4px;
+    margin-bottom: 6px;
+    height: 30px;
+    width: 100%;
+    font-size: 90%;
+    /* margin: auto; */
 }
 
 .buttons,
@@ -624,15 +628,16 @@ input[type='radio']:active {
     user-select: none;
     position: static;
     top: .25rem;
-    font-family: 'HKVenetianRegular', serif;
-    font-weight: normal;
+    /* font-family: 'HKVenetianRegular', serif; */
+    /* font-weight: normal; */
     font-size: .65rem;
     border-color: black;
     border-width: 1px;
     /* border-top-left-radius: .5rem; */
-    border-bottom-left-radius: .5rem;
+    /* border-bottom-left-radius: .5rem; */
     z-index: 1;
-    border: 2px solid rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(0, 0, 0, 0.87);
+    min-width: 175px;
 }
 
 .notUsedType {
@@ -644,11 +649,17 @@ input[type='radio']:active {
     color: #4db6ac;
 }
 
-.allCommenters {
-    overflow-y: scroll;
+.mdl-radio__label {
+    word-break: keep-all;
 }
 
-.allCommenters::-webkit-scrollbar {
+.allCommenters {
+    /* min-height: 200px; */
+    overflow-y: scroll;
+    overflow-x: hidden;
+}
+
+/* .allCommenters::-webkit-scrollbar {
     width: 5px;
     height: 5px;
     background: #f3f1ef;
@@ -662,7 +673,7 @@ input[type='radio']:active {
     border-radius: 5px;
     background: #4db6ac;
     -webkit-box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.5);
-}
+} */
 
 
 /*------------------------------------*/
@@ -1038,7 +1049,14 @@ input[type="file"] {
         -webkit-transform: rotat
     }
 }
+/*-----------------commentSizeIndicator----------------*/
+.startDiv{
+  display:inline;
+}
 
+.endDiv{
+  display:inline;
+}
 
 /*-----------------addLitPage----------------------*/
 
@@ -1109,7 +1127,7 @@ input[type="file"] {
 /*-----------------colorsForComments---------------*/
 
 .unapprovedComments {
-    color: red;
+    color: red!important;
 }
 
 .unapprovedComments.threadNotApproved {
@@ -1117,14 +1135,15 @@ input[type="file"] {
 }
 
 .threadNotApproved {
-    color: orange;
+    color: orange!important;
 }
 
 
 /*-----------------commentHighlightColor-----------*/
 
 .commented-selection {
-    background-color: rgba(100, 255, 100);
+    background-color: rgba(0, 200, 0);
+    color: white;
     cursor: context-menu;
 }
 
@@ -1147,7 +1166,7 @@ input[type="file"] {
   background-color: #186818;
 } */
 
-.overLapComments {
+.blueComments {
     background-color: rgba(100, 100, 255);
     cursor: context-menu;
 }
@@ -1214,6 +1233,14 @@ input[type="file"] {
 .litSettingOptionSelected,
 .usersMenuSelected {
     background-color: #bfbcba;
+}
+
+.settingOptions div {
+    /* font-weight: bold; */
+    margin-top: 5px;
+    margin-bottom: 5px;
+    margin-left: 5px;
+    font-size: 1.15em;
 }
 
 
@@ -1382,6 +1409,7 @@ input[type="file"] {
 .litEditButton:hover,
 .litWhiteListButton:hover {
     background-color: #bfbcba;
+    cursor: pointer;
 }
 
 #litSettingButton,
@@ -1411,8 +1439,20 @@ input[type="file"] {
     float: right;
 }
 
+.mdl-switch__ripple-container {
+    cursor: pointer;
+}
+
 .mdl-switch {
-    margin-left: 50px;
+    margin-top: -12px;
+    /* margin-left: 50px; */
+    cursor: pointer;
+    width: 50px;
+}
+
+.whiteListLinkIcon {
+    vertical-align: middle;
+    padding-left: 4px;
 }
 
 

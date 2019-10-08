@@ -106,7 +106,6 @@ function createReplies(dataForReplies) {
     commentid: hash,
     name: eppn,
     haschild:0,
-    flname:firstName+lastName,
     type:type
   });
   replyBox.html(repliesSpan);
@@ -257,7 +256,7 @@ function replyButtonOnClick(evt){
   CKEDITOR.instances.textForm.setData("");
   $('.commentTypeDropdown').attr('disabled',true);
   var firstCommentId = $('#replies').attr('data-firstCommentId');
-  $('.commentTypeDropdown').val($("#"+firstCommentId).attr("typeof"));
+  $('.commentTypeDropdown').val($(".commented-selection"+"[commentId = '"+firstCommentId+"']").attr("typeof"));
   $("#commentBox").attr("data-editCommentID", "-1");
   displayCommentBox(evt);
 }
@@ -271,7 +270,7 @@ function editButtonOnClick(evt,inText,hash){
     $('.commentTypeDropdown').removeAttr('disabled');
   }
   var firstCommentId = $('#replies').attr('data-firstCommentId');
-  $('.commentTypeDropdown').val($("#"+firstCommentId).attr("typeof"));
+  $('.commentTypeDropdown').val($(".commented-selection"+"[commentId = '"+firstCommentId+"']").attr("typeof"));
 }
 
 function deleteButtonOnClick(hash,eppn,hashForReply,work,workCreator){
@@ -297,18 +296,18 @@ function commentPrivateButtonOnClick(evt,work,workCreator,setPublic){
   }).then((data)=>{
     if(setPublic){
       launchToastNotifcation("successfully set comment to public");
-      autoApprove(commentId,commenterEppn,work,workCreator);
     }
     else{
       launchToastNotifcation("successfully set comment to private");
     }
     let firstCommentId = $("#replies").attr("data-firstCommentId");
-    let firstCommentCommenter = $("#"+firstCommentId).attr("creator");
+    let firstCommentCommenter = $(".commented-selection"+"[commentId = '"+firstCommentId+"']").attr("creator");
     refreshReplyBox(workCreator,work,firstCommentCommenter,firstCommentId);
   });
 }
 
 function commentApprovedButtonOnClick(hash,commenterEppn,work,workCreator){
+  console.log(hash)
   var data = JSON.stringify({
     creator: workCreator,
     work: work,
@@ -321,8 +320,9 @@ function commentApprovedButtonOnClick(hash,commenterEppn,work,workCreator){
     data: data
   }).then((data)=>{
     launchToastNotifcation(data);
-    $("#"+hash).attr("approved",true);
-    $("#"+hash).removeClass("unapprovedComments");
+    if($(".commented-selection"+"[commentId = '"+hash+"']").length != 0){
+      $(".commented-selection"+"[commentId = '"+hash+"']").attr("approved",true).removeClass("unapprovedComments");
+    }
     let currentSelectedType = $(".typeSelector").attr("currentTarget");
     let currentSelectedCommenter = $(".commenterSelector").attr("currentTarget");
     console.log(currentSelectedType,currentSelectedCommenter);
@@ -334,7 +334,8 @@ function commentApprovedButtonOnClick(hash,commenterEppn,work,workCreator){
       commenter: firstCommenter,
       hash: firstCommentHash
     }
-    checkThreadUnapprovedComments(firstCommentData,currentSelectedType,currentSelectedCommenter,markUnapprovedComments);
+    //TODO this function need to get fixed
+    //getUnapprovedComments(workCreator,work);
     refreshReplyBox(workCreator,work,firstCommenter,firstCommentHash);
   });
 }

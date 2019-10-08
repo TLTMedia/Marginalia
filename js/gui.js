@@ -30,6 +30,7 @@ $(window).ready(function() {
       $(this).addClass("active");
       homeButtonAction();
       resetWhiteListPage();
+      $(".selectorOpener").remove(); 
     });
 
 
