@@ -2,6 +2,10 @@
     outline: none;
 }
 
+#text a {
+    color: blue !important;
+}
+
 body {
     background-color: #333333;
 }
@@ -1662,21 +1666,19 @@ input[type="file"] {
         margin-top: 0%;
         line-height: 1.5;
     }
-    .commentText {
-        padding: 2%;
-        width: auto;
-    }
-    .headText {
-        line-height: 1;
-    }
-    .firstPage {
-        width: auto;
-    }
+   .commentText {
+       padding: 2%;
+       width: auto;
+   }
+   .headText {
+       line-height: 1;
+   }
+   .firstPage {
+       width: auto;
+   }
 }
 
-
 /*--------------cardbox--------------------*/
-
 #cardbox {
     border-radius: .75rem;
     -moz-user-select: -moz-none;
@@ -1696,7 +1698,7 @@ input[type="file"] {
     /* padding: 4%; */
     padding: 40px 40px 40px 40px;
 }
-
+    
 #firstPage {
     max-height: 700px;
     display: flex;
