@@ -11,19 +11,15 @@ body {
 }
 
 html {
-    overflow: -moz-scrollbars-vertical;
-    overflow-y: scroll;
+    /* overflow: -moz-scrollbars-vertical; */
+    /* overflow-y: scroll; */
 }
 
-
-/* the whole replybox*/
-
+/* the whole replybox */
 #replies {
-    margin-top: -10px;
     border-bottom-left-radius: 10px;
     border-bottom-right-radius: 10px;
 }
-
 
 /*--------------------replies in the replybox----------------*/
 
@@ -102,10 +98,10 @@ html {
   background-color: #186818;
 } */
 
-.content {
+/* .content {
     width: 100%;
     height: 100%;
-}
+} */
 
 #home {
     float: left;
@@ -1092,7 +1088,7 @@ input[type="file"] {
 
 /*=================headerTab=======================*/
 
-#header {
+/* #header {
     background-color: #4db6ac;
     width: 100%;
     height: 4rem;
@@ -1105,18 +1101,17 @@ input[type="file"] {
     flex-direction: row;
     justify-content: flex-end;
     overflow: hidden;
-}
+} */
 
-#header a {
+/* #header a {
     color: #f2f2f2;
     text-align: center;
     padding: 14px 16px;
     text-decoration: none;
     font-size: 17px;
-    /* margin-top:auto; */
-}
+} */
 
-#header a:hover {
+/* #header a:hover {
     cursor: pointer;
     background-color: #ddd;
     color: black;
@@ -1125,7 +1120,7 @@ input[type="file"] {
 #header a.active {
     background-color: #4CAF50;
     color: white;
-}
+} */
 
 
 /*-----------------colorsForComments---------------*/
@@ -1622,11 +1617,11 @@ input[type="file"] {
         height: auto;
         margin: auto;
     }
-    #header {
+    /* #header {
         background-position: 4% 50%;
         background-size: 33% 100%;
         width: auto;
-    }
+    } */
     .introBoxes {
         margin: 5% auto;
         padding: 5%;
