@@ -1,5 +1,5 @@
 export class Users {
-    constructor({api, grouping = ''} = {}) {
+    constructor({ api, grouping = '' } = {}) {
         this.api = api;
         this.grouping = grouping;
         return (async () => {
@@ -26,7 +26,10 @@ export class Users {
 
     async get_user_works(eppn) {
         this.selected_user_works = await this.api.request({
-            endpoint: 'get_works/' + eppn
+            endpoint: 'get_works',
+            data: {
+                eppn: eppn,
+            }
         });
         /* remove '.html' */
         this.selected_user_works.forEach((work, index) => {

@@ -51,7 +51,8 @@ function saveLit({ work, privacy, data } = {}) {
   API.request({
     endpoint: "create_work",
     method: "POST",
-    data: formData
+    data: formData,
+    dataType: "form",
   }).then(data => {
     launchToastNotifcation(work + " is successfully created");
     $("#addLitSecondPage").show();
@@ -173,10 +174,13 @@ function showUsersLit(selected_eppn) {
 }
 
 function getUserWorks(selected_eppn) {
-  let endpoint = "get_works/" + selected_eppn;
+  let endpoint = "get_works";
   API.request({
     endpoint: endpoint,
-    method: "GET"
+    method: "GET",
+    data: {
+      eppn: selected_eppn
+    }
   }).then((data) => {
     for (var work in data) {
       var fileName = data[work].substr(0, data[work].lastIndexOf('.')) || data[work];
@@ -200,9 +204,15 @@ function selectLit(selected_eppn, textChosen) {
   $("#text").empty();
   $(".chosenUser").text(selected_eppn + ":");
   $(".chosenFile").text(textChosen);
-  let endpoint = 'get_work/' + selected_eppn + '/' + textChosen;
-  showLink(endpoint);
-  API.request({ endpoint }).then((data) => {
+  let endpoint = 'get_work'
+  showLink(endpoint + "/" + selected_eppn + "/" + textChosen);
+  API.request({
+    endpoint: endpoint,
+    data: {
+      eppn: selected_eppn,
+      work: textChosen,
+    },
+  }).then(data => {
     if (data["status"] != "error") {
       let literatureText = data;
       buildHTMLFile(literatureText, selected_eppn, textChosen);
@@ -221,7 +231,7 @@ function selectLit(selected_eppn, textChosen) {
 }
 
 function updateSettingPage(selected_eppn, textChosen) {
-  let endPoint = "comments_need_approval/" + selected_eppn + "/" + textChosen;
+  let endPoint = "comments_need_approval/" + selected_eppn + "/" + textChosen; // unused?
   $("#setting").removeClass("disabledHeaderTab");
   $("#setting").attr({
     "author": selected_eppn,
