@@ -16,11 +16,11 @@ var remSpan; // holds the name of made and clicked spans
 init = async ({ api = api, users = users } = {}) => {
   API = api;
   currentUser = users.current_user;
+
   $(".loader").hide();
   $("#text").hide();
   $("#addLitBase").hide();
   createUserSelectScreen({ users: users });
-
 
   $(window).on("resize", function () {
     var stageWidth = $(window).width();
@@ -28,12 +28,10 @@ init = async ({ api = api, users = users } = {}) => {
     $("html").css("font-size", (stageWidth / 60) + "px");
   }).trigger("resize")
 
-
   $.address.externalChange((evt) => {
     console.log("externalChange");
     loadFromDeepLink();
   });
-
 }
 
 // Creates a visual list of all users which gives access to their folders
