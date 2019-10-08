@@ -70,58 +70,76 @@
 
 <body>
 	<div class="content">
-		<div id="header">
-			<a class="headerTab headerUpload" id="home">Home</a>
-			<a class="headerTab headerUpload" id="litadd">Add Literature</a>
-			<a class="headerTab headerUpload" id="setting">Settings</a>
-		</div>
-		<div id="firstPage">
-			<div id="cardbox" class="introBoxes">
-				<div class="titleText">Marginalia</div>
-				<div id="addLitBase"></div>
-				<div id="settingBase">
-					<div id="settingTitle">Settings</div>
-					<div class="litSettingBase"></div>
-					<div class="whiteListSettingBase"></div>
-					<div id="settingGoBack" style="margin-bottom:0px">
-						<button class="mdl-button mdl-js-button mdl-button--icon">
-							<span class="material-icons">arrow_back</span>
-						</button>
-						Go Back
+		<div class="mdl-layout__container">
+			<div class="mdl-layout mdl-js-layout mdl-layout--fixed-header is-upgraded" data-upgraded=",MaterialLayout">
+				<header class="mdl-layout__header is-casting-shadow">
+					<div class="mdl-layout__header-row">
+						<span class="mdl-layout-title"><img style="z-index: 4" width="100" height="100"
+								src="img/smalllogo.svg" />Marginalia</span>
+						<div class="mdl-layout-spacer"></div>
+						<nav class="mdl-navigation mdl-layout--large-screen-only">
+							<a class="mdl-navigation__link headerTab headerUpload" id="home" href="#">Home</a>
+							<a class="mdl-navigation__link headerTab headerUpload" id="litadd"
+								href="#">Add Literature</a>
+							<a class="mdl-navigation__link headerTab headerUpload" id="setting"
+								href="#">Settings</a>
+						</nav>
 					</div>
-				</div>
-				<div id="nonTitleContent">
-					<div class="pleaseSelect">
-						<span>Please Select User & Literature Piece</span>
-					</div>
-					<div class="userSelectMenu">
-						<div class="usersMenuTitle">Users:</div>
-						<input type="text" class="searchUser" placeholder="Search for users..."></input>
-						<ul class="mdl-list usersMenu"></ul>
-					</div>
-					<div class="workSelectMenu">
-						<div id="selectedUserWorks"></div>
-						<input type="text" class="searchLit" placeholder="Search for works..."></input>
-						<ul class="mdl-list worksMenu"></ul>
-					</div>
-				</div>
-			</div> <!-- end cardbox -->
-		</div> <!-- end firstPage -->
-		<div id="commentBox"></div>
-		<div id="replies"></div>
-		<div id="comApproval"></div>
-		<div id="deleteFileChoice"></div>
-		<div id="moderateFileChoice"></div>
-		<div id="userPrivateList"></div>
-		<div class="loader" id="loadingSign"></div>
-		<div class="selector">
-			<div class="typeSelector" id="typeSelector"></div>
-			<div class="commenterSelector" id="commenterSelector"></div>
+				</header>
+				<main class="mdl-layout__content">
+					<div class="page-content">
+						<div id="firstPage">
+							<div id="cardbox" class="introBoxes">
+								<div class="titleText">Marginalia</div>
+								<div id="addLitBase"></div>
+								<div id="settingBase">
+									<div id="settingTitle">Settings</div>
+									<div class="litSettingBase"></div>
+									<div class="whiteListSettingBase"></div>
+									<div id="settingGoBack" style="margin-bottom:0px">
+										<button class="mdl-button mdl-js-button mdl-button--icon">
+											<span class="material-icons">arrow_back</span>
+										</button>
+										Go Back
+									</div>
+								</div>
+								<div id="nonTitleContent">
+									<div class="pleaseSelect">
+										<span>Please Select User & Literature Piece</span>
+									</div>
+									<div class="userSelectMenu">
+										<div class="usersMenuTitle">Users:</div>
+										<input type="text" class="searchUser" placeholder="Search for users..."></input>
+										<ul class="mdl-list usersMenu"></ul>
+									</div>
+									<div class="workSelectMenu">
+										<div id="selectedUserWorks"></div>
+										<input type="text" class="searchLit" placeholder="Search for works..."></input>
+										<ul class="mdl-list worksMenu"></ul>
+									</div>
+								</div>
+							</div> <!-- end cardbox -->
+						</div> <!-- end firstPage -->
+						<div id="commentBox"></div>
+						<div id="replies"></div>
+						<div id="comApproval"></div>
+						<div id="deleteFileChoice"></div>
+						<div id="moderateFileChoice"></div>
+						<div id="userPrivateList"></div>
+						<div class="loader" id="loadingSign"></div>
+						<div class="selector">
+							<div class="typeSelector" id="typeSelector"></div>
+							<div class="commenterSelector" id="commenterSelector"></div>
+						</div>
+						<div id="text" visible="false">
+							<div id="textTitle"></div>
+						</div>
+					</div> <!-- end page-content -->
+				</main>
+			</div>
 		</div>
 	</div> <!-- end content -->
-	<div id="text" visible="false">
-		<div id="textTitle"></div>
-	</div>
+
 	<div id="toast-notification1" class="mdl-js-snackbar mdl-snackbar">
 		<div id="logo1"></div>
 		<div class="mdl-snackbar__text"></div>
