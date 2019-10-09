@@ -13,6 +13,8 @@ init = async ({ api = api, users = users } = {}) => {
     API = api;
     currentUser = users.current_user;
 
+    const host = "apps.tlt.stonybrook.edu";
+
     $(".loader").hide();
     $("#text").hide();
     $("#addLitBase").hide();
@@ -27,6 +29,27 @@ init = async ({ api = api, users = users } = {}) => {
     $.address.externalChange((evt) => {
         console.log("externalChange");
         loadFromDeepLink();
+    });
+
+    $(document).ajaxComplete(function () {
+        (function bindRedirectConfirmation() {
+            $("a").off("click").one("click", function (event) {
+                event.preventDefault();
+                if ((this.href).indexOf(host) !== -1) {
+                    return;
+                } else if ((this.href).indexOf("javascript:void(0);") !== -1) {
+                    return;
+                } else {
+                    let res = confirm("Are you sure you want to visit the URL:\n\n" + this.href);
+                    if (res) {
+                        window.location = this.href;
+                    } else {
+                        bindRedirectConfirmation();
+                        return;
+                    }
+                }
+            });
+        })();
     });
 }
 
