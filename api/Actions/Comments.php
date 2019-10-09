@@ -534,25 +534,86 @@ class Comments
             ));
         }
 
-        $fileData           = json_decode(file_get_contents($fileToModify));
-        $fileData->approved = true;
-        $fileData->public   = true; // For a comment to be unapproved - it must've been public to begin with... Leaving this here just in case though.
-        if (file_put_contents($fileToModify, json_encode($fileData))) {
-            /** Remove the deleted comment from the unapproved registry */
-            if (!$this->unapprovedComments->unregisterUnapprovedComment($commenterEppn, $commentHash)) {
+        if ($this->permissions->userOnPermissionsList($this->workPath, $approverEppn)) {
+            $fileData           = json_decode(file_get_contents($fileToModify));
+            $fileData->approved = true;
+            $fileData->public   = true; // For a comment to be unapproved - it must've been public to begin with... Leaving this here just in case though.
+            if (file_put_contents($fileToModify, json_encode($fileData))) {
+                /** Remove the deleted comment from the unapproved registry */
+                if (!$this->unapprovedComments->unregisterUnapprovedComment($commenterEppn, $commentHash)) {
+                    return json_encode(array(
+                        "status"  => "error",
+                        "message" => "unable to unregister an unapproved comment",
+                    ));
+                }
+                return json_encode(array(
+                    "status"  => "ok",
+                    "message" => "successfully approved comment",
+                ));
+            } else {
                 return json_encode(array(
                     "status"  => "error",
-                    "message" => "unable to unregister an unapproved comment",
+                    "message" => "unable to approve comment",
                 ));
             }
-            return json_encode(array(
-                "status"  => "ok",
-                "message" => "successfully approved comment",
-            ));
         } else {
             return json_encode(array(
                 "status"  => "error",
+                "message" => "unable to approve comment, no permission",
+            ));
+        }
+    }
+
+    /**
+     * Approves a comment.
+     * Removes the file from the unapproved registry.
+     * And sets the comments' "approved" property to "true".
+     */
+    public function unapproveComment($approverEppn, $creator, $work, $commentHash, $commenterEppn)
+    {
+        $fileToModify = $this->__getCommentPathByHash($creator, $work, $commentHash, $commenterEppn);
+        if (!$fileToModify) {
+            return json_encode(array(
+                "status"  => "error",
                 "message" => "unable to approve comment",
+            ));
+        }
+
+        /**
+         * In contrary with approveComment(), the comment creator can unapprove it
+         */
+        if ($approverEppn == $commenterEppn || $this->permissions->userOnPermissionsList($this->workPath, $approverEppn)) {
+            $fileData           = json_decode(file_get_contents($fileToModify));
+            $fileData->approved = false;
+            $fileData->public   = true; // For a comment to be unapproved - it must've been public to begin with... Leaving this here just in case though.
+            if (file_put_contents($fileToModify, json_encode($fileData))) {
+                $ancestorData = $this->__getFirstLevelMetaFromCommentPath($fileToModify);
+                if (!$this->unapprovedComments->registerUnapprovedComment(
+                    $ancestorData["eppn"],
+                    $ancestorData["hash"],
+                    $commenterEppn,
+                    $commentHash,
+                    $fileToModify
+                )) {
+                    return json_encode(array(
+                        "status"  => "error",
+                        "message" => "unable to register an unapproved comment",
+                    ));
+                }
+                return json_encode(array(
+                    "status"  => "ok",
+                    "message" => "successfully unapproved comment",
+                ));
+            } else {
+                return json_encode(array(
+                    "status"  => "error",
+                    "message" => "unable to unapprove comment",
+                ));
+            }
+        } else {
+            return json_encode(array(
+                "status"  => "error",
+                "message" => "unable to unapprove comment, no permission",
             ));
         }
     }

@@ -390,6 +390,27 @@ $app->post("/approve_comment", function () use ($app, $PATH, $parameters, $authU
 });
 
 /**
+ * Approve a comment for public viewing
+ */
+$app->post("/unapprove_comment", function () use ($app, $PATH, $parameters, $authUniqueId) {
+    $data = json_decode($app->request->getBody(), true);
+    $parameters->paramCheck($data, array(
+        "creator", "work", "commenterEppn", "comment_hash",
+    ));
+
+    require "../Actions/Comments.php";
+    $comments = new Comments($app->log, $PATH, $data["creator"], $data["work"]);
+
+    echo $comments->unapproveComment(
+        $authUniqueId,
+        $data["creator"],
+        $data["work"],
+        $data["comment_hash"],
+        $data["commenterEppn"]
+    );
+});
+
+/**
  * Set an existing comment public/privacy status
  */
 $app->get("/get_comment_chain", function () use ($app, $PATH, $parameters, $authUniqueId) {
