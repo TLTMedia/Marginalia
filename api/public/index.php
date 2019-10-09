@@ -248,12 +248,31 @@ $app->get("/get_highlights", function () use ($app, $PATH, $parameters, $authUni
     require "../Actions/Comments.php";
     $comments = new Comments($app->log, $PATH, $data["creator"], $data["work"]);
 
-    // TODO: need to test to see if this is necessary
-    $app->response->header("Content-Type", "application/json");
     echo $comments->getHighlights(
         $data["creator"],
         $data["work"],
         $authUniqueId
+    );
+});
+
+/**
+ * Get highlights/first level comment meta data (not the text of the comment)
+ */
+$app->get("/get_highlights_filtered", function () use ($app, $PATH, $parameters, $authUniqueId) {
+    $data = $app->request->get();
+    $parameters->paramCheck($data, array(
+        "creator", "work", "filterEppn", "filterType",
+    ));
+
+    require "../Actions/Comments.php";
+    $comments = new Comments($app->log, $PATH, $data["creator"], $data["work"]);
+
+    echo $comments->getHighlightsFiltered(
+        $data["creator"],
+        $data["work"],
+        $authUniqueId,
+        $data["filterEppn"],
+        $data["filterType"]
     );
 });
 
