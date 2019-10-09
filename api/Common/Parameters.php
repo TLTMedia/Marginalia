@@ -1,18 +1,40 @@
 <?php
 
-class Parameters {
+class Parameters
+{
     /**
      * Checks whether parameters have been properly set
      */
     public function paramCheck($a, $b)
     {
-        if (!$this->array_equal(array_keys($a), $b)) {
+        if (is_null($a)) {
             echo json_encode(array(
-                "status" => "error",
-                "message" => "invalid parameters"
+                "status"  => "error",
+                "message" => "invalid parameters",
             ));
             exit; // Maybe this is a good idea?
         }
+        if (!$this->isInArray(array_keys($a), $b)) {
+            echo json_encode(array(
+                "status"  => "error",
+                "message" => "invalid parameters",
+            ));
+            exit; // Maybe this is a good idea?
+        }
+    }
+
+    /**
+     * Returns true if at least the listed items are in the array
+     */
+    public function isInArray($a, $b)
+    {
+        foreach ($b as $item) {
+            if (!in_array($item, $a)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -21,12 +43,12 @@ class Parameters {
      */
     public function array_equal($a, $b)
     {
-    	return (
+        return (
             is_array($a)
             && is_array($b)
             && count($a) == count($b)
             && array_diff($a, $b) === array_diff($b, $a)
-    	);
+        );
     }
 
 }
