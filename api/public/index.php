@@ -335,7 +335,7 @@ $app->post("/create_work", function () use ($app, $PATH, $SKELETON_PATH, $parame
         exit;
     }
 
-    require "../Actions/CreateWork.php";
+    require "../Actions/Work.php";
     $newWork = new CreateWork($PATH, $SKELETON_PATH);
 
     echo $newWork->init(
@@ -343,6 +343,23 @@ $app->post("/create_work", function () use ($app, $PATH, $SKELETON_PATH, $parame
         $data["work"],
         $data["privacy"],
         $tempFile
+    );
+});
+
+/**
+ * Create a new work
+ */
+$app->post("/delete_work", function () use ($app, $PATH, $parameters, $authUniqueId) {
+    $data = $app->request->post();
+    $parameters->paramCheck($data, array(
+        "work", "creator",
+    ));
+
+    require "../Actions/Work.php";
+    $work = new Work($PATH, $data["creator"], $data["work"]);
+
+    echo $work->deleteWork(
+        $authUniqueId
     );
 });
 
