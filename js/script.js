@@ -32,19 +32,19 @@ init = async ({ api = api, users = users } = {}) => {
     });
 
     $(document).ajaxComplete(function () {
-        (function bindRedirectConfirmation() {
-            $("a").off("click").one("click", function (event) {
-                event.preventDefault();
+        (function bindRedirectConfirmation(specific = "a") {
+            $(specific).one("click", function (event) {
                 if ((this.href).indexOf(host) !== -1) {
-                    return;
+                    console.log("do nothing is same host");
                 } else if ((this.href).indexOf("javascript:void(0);") !== -1) {
-                    return;
+                    console.log("do nothing is javascript void event");
                 } else {
+                    event.preventDefault();
                     let res = confirm("Are you sure you want to visit the URL:\n\n" + this.href);
                     if (res) {
                         window.location = this.href;
                     } else {
-                        bindRedirectConfirmation();
+                        bindRedirectConfirmation(this);
                         return;
                     }
                 }
