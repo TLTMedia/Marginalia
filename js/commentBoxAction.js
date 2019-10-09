@@ -1,4 +1,5 @@
 function makeDraggableCommentBox(workCreator, work) {
+  console.log(workCreator,work)
   if ($("#commentBox").length) {
     if ($(".commentTypeDropdown").length < 1) {
       $("#commentBox").append(dropdown);
@@ -257,8 +258,8 @@ function editOrDelete(dataForEditOrDelete, isEdit) {
       //update the commenterSelector and the typeSelector
       if (firstCommentId == $("#replies").attr("deletedid")) {
         console.log("should unwrap");
-        //checkSpansNeedRecover(firstCommentId,removeDeletedSpan);
-        removeDeletedSpan(firstCommentId);
+        checkSpansNeedRecover(firstCommentId,removeDeletedSpan);
+        //removeDeletedSpan(firstCommentId);
         updateCommenterSelectors(firstCommentId);
         updateTypeSelector(undefined, "All");
         $("#replies").parent().hide();
@@ -272,7 +273,6 @@ function editOrDelete(dataForEditOrDelete, isEdit) {
           commenter: $(".commented-selection" + "[commentId = '" + firstCommentId + "']").attr("creator"),
           hash: firstCommentId
         }
-        //TODO this function need fix
         getUnapprovedComments(workCreator, work);
       }
       $("#replies").removeAttr("deletedid");
@@ -358,6 +358,8 @@ function checkSpansNeedRecover(id, callback) {
   }
   else {
     console.log("hi")
+    $(".startDiv"+"[parentHash = '"+id+"']").removeAttr("parentHash");
+    $(".endDiv"+"[parentHash = '"+id+"']").removeAttr("parentHash");
     callback(id);
   }
   handleStartEndDiv(createCommentData());

@@ -221,7 +221,7 @@ function selectLit(selected_eppn, textChosen) {
     else {
       //if work doesn't exist redirect to home
       $("#home").click();
-      launchToastNotifcation("");
+      launchToastNotifcation("work don't exist");
     }
   });
   //auto scroll to the text part

@@ -42,6 +42,7 @@ init = async ({ api = api, users = users } = {}) => {
 */
 function buildHTMLFile(litContents, selected_eppn, textChosen) {
   // TODO check this logic
+  console.log(selected_eppn, textChosen)
   if (!$(".commentTypeDropdown").length) {
     //TODO make drop down combine with commentbox
     makeDropDown();
