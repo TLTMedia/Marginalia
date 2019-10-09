@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>Marginalia</title>
-	<meta name="description" content="Welcome to the Marginalia website.">
+	<title>MarginaliaDev</title>
+	<meta name="description" content="Welcome to Marginalia">
 	<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
 	<link rel="stylesheet" href="https://code.getmdl.io/1.0.6/material.indigo-pink.min.css">
 	<link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.teal-yellow.min.css" />
@@ -36,95 +36,85 @@
 	<script src="js/gui.js"></script>
 	<script src="js/addLit.js"></script>
 
-	<!-- <script src="js/dynamicStyling.js"></script> -->
+	<script defer type="text/javascript">
+		$(document).on("DOMNodeInserted", e => {
+			const classes = $(e.target).attr("class");
+			if (classes && classes.match(/^hl_/)) {
+				$(e.target).addClass("commented-selection");
+				console.log("special function");
+			}
+		});
+	</script>
+
+	<!--
+	<script type="text/javascript">
+		document.addEventListener("selectionchange", event => {
+			let selection = document.getSelection ? document.getSelection().toString() :  document.selection.createRange().toString() ;
+			alert(selection);
+		});
+	</script>
+	 -->
+
 	<link rel="stylesheet" type="text/css" media="only screen" href="css/style.css">
 </head>
-
 <body>
-  <div class="content">
-    <div id="header">
-				<a class="headerTab headerUpload" id ="home">Home</a>
-			  <a class="headerTab headerUpload" id="litadd">Add Literature</a>
-			  <a class="headerTab headerUpload" id="setting">Settings</a>
-    </div>
-    <div id="firstPage">
-      <div id="cardbox" class="introBoxes">
-        <div class="titleText">
-          Marginalia
-        </div>
-
-        <div id="addLitBase"></div>
-				<div id="settingBase">
-				    <div id="settingTitle">Settings</div>
-						<div class = "litSettingBase"></div>
-						<div class = "whiteListSettingBase"></div>
-						<div id="settingGoBack" style="margin-bottom:0px">
-				        <button class="mdl-button mdl-js-button mdl-button--icon">
-				            <span class="material-icons">arrow_back</span>
-				        </button>
-				        Go Back
-				    </div>
-				</div>
-        <div id="nonTitleContent">
-
-          <div class="pleaseSelect">
-            <span>Please Select User & Literature Piece</span>
-          </div>
-						<div class = "userSelectMenu">
-            <div class="usersMenuTitle">Users:</div>
-							<input type = "text" class = "searchUser" placeholder="Search for users.."></input>
-							<ul class = "mdl-list usersMenu"></ul>
-						</div>
-
-						<div class = "workSelectMenu">
-						<div id = "selectedUserWorks"></div>
-							<input type = "text" class = "searchLit" placeholder="Search for works.."></input>
-							<ul class = "mdl-list worksMenu"></ul>
-						</div>
-        </div>
-      </div>
-      <!-- cardbox end -->
-    </div>
-    <!-- firstPage end -->
-    <div id="commentBox"></div>
-    <div id="replies"></div>
-    <div id="comApproval"></div>
-    <div id="deleteFileChoice"></div>
-    <div id="moderateFileChoice"></div>
-    <div id="userPrivateList"></div>
-    <div class="loader" id="loadingSign"></div>
-		<div class="selector">
-    	<div class="typeSelector" id="typeSelector"></div>
-			<div class="commenterSelector" id = "commenterSelector"></div>
+	<div class="content">
+		<div id="header">
+			<a class="headerTab headerUpload" id="home">Home</a>
+			<a class="headerTab headerUpload" id="litadd">Add Literature</a>
+			<a class="headerTab headerUpload" id="setting">Settings</a>
 		</div>
-  </div>
-  <div id="text" visible="false">
-		<div id = "textTitle"></div>
+		<div id="firstPage">
+			<div id="cardbox" class="introBoxes">
+				<div class="titleText">Marginalia</div>
+				<div id="addLitBase"></div>
+				<div id="settingBase">
+					<div id="settingTitle">Settings</div>
+					<div class="litSettingBase"></div>
+					<div class="whiteListSettingBase"></div>
+					<div id="settingGoBack" style="margin-bottom:0px">
+						<button class="mdl-button mdl-js-button mdl-button--icon">
+							<span class="material-icons">arrow_back</span>
+						</button>
+						Go Back
+					</div>
+				</div>
+				<div id="nonTitleContent">
+					<div class="pleaseSelect">
+						<span>Please Select User & Literature Piece</span>
+					</div>
+					<div class="userSelectMenu">
+						<div class="usersMenuTitle">Users:</div>
+						<input type="text" class="searchUser" placeholder="Search for users..."></input>
+						<ul class="mdl-list usersMenu"></ul>
+					</div>
+					<div class="workSelectMenu">
+						<div id="selectedUserWorks"></div>
+						<input type="text" class="searchLit" placeholder="Search for works..."></input>
+						<ul class="mdl-list worksMenu"></ul>
+					</div>
+				</div>
+			</div> <!-- end cardbox -->
+		</div> <!-- end firstPage -->
+		<div id="commentBox"></div>
+		<div id="replies"></div>
+		<div id="comApproval"></div>
+		<div id="deleteFileChoice"></div>
+		<div id="moderateFileChoice"></div>
+		<div id="userPrivateList"></div>
+		<div class="loader" id="loadingSign"></div>
+		<div class="selector">
+			<div class="typeSelector" id="typeSelector"></div>
+			<div class="commenterSelector" id="commenterSelector"></div>
+		</div>
+	</div> <!-- end content -->
+	<div id="text" visible="false">
+		<div id="textTitle"></div>
 	</div>
-
 	<div id="toast-notification1" class="mdl-js-snackbar mdl-snackbar">
-		<div id = "logo1"></div>
-  	<div class="mdl-snackbar__text"></div>
-		<button class="mdl-snackbar__action" type="button" style = "visibility:hidden"></button>
+		<div id="logo1"></div>
+		<div class="mdl-snackbar__text"></div>
+		<button class="mdl-snackbar__action" type="button" style="visibility:hidden"></button>
 	</div>
-
-
 </body>
-<script defer>
-$(document).on("DOMNodeInserted", e => {
-	const classes = $(e.target).attr("class");
-	if (classes && classes.match(/^hl_/)) {
-		$(e.target).addClass("commented-selection");
-		console.log("special function");
-	}
-});
-</script>
-<!--
-<script>
-document.addEventListener("selectionchange", event => {
-	let selection = document.getSelection ? document.getSelection().toString() :  document.selection.createRange().toString() ;
-	alert(selection);
-})
-</script>
--->
 </html>

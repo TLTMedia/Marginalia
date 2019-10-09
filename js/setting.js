@@ -158,14 +158,14 @@ function litSettingButtonOnClick(selectedLitId, selected_eppn){
   $(".whiteListSettingBase, #addLitBase").hide();
   $(".litSettingBase").empty().fadeIn();
   $("#settingTitle").text("Settings For : " + selected_eppn +"'s " +selectedLitId);
-  var settingOptions = $("<ul/>",{
-    class: "settingOptions mdl-list"
+  let settingOptions = $("<div/>",{
+    class: "settingOptions"
   });
   $(".litSettingBase").append(settingOptions);
   //privacy Switch
-  makeSettingSwitch("privacy","Private Work",selectedLitId, selected_eppn,checkIsWorkPublic);
+  makeSettingSwitch("privacy","Work is Private?",selectedLitId, selected_eppn,checkIsWorkPublic);
   //commentNeedApproval switch
-  makeSettingSwitch("commentsNeedApproval","Does Comments Requires Approval",selectedLitId, selected_eppn, checkIsCommentNeedApproval);
+  makeSettingSwitch("commentsNeedApproval","Comments Require Approval?",selectedLitId, selected_eppn, checkIsCommentNeedApproval);
   // whiteListPageOpener
   makeWhiteListButton(selectedLitId, selected_eppn);
   //activate the go back button
@@ -176,46 +176,52 @@ function litSettingButtonOnClick(selectedLitId, selected_eppn){
 
 // purpose : privacy / commentsNeedApproval
 // return the input element and the event will be handle out side this function
-function makeSettingSwitch(purpose,text,litId,selected_eppn,callback){
-  let option =$("<li/>",{
-    class: "mdl-list__item",
+function makeSettingSwitch(purpose, text, litId, selected_eppn, callback) {
+  let option = $("<div/>", {
     text: text
   });
-  var label= $("<label/>",{
+
+  let label= $("<label/>", {
     class: "mdl-switch mdl-js-switch mdl-js-ripple-effect",
-    for: purpose+"Switch"
+    for: purpose + "Switch"
   });
-  var input = $("<input/>",{
+
+  let input = $("<input/>", {
     type: "checkbox",
-    id: purpose+"Switch",
+    id: purpose + "Switch",
     class: "mdl-switch__input"
   });
+
   $(".settingOptions").append(option);
   $(option).append(label);
   $(label).append(input);
   componentHandler.upgradeAllRegistered();
-  if(callback != undefined){
-    callback(selected_eppn,litId);
+
+  if (callback != undefined) {
+    callback(selected_eppn, litId);
   }
-  input.off().on("change",(evt)=>{
-    if(!input.hasClass("disabled")){
-      workSettingSwitchOnChange(evt,litId,selected_eppn);
+
+  input.off().on("change", evt => {
+    if (!input.hasClass("disabled")) {
+      workSettingSwitchOnChange(evt, litId, selected_eppn);
     }
   });
 }
 
 function makeWhiteListButton(litId,selected_eppn){
-  let whiteListOption =$("<li/>",{
-    class: "mdl-list__item litWhiteListButton",
+  let whiteListOption = $("<div/>", {
+    class: "litWhiteListButton",
     text: "Manage White List",
-    click: (evt)=>{
-      if(isCurrentUserSelectedUser(selected_eppn,true)){
+    click: evt => {
+      if (isCurrentUserSelectedUser(selected_eppn, true)) {
         $(".litSettingOptionSelected").removeClass("litSettingOptionSelected");
         $(this).addClass("litSettingOptionSelected");
-        showWhiteListSettingBase(litId,selected_eppn);
+        showWhiteListSettingBase(litId, selected_eppn);
       }
     }
   });
+
+  $(whiteListOption).append(`<i class="material-icons whiteListLinkIcon">link</i>`);
   $(".settingOptions").append(whiteListOption);
   componentHandler.upgradeAllRegistered();
 }

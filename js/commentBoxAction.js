@@ -131,7 +131,7 @@ function getDataForSave(creator,literatureName,commentText,commentType,span,repl
 
 // isComment is true then this is the first comment
 // isComment is false mean this is a reply to some other people's comment
-function saveCommentOrReply(dataForSave,isComment){
+function saveCommentOrReply(dataForSave,isFirstComment){
   let savedData = JSON.stringify({
       author: dataForSave["author"],
       work: dataForSave["work"],
@@ -140,7 +140,7 @@ function saveCommentOrReply(dataForSave,isComment){
       startIndex: dataForSave["startIndex"],
       endIndex: dataForSave["endIndex"],
       commentText: dataForSave["commentText"],
-      commentType: isComment?dataForSave["commentType"]:null, // if this is saving reply type will be null
+      commentType: isFirstComment?dataForSave["commentType"]:null, // if this is saving reply type will be null
       visibility: dataForSave["visibility"]
   });
   API.request({
@@ -152,20 +152,24 @@ function saveCommentOrReply(dataForSave,isComment){
     launchToastNotifcation(data['message']);
     let firstCommentData,type;
     //reply to other user's comment
-    if(!isComment){
+    if(!isFirstComment){
       var firstCommentId = $("#replies").attr("data-firstCommentId");
-      refreshReplyBox(dataForSave["author"],dataForSave["work"],$("#"+firstCommentId).attr("creator"),firstCommentId);
-      firstCommentData = {
-        creator: dataForSave["author"],
-        work: dataForSave["work"],
-        commenter:$("#"+firstCommentId).attr("creator"),
-        hash: firstCommentId
-      };
-      type = undefined;
+      refreshReplyBox(dataForSave["author"],dataForSave["work"],$(".commented-selection"+"[commentId = '"+firstCommentId+"']").attr("creator"),firstCommentId);
+      // firstCommentData = {
+      //   creator: dataForSave["author"],
+      //   work: dataForSave["work"],
+      //   commenter:$(".commented-selection"+"[commentId = '"+firstCommentId+"']").attr("creator"),
+      //   hash: firstCommentId
+      // };
+      // type = undefined;
     }
     // the first comment
     else{
       let approved;
+      let index = {
+        'start':$('.'+escapeSpecialChar(remSpan)).attr("startIndex"),
+        'end':$('.'+escapeSpecialChar(remSpan)).attr("endIndex")
+      }
       $('.'+escapeSpecialChar(remSpan)).removeAttr('startindex endIndex');
       console.log(data);
       if(data["approval"] == true){
@@ -173,33 +177,25 @@ function saveCommentOrReply(dataForSave,isComment){
       }
       else{
         approved = false;
+        $('.'+escapeSpecialChar(remSpan)).addClass("unapprovedComments");
       }
       $('.'+escapeSpecialChar(remSpan)).attr({
-        'id':data['commentHash'],
+        'commentId':data['commentHash'],
         'creator':currentUser.eppn,
         'typeof':dataForSave['commentType'],
         'approved':approved
       });
+      $("<param/>",{class : 'startDiv', commentId:data['commentHash'], startIndex:index["start"], colorId: 0}).insertBefore('.'+escapeSpecialChar(remSpan));
+      $("<param/>",{class : 'endDiv', commentId : data['commentHash'], endIndex : index["end"], colorId: 0 }).insertAfter('.'+escapeSpecialChar(remSpan));
       $('.'+escapeSpecialChar(remSpan)).removeClass(remSpan);
+      let allComments = createCommentData();
+      handleStartEndDiv(allComments);
       updateTypeSelector(dataForSave["replyHash"],dataForSave["commentType"]);
       updateCommenterSelectors();
       //update the click event on this new added comment
-      $("#"+data['commentHash']).off().on("click", function(evt) {
-        var commentSpanId = $(this).attr('id');
-        console.log(evt);
-        clickOnComment(commentSpanId,dataForSave["work"],dataForSave["author"],evt);
-      });
-      firstCommentData = {
-        creator: dataForSave["author"],
-        work: dataForSave["work"],
-        commenter: currentUser.eppn,
-        hash: dataForSave["replyHash"]
-      };
-      type = dataForSave['commentType'];
+      allowClickOnComment(dataForSave["work"],dataForSave["author"]);
     }
-    console.log(dataForSave['commentType']);
-    // this function takes the first comment data
-    checkThreadUnapprovedComments(firstCommentData,type,"AllCommenters",markUnapprovedComments);
+    getUnapprovedComments(dataForSave["author"],dataForSave["work"]);
   });
 }
 
@@ -249,20 +245,19 @@ function editOrDelete(dataForEditOrDelete,isEdit){
   }).then((data)=>{
     launchToastNotifcation(data);
     var firstCommentId = $("#replies").attr("data-firstCommentId");
-    refreshReplyBox(dataForEditOrDelete["creator"],dataForEditOrDelete["work"],$("#"+firstCommentId).attr("creator"),firstCommentId);
+    refreshReplyBox(dataForEditOrDelete["creator"],dataForEditOrDelete["work"],$(".commented-selection"+"[commentId = '"+firstCommentId+"']").attr("creator"),firstCommentId);
     if(isEdit){
       if(dataForEditOrDelete["type"]){
-        $("#"+dataForEditOrDelete["hash"]).attr("typeof",dataForEditOrDelete["type"]);
+        $(".commented-selection"+"[commentId = '"+dataForEditOrDelete["hash"]+"']").attr("typeof",dataForEditOrDelete["type"]);
         updateTypeSelector(dataForEditOrDelete["hash"],dataForEditOrDelete["type"]);
       }
-      autoApprove(dataForEditOrDelete["hash"],dataForEditOrDelete["commenter"],dataForEditOrDelete["work"],dataForEditOrDelete["creator"]);
     }
     else{
       //unhighlight the deleted comment
       //update the commenterSelector and the typeSelector
       if(firstCommentId == $("#replies").attr("deletedid")){
         console.log("should unwrap");
-        removeDeletedSpan(firstCommentId);
+        checkSpansNeedRecover(firstCommentId,removeDeletedSpan);
         updateCommenterSelectors(firstCommentId);
         updateTypeSelector(undefined,"All");
         $("#replies").parent().hide();
@@ -273,33 +268,100 @@ function editOrDelete(dataForEditOrDelete,isEdit){
         let firstCommentData = {
           creator: dataForEditOrDelete["creator"],
           work: dataForEditOrDelete["work"],
-          commenter: $("#"+firstCommentId).attr("creator"),
+          commenter: $(".commented-selection"+"[commentId = '"+firstCommentId+"']").attr("creator"),
           hash: firstCommentId
         }
-        checkThreadUnapprovedComments(firstCommentData,undefined,undefined,markUnapprovedComments);
+        //TODO this function need fix
+        getUnapprovedComments(workCreator,work);
       }
       $("#replies").removeAttr("deletedid");
     }
-
   });
 }
 
-//ADDED SEP 4 Can remove if backend is fixed
-function autoApprove(hash,commenterEppn,work,workCreator){
-  API.request({
-    endpoint: "comments_need_approval/"+workCreator+"/"+work,
-    method: "GET"
-  }).then((data)=>{
-    console.log("autoApprove ",data)
-    if(data == "false"){
-      commentApprovedButtonOnClick(hash,commenterEppn,work,workCreator);
-    }
-  });
-}
-
-//TODO the id should chan
+//TODO the id should change
 function removeDeletedSpan(id){
-  $("#"+id).contents().unwrap();
+  $(".commented-selection"+"[commentId = '"+id+"']").contents().unwrap();
+  $(".startDiv"+"[commentId = '"+id+"']").remove();
+  $(".endDiv"+"[commentId = '"+id+"']").remove();
+}
+
+//TODO clean this funciton
+//Check if start end div have parent hash
+//check if next startDiv startIndex is smaller than the given id's EndDiv endIndex, or prevEndIndex is greater than the given id's startIndex
+function checkSpansNeedRecover(id,callback){
+  let currentStartDiv = $(".startDiv"+"[commentId = '"+id+"']");
+  let currentStartDivIndex = currentStartDiv.attr("startIndex");
+  let currentEndDiv = $(".endDiv"+"[commentId = '"+id+"']");
+  let currentEndDivParentHash =currentEndDiv.attr("parentHash");
+  let currentEndDivIndex = currentEndDiv.attr("endIndex");
+  let prevEndDiv = $(".startDiv"+"[commentId = '"+id+"']").prevAll(".endDiv:first");
+  let prevEndDivIndex = prevEndDiv.attr("endIndex");
+  let nextStartDiv = $(".endDiv"+"[commentId = '"+id+"']").nextAll(".startDiv:first");
+  let nextStartDivIndex = nextStartDiv.attr("startIndex");
+  console.log(currentStartDivIndex,prevEndDivIndex,currentEndDivIndex,nextStartDivIndex);
+  //if parentHash != undefiend, then recover the parent comment
+  if(currentEndDivParentHash!=undefined){
+    //console.log($(".startDiv"+"[commentId = '"+currentEndDivParentHash+"']").nextUntil("endDiv"+"[commentId ='"+currentEndDivParentHash+"']","span"));
+    let parentComment = $(".commented-selection"+"[commentId = '"+currentEndDivParentHash+"']");
+    $(".startDiv"+"[commentId = '"+currentEndDivParentHash+"']").nextUntil("endDiv"+"[commentId ='"+currentEndDivParentHash+"']",'span').each(function(){
+      let span = $(this);
+      if(span.attr("commentid")==id){
+        span.removeClass().addClass("commented-selection");
+        span.attr({
+          "commentid":currentEndDivParentHash,
+          "creator":parentComment.attr("creator"),
+          "typeOf":parentComment.attr("typeOf"),
+          "approved":parentComment.attr("approved")
+        });
+      }
+    });
+    callback(id);
+    //TODO make the adjacent one to one span
+    // $(".commented-selection"+"[commentId = '"+currentEndDivParentHash+"']").wrapAll("<span class = 'tempWrap'/>");
+    // $(".tempWrap").removeClass().addClass("commented-selection").attr({
+    //   "commentid":currentEndDivParentHash,
+    // });
+  }
+  // unwrap the next comment and recreate it with the highlightText function
+  else if(parseInt(nextStartDivIndex) < parseInt(currentEndDivIndex) && nextStartDivIndex != undefined){
+    removeDeletedSpan(id);
+    //console.log($(".commented-selection"+"[commentId = '"+nextStartDiv.attr("commentId")+"']"));
+    let commentNeedRecover = $(".commented-selection"+"[commentId = '"+nextStartDiv.attr("commentId")+"']");
+    let endDivForRecover = $(".endDiv"+"[commentId = '"+nextStartDiv.attr("commentId")+"']");
+    let recoverData = {
+      startIndex: nextStartDivIndex,
+      endIndex: endDivForRecover.attr("endIndex"),
+      commentType: commentNeedRecover.attr("typeOf"),
+      eppn: commentNeedRecover.attr("creator"),
+      hash: commentNeedRecover.attr("commentId"),
+      approved: commentNeedRecover.attr("approved")
+    }
+    callback(nextStartDiv.attr("commentId"));
+    highlightText(recoverData);
+  }
+  else if (parseInt(prevEndDivIndex) > parseInt(currentStartDivIndex) && prevEndDivIndex != undefined){
+    removeDeletedSpan(id);
+    //console.log($(".commented-selection"+"[commentId = '"+prevEndDiv.attr("commentId")+"']"));
+    let commentNeedRecover = $(".commented-selection"+"[commentId = '"+prevEndDiv.attr("commentId")+"']");
+    let startDivForRecover = $(".startDiv"+"[commentId = '"+prevEndDiv.attr("commentId")+"']");
+    let recoverData = {
+      startIndex: prevEndDivIndex,
+      endIndex: startDivForRecover.attr("startIndex"),
+      commentType: commentNeedRecover.attr("typeOf"),
+      eppn: commentNeedRecover.attr("creator"),
+      hash: commentNeedRecover.attr("commentId"),
+      approved: commentNeedRecover.attr("approved")
+    }
+    callback(prevEndDiv.attr("commentId"));
+    highlightText(recoverData);
+  }
+  else{
+    $(".startDiv"+"[parentHash = '"+id+"']").removeAttr("parentHash");
+    $(".endDiv"+"[parentHash = '"+id+"']").removeAttr("parentHash");
+    callback(id);
+  }
+  handleStartEndDiv(createCommentData());
 }
 
 function exitButtonOnClick(){

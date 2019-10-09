@@ -78,23 +78,24 @@ class Comments
                 $jsonData->approved = TRUE;
             } else {
                 $jsonData->approved = FALSE;
-            }
 
-            /**
-             * Register a comment with the unapproved "registry"
-             */
-            $ancestorData = $this->getFirstLevelMetaFromCommentPath($fileToModify);
-            if (is_int($ancestorData) && $ancestorData == -1) {
-                return json_encode(array(
-                    "status" => "error",
-                    "message" => "unable to get ancestor info for the new comment"
-                ));
-            }
-            if (!$this->unapprovedComments->registerUnapprovedComment($ancestorData["eppn"], $ancestorData["hash"], $commenterEppn, $commentHash, $fileToModify)) {
-                return json_encode(array(
-                    "status" => "error",
-                    "message" => "unable to unregister an unapproved comment"
-                ));
+                /**
+                 * Register a comment with the unapproved "registry" b/c this
+                 * comment was edited by someone not on the permissions list
+                 */
+                $ancestorData = $this->getFirstLevelMetaFromCommentPath($fileToModify);
+                if (is_int($ancestorData) && $ancestorData == -1) {
+                    return json_encode(array(
+                        "status" => "error",
+                        "message" => "unable to get ancestor info for the new comment"
+                    ));
+                }
+                if (!$this->unapprovedComments->registerUnapprovedComment($ancestorData["eppn"], $ancestorData["hash"], $commenterEppn, $commentHash, $fileToModify)) {
+                    return json_encode(array(
+                        "status" => "error",
+                        "message" => "unable to unregister an unapproved comment"
+                    ));
+                }
             }
         }
         $jsonData->commentText = $text;

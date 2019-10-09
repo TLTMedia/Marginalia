@@ -8,21 +8,26 @@ class Users
     }
 
     /**
+     * Create User
+     */
+    
+
+    /**
      * Returns a list of all the work creators
      */
     public function getCreators()
     {
         $userFolder = glob("../../users/*");
-        $allNetIDs = array();
+        $allNetIDs  = array();
 
         foreach ($userFolder as $userid) {
-            $netid = substr($userid, strrpos($userid, '/') + 1);;
+            $netid = substr($userid, strrpos($userid, '/') + 1);
             array_push($allNetIDs, $netid);
         }
 
         return json_encode(array(
             "status" => "ok",
-            "data" => $allNetIDs
+            "data"   => $allNetIDs,
         ));
     }
 
@@ -31,14 +36,14 @@ class Users
      */
     public function getCurrentUser($firstName, $lastName, $eppn)
     {
-        $user = json_decode("{}");
+        $user            = json_decode("{}");
         $user->firstname = $firstName;
-        $user->lastname = $lastName;
-        $user->eppn = $eppn;
+        $user->lastname  = $lastName;
+        $user->eppn      = $eppn;
 
         return json_encode(array(
             "status" => "ok",
-            "data" => $user
+            "data"   => $user,
         ));
     }
 
@@ -48,8 +53,8 @@ class Users
     public function getUserWorks($eppn, $currentEppn)
     {
         require 'Permissions.php';
-        $permissions = new Permissions($this->path);
-        $allWorks = array();
+        $permissions   = new Permissions($this->path);
+        $allWorks      = array();
         $userWorksPath = $this->path . $eppn . "/works/";
         foreach (glob($userWorksPath . "*") as $work) {
             $workName = substr($work, strrpos($work, '/') + 1);
@@ -68,7 +73,7 @@ class Users
 
         return json_encode(array(
             "status" => "ok",
-            "data" => $allWorks
+            "data"   => $allWorks,
         ));
     }
 
@@ -80,8 +85,8 @@ class Users
         $workIndex = $pathOfWork . "/index.html";
         if (!file_exists($workIndex)) {
             return json_encode(array(
-                "status" => "error",
-                "message" => "work does not exist"
+                "status"  => "error",
+                "message" => "work does not exist",
             ));
         }
 
@@ -89,45 +94,45 @@ class Users
         $permissions = new Permissions($this->path);
         if (!$permissions->isWorkPublic($pathOfWork)) {
             if ($permissions->userOnPermissionsList($pathOfWork, $currentEppn)) {
-                if ($permissions->commentsNeedsApproval($pathOfWork)){
+                if ($permissions->commentsNeedsApproval($pathOfWork)) {
                     return json_encode(array(
-                        "status" => "ok",
-                        "data" => file_get_contents($workIndex),
-                        "admin" => TRUE, // must be to reach here,
-                        "privacy" => "private",
-                        "approval" => "needApproval"
+                        "status"   => "ok",
+                        "data"     => file_get_contents($workIndex),
+                        "admin"    => true, // must be to reach here,
+                         "privacy"  => "private",
+                        "approval" => "needApproval",
                     ));
                 } else {
                     return json_encode(array(
-                        "status" => "ok",
-                        "data" => file_get_contents($workIndex),
-                        "admin" => TRUE, // must be to reach here,
-                        "privacy" => "private",
-                        "approval" => "noApproval"
+                        "status"   => "ok",
+                        "data"     => file_get_contents($workIndex),
+                        "admin"    => true, // must be to reach here,
+                         "privacy"  => "private",
+                        "approval" => "noApproval",
                     ));
                 }
             } else {
                 return json_encode(array(
-                    "status" => "error",
-                    "message" => "invalid permissions to view work"
+                    "status"  => "error",
+                    "message" => "invalid permissions to view work",
                 ));
             }
         } else {
             if ($permissions->commentsNeedsApproval($pathOfWork)) {
                 return json_encode(array(
-                    "status" => "ok",
-                    "data" => file_get_contents($workIndex),
-                    "admin" => $permissions->userOnPermissionsList($pathOfWork, $currentEppn),
-                    "privacy" => "public",
-                    "approval" => "needApproval"
+                    "status"   => "ok",
+                    "data"     => file_get_contents($workIndex),
+                    "admin"    => $permissions->userOnPermissionsList($pathOfWork, $currentEppn),
+                    "privacy"  => "public",
+                    "approval" => "needApproval",
                 ));
             } else {
                 return json_encode(array(
-                    "status" => "ok",
-                    "data" => file_get_contents($workIndex),
-                    "admin" => $permissions->userOnPermissionsList($pathOfWork, $currentEppn),
-                    "privacy" => "public",
-                    "approval" => "noApproval"
+                    "status"   => "ok",
+                    "data"     => file_get_contents($workIndex),
+                    "admin"    => $permissions->userOnPermissionsList($pathOfWork, $currentEppn),
+                    "privacy"  => "public",
+                    "approval" => "noApproval",
                 ));
             }
         }
