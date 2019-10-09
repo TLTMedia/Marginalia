@@ -31,7 +31,9 @@ class Users
      */
     public function getCurrentUser($firstName, $lastName, $eppn)
     {
-        $user            = json_decode("{}");
+        $this->__createUserIfNotExists($eppn);
+
+        $user            = json_decode("");
         $user->firstname = $firstName;
         $user->lastname  = $lastName;
         $user->eppn      = $eppn;
@@ -133,4 +135,10 @@ class Users
         }
     }
 
+    private function __createUserIfNotExists($eppn)
+    {
+        if (!is_dir($this->path . $eppn)) {
+            mkdir($this->path . $eppn, 0777);
+        }
+    }
 }
