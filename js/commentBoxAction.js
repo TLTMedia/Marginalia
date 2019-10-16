@@ -154,18 +154,13 @@ function saveCommentOrReply(dataForSave, isFirstComment) {
         let firstCommentData, type;
         //reply to other user's comment
         if (!isFirstComment) {
+            console.log("hu")
             var firstCommentId = $("#replies").attr("data-firstCommentId");
             refreshReplyBox(dataForSave["author"], dataForSave["work"], $(".commented-selection" + "[commentId = '" + firstCommentId + "']").attr("creator"), firstCommentId);
-            // firstCommentData = {
-            //   creator: dataForSave["author"],
-            //   work: dataForSave["work"],
-            //   commenter:$(".commented-selection"+"[commentId = '"+firstCommentId+"']").attr("creator"),
-            //   hash: firstCommentId
-            // };
-            // type = undefined;
         }
         // the first comment
         else {
+          console.log("yo")
             let approved;
             let index = {
                 'start': $('.' + escapeSpecialChar(remSpan)).attr("startIndex"),
@@ -237,7 +232,6 @@ function editOrDelete(dataForEditOrDelete, isEdit) {
     } else {
         endPoint = "delete_comment";
     }
-    console.log(commonData);
     API.request({
         endpoint: endPoint,
         method: "POST",
@@ -257,9 +251,7 @@ function editOrDelete(dataForEditOrDelete, isEdit) {
             //unhighlight the deleted comment
             //update the commenterSelector and the typeSelector
             if (firstCommentId == $("#replies").attr("deletedid")) {
-                console.log("should unwrap");
                 checkSpansNeedRecover(firstCommentId, removeDeletedSpan);
-                //removeDeletedSpan(firstCommentId);
                 updateCommenterSelectors(firstCommentId);
                 updateTypeSelector(undefined, "All");
                 $("#replies").parent().hide();
@@ -273,8 +265,9 @@ function editOrDelete(dataForEditOrDelete, isEdit) {
                     commenter: $(".commented-selection" + "[commentId = '" + firstCommentId + "']").attr("creator"),
                     hash: firstCommentId
                 }
-                getUnapprovedComments(workCreator, work);
             }
+            allowClickOnComment(dataForEditOrDelete["work"], dataForEditOrDelete["creator"])
+            getUnapprovedComments(dataForEditOrDelete["creator"], dataForEditOrDelete["work"]);
             $("#replies").removeAttr("deletedid");
         }
     });
@@ -302,7 +295,6 @@ function checkSpansNeedRecover(id, callback) {
     console.log(currentStartDivIndex, prevEndDivIndex, currentEndDivIndex, nextStartDivIndex);
     //if parentHash != undefiend, then recover the parent comment
     if (currentEndDivParentHash != undefined) {
-        //console.log($(".startDiv"+"[commentId = '"+currentEndDivParentHash+"']").nextUntil("endDiv"+"[commentId ='"+currentEndDivParentHash+"']","span"));
         let parentComment = $(".commented-selection" + "[commentId = '" + currentEndDivParentHash + "']");
         $(".startDiv" + "[commentId = '" + currentEndDivParentHash + "']").nextUntil("endDiv" + "[commentId ='" + currentEndDivParentHash + "']", 'span').each(function () {
             let span = $(this);
@@ -318,13 +310,22 @@ function checkSpansNeedRecover(id, callback) {
         });
         callback(id);
         //TODO make the adjacent one to one span
-        // $(".commented-selection"+"[commentId = '"+currentEndDivParentHash+"']").wrapAll("<span class = 'tempWrap'/>");
-        // $(".tempWrap").removeClass().addClass("commented-selection").attr({
-        //   "commentid":currentEndDivParentHash,
-        // });
+        let pCommentCreator = parentComment.attr("creator");
+        let pCommentType = parentComment.attr("typeOf");
+        let pCommentApproved = parentComment.attr("approved");
+        $(".commented-selection"+"[commentId = '"+currentEndDivParentHash+"']").wrapAll("<span class = 'tempWrap'/>");
+        $(".tempWrap").removeClass().addClass("commented-selection").attr({
+          "commentid":currentEndDivParentHash,
+          "creator": pCommentCreator,
+          "typeOf": pCommentType,
+          "approved": pCommentApproved
+        });
+        allowClickOnComment($("#setting").attr("work"),$("#setting").attr("author"));
+        getUnapprovedComments($("#setting").attr("author"),$("#setting").attr("work"))
     }
-    // unwrap the next comment and recreate it with the highlightText function
+    // unwrap the next comment and recreate it with the highlightText()
     else if (parseInt(nextStartDivIndex) < parseInt(currentEndDivIndex) && nextStartDivIndex != undefined) {
+      console.log("cover the one after")
         removeDeletedSpan(id);
         //console.log($(".commented-selection"+"[commentId = '"+nextStartDiv.attr("commentId")+"']"));
         let commentNeedRecover = $(".commented-selection" + "[commentId = '" + nextStartDiv.attr("commentId") + "']");
@@ -337,17 +338,20 @@ function checkSpansNeedRecover(id, callback) {
             hash: commentNeedRecover.attr("commentId"),
             approved: commentNeedRecover.attr("approved")
         }
+        console.log(recoverData)
         callback(nextStartDiv.attr("commentId"));
         highlightText(recoverData);
     }
+    //unwrap the previous comment and recreate it with highlightText()
     else if (parseInt(prevEndDivIndex) > parseInt(currentStartDivIndex) && prevEndDivIndex != undefined) {
+        console.log("cover the one before")
         removeDeletedSpan(id);
         //console.log($(".commented-selection"+"[commentId = '"+prevEndDiv.attr("commentId")+"']"));
         let commentNeedRecover = $(".commented-selection" + "[commentId = '" + prevEndDiv.attr("commentId") + "']");
         let startDivForRecover = $(".startDiv" + "[commentId = '" + prevEndDiv.attr("commentId") + "']");
         let recoverData = {
-            startIndex: prevEndDivIndex,
-            endIndex: startDivForRecover.attr("startIndex"),
+            startIndex: startDivForRecover.attr("startIndex"),
+            endIndex: prevEndDivIndex,
             commentType: commentNeedRecover.attr("typeOf"),
             eppn: commentNeedRecover.attr("creator"),
             hash: commentNeedRecover.attr("commentId"),

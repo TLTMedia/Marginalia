@@ -27,6 +27,7 @@ html {
 /* single reply*/
 
 .replies {
+    display : block;
     padding-left: 10px;
     border-left: 3px solid #d7d3d1;
     background-color: #efebe9;
@@ -36,7 +37,7 @@ html {
     color: grey;
 }
 
-.unapproved i {
+i.unapproved {
     font-size: 14px;
 }
 
@@ -44,7 +45,7 @@ html {
     color: blue;
 }
 
-.private i {
+ i.private {
     font-size: 14px;
 }
 
@@ -60,7 +61,7 @@ html {
 }
 
 .replyText {
-    margin-bottom: 15px;
+    margin-bottom: 0px;
     margin-left: 0px;
     margin-top: 12px;
     padding-left: 5px;
@@ -79,29 +80,7 @@ html {
     margin-right: 30px;
     float: right;
 }
-
-
-/* #text span {
-  background-color: #48c448;
-
-}
-
-#text span span {
-  background-color: #309b30;
-}
-
-#text span span span {
-  background-color: #238423;
-}
-
-#text span span span span {
-  background-color: #186818;
-} */
-
-/* .content {
-    width: 100%;
-    height: 100%;
-} */
+/*----------------------------------------*/
 
 #home {
     float: left;
@@ -1049,6 +1028,17 @@ input[type="file"] {
         -webkit-transform: rotat
     }
 }
+/*-----------------repliesToolBar----------------*/
+.toolBar{
+  display: block;
+  height: 40px;
+}
+
+.toolBar > button{
+  margin-right: 10px;
+  float: left;
+}
+
 /*-----------------commentSizeIndicator----------------*/
 .startDiv{
   display:inline;
@@ -1721,7 +1711,7 @@ input[type="file"] {
     /* padding: 4%; */
     padding: 40px 40px 40px 40px;
 }
-    
+
 #firstPage {
     max-height: 700px;
     display: flex;

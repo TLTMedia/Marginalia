@@ -114,11 +114,6 @@ function createReplies(dataForReplies) {
     if (parentHash != null) {
         $(".replies" + "[commentid = '" + parentHash + "']").append(replyBox);
         $(".replies" + "[commentid = '" + parentHash + "']").attr("haschild", "1");
-        //if this is a deleted comment
-        // hide the dev if the current comment is a deleted comment
-        // if(firstName == 'deleted' && lastName == 'deleted'){
-        //   $(".replies"+"[commentid = '"+hash+"']").hide();
-        // }
         //shows the deleted reply if it has a child
         if ($(".replies" + "[commentid = '" + parentHash + "']").attr("haschild") == 1) {
             $(".replies" + "[commentid = '" + parentHash + "']").show();
@@ -129,7 +124,41 @@ function createReplies(dataForReplies) {
         $("#replies").append(replyBox);
         $("#r" + hash).addClass("firstComment");
     }
-    createMenuForComment(inText, hash, eppn, hashForReply, approved, public, work, workCreator)
+    createToolBar(inText, hash, eppn, hashForReply, approved, public, work, workCreator);
+}
+
+function createToolBar(inText, hash, eppn, hashForReply, approved, public, work, workCreator){
+    let toolBar = $("<div/>",{
+      class: "toolBar",
+      commentId : hash
+    });
+    $(".replies"+"[commentid = '"+hash+"']").append(toolBar);
+    let replyButton = $("<button/>",{
+        class: "replyToComments mdl-button mdl-js-button",
+        commentId: hash,
+        click: (evt)=>{
+          replyButtonOnClick(evt, hash);
+        }
+    });
+    replyButton.html("<i class = 'material-icons'> reply </i> <label>Reply</label>");
+    let editButton = $("<button/>",{
+      class: "editComments mdl-button mdl-js-button",
+      commentId: hash,
+      click: (evt)=>{
+        editButtonOnClick(evt, inText, hash);
+      }
+    });
+    editButton.html("<i class = 'material-icons'> edit </i> <label>Edit</label>");
+    if(approved && isCurrentUserSelectedUser(eppn, false)){
+      toolBar.append(replyButton, editButton);
+    }
+    else if (approved && !isCurrentUserSelectedUser(eppn, false)){
+      toolBar.append(replyButton);
+    }
+    else if (!approved && isCurrentUserSelectedUser(eppn, false)){
+      toolBar.append(editButton);
+    }
+    createMenuForComment(inText, hash, eppn, hashForReply, approved, public, work, workCreator);
 }
 
 
@@ -143,30 +172,15 @@ function createMenuForComment(inText, hash, eppn, hashForReply, approved, public
         }
     });
     var icon = $("<i/>", {
-        class: "material_icons",
-        text: "..."
+        class: "material-icons",
+        text: "more_vert"
     });
+    $(commentMenuButton).append(icon);
     //create Buttons
     var menu = $("<ul/>", {
         class: "commentMenu mdl-menu--bottom-right mdl-menu mdl-js-menu",
         for: "m" + hash,
         commentid: hash
-    });
-    var menuReply = $("<li/>", {
-        class: "replyToComments mdl-menu__item",
-        text: "Reply",
-        commentid: hash,
-        click: (evt) => {
-            replyButtonOnClick(evt);
-        }
-    });
-    var menuEdit = $("<li/>", {
-        class: "editComments mdl-menu__item",
-        text: "Edit",
-        commentid: hash,
-        click: (evt) => {
-            editButtonOnClick(evt, inText, hash);
-        }
     });
     var menuDelete = $("<li/>", {
         class: "deleteComments mdl-menu__item",
@@ -192,19 +206,22 @@ function createMenuForComment(inText, hash, eppn, hashForReply, approved, public
             commentPrivateButtonOnClick(evt, work, workCreator, true);
         }
     });
-    var menuApprove = $("<li/>", {
+    var menuApproveOrUnapprove = $("<li/>", {
         class: "approveComments mdl-menu__item",
-        text: "Approve",
+        text: !(approved) ? "Approve" : "Unapprove",
         commentid: hash,
         click: (evt) => {
             var commenterEppn = eppn;
-            commentApprovedButtonOnClick(hash, commenterEppn, work, workCreator);
+            commentApprovedOrUnapprovedButtonOnClick(hash, commenterEppn, work, workCreator, approved);
         }
     });
-    $(commentMenuButton).append(icon);
+
     //comment is approved and currentUser is the comment creator
     if (approved && isCurrentUserSelectedUser(eppn, false)) {
-        $(menu).append(menuReply, menuEdit, menuDelete);
+        $(menu).append(menuDelete);
+        if(isCurrentUserSelectedUser(workCreator, false)){
+            $(menu).append(menuApproveOrUnapprove);
+        }
         if (public) {
             $(menu).append(menuSetPrivate);
         }
@@ -214,26 +231,24 @@ function createMenuForComment(inText, hash, eppn, hashForReply, approved, public
     }
     //comment is approved and currentUser is not the comment creator
     else if (approved && !isCurrentUserSelectedUser(eppn, false)) {
-        $(menu).append(menuReply);
+        // if the currentUser is the author of the work
+        if(isCurrentUserSelectedUser(workCreator,false)){
+          $(menu).append(menuApproveOrUnapprove);
+        }
     }
     // comment is unapproved and currentUser is the comment creator
     else if (!approved) {
-        if (isCurrentUserSelectedUser(eppn, false)) {
-            $(menu).append(menuEdit);
-        }
-        //TODO not sure why it only works when set it to string
-        //Assuming that no boolean can be stored on DOM element attr
         if ($("#replies").attr("isCurrentUserAdmin") == "true") {
-            $(menu).append(menuApprove, menuDelete);
+            $(menu).append(menuApproveOrUnapprove, menuDelete);
         }
         else {
             $(menu).append(menuDelete);
         }
-
     }
-    var span = $("#r" + hash);
-    if (span.text() != 'deleted') {
-        span.append(commentMenuButton, menu);
+    var functionPlane = $(".toolBar" + "[commentId = '"+hash+"']");
+    var textSpan = $("#r"+hash);
+    if (textSpan.text() != 'deleted' && $(menu).has("li").length != 0) {
+        functionPlane.append(commentMenuButton, menu);
     }
     componentHandler.upgradeAllRegistered();
 }
@@ -241,10 +256,6 @@ function createMenuForComment(inText, hash, eppn, hashForReply, approved, public
 function commentMenuOnClick(rid) {
     $(".commentMenu").hide();
     $(".commentMenu" + "[commentid = '" + rid + "']").show();
-    console.log("commentMenuOnClick");
-    var replyToEppn = $(".replies" + "[commentid = '" + rid + "']").attr('name');
-    $("#commentBox").attr("data-replyToEppn", replyToEppn);
-    $("#commentBox").attr("data-replyToHash", rid);
     $("#commentSave").show();
     $("#commentExit").text("Exit");
     $(".commentMenu").children("li").hide();
@@ -252,7 +263,10 @@ function commentMenuOnClick(rid) {
     CKEDITOR.instances.textForm.setReadOnly(false);
 }
 
-function replyButtonOnClick(evt) {
+function replyButtonOnClick(evt, hash) {
+    var replyToEppn = $(".replies" + "[commentid = '" + hash + "']").attr('name');
+    $("#commentBox").attr("data-replyToEppn", replyToEppn);
+    $("#commentBox").attr("data-replyToHash", hash);
     CKEDITOR.instances.textForm.setData("");
     $('.commentTypeDropdown').attr('disabled', true);
     var firstCommentId = $('#replies').attr('data-firstCommentId');
@@ -283,12 +297,12 @@ function deleteButtonOnClick(hash, eppn, hashForReply, work, workCreator) {
 function commentPrivateButtonOnClick(evt, work, workCreator, setPublic) {
     var commentId = evt["currentTarget"]["attributes"]["commentid"]["value"];
     var commenterEppn = $(".replies" + "[commentId = '" + commentId + "']").attr("name");
-    var data = JSON.stringify({
+    var data = {
         creator: workCreator,
         work: work,
         comment_hash: commentId,
         public: setPublic ? true : false
-    });
+    };
     API.request({
         endpoint: "set_comment_public",
         method: "POST",
@@ -306,26 +320,27 @@ function commentPrivateButtonOnClick(evt, work, workCreator, setPublic) {
     });
 }
 
-function commentApprovedButtonOnClick(hash, commenterEppn, work, workCreator) {
+function commentApprovedOrUnapprovedButtonOnClick(hash, commenterEppn, work, workCreator, approved) {
     console.log(hash)
-    var data = JSON.stringify({
+    var data ={
         creator: workCreator,
         work: work,
         commenterEppn: commenterEppn,
         comment_hash: hash
-    });
+    };
+    let endpoint;
+    if(approved){
+      endpoint = "unapprove_comment"
+    }
+    else{
+      endpoint = "approve_comment"
+    }
     API.request({
-        endpoint: "approve_comment",
+        endpoint: endpoint,
         method: "POST",
         data: data
     }).then((data) => {
         launchToastNotifcation(data);
-        if ($(".commented-selection" + "[commentId = '" + hash + "']").length != 0) {
-            $(".commented-selection" + "[commentId = '" + hash + "']").attr("approved", true).removeClass("unapprovedComments");
-        }
-        let currentSelectedType = $(".typeSelector").attr("currentTarget");
-        let currentSelectedCommenter = $(".commenterSelector").attr("currentTarget");
-        console.log(currentSelectedType, currentSelectedCommenter);
         let firstCommentHash = $("#replies").attr("data-firstCommentId");
         let firstCommenter = $(".replies" + "[commentId = '" + firstCommentHash + "']").attr("name");
         let firstCommentData = {
@@ -334,8 +349,7 @@ function commentApprovedButtonOnClick(hash, commenterEppn, work, workCreator) {
             commenter: firstCommenter,
             hash: firstCommentHash
         }
-        //TODO this function need to get fixed
-        //getUnapprovedComments(workCreator,work);
+        getUnapprovedComments(workCreator,work);
         refreshReplyBox(workCreator, work, firstCommenter, firstCommentHash);
     });
 }
@@ -362,6 +376,7 @@ function hideReplyBox() {
 //commenter : the first commenter
 //hash : the first comment hash
 function refreshReplyBox(creator, work, commenter, hash) {
+    console.log(creator, work, commenter, hash);
     $("#replies").empty();
     let comment_data = {
         creator: creator,
