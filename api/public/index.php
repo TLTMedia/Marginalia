@@ -248,12 +248,31 @@ $app->get("/get_highlights", function () use ($app, $PATH, $parameters, $authUni
     require "../Actions/Comments.php";
     $comments = new Comments($app->log, $PATH, $data["creator"], $data["work"]);
 
-    // TODO: need to test to see if this is necessary
-    $app->response->header("Content-Type", "application/json");
     echo $comments->getHighlights(
         $data["creator"],
         $data["work"],
         $authUniqueId
+    );
+});
+
+/**
+ * Get highlights/first level comment meta data (not the text of the comment)
+ */
+$app->get("/get_highlights_filtered", function () use ($app, $PATH, $parameters, $authUniqueId) {
+    $data = $app->request->get();
+    $parameters->paramCheck($data, array(
+        "creator", "work", "filterEppn", "filterType",
+    ));
+
+    require "../Actions/Comments.php";
+    $comments = new Comments($app->log, $PATH, $data["creator"], $data["work"]);
+
+    echo $comments->getHighlightsFiltered(
+        $data["creator"],
+        $data["work"],
+        $authUniqueId,
+        $data["filterEppn"],
+        $data["filterType"]
     );
 });
 
@@ -316,7 +335,7 @@ $app->post("/create_work", function () use ($app, $PATH, $SKELETON_PATH, $parame
         exit;
     }
 
-    require "../Actions/CreateWork.php";
+    require "../Actions/Work.php";
     $newWork = new CreateWork($PATH, $SKELETON_PATH);
 
     echo $newWork->init(
@@ -324,6 +343,23 @@ $app->post("/create_work", function () use ($app, $PATH, $SKELETON_PATH, $parame
         $data["work"],
         $data["privacy"],
         $tempFile
+    );
+});
+
+/**
+ * Create a new work
+ */
+$app->post("/delete_work", function () use ($app, $PATH, $parameters, $authUniqueId) {
+    $data = $app->request->post();
+    $parameters->paramCheck($data, array(
+        "work", "creator",
+    ));
+
+    require "../Actions/Work.php";
+    $work = new Work($PATH, $data["creator"], $data["work"]);
+
+    echo $work->deleteWork(
+        $authUniqueId
     );
 });
 
@@ -362,6 +398,27 @@ $app->post("/approve_comment", function () use ($app, $PATH, $parameters, $authU
     $comments = new Comments($app->log, $PATH, $data["creator"], $data["work"]);
 
     echo $comments->approveComment(
+        $authUniqueId,
+        $data["creator"],
+        $data["work"],
+        $data["comment_hash"],
+        $data["commenterEppn"]
+    );
+});
+
+/**
+ * Approve a comment for public viewing
+ */
+$app->post("/unapprove_comment", function () use ($app, $PATH, $parameters, $authUniqueId) {
+    $data = json_decode($app->request->getBody(), true);
+    $parameters->paramCheck($data, array(
+        "creator", "work", "commenterEppn", "comment_hash",
+    ));
+
+    require "../Actions/Comments.php";
+    $comments = new Comments($app->log, $PATH, $data["creator"], $data["work"]);
+
+    echo $comments->unapproveComment(
         $authUniqueId,
         $data["creator"],
         $data["work"],

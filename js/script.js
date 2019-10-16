@@ -13,6 +13,8 @@ init = async ({ api = api, users = users } = {}) => {
     API = api;
     currentUser = users.current_user;
 
+    const host = "apps.tlt.stonybrook.edu";
+
     $(".loader").hide();
     $("#text").hide();
     $("#addLitBase").hide();
@@ -27,6 +29,27 @@ init = async ({ api = api, users = users } = {}) => {
     $.address.externalChange((evt) => {
         console.log("externalChange");
         loadFromDeepLink();
+    });
+
+    $(document).ajaxComplete(function () {
+        (function bindRedirectConfirmation(specific = "a") {
+            $(specific).one("click", function (event) {
+                if ((this.href).indexOf(host) !== -1) {
+                    console.log("do nothing is same host");
+                } else if ((this.href).indexOf("javascript:void(0);") !== -1) {
+                    console.log("do nothing is javascript void event");
+                } else {
+                    event.preventDefault();
+                    let res = confirm("Are you sure you want to visit the URL:\n\n" + this.href);
+                    if (res) {
+                        window.location = this.href;
+                    } else {
+                        bindRedirectConfirmation(this);
+                        return;
+                    }
+                }
+            });
+        })();
     });
 }
 
@@ -46,7 +69,6 @@ function buildHTMLFile(litContents, selected_eppn, textChosen) {
         makeDraggableReplyBox();
         hideAllBoxes();
     } else {
-        console.log("change doc ---------------")
         //TODO find a better way to do this (figure out why makeDraggableCommentBox is breaking the code if we call it twice)
         $("#commentSave").off().on("click", () => {
             saveButtonOnClick(selected_eppn, textChosen);
@@ -136,21 +158,47 @@ function makeDropDown() {
   Each is mapped with its cooresponding Hex-Encoded UNIX timestamp
   The student selection menu is filled with each student's netid
 */
-loadUserComments = (selected_eppn, textChosen) => {
-    $("#text").hide();
-    $("#textSpace").hide();
-    $("#textTitle").hide();
-    let endpoint = "get_highlights";
+
+loadUserComments = (selected_eppn, textChosen, selectedType, selectedCommenter) => {
+    let endpoint, data;
+    let isTypeAndCommenterUndefiend = (selectedType == undefined && selectedCommenter == undefined);
+    if (isTypeAndCommenterUndefiend) {
+        $("#text").hide();
+        $("#textSpace").hide();
+        $("#textTitle").hide();
+        endpoint = "get_highlights";
+        data = {
+          creator : selected_eppn,
+          work : textChosen
+        }
+    }
+    // only reach here when selectorOnSelect() is called
+    else {
+      console.log(selectedType, selectedCommenter)
+      endpoint = "get_highlights_filtered";
+      data = {
+        creator : selected_eppn,
+        work : textChosen,
+        filterEppn : selectedCommenter == "AllCommenters" ? "" : selectedCommenter,
+        filterType: selectedType == "All" ? "" : selectedType
+      }
+    }
     API.request({
         endpoint: endpoint,
-        data: {
-            creator: selected_eppn,
-            work: textChosen
-        },
-    }).then(data => {
-        console.log(data);
-        renderComments(data, selected_eppn, textChosen, getUnapprovedComments);
-        makeSelector(createListOfCommenter(data), colorNotUsedTypeSelector);
+        data: data
+    }).then((data) => {
+        let sortedCommentData = [];
+        for(var i = 0; i < data.length ; i++){
+          let comment = data[i];
+          sortedCommentData = sortCommentsByStartIndex(sortedCommentData,comment);
+        }
+        // reverse the list so the comments are created by the order of the startIndex. (bigger startIndex get created first)
+        reverseSortedCommentData = reverseList(sortedCommentData);
+        console.log(reverseSortedCommentData);
+        renderComments(reverseSortedCommentData, selected_eppn, textChosen, getUnapprovedComments);
+        if (isTypeAndCommenterUndefiend) {
+            makeSelector(createListOfCommenter(data), colorNotUsedTypeSelector);
+        }
     });
 }
 
@@ -160,6 +208,7 @@ renderComments = (commentData, selected_eppn, textChosen, callback) => {
     $("#text").fadeIn();
     $("#textSpace").fadeIn();
     $("#textTitle").fadeIn();
+    let temp;
     for (let i = 0; i < commentData.length; i++) {
         highlightText({
             startIndex: commentData[i].startIndex,
@@ -201,20 +250,8 @@ function highlightText({ startIndex, endIndex, commentType, eppn, hash, approved
         }
     });
     area.applyToRange(range);
-    $("<param/>", { class: 'startDiv', commentId: hash, startIndex: startIndex, isBlue: false }).insertBefore(".commented-selection" + "[commentId = '" + hash + "']");
-    $("<param/>", { class: 'endDiv', commentId: hash, endIndex: endIndex, isBlue: false }).insertAfter(".commented-selection" + "[commentId = '" + hash + "']");
-}
-
-function handleIncorrectTemplate() {
-    console.log($(".commented-selection").has('span'));
-    let incorrectTemplate = $(".commented-selection").has('span');
-    incorrectTemplate.each(function () {
-        let span = $(this);
-        let incorrectTemplateText = span.text();
-        incorrectTemplateText.concat(span.find('span').text());
-        span.empty();
-        span.html(incorrectTemplateText);
-    });
+    $("<param/>", { class: 'startDiv', commentId: hash, startIndex: startIndex, colorId: 0 }).insertBefore(".commented-selection" + "[commentId = '" + hash + "']");
+    $("<param/>", { class: 'endDiv', commentId: hash, endIndex: endIndex, colorId: 0 }).insertAfter(".commented-selection" + "[commentId = '" + hash + "']");
 }
 
 function handleStartEndDiv(commentData) {
@@ -231,20 +268,13 @@ function handleStartEndDiv(commentData) {
         if (endCount > 1) {
             $(".endDiv" + "[commentId = '" + commentData[i].hash + "']").not(":last").remove();
         }
+        let isStartDivExist = $(".startDiv" + "[commentId = '" + commentData[i].hash + "']").length;
         let comment = {
             "hash": commentData[i].hash,
+            // "startIndex":  isStartDivExist!=0 ? $(".startDiv"+"[commentId = '"+commentData[i].hash+"']").attr("startIndex") : $(".hiddenDiv"+"[commentId = '"+commentData[i].hash+"']").attr("startIndex")'
             "startIndex": $(".startDiv" + "[commentId = '" + commentData[i].hash + "']").attr("startIndex")
         }
-        sortedCommentData.unshift(comment);
-        for (var j = 0; j < sortedCommentData.length - 1; j++) {
-            let first = parseInt(sortedCommentData[j]["startIndex"], 10);
-            let second = parseInt(sortedCommentData[j + 1]["startIndex"], 10);
-            if (first > second) {
-                let temp = sortedCommentData[j + 1];
-                sortedCommentData[j + 1] = sortedCommentData[j];
-                sortedCommentData[j] = temp;
-            }
-        }
+        sortedCommentData = sortCommentsByStartIndex(sortedCommentData, comment);
     }
     console.log(sortedCommentData)
     //assign parent hash
@@ -254,24 +284,66 @@ function handleStartEndDiv(commentData) {
     }
 }
 
+function sortCommentsByStartIndex(sortedCommentData, comment) {
+    sortedCommentData.unshift(comment);
+    for (var j = 0; j < sortedCommentData.length - 1; j++) {
+        let first = parseInt(sortedCommentData[j]["startIndex"], 10);
+        let second = parseInt(sortedCommentData[j + 1]["startIndex"], 10);
+        if (first > second) {
+            let temp = sortedCommentData[j + 1];
+            sortedCommentData[j + 1] = sortedCommentData[j];
+            sortedCommentData[j] = temp;
+        }
+    }
+    return sortedCommentData;
+}
+
+function reverseList(list){
+  let rlist = [];
+  for(var i = 0; i < list.length ; i++){
+    rlist.unshift(list[i]);
+  }
+  return rlist;
+}
+
+function handleIncorrectTemplate() {
+    console.log($(".commented-selection").has('span'));
+    let incorrectTemplate = $(".commented-selection").has('span');
+    incorrectTemplate.each(function () {
+        let span = $(this);
+        let incorrectTemplateText = span.text();
+        incorrectTemplateText.concat(span.find('span').text());
+        span.empty();
+        span.html(incorrectTemplateText);
+    });
+}
+
+// TODO make a recursive to check if all it's parent is hidden
 function colorOverLappedComments(commentHash) {
     // remove the parentHash first and reassign them if needed
-    $(".startDiv" + "[commentId = '" + commentHash + "']").removeAttr("parentHash");
-    $(".endDiv" + "[commentId = '" + commentHash + "']").removeAttr("parentHash");
-    // let prevStartDiv = $(".startDiv" + "[commentId = '"+commentHash+"']").closest(".startDiv").prev();
+    // $(".startDiv"+"[commentId = '"+commentHash+"']").removeAttr("parentHash");
+    // $(".endDiv"+"[commentId = '"+commentHash+"']").removeAttr("parentHash");
     let prevStartDiv = $(".startDiv" + "[commentId = '" + commentHash + "']").prevAll(".startDiv:first");
-    // let nextEndDiv = $(".endDiv" + "[commentId = '"+commentHash+"']").closest(".endDiv").next();
     let nextEndDiv = $(".endDiv" + "[commentId = '" + commentHash + "']").nextAll(".endDiv:first");
-    let isPrevStartBlue = prevStartDiv.attr("isBlue");
-    //console.log(prevStartDiv,nextEndDiv);
-    if ((prevStartDiv.attr('commentId') == nextEndDiv.attr("commentId")) && (isPrevStartBlue == "false") && (prevStartDiv.attr('commentId') != undefined)) {
+    let prevStartColorId = parseInt(prevStartDiv.attr("colorId"), 10);
+    //colorId 0:normal, 1:colorOneComments, 2:colorTwoComments, 3:colorThreeComments,4: colorFourComments
+    if ((prevStartDiv.attr('commentId') == nextEndDiv.attr("commentId")) && (prevStartDiv.attr('commentId') != undefined)) {
         if ($(".commented-selection" + "[commentId = '" + prevStartDiv.attr('commentId') + "']").length != 0) {
-            $(".startDiv" + "[commentId = '" + commentHash + "']").attr("parentHash", nextEndDiv.attr("commentId"));
-            $(".startDiv" + "[commentId = '" + commentHash + "']").attr("isBlue", true);
-            $(".endDiv" + "[commentId = '" + commentHash + "']").attr("parentHash", nextEndDiv.attr("commentId"));
-            $(".endDiv" + "[commentId = '" + commentHash + "']").attr("isBlue", true);
-            $(".commented-selection" + "[commentId = '" + commentHash + "']").addClass("blueComments");
-            console.log("colored", prevStartDiv, nextEndDiv);
+            let startDiv = $(".startDiv" + "[commentId = '" + commentHash + "']");
+            let endDiv = $(".endDiv" + "[commentId = '" + commentHash + "']");
+            startDiv.attr("parentHash", nextEndDiv.attr("commentId"));
+            endDiv.attr("parentHash", nextEndDiv.attr("commentId"));
+            let commentsColorClass = ["", "colorOneComments", "colorTwoComments", "colorThreeComments", "colorFourComments"];
+            if (prevStartColorId < 4) {
+                $(".commented-selection" + "[commentId = '" + commentHash + "']").addClass(commentsColorClass[(prevStartColorId + 1)]);
+                startDiv.attr("colorId", prevStartColorId + 1);
+                endDiv.attr("colorId", prevStartColorId + 1);
+            }
+            else if (prevStartColorId == 4) {
+                $(".commented-selection" + "[commentId = '" + commentHash + "']").addClass(commentsColorClass[0]);
+                startDiv.attr("colorId", 0);
+                endDiv.attr("colorId", 0);
+            }
         }
     }
 }
@@ -281,17 +353,25 @@ function colorAdjacentComments(commentHash) {
     let prevEndDivData = {
         "id": prevEndDiv.attr("commentId"),
         "index": prevEndDiv.attr("endIndex"),
-        "isBlue": prevEndDiv.attr("isBlue")
+        "colorId": parseInt(prevEndDiv.attr("colorId"), 10)
     }
     //console.log("prevEnd", prevEndDivData["id"],prevEndDivData["index"],prevEndDivData["isBlue"]);
     let currentStartDivIndex = $(".startDiv" + "[commentId = '" + commentHash + "']").attr("startIndex");
     let currentEndDivIndex = $(".endDiv" + "[commentId = '" + commentHash + "']").attr("endIndex");
     //console.log(commentHash,currentStartDivIndex,currentEndDivIndex);
-    if ((currentStartDivIndex <= parseInt(prevEndDivData["index"], 10) && prevEndDivData["isBlue"] == "false")) {
+    if (currentStartDivIndex <= parseInt(prevEndDivData["index"], 10)) {
         if ($(".commented-selection" + "[commentId = '" + prevEndDivData["id"] + "']").length != 0) {
-            $(".commented-selection" + "[commentId = '" + commentHash + "']").addClass("blueComments");
-            $(".endDiv" + "[commentId = '" + commentHash + "']").attr("isBlue", "true");
-            $(".startDiv" + "[commentId = '" + commentHash + "']").attr("isBlue", "true");
+            let commentsColorClass = ["", "colorOneComments", "colorTwoComments", "colorThreeComments", "colorFourComments"];
+            if (prevEndDivData["colorId"] < 4) {
+                $(".commented-selection" + "[commentId = '" + commentHash + "']").addClass(commentsColorClass[prevEndDivData["colorId"] + 1]);
+                $(".startDiv" + "[commentId = '" + commentHash + "']").attr("colorId", prevEndDivData["colorId"] + 1);
+                $(".endDiv" + "[commentId = '" + commentHash + "']").attr("colorId", prevEndDivData["colorId"] + 1);
+            }
+            else if (prevEndDivData["colorId"] == 4) {
+                $(".commented-selection" + "[commentId = '" + commentHash + "']").addClass(commentsColorClass[0]);
+                $(".startDiv" + "[commentId = '" + commentHash + "']").attr("colorId", 0);
+                $(".endDiv" + "[commentId = '" + commentHash + "']").attr("colorId", 0);
+            }
         }
     }
 }
@@ -315,6 +395,33 @@ function clickOnComment(workChosen, workCreator, evt) {
     displayReplyBox(evt, comment_data["hash"]);
     // displayCommentBox(evt);
     // hideCommentBox();
+}
+
+function getUnapprovedComments(workCreator, work) {
+    //remove the unapproved classes
+    $(".commented-selection").removeClass("unapprovedComments threadNotApproved");
+    API.request({
+        endpoint: "unapproved_comments",
+        method: "GET",
+        data: {
+            creator: workCreator,
+            work: work,
+        },
+    }).then((data) => {
+        console.log(data);
+        data.forEach((data) => {
+            let ancesHash = data["AncestorHash"];
+            let hash = data["CommentHash"];
+            //console.log("for unaproved ",ancesHash,hash);
+            //the first Level is unapproved
+            if (ancesHash == hash) {
+                $(".commented-selection" + "[commentId = '" + hash + "']").addClass("unapprovedComments");
+            }
+            else {
+                $(".commented-selection" + "[commentId = '" + ancesHash + "']").addClass("threadNotApproved");
+            }
+        });
+    });
 }
 
 function get_comment_chain_API_request(jsonData, commentSpanId) {
@@ -357,127 +464,8 @@ function readThreads(threads, work, workCreator, parentId = null) {
     }
 }
 
-function getUnapprovedComments(workCreator, work) {
-    //remove the unapproved classes
-    $(".commented-selection").removeClass("unapprovedComments threadNotApproved");
-    API.request({
-        endpoint: "unapproved_comments",
-        data: {
-            creator: workCreator,
-            work: work,
-        },
-        method: "GET",
-    }).then((data) => {
-        console.log(data);
-        data.forEach((data) => {
-            let ancesHash = data["AncestorHash"];
-            let hash = data["CommentHash"];
-            //console.log("for unaproved ",ancesHash,hash);
-            //the first Level is unapproved
-            if (ancesHash == hash) {
-                $(".commented-selection" + "[commentId = '" + hash + "']").addClass("unapprovedComments");
-            }
-            else {
-                $(".commented-selection" + "[commentId = '" + ancesHash + "']").addClass("threadNotApproved");
-            }
-        });
-    });
-}
-
-// function checkThreadUnapprovedComments(commentData,type,commenter,callback){
-//   let jsonDataStr = JSON.stringify(commentData);
-//   API.request({
-//       endpoint: "get_comment_chain",
-//       data: jsonDataStr,
-//       method: "POST"
-//   }).then((data) => {
-//     let isThreadApproved = checkIsThreadApprovedHelper(data,commentData.work,commentData.creator);
-//     if(isThreadApproved == false){
-//       let targetComment = $(".commented-selection"+"[commentId = '"+commentData.hash+"']");
-//       targetComment.addClass("threadNotApproved");
-//       targetComment.children("span").addClass("threadNotApproved");
-//       if(!targetComment.children("span").hasClass("commentNotApproved")){
-//         targetComment.children("span").text("Orange comment means there are unapproved replies");
-//       }
-//     }
-//     else{
-//       $(".commented-selection"+"[commentId = '"+commentData.hash+"']").removeClass("threadNotApproved");
-//     }
-//     var callBackType = type != undefined ? type : "All";
-//     var callBackCommenter = commenter != undefined ? commenter : "AllCommenters";
-//     callback(callBackType,callBackCommenter);
-//   });
-// }
-
-// function checkIsThreadApprovedHelper(threads, work, workCreator){
-//   if (threads.length==0){
-//     return true;
-//   }
-//   else{
-//     let isApproved;
-//     let isCurrentCommentApproved = true;
-//     let isChildApproved = true;
-//     for(var i =0; i<threads.length ; i++){
-//       if(threads[i].approved == false){
-//         isCurrentCommentApproved = false;
-//         break;
-//       }
-//       isChildApproved = checkIsThreadApprovedHelper(threads[i].threads,work,workCreator);
-//       if(isChildApproved == false){
-//         break;
-//       }
-//     }
-//     isApproved = isCurrentCommentApproved && isChildApproved;
-//     return isApproved;
-//   }
-// }
-
-// function markUnapprovedComments(type,commenter){
-//   //change everything to color black
-//   //$(".commented-selection").css({"color" : "black"});
-//   console.log(type,commenter);
-//   let unapprovedThreadCommentsId = [];
-//   let unapprovedThreadComments;
-//   let unapprovedCommentsId =[];
-//   let unapprovedComments;
-//   if(commenter == "AllCommenters"){
-//     if(type == "All"){
-//       unapprovedComments = $("#text").find(".commented-selection" + "[approved = "+false+"]");
-//       //only select comments that is approved, the unapproved first comment is going to be in unapprovedComments
-//       unapprovedThreadComments = $(".commented-selection.threadNotApproved" + "[approved = "+true+"]");
-//       //$("#text").find(".commented-selection.threadNotApproved" + "[approved = "+true+"]");
-//     }
-//     else{
-//       unapprovedComments = $("#text").find(".commented-selection" + "[approved = "+false+"][typeof = '"+type+"']");
-//       unapprovedThreadComments = $("#text").find(".commented-selection.threadNotApproved" + "[approved = "+true+"][typeof = '"+type+"']");
-//     }
-//   }
-//   else{
-//     if(type == "All"){
-//       unapprovedComments = $("#text").find(".commented-selection" + "[approved = "+false+"][creator = '"+commenter+"']");
-//       unapprovedThreadComments = $("#text").find(".commented-selection.threadNotApproved" + "[approved = "+true+"][creator = '"+commenter+"']");
-//     }
-//     else{
-//       unapprovedComments = $("#text").find(".commented-selection" + "[approved = "+false+"][typeof = '"+type+"'][creator = '"+commenter+"']");
-//       unapprovedThreadComments = $("#text").find(".commented-selection.threadNotApproved" + "[approved = "+true+"][typeof = '"+type+"'][creator = '"+commenter+"']");
-//     }
-//   }
-//   for(var i = 0; i < unapprovedComments.length; i++){
-//     let id = unapprovedComments[i]["attributes"]["commentId"]["value"];
-//     unapprovedCommentsId.push(id);
-//   }
-//   unapprovedCommentsId.forEach((id)=>{
-//     $(".commented-selection"+"[commentId = '"+id+"']").addClass("unapprovedComments");
-//   });
-//   for(var i = 0; i < unapprovedThreadComments.length; i++){
-//    let id = unapprovedThreadComments[i]["attributes"]["commentId"]["value"];
-//    unapprovedThreadCommentsId.push(id);
-//   }
-//   // unapprovedThreadCommentsId.forEach((element)=>{
-//   //   $("#"+element).css({"color" : "darkOrange"});
-//   // });
-// }
-
+//TODO add the hidden comments also
+//do the same thing as the commented-selection.length!=0 comment
 function createCommentData() {
     let comments = $(".commented-selection");
     let commentData = [];
@@ -550,17 +538,11 @@ function checkworkAdminList(selected_eppn, litId, mode) {
             }
         }
         if (!isInWhiteList) {
-            // if(mode == "setting"){
-            //   $("#setting").addClass("noPermission");
-            // }
             if (mode == "approvedComments") {
                 $("#replies").attr("isCurrentUserAdmin", false);
             }
         }
         else {
-            // if(mode == "setting"){
-            //   $("#setting").removeClass("noPermission");
-            // }
             if (mode == "approvedComments") {
                 $("#replies").attr("isCurrentUserAdmin", true);
             }
@@ -569,12 +551,6 @@ function checkworkAdminList(selected_eppn, litId, mode) {
 }
 
 function launchToastNotifcation(data) {
-    // $("#toast-notification").addClass("show");
-    // $("#notification-data").html(data);
-    // setTimeout(function(){
-    //   $("#toast-notification").removeClass("show");
-    //   $("#notification-data").empty();
-    // }, 3000);
     var message = { message: data }
     console.log(data)
     var snackbarContainer = document.querySelector('.mdl-js-snackbar');

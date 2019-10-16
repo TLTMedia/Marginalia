@@ -2,61 +2,61 @@
 <html lang="en">
 
 <head>
-	<meta charset="UTF-8">
-	<title>Marginalia</title>
-	<meta name="description" content="Welcome to Marginalia">
+    <meta charset="UTF-8">
+    <title>Marginalia</title>
+    <meta name="description" content="Welcome to Marginalia">
 
-	<!-- Material -->
-	<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
-	<link rel="stylesheet" href="https://code.getmdl.io/1.0.6/material.indigo-pink.min.css">
-	<link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.teal-yellow.min.css" />
-	<script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+    <!-- Material -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    <link rel="stylesheet" href="https://code.getmdl.io/1.0.6/material.indigo-pink.min.css">
+    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.teal-yellow.min.css" />
+    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
 
-	<!-- jQuery -->
-	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
-	<script src="https://code.jquery.com/ui/1.12.0/jquery-ui.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.js"></script>
 
-	<!-- jQuery Plugins -->
-	<script
-		src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.address/1.6/jquery.address.js"
-		type="text/javascript"></script>
+    <!-- jQuery Plugins -->
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.address/1.6/jquery.address.js"
+        type="text/javascript"></script>
 
-	<!-- JS Scripts -->
-	<!--[if lt IE 9]>
+    <!-- JS Scripts -->
+    <!--[if lt IE 9]>
 		<script src="https://cdn.jsdelivr.net/html5shiv/3.7.3/html5shiv.min.js"></script>
 	<![endif]-->
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/rangy/1.3.0/rangy-core.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/rangy/1.3.0/rangy-classapplier.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/rangy/1.3.0/rangy-serializer.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/rangy/1.3.0/rangy-textrange.min.js"></script>
-	<script src="ckeditor/ckeditor.js"></script>
-	<script src="ckeditor/adapters/jquery.js"></script>
-	<script src="lightRangy/LightRange.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/rangy/1.3.0/rangy-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/rangy/1.3.0/rangy-classapplier.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/rangy/1.3.0/rangy-serializer.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/rangy/1.3.0/rangy-textrange.min.js"></script>
+    <script src="ckeditor/ckeditor.js"></script>
+    <script src="ckeditor/adapters/jquery.js"></script>
+    <script src="js/lightRangy/LightRange.min.js"></script>
 
-	<script defer type="module" src="./js/App.js" crossorigin="use-credentials"></script>
+    <script defer type="module" src="./js/App.js" crossorigin="use-credentials"></script>
 
-	<script src="js/rangyHelpers.js"></script>
+    <script src="js/rangyHelpers.js"></script>
 
-	<script src="js/script.js"></script>
-	<script src="js/selector.js"></script>
-	<script src="js/replyBoxAction.js"></script>
-	<script src="js/commentBoxAction.js"></script>
-	<script src="js/setting.js"></script>
-	<script src="js/gui.js"></script>
-	<script src="js/addLit.js"></script>
+    <script src="js/script.js"></script>
+    <script src="js/selector.js"></script>
+    <script src="js/replyBoxAction.js"></script>
+    <script src="js/commentBoxAction.js"></script>
+    <script src="js/setting.js"></script>
+    <script src="js/gui.js"></script>
+    <script src="js/addLit.js"></script>
 
-	<script defer type="text/javascript">
-		$(document).on("DOMNodeInserted", e => {
-			const classes = $(e.target).attr("class");
-			if (classes && classes.match(/^hl_/)) {
-				$(e.target).addClass("commented-selection");
-				console.log("special function");
-			}
-		});
-	</script>
+    <script defer type="text/javascript">
+        $(document).on("DOMNodeInserted", e => {
+            const classes = $(e.target).attr("class");
+            if (classes && classes.match(/^hl_/)) {
+                $(e.target).addClass("commented-selection");
+                console.log("special function");
+            }
+        });
+    </script>
 
-	<!-- 	
+    <!--
 	<script type="text/javascript">
 		document.addEventListener("selectionchange", event => {
 			let selection = document.getSelection ? document.getSelection().toString() :  document.selection.createRange().toString() ;
@@ -65,85 +65,85 @@
 	</script>
 	 -->
 
-	<link rel="stylesheet" type="text/css" media="only screen" href="css/style.css">
+    <link rel="stylesheet" type="text/css" media="only screen" href="css/style.css">
 </head>
 
 <body>
-	<div class="content">
-		<div class="mdl-layout__container">
-			<div class="mdl-layout mdl-js-layout mdl-layout--fixed-header is-upgraded" data-upgraded=",MaterialLayout">
-				<header class="mdl-layout__header is-casting-shadow">
-					<div class="mdl-layout__header-row">
-						<span class="mdl-layout-title"><img style="z-index: 4" width="100" height="100"
-								src="img/smalllogo.svg" />Marginalia</span>
-						<div class="mdl-layout-spacer"></div>
-						<nav class="mdl-navigation mdl-layout--large-screen-only">
-							<a class="mdl-navigation__link headerTab headerUpload" id="home" href="#">Home</a>
-							<a class="mdl-navigation__link headerTab headerUpload" id="litadd"
-								href="#">Add Literature</a>
-							<a class="mdl-navigation__link headerTab headerUpload" id="setting"
-								href="javascript:void(0);">Settings</a>
-						</nav>
-					</div>
-				</header>
-				<main class="mainContent">
-					<div class="page-content">
-						<div id="firstPage">
-							<div id="cardbox" class="introBoxes">
-								<div class="titleText">Marginalia</div>
-								<div id="addLitBase"></div>
-								<div id="settingBase">
-									<div id="settingTitle">Settings</div>
-									<div class="litSettingBase"></div>
-									<div class="whiteListSettingBase"></div>
-									<div id="settingGoBack" style="margin-bottom:0px">
-										<button class="mdl-button mdl-js-button mdl-button--icon">
-											<span class="material-icons">arrow_back</span>
-										</button>
-										Go Back
-									</div>
-								</div>
-								<div id="nonTitleContent">
-									<div class="pleaseSelect">
-										<span>Please Select User & Literature Piece</span>
-									</div>
-									<div class="userSelectMenu">
-										<div class="usersMenuTitle">Users:</div>
-										<input type="text" class="searchUser" placeholder="Search for users..."></input>
-										<ul class="mdl-list usersMenu"></ul>
-									</div>
-									<div class="workSelectMenu">
-										<div id="selectedUserWorks"></div>
-										<input type="text" class="searchLit" placeholder="Search for works..."></input>
-										<ul class="mdl-list worksMenu"></ul>
-									</div>
-								</div>
-							</div> <!-- end cardbox -->
-						</div> <!-- end firstPage -->
-						<div id="commentBox"></div>
-						<div id="replies"></div>
-						<div id="comApproval"></div>
-						<div id="deleteFileChoice"></div>
-						<div id="moderateFileChoice"></div>
-						<div id="userPrivateList"></div>
-						<div class="loader" id="loadingSign"></div>
-						<div class="selector">
-							<div class="typeSelector" id="typeSelector"></div>
-							<div class="commenterSelector" id="commenterSelector"></div>
-						</div>
-						<div id="text" visible="false">
-							<div id="textTitle"></div>
-						</div>
-						<div id="toast-notification1" class="mdl-js-snackbar mdl-snackbar">
-							<div id="logo1"></div>
-							<div class="mdl-snackbar__text"></div>
-							<button class="mdl-snackbar__action" type="button" style="visibility:hidden"></button>
-						</div>
-					</div> <!-- end page-content -->
-				</main> <!-- main ends-->
-			</div>
-		</div>
-	</div> <!-- end content -->
+    <div class="content">
+        <div class="mdl-layout__container">
+            <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header is-upgraded" data-upgraded=",MaterialLayout">
+                <header class="mdl-layout__header is-casting-shadow">
+                    <div class="mdl-layout__header-row">
+                        <span class="mdl-layout-title"><img style="z-index: 4" width="100" height="100"
+                                src="img/smalllogo.svg" />Marginalia</span>
+                        <div class="mdl-layout-spacer"></div>
+                        <nav class="mdl-navigation mdl-layout--large-screen-only">
+                            <a class="mdl-navigation__link headerTab headerUpload" id="home" href="#">Home</a>
+                            <a class="mdl-navigation__link headerTab headerUpload" id="litadd" href="#">Add
+                                Literature</a>
+                            <a class="mdl-navigation__link headerTab headerUpload" id="setting"
+                                href="javascript:void(0);">Settings</a>
+                        </nav>
+                    </div>
+                </header>
+                <main class="mainContent">
+                    <div class="page-content">
+                        <div id="firstPage">
+                            <div id="cardbox" class="introBoxes">
+                                <div class="titleText">Marginalia</div>
+                                <div id="addLitBase"></div>
+                                <div id="settingBase">
+                                    <div id="settingTitle">Settings</div>
+                                    <div class="litSettingBase"></div>
+                                    <div class="whiteListSettingBase"></div>
+                                    <div id="settingGoBack" style="margin-bottom:0px">
+                                        <button class="mdl-button mdl-js-button mdl-button--icon">
+                                            <span class="material-icons">arrow_back</span>
+                                        </button>
+                                        Go Back
+                                    </div>
+                                </div>
+                                <div id="nonTitleContent">
+                                    <div class="pleaseSelect">
+                                        <span>Please Select User & Literature Piece</span>
+                                    </div>
+                                    <div class="userSelectMenu">
+                                        <div class="usersMenuTitle">Users:</div>
+                                        <input type="text" class="searchUser" placeholder="Search for users..."></input>
+                                        <ul class="mdl-list usersMenu"></ul>
+                                    </div>
+                                    <div class="workSelectMenu">
+                                        <div id="selectedUserWorks"></div>
+                                        <input type="text" class="searchLit" placeholder="Search for works..."></input>
+                                        <ul class="mdl-list worksMenu"></ul>
+                                    </div>
+                                </div>
+                            </div> <!-- end cardbox -->
+                        </div> <!-- end firstPage -->
+                        <div id="commentBox"></div>
+                        <div id="replies"></div>
+                        <div id="comApproval"></div>
+                        <div id="deleteFileChoice"></div>
+                        <div id="moderateFileChoice"></div>
+                        <div id="userPrivateList"></div>
+                        <div class="loader" id="loadingSign"></div>
+                        <div class="selector">
+                            <div class="typeSelector" id="typeSelector"></div>
+                            <div class="commenterSelector" id="commenterSelector"></div>
+                        </div>
+                        <div id="text" visible="false">
+                            <div id="textTitle"></div>
+                        </div>
+                        <div id="toast-notification1" class="mdl-js-snackbar mdl-snackbar">
+                            <div id="logo1"></div>
+                            <div class="mdl-snackbar__text"></div>
+                            <button class="mdl-snackbar__action" type="button" style="visibility:hidden"></button>
+                        </div>
+                    </div> <!-- end page-content -->
+                </main> <!-- main ends-->
+            </div>
+        </div>
+    </div> <!-- end content -->
 </body>
 
 </html>
