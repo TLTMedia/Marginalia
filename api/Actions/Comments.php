@@ -147,7 +147,7 @@ class Comments
         }
 
         $commentDirectoryHash = substr($fileToModify, 0, strrpos($fileToModify, "comment.json"));
-        if (file_exists($commentDirectoryHash . "threads/") && !($this->isCommentRoot($commentDirectoryHash))) {
+        if (file_exists($commentDirectoryHash . "threads/") && !($this->__isCommentRoot($commentDirectoryHash))) {
             // comment has replies/threads - so don't delete the comment.json; replace the comment owner and text with 'deleted'
             $jsonData              = json_decode(file_get_contents($fileToModify));
             $jsonData->commentText = "deleted";
@@ -469,23 +469,22 @@ class Comments
                     $fileData->approved = true;
                 } else {
                     $fileData->approved = false;
-                }
-
-                /**
-                 * Register a comment with the unapproved "registry"
-                 */
-                $ancestorData = $this->__getFirstLevelMetaFromCommentPath($fileToModify);
-                if (is_int($ancestorData) && $ancestorData == -1) {
-                    return json_encode(array(
-                        "status"  => "error",
-                        "message" => "unable to get ancestor info for the new comment",
-                    ));
-                }
-                if (!$this->unapprovedComments->registerUnapprovedComment($ancestorData["eppn"], $ancestorData["hash"], $commenterEppn, $commentHash, $fileToModify)) {
-                    return json_encode(array(
-                        "status"  => "error",
-                        "message" => "unable to unregister an unapproved comment",
-                    ));
+                    /**
+                     * Register a comment with the unapproved "registry"
+                     */
+                    $ancestorData = $this->__getFirstLevelMetaFromCommentPath($fileToModify);
+                    if (is_int($ancestorData) && $ancestorData == -1) {
+                        return json_encode(array(
+                            "status"  => "error",
+                            "message" => "unable to get ancestor info for the new comment",
+                        ));
+                    }
+                    if (!$this->unapprovedComments->registerUnapprovedComment($ancestorData["eppn"], $ancestorData["hash"], $commenterEppn, $commentHash, $fileToModify)) {
+                        return json_encode(array(
+                            "status"  => "error",
+                            "message" => "unable to unregister an unapproved comment",
+                        ));
+                    }
                 }
             } else {
                 $fileData->approved = true;

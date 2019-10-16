@@ -69,7 +69,6 @@ function buildHTMLFile(litContents, selected_eppn, textChosen) {
         makeDraggableReplyBox();
         hideAllBoxes();
     } else {
-        console.log("change doc ---------------")
         //TODO find a better way to do this (figure out why makeDraggableCommentBox is breaking the code if we call it twice)
         $("#commentSave").off().on("click", () => {
             saveButtonOnClick(selected_eppn, textChosen);
@@ -161,28 +160,42 @@ function makeDropDown() {
 */
 
 loadUserComments = (selected_eppn, textChosen, selectedType, selectedCommenter) => {
-
-    let endpoint;
+    let endpoint, data;
     let isTypeAndCommenterUndefiend = (selectedType == undefined && selectedCommenter == undefined);
     if (isTypeAndCommenterUndefiend) {
-        endpoint = "get_highlights";
         $("#text").hide();
         $("#textSpace").hide();
         $("#textTitle").hide();
+        endpoint = "get_highlights";
+        data = {
+          creator : selected_eppn,
+          work : textChosen
+        }
     }
     // only reach here when selectorOnSelect() is called
     else {
-        endpont = "";
+      console.log(selectedType, selectedCommenter)
+      endpoint = "get_highlights_filtered";
+      data = {
+        creator : selected_eppn,
+        work : textChosen,
+        filterEppn : selectedCommenter == "AllCommenters" ? "" : selectedCommenter,
+        filterType: selectedType == "All" ? "" : selectedType
+      }
     }
     API.request({
         endpoint: endpoint,
-        data: {
-            creator: selected_eppn,
-            work: textChosen
-        },
+        data: data
     }).then((data) => {
-        console.log(data);
-        renderComments(data, selected_eppn, textChosen, getUnapprovedComments);
+        let sortedCommentData = [];
+        for(var i = 0; i < data.length ; i++){
+          let comment = data[i];
+          sortedCommentData = sortCommentsByStartIndex(sortedCommentData,comment);
+        }
+        // reverse the list so the comments are created by the order of the startIndex. (bigger startIndex get created first)
+        reverseSortedCommentData = reverseList(sortedCommentData);
+        console.log(reverseSortedCommentData);
+        renderComments(reverseSortedCommentData, selected_eppn, textChosen, getUnapprovedComments);
         if (isTypeAndCommenterUndefiend) {
             makeSelector(createListOfCommenter(data), colorNotUsedTypeSelector);
         }
@@ -195,6 +208,7 @@ renderComments = (commentData, selected_eppn, textChosen, callback) => {
     $("#text").fadeIn();
     $("#textSpace").fadeIn();
     $("#textTitle").fadeIn();
+    let temp;
     for (let i = 0; i < commentData.length; i++) {
         highlightText({
             startIndex: commentData[i].startIndex,
@@ -282,6 +296,14 @@ function sortCommentsByStartIndex(sortedCommentData, comment) {
         }
     }
     return sortedCommentData;
+}
+
+function reverseList(list){
+  let rlist = [];
+  for(var i = 0; i < list.length ; i++){
+    rlist.unshift(list[i]);
+  }
+  return rlist;
 }
 
 function handleIncorrectTemplate() {
@@ -516,17 +538,11 @@ function checkworkAdminList(selected_eppn, litId, mode) {
             }
         }
         if (!isInWhiteList) {
-            // if(mode == "setting"){
-            //   $("#setting").addClass("noPermission");
-            // }
             if (mode == "approvedComments") {
                 $("#replies").attr("isCurrentUserAdmin", false);
             }
         }
         else {
-            // if(mode == "setting"){
-            //   $("#setting").removeClass("noPermission");
-            // }
             if (mode == "approvedComments") {
                 $("#replies").attr("isCurrentUserAdmin", true);
             }
@@ -535,12 +551,6 @@ function checkworkAdminList(selected_eppn, litId, mode) {
 }
 
 function launchToastNotifcation(data) {
-    // $("#toast-notification").addClass("show");
-    // $("#notification-data").html(data);
-    // setTimeout(function(){
-    //   $("#toast-notification").removeClass("show");
-    //   $("#notification-data").empty();
-    // }, 3000);
     var message = { message: data }
     console.log(data)
     var snackbarContainer = document.querySelector('.mdl-js-snackbar');

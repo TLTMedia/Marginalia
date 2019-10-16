@@ -45,9 +45,6 @@ function saveLit({ work, privacy, data } = {}) {
     formData.append("file", data);
     formData.append("work", work);
     formData.append("privacy", privacy);
-
-
-
     API.request({
         endpoint: "create_work",
         method: "POST",
@@ -116,19 +113,13 @@ function homeButtonAction() {
     $("#setting").addClass("disabledHeaderTab");
     $(".headerTab").removeClass("active");
     $("#home").addClass("active");
-    //TODO this is the old hide box with wierd query
     hideAllBoxes();
-    //hideReplyBox();
-    //hideCommentBox();
 }
 //----------------------------------------------------------
 
 createUserSelectScreen = async ({ users = users } = {}) => {
     $(".workSelectMenu").hide();
     user_list = users.creator_list;
-    // TODO need to check what does this width thing do
-    // figure out why this is here
-
     for (i in user_list) {
         var user = createUserMenuOption(user_list[i], users);
         $(".usersMenu").append(user);
@@ -188,12 +179,16 @@ function getUserWorks(selected_eppn) {
                 class: "mdl-list__item worksMenuOptions",
                 id: fileName,
                 text: fileName,
-                click: function (evt) {
-                    $(".worksMenuOptions").removeClass("workMenuSelected");
-                    $(this).addClass("workMenuSelected");
-                    let selectedWorkId = evt["currentTarget"]["id"];
-                    selectLit(selected_eppn, selectedWorkId);
-                }
+                click: function(evt){
+                          if($(this).attr("disabled") == undefined){
+                              $(".worksMenuOptions").attr("disabled","disabled");
+                              setTimeout(function(){ $(".worksMenuOptions").removeAttr("disabled")},500);
+                              $(".worksMenuOptions").removeClass("workMenuSelected");
+                              $(this).addClass("workMenuSelected");
+                              let selectedWorkId = $(this).attr("id")
+                              selectLit(selected_eppn, selectedWorkId);
+                            }
+                        }
             });
             $(".worksMenu").append(litButton);
         }
