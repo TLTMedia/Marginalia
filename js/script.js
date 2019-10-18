@@ -9,11 +9,10 @@ var remSpan; // holds the name of made and clicked spans
   Loads the userdata obtained by the netID login
   Loads the users folder and creates a button for each user
 */
-init = async ({ api = api, users = users } = {}) => {
+init = async ({ api = api, courses = courses, users = users } = {}) => {
+    /** For legacy purposes... */
     API = api;
     currentUser = users.current_user;
-
-    const host = "apps.tlt.stonybrook.edu";
 
     $(".loader").hide();
     $("#text").hide();
@@ -31,25 +30,38 @@ init = async ({ api = api, users = users } = {}) => {
         loadFromDeepLink();
     });
 
-    $(document).ajaxComplete(function () {
-        (function bindRedirectConfirmation(specific = "a") {
-            $(specific).one("click", function (event) {
-                if ((this.href).indexOf(host) !== -1) {
-                    console.log("do nothing is same host");
-                } else if ((this.href).indexOf("javascript:void(0);") !== -1) {
-                    console.log("do nothing is javascript void event");
-                } else {
-                    event.preventDefault();
-                    let res = confirm("Are you sure you want to visit the URL:\n\n" + this.href);
-                    if (res) {
-                        window.location = this.href;
-                    } else {
-                        bindRedirectConfirmation(this);
-                        return;
-                    }
-                }
-            });
-        })();
+    /**
+     * Prompt if they want to leave the page when clicking on a link in the work
+     */
+    $(document).ajaxComplete(() => {
+        $("a").each(function (_, currentElement) {
+            if ($(currentElement).hasClass("redirection-binded")) {
+                return;
+            } else {
+                $(currentElement).addClass("redirection-binded");
+                bindRedirectConfirmation(currentElement);
+            }
+        });
+    });
+}
+
+function bindRedirectConfirmation(specificElement) {
+    $(specificElement).on("click", function (event) {
+        if (($(specificElement).attr("href")).indexOf(window.location.host) !== -1) {
+            console.log("do nothing is same host");
+        } else if (($(specificElement).attr("href")).indexOf("javascript:void(0);") !== -1) {
+            console.log("do nothing is javascript void event");
+        } else if ($(specificElement).attr("href").charAt(0) == "#") {
+            console.log("do nothing is just hash placeholder tag");
+        } else {
+            event.preventDefault();
+            let res = confirm("Are you sure you want to visit the URL:\n\n" + $(specificElement).attr("href"));
+            if (res) {
+                window.location = $(specificElement).attr("href");
+            } else {
+                return;
+            }
+        }
     });
 }
 
@@ -70,9 +82,7 @@ function buildHTMLFile(litContents, selected_eppn, textChosen) {
         hideAllBoxes();
     } else {
         //TODO find a better way to do this (figure out why makeDraggableCommentBox is breaking the code if we call it twice)
-        $("#commentSave").off().on("click", () => {
-            saveButtonOnClick(selected_eppn, textChosen);
-        });
+        updateCommentBoxSaveButton(selected_eppn, textChosen);
     }
     loadUserComments(selected_eppn, textChosen);
     createWorkTitle(textChosen);
@@ -132,7 +142,7 @@ function createTips(workTitle) {
     let text = $("<span/>", {
         class: "tipsText"
     });
-    text.html("The <span style = 'color : red'>Red</span> comments are the comments that are not approved yet.\nThe <span style = 'color : orange'>Orange</span> comments are comments that have unapproved replies.");
+    text.html("The <span style = 'color : darkred'>Dark Red</span> comments with underlines are the comments that are not approved yet.\nThe <span style = 'color : orangered'>Orange</span> comments are comments that have unapproved replies.");
     tips.append(icon, text);
     workTitle.prepend(tips);
 }
@@ -168,29 +178,29 @@ loadUserComments = (selected_eppn, textChosen, selectedType, selectedCommenter) 
         $("#textTitle").hide();
         endpoint = "get_highlights";
         data = {
-          creator : selected_eppn,
-          work : textChosen
+            creator: selected_eppn,
+            work: textChosen
         }
     }
     // only reach here when selectorOnSelect() is called
     else {
-      console.log(selectedType, selectedCommenter)
-      endpoint = "get_highlights_filtered";
-      data = {
-        creator : selected_eppn,
-        work : textChosen,
-        filterEppn : selectedCommenter == "AllCommenters" ? "" : selectedCommenter,
-        filterType: selectedType == "All" ? "" : selectedType
-      }
+        console.log(selectedType, selectedCommenter)
+        endpoint = "get_highlights_filtered";
+        data = {
+            creator: selected_eppn,
+            work: textChosen,
+            filterEppn: selectedCommenter == "AllCommenters" ? "" : selectedCommenter,
+            filterType: selectedType == "All" ? "" : selectedType
+        }
     }
     API.request({
         endpoint: endpoint,
         data: data
     }).then((data) => {
         let sortedCommentData = [];
-        for(var i = 0; i < data.length ; i++){
-          let comment = data[i];
-          sortedCommentData = sortCommentsByStartIndex(sortedCommentData,comment);
+        for (var i = 0; i < data.length; i++) {
+            let comment = data[i];
+            sortedCommentData = sortCommentsByStartIndex(sortedCommentData, comment);
         }
         // reverse the list so the comments are created by the order of the startIndex. (bigger startIndex get created first)
         reverseSortedCommentData = reverseList(sortedCommentData);
@@ -298,12 +308,12 @@ function sortCommentsByStartIndex(sortedCommentData, comment) {
     return sortedCommentData;
 }
 
-function reverseList(list){
-  let rlist = [];
-  for(var i = 0; i < list.length ; i++){
-    rlist.unshift(list[i]);
-  }
-  return rlist;
+function reverseList(list) {
+    let rlist = [];
+    for (var i = 0; i < list.length; i++) {
+        rlist.unshift(list[i]);
+    }
+    return rlist;
 }
 
 function handleIncorrectTemplate() {
@@ -334,12 +344,12 @@ function colorOverLappedComments(commentHash) {
             startDiv.attr("parentHash", nextEndDiv.attr("commentId"));
             endDiv.attr("parentHash", nextEndDiv.attr("commentId"));
             let commentsColorClass = ["", "colorOneComments", "colorTwoComments", "colorThreeComments", "colorFourComments"];
-            if (prevStartColorId < 4) {
+            if (prevStartColorId < 3) {
                 $(".commented-selection" + "[commentId = '" + commentHash + "']").addClass(commentsColorClass[(prevStartColorId + 1)]);
                 startDiv.attr("colorId", prevStartColorId + 1);
                 endDiv.attr("colorId", prevStartColorId + 1);
             }
-            else if (prevStartColorId == 4) {
+            else if (prevStartColorId == 3) {
                 $(".commented-selection" + "[commentId = '" + commentHash + "']").addClass(commentsColorClass[0]);
                 startDiv.attr("colorId", 0);
                 endDiv.attr("colorId", 0);
@@ -362,12 +372,12 @@ function colorAdjacentComments(commentHash) {
     if (currentStartDivIndex <= parseInt(prevEndDivData["index"], 10)) {
         if ($(".commented-selection" + "[commentId = '" + prevEndDivData["id"] + "']").length != 0) {
             let commentsColorClass = ["", "colorOneComments", "colorTwoComments", "colorThreeComments", "colorFourComments"];
-            if (prevEndDivData["colorId"] < 4) {
+            if (prevEndDivData["colorId"] < 3) {
                 $(".commented-selection" + "[commentId = '" + commentHash + "']").addClass(commentsColorClass[prevEndDivData["colorId"] + 1]);
                 $(".startDiv" + "[commentId = '" + commentHash + "']").attr("colorId", prevEndDivData["colorId"] + 1);
                 $(".endDiv" + "[commentId = '" + commentHash + "']").attr("colorId", prevEndDivData["colorId"] + 1);
             }
-            else if (prevEndDivData["colorId"] == 4) {
+            else if (prevEndDivData["colorId"] == 3) {
                 $(".commented-selection" + "[commentId = '" + commentHash + "']").addClass(commentsColorClass[0]);
                 $(".startDiv" + "[commentId = '" + commentHash + "']").attr("colorId", 0);
                 $(".endDiv" + "[commentId = '" + commentHash + "']").attr("colorId", 0);
