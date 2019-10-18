@@ -7,7 +7,7 @@ class Work
         $this->path     = $path;
         $this->creator  = $creator;
         $this->work     = $work;
-        $this->workPath = $path . $creator . "/" . $work;
+        $this->workPath = $path . $creator . "/works/" . $work;
         require 'Permissions.php';
         $this->permissions = new Permissions($path);
     }
