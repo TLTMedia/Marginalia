@@ -18,6 +18,7 @@ $responseFmt = new APIResponse;
 
 // Define String Constants
 $PATH          = "../../users/";
+$PATH_COURSES  = "../../courses/";
 $SKELETON_PATH = "../../SKELETON_USER/";
 
 // Rereference Shibboleth Globals used
@@ -122,7 +123,7 @@ $app->post("/add_permission", function () use ($app, $PATH, $parameters, $authUn
 
     echo $permissions->addPermission(
         $workFullPath,
-        $data["user"]
+        $data["eppn"]
     );
 });
 
@@ -350,7 +351,7 @@ $app->post("/create_work", function () use ($app, $PATH, $SKELETON_PATH, $parame
  * Create a new work
  */
 $app->post("/delete_work", function () use ($app, $PATH, $parameters, $authUniqueId) {
-    $data = $app->request->post();
+    $data = json_decode($app->request->getBody(), true);
     $parameters->paramCheck($data, array(
         "work", "creator",
     ));
@@ -565,6 +566,26 @@ $app->get("/unapproved_comments", function () use ($app, $PATH, $parameters, $re
         $unapproved->getAllUnapprovedCommentData()
     );
 });
+
+/**
+ * Lists out the courses
+ */
+$app->get("/courses", function () use ($app, $PATH_COURSES, $responseFmt, $authUniqueId) {
+    require "../Actions/Courses.php";
+    $courses = new Courses($app->log, $PATH_COURSES, $authUniqueId);
+
+    echo $responseFmt->message(
+        $courses->getCourses()
+    );
+});
+
+/**
+ * Adds a course to the courses list. Only course admins defined in courses/permissions.json may add courses.
+ */
+
+/**
+ * Adds a course admin; pre-existing course-admin's can create courses... They can also add other users as course-admins
+ */
 
 /**
  * Temp function to create the unapproved directory for a work
