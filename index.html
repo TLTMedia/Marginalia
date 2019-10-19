@@ -47,6 +47,7 @@
     <script src="js/addLit.js"></script>
 
     <script defer type="text/javascript">
+        // alert("Sorry for any inconvenience, currently under maintenance.\n Check back in a few hours.");
         $(document).on("DOMNodeInserted", e => {
             const classes = $(e.target).attr("class");
             if (classes && classes.match(/^hl_/)) {
@@ -96,6 +97,14 @@
                                     <div id="settingTitle">Settings</div>
                                     <div class="litSettingBase"></div>
                                     <div class="whiteListSettingBase"></div>
+                                    <div class="settingDataBase">
+                                        <table class="mdl-data-table mdl-js-data-table settingDataTable">
+                                            <thead>
+                                            </thead>
+                                            <tbody>
+                                            </tbody>
+                                        </table>
+                                    </div>
                                     <div id="settingGoBack" style="margin-bottom:0px">
                                         <button class="mdl-button mdl-js-button mdl-button--icon">
                                             <span class="material-icons">arrow_back</span>
@@ -105,15 +114,21 @@
                                 </div>
                                 <div id="nonTitleContent">
                                     <div class="pleaseSelect">
-                                        <span>Please Select User & Literature Piece</span>
+                                        <span>Please select your course.</span>
+                                    </div>
+                                    <div class="courseSelectMenu">
+                                        <div class="menuOptionTitle">Courses:</div>
+                                        <input type="text" class="searchCourse"
+                                            placeholder="Search for courses..."></input>
+                                        <ul class="mdl-list coursesMenu"></ul>
                                     </div>
                                     <div class="userSelectMenu">
-                                        <div class="usersMenuTitle">Users:</div>
+                                        <div class="menuOptionTitle">Users:</div>
                                         <input type="text" class="searchUser" placeholder="Search for users..."></input>
                                         <ul class="mdl-list usersMenu"></ul>
                                     </div>
                                     <div class="workSelectMenu">
-                                        <div id="selectedUserWorks"></div>
+                                        <div class="menuOptionTitle">Works:</div>
                                         <input type="text" class="searchLit" placeholder="Search for works..."></input>
                                         <ul class="mdl-list worksMenu"></ul>
                                     </div>

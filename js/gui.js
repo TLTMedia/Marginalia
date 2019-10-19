@@ -95,10 +95,12 @@ function loadFromDeepLink() {
     if (location.hash) {
         [, api, ...rest] = location.hash.split("#")[1].split("/");
         if (api == "get_work") {
-            selectLit(...rest)
+            console.log("loading from deep link");
+            selectLit(...rest);
+
         }
-    }
-    else {
+        console.log(api);
+    } else {
         homeButtonAction();
     }
 }
@@ -156,6 +158,7 @@ function showUsersLit(selected_eppn) {
     $(".worksMenu").empty();
     $(".workSelectMenu").fadeIn();
     $("#selectedUserWorks").text(selected_eppn + "'s works:");
+    let createWorkMenuOptions = true;
     getUserWorks(selected_eppn);
     $(".searchLit").on("keyup", () => {
         let ul = $(".worksMenu");
@@ -179,21 +182,22 @@ function getUserWorks(selected_eppn) {
                 class: "mdl-list__item worksMenuOptions",
                 id: fileName,
                 text: fileName,
-                click: function(evt){
-                          if($(this).attr("disabled") == undefined){
-                              $(".worksMenuOptions").attr("disabled","disabled");
-                              setTimeout(function(){ $(".worksMenuOptions").removeAttr("disabled")},500);
-                              $(".worksMenuOptions").removeClass("workMenuSelected");
-                              $(this).addClass("workMenuSelected");
-                              let selectedWorkId = $(this).attr("id")
-                              selectLit(selected_eppn, selectedWorkId);
-                            }
-                        }
+                click: function (evt) {
+                    if ($(this).attr("disabled") == undefined) {
+                        $(".worksMenuOptions").attr("disabled", "disabled");
+                        setTimeout(function () { $(".worksMenuOptions").removeAttr("disabled") }, 500);
+                        $(".worksMenuOptions").removeClass("workMenuSelected");
+                        $(this).addClass("workMenuSelected");
+                        let selectedWorkId = $(this).attr("id")
+                        selectLit(selected_eppn, selectedWorkId);
+                    }
+                }
             });
             $(".worksMenu").append(litButton);
         }
     });
 }
+
 
 function selectLit(selected_eppn, textChosen) {
     $("#text").empty();

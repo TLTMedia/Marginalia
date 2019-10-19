@@ -30,6 +30,11 @@ function settingGoBackButtonOnClick() {
             resetWhiteListPage();
             $(".litSettingBase").show();
         }
+        else if ($(".settingDataBase").is(":visible")) {
+            $(".settingDataBase").hide();
+            $(".litSettingBase").show();
+            adjustCardBoxSize(undefined);
+        }
     }
 }
 
@@ -124,7 +129,7 @@ function makeWhiteListSettingBase(user_list) {
     componentHandler.upgradeAllRegistered();
 }
 
-//TODO get the value from back end instead of the setting button
+
 function checkIsWorkPublic(selected_eppn, litId) {
     API.request({
         endpoint: "is_public",
@@ -163,7 +168,7 @@ function checkIsCommentNeedApproval(selected_eppn, litId) {
 function litSettingButtonOnClick(selectedLitId, selected_eppn) {
     $("#nonTitleContent").hide();
     $("#settingBase").show();
-    $(".whiteListSettingBase, #addLitBase").hide();
+    $(".whiteListSettingBase, .settingDataBase, #addLitBase").hide();
     $(".litSettingBase").empty().fadeIn();
     $("#settingTitle").text("Settings For : " + selected_eppn + "'s " + selectedLitId);
     let settingOptions = $("<div/>", {
@@ -174,8 +179,13 @@ function litSettingButtonOnClick(selectedLitId, selected_eppn) {
     makeSettingSwitch("privacy", "Work is Private?", selectedLitId, selected_eppn, checkIsWorkPublic);
     //commentNeedApproval switch
     makeSettingSwitch("commentsNeedApproval", "Comments Require Approval?", selectedLitId, selected_eppn, checkIsCommentNeedApproval);
+
     // whiteListPageOpener
-    makeWhiteListButton(selectedLitId, selected_eppn);
+    makeSettingButton(selectedLitId, selected_eppn, "litWhiteListButton", "Manage White List");
+    makeSettingButton(selectedLitId, selected_eppn, "settingDataButton", "Work Data");
+    makeSettingButton(selectedLitId, selected_eppn, "deleteWorkButton", "Delete Work");
+    // makeWhiteListButton(selectedLitId, selected_eppn);
+    // makeDeleteWorkButton(selectedLitId,selected_eppn);
     //activate the go back button
     $("#settingGoBack").children().off().on("click", () => {
         settingGoBackButtonOnClick();
@@ -185,12 +195,14 @@ function litSettingButtonOnClick(selectedLitId, selected_eppn) {
 // purpose : privacy / commentsNeedApproval
 // return the input element and the event will be handle out side this function
 function makeSettingSwitch(purpose, text, litId, selected_eppn, callback) {
-    let option = $("<div/>", {
+    // let option = $("<div/>");
+    let span = $("<span/>", {
+        class: "mdl-switch__label",
         text: text
     });
 
     let label = $("<label/>", {
-        class: "mdl-switch mdl-js-switch mdl-js-ripple-effect",
+        class: "mdl-switch mdl-js-switch settingSwitch",
         for: purpose + "Switch"
     });
 
@@ -200,9 +212,11 @@ function makeSettingSwitch(purpose, text, litId, selected_eppn, callback) {
         class: "mdl-switch__input"
     });
 
-    $(".settingOptions").append(option);
-    $(option).append(label);
-    $(label).append(input);
+    // $(".settingOptions").append(option);
+    // $(option).append(label);
+
+    $(".settingOptions").append(label)
+    $(label).append(span, input);
     componentHandler.upgradeAllRegistered();
 
     if (callback != undefined) {
@@ -216,22 +230,38 @@ function makeSettingSwitch(purpose, text, litId, selected_eppn, callback) {
     });
 }
 
-function makeWhiteListButton(litId, selected_eppn) {
-    let whiteListOption = $("<div/>", {
-        class: "litWhiteListButton",
-        text: "Manage White List",
-        click: evt => {
+function makeSettingButton(litId, selected_eppn, buttonName, buttonText) {
+    let button = $("<div/>", {
+        class: buttonName,
+        text: buttonText
+    });
+    if (buttonName == "litWhiteListButton") {
+        button.on("click", (evt) => {
+            //console.log("white list!");
             if (isCurrentUserSelectedUser(selected_eppn, true)) {
                 $(".litSettingOptionSelected").removeClass("litSettingOptionSelected");
                 $(this).addClass("litSettingOptionSelected");
                 showWhiteListSettingBase(litId, selected_eppn);
             }
-        }
-    });
-
-    $(whiteListOption).append(`<i class="material-icons whiteListLinkIcon">link</i>`);
-    $(".settingOptions").append(whiteListOption);
-    componentHandler.upgradeAllRegistered();
+        });
+        $(button).append(`<i class="material-icons whiteListLinkIcon">link</i>`);
+        componentHandler.upgradeAllRegistered();
+    }
+    else if (buttonName == "deleteWorkButton") {
+        button.on("click", (evt) => {
+            if (isCurrentUserSelectedUser(selected_eppn, true)) {
+                if (confirm("Are you sure you want to delete the work " + litId + "?")) {
+                    deleteWork(litId, selected_eppn, undefined);
+                }
+            }
+        })
+    }
+    else if (buttonName == "settingDataButton") {
+        button.on("click", (evt) => {
+            showWorkSettingDataBase(selected_eppn, litId);
+        })
+    }
+    $(".settingOptions").append(button);
 }
 
 //TODO php for commentsNeedApproval
@@ -288,13 +318,170 @@ function workSettingSwitchOnChange(evt, litId, selected_eppn) {
     });
 }
 
+function deleteWork(litId, selected_eppn, userWorkCount) {
+    if (userWorkCount == undefined) {
+        console.log("0")
+        API.request({
+            endpoint: "get_works",
+            method: "GET",
+            data: {
+                eppn: selected_eppn
+            }
+        }).then((data) => {
+            let i = data.length
+            console.log(i)
+            deleteWork(litId, selected_eppn, i);
+        });
+    }
+    else {
+        console.log("2")
+        API.request({
+            endpoint: "delete_work",
+            method: "POST",
+            data: {
+                work: litId,
+                creator: selected_eppn
+            }
+        }).then((data) => {
+            $("#home").click();
+            // user only have one work before we delete the current work => delete the userMenuOptions
+            if (userWorkCount == 1) {
+                $(".usersMenuOptions" + "[commenterId = '" + selected_eppn + "']").remove();
+                $(".workSelectMenu").hide();
+            }
+            launchToastNotifcation(data);
+        });
+    }
+}
+
+function adjustCardBoxSize(target) {
+    //reset
+    if (target == undefined) {
+        $(".introBoxes").css({
+            "width": "",
+            "max-width": ""
+        });
+    }
+    else {
+        let targetWidth = $("." + target).width();
+        targetWidth += 100;
+        $(".introBoxes").css({
+            "width": targetWidth,
+            "max-width": targetWidth
+        });
+    }
+}
+
+function showWorkSettingDataBase(selected_eppn, litId) {
+    $(".litSettingBase").hide();
+    $(".settingDataBase").show();
+    let tbody = $(".settingDataTable").find("tbody");
+    tbody.empty();
+    let isHeadCreated = $(".settingDataTable").find("thead").children().length;
+    console.log(isHeadCreated);
+    if (isHeadCreated) {
+        createDataTableBody(selected_eppn, litId);
+    }
+    else {
+        createDataTableHeader();
+        createDataTableBody(selected_eppn, litId);
+    }
+    adjustCardBoxSize("settingDataTable");
+}
+
+function createDataTableHeader() {
+    let thead_tr = $("<tr/>");
+    let nameTableHead = $("<th/>", {
+        class: "mdl-data-table__cell--non-numeric",
+        text: "Name/Type"
+    });
+    thead_tr.append(nameTableHead);
+    let dataTableHead = ["All Comments", "Unapproved Comments"];
+    for (var i in dataTableHead) {
+        let header = $("<th/>", {
+            text: dataTableHead[i]
+        });
+        thead_tr.append(header);
+    }
+    $(".settingDataTable").find("thead").append(thead_tr);
+    componentHandler.upgradeAllRegistered();
+}
+
+function createDataTableBody(selected_eppn, litId) {
+    let typeData = ["All", "Historical", "Analytical", "Comment", "Question"];
+    for (var i in typeData) {
+        let tr = $("<tr/>");
+        let data = [getWorkCommentsData(typeData[i], undefined, true), getWorkCommentsData(typeData[i], undefined, false)]
+        let type = $("<td/>", {
+            class: "mdl-data-table__cell--non-numeric",
+            text: typeData[i]
+        });
+        tr.append(type);
+        for (var j in data) {
+            let num = $("<td/>");
+            num.html(data[j]);
+            tr.append(num)
+        }
+        $(".settingDataTable").find("tbody").append(tr);
+    }
+    API.request({
+        endpoint: "get_highlights",
+        method: "GET",
+        data: {
+            creator: selected_eppn,
+            work: litId
+        }
+    }).then((data) => {
+        let commenter = createListOfCommenter(data);
+        for (var i in commenter) {
+            let tr = $("<tr/>");
+            let name = $("<td/>", {
+                class: "mdl-data-table__cell--non-numeric",
+                text: commenter[i]
+            });
+            tr.append(name);
+            let data = [getWorkCommentsData(undefined, commenter[i], true), getWorkCommentsData(undefined, commenter[i], false)];
+            for (var j in data) {
+                let num = $("<td/>");
+                num.html(data[j]);
+                tr.append(num);
+            }
+            $(".settingDataTable").find("tbody").append(tr);
+        }
+    });
+    componentHandler.upgradeAllRegistered();
+}
+
+function getWorkCommentsData(type, commenter, all) {
+    let className;
+    let data;
+    if (all) {
+        className = ".commented-selection"
+    }
+    else {
+        className = ".unapprovedComments"
+    }
+    if (type != undefined) {
+        if (type == "All") {
+            data = $(className);
+        }
+        else {
+            data = $(className + "[typeOf = '" + type + "']");
+        }
+    }
+    else if (commenter != undefined) {
+        data = $(className + "[creator = '" + commenter + "']");
+    }
+    return data.length
+}
+
 //litId = literature name , selected_eppn = creator of the literature
 function showWhiteListSettingBase(litId, selected_eppn) {
     enableAllWhiteListOption();
     $(".whiteListSettingBase").fadeIn();
     $(".litSettingBase").hide();
     $(".whiteListCheckBoxSpan").children("label").removeClass("is-checked");
-    var endPoint = "get_permissions_list";
+    let endPoint = "get_permissions_list";
     console.log(endPoint)
     API.request({
         endpoint: endPoint,

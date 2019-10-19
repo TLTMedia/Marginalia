@@ -42,7 +42,6 @@ function addFileAndUpload() {
     var fileToSave;
     $("#addFileButton").on("change", function (e) {
         let tmpFileToSave = e.target.files[0];
-        console.log(tmpFileToSave);
         if (tmpFileToSave === undefined || tmpFileToSave === null) {
             // Can occur when user cancels file-choosing view
             return;
@@ -68,7 +67,7 @@ function addFileAndUpload() {
         else if (/^[\s]+$/.test(name)) {
             launchToastNotifcation("Please chosse a file name without space");
         }
-        else if (!/^[a-zA-Z0-9_\-\.]+$/.test(name)) {
+        else if (!/^[a-zA-Z0-9_\-\.\s]+$/.test(name)) {
             launchToastNotifcation("Please choose a file name without special characters");
         } else {
             saveLit({ work: name, privacy: $("#privateCheck").is('.is-checked'), data: fileToSave });

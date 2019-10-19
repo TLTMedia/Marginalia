@@ -9,7 +9,7 @@ var remSpan; // holds the name of made and clicked spans
   Loads the userdata obtained by the netID login
   Loads the users folder and creates a button for each user
 */
-init = async ({ api = api, courses = courses, users = users } = {}) => {
+init = async ({ state = state, ui = ui, api = api, courses = courses, users = users } = {}) => {
     /** For legacy purposes... */
     API = api;
     currentUser = users.current_user;
@@ -17,16 +17,26 @@ init = async ({ api = api, courses = courses, users = users } = {}) => {
     $(".loader").hide();
     $("#text").hide();
     $("#addLitBase").hide();
-    createUserSelectScreen({ users: users });
+
+    /** Populate the courses select dropdown */
+    let courses_list = await courses.get_course_list();
+    if (!ui.populate_courses_dropdown(courses_list)) {
+        console.error("error while attempting to populate courses dropdown");
+    } else {
+        $(".searchCourse").on("keyup", () => {
+            ui.ui_events.do_course_search();
+        });
+        // //make the white list
+        // makeWhiteListSettingBase(user_list);
+    }
 
     $(window).on("resize", function () {
-        var stageWidth = $(window).width();
+        let stageWidth = $(window).width();
         $("#text").css("height", $("#litDiv").height() + "px");
         $("html").css("font-size", (stageWidth / 60) + "px");
-    }).trigger("resize")
+    }).trigger("resize");
 
-    $.address.externalChange((evt) => {
-        console.log("externalChange");
+    $.address.externalChange(() => {
         loadFromDeepLink();
     });
 
@@ -48,11 +58,11 @@ init = async ({ api = api, courses = courses, users = users } = {}) => {
 function bindRedirectConfirmation(specificElement) {
     $(specificElement).on("click", function (event) {
         if (($(specificElement).attr("href")).indexOf(window.location.host) !== -1) {
-            console.log("do nothing is same host");
+            // console.log("do nothing is same host");
         } else if (($(specificElement).attr("href")).indexOf("javascript:void(0);") !== -1) {
-            console.log("do nothing is javascript void event");
+            // console.log("do nothing is javascript void event");
         } else if ($(specificElement).attr("href").charAt(0) == "#") {
-            console.log("do nothing is just hash placeholder tag");
+            // console.log("do nothing is just hash placeholder tag");
         } else {
             event.preventDefault();
             let res = confirm("Are you sure you want to visit the URL:\n\n" + $(specificElement).attr("href"));
@@ -562,7 +572,6 @@ function checkworkAdminList(selected_eppn, litId, mode) {
 
 function launchToastNotifcation(data) {
     var message = { message: data }
-    console.log(data)
     var snackbarContainer = document.querySelector('.mdl-js-snackbar');
     snackbarContainer.MaterialSnackbar.showSnackbar(message);
 }
