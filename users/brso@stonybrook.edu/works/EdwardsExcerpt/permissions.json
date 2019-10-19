@@ -1,0 +1,10 @@
+{
+    "admins": [
+        "brso@stonybrook.edu"
+    ],
+    "public": true,
+    "comments_require_approval": false,
+    "privacy": "false",
+    "creator_first_name": "Brandi",
+    "creator_last_name": "So"
+}

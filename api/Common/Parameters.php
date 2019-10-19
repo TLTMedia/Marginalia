@@ -10,14 +10,14 @@ class Parameters
         if (is_null($a)) {
             echo json_encode(array(
                 "status"  => "error",
-                "message" => "invalid parameters",
+                "message" => "invalid parameters 1",
             ));
             exit; // Maybe this is a good idea?
         }
         if (!$this->isInArray(array_keys($a), $b)) {
             echo json_encode(array(
                 "status"  => "error",
-                "message" => "invalid parameters",
+                "message" => "invalid parameters 2",
             ));
             exit; // Maybe this is a good idea?
         }

@@ -10,12 +10,8 @@ body {
     background-color: #333333;
 }
 
-html {
-    /* overflow: -moz-scrollbars-vertical; */
-    /* overflow-y: scroll; */
-}
-
 /* the whole replybox */
+
 #replies {
     border-bottom-left-radius: 10px;
     border-bottom-right-radius: 10px;
@@ -23,11 +19,10 @@ html {
 
 /*--------------------replies in the replybox----------------*/
 
-
 /* single reply*/
 
 .replies {
-    display : block;
+    display: block;
     padding-left: 10px;
     border-left: 3px solid #d7d3d1;
     background-color: #efebe9;
@@ -45,7 +40,7 @@ i.unapproved {
     color: blue;
 }
 
- i.private {
+i.private {
     font-size: 14px;
 }
 
@@ -80,6 +75,7 @@ i.unapproved {
     margin-right: 30px;
     float: right;
 }
+
 /*----------------------------------------*/
 
 #home {
@@ -126,7 +122,7 @@ i.unapproved {
     padding: 2%;
     position: absolute;
     overflow: none;
-    height: 545%;
+    height: 100%;
     background-color: #efebe9;
 }
 
@@ -180,7 +176,6 @@ i.unapproved {
     font-style: bold;
     color: #efebe9;
 }
-
 
 /*------------------------------------------*/
 
@@ -499,7 +494,6 @@ text[inputtype='inputFile'] {
     font-size: auto;
 }
 
-
 /*-----------------Commenters/Type Selector----------------*/
 
 .typeSelector {
@@ -509,7 +503,7 @@ text[inputtype='inputFile'] {
 
 .typeSelector ul {
     top: calc(5rem + 24px);
-    right: 0;
+    right: 10px;
     list-style-type: none;
     margin-top: 20px;
     margin-left: 2px;
@@ -521,7 +515,7 @@ text[inputtype='inputFile'] {
 
 .commenterSelector ul {
     top: calc(5rem + 250px);
-    right: 0;
+    right: 10px;
     list-style-type: none;
     margin-top: 10px;
     padding: 0;
@@ -534,7 +528,7 @@ text[inputtype='inputFile'] {
 .selectorOpener {
     position: fixed;
     top: calc(5rem + 45px);
-    right: 0;
+    right: 10px;
     margin: auto;
     background-color: #EFEBE9;
     font-size: 12px;
@@ -564,8 +558,7 @@ text[inputtype='inputFile'] {
     /* margin: auto; */
 }
 
-.buttons,
-.commenters {
+.buttons, .commenters {
     height: 20%;
     position: relative;
     display: block;
@@ -575,18 +568,15 @@ text[inputtype='inputFile'] {
     border-bottom-left-radius: .5rem;
 }
 
-.buttons label,
-.commenters label {
+.buttons label, .commenters label {
     padding-left: 4px;
 }
 
-.buttons input,
-.commenters input {
+.buttons input, .commenters input {
     width: 20px;
 }
 
-.buttons:hover,
-.commenters:hover {
+.buttons:hover, .commenters:hover {
     background-color: #C8C8C8;
 }
 
@@ -598,8 +588,7 @@ input[type='radio']:active {
     background-color: #C999F6;
 }
 
-.allTypes,
-.allCommenters {
+.allTypes, .allCommenters {
     -moz-user-select: -moz-none;
     -khtml-user-select: none;
     -webkit-user-select: none;
@@ -653,7 +642,6 @@ input[type='radio']:active {
     background: #4db6ac;
     -webkit-box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.5);
 } */
-
 
 /*------------------------------------*/
 
@@ -787,8 +775,7 @@ button[id^="removePrivateName_"]:hover {
     border-width: 2px;
 }
 
-#commentSave:hover,
-#commentExit:hover {
+#commentSave:hover, #commentExit:hover {
     background-color: #bfbcba;
 }
 
@@ -833,9 +820,10 @@ button[id^="removePrivateName_"]:hover {
 }
 
 ::-webkit-scrollbar-track {
-    /* border-radius: 10px; */
-    /* border-left: 1px solid rgba(0, 0, 0, 0.87);
-  scroll-padding-left: 1px; */
+    background: #DCDCDC;
+    border-radius: 10px;
+    border-left: 1px solid rgb(192, 192, 192, 0.85);
+    /*scroll-padding-left: 1px; */
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -844,7 +832,7 @@ button[id^="removePrivateName_"]:hover {
 
 ::-webkit-scrollbar-thumb {
     border-radius: 5px;
-    background: #4db6ac;
+    background: #C0C0C0;
     cursor: pointer;
     /* border: 1px solid rgba(0, 0, 0, 0.87); */
     /* -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5); */
@@ -1028,24 +1016,27 @@ input[type="file"] {
         -webkit-transform: rotat
     }
 }
+
 /*-----------------repliesToolBar----------------*/
-.toolBar{
-  display: block;
-  height: 40px;
+
+.toolBar {
+    display: block;
+    height: 40px;
 }
 
-.toolBar > button{
-  margin-right: 10px;
-  float: left;
+.toolBar>button {
+    margin-right: 10px;
+    float: left;
 }
 
 /*-----------------commentSizeIndicator----------------*/
-.startDiv{
-  display:inline;
+
+.startDiv {
+    display: inline;
 }
 
-.endDiv{
-  display:inline;
+.endDiv {
+    display: inline;
 }
 
 /*-----------------addLitPage----------------------*/
@@ -1074,7 +1065,6 @@ input[type="file"] {
     cursor: pointer;
     margin-bottom: 0px;
 }
-
 
 /*=================headerTab=======================*/
 
@@ -1112,27 +1102,25 @@ input[type="file"] {
     color: white;
 } */
 
-
 /*-----------------colorsForComments---------------*/
 
 .unapprovedComments {
-    color: red!important;
-}
-
-.unapprovedComments.threadNotApproved {
-    color: red;
+    /* color: red!important; */
+    /* color: #EE4266!important; */
+    color: #8B0000!important;
+    text-decoration: underline;
 }
 
 .threadNotApproved {
-    color: orange!important;
+    /* color: orange!important; */
+    color: #FF4500!important;
 }
-
 
 /*-----------------commentHighlightColor-----------*/
 
 .commented-selection {
-    background-color: rgba(0, 200, 0);
-    color: white;
+    background-color: rgba(255, 210, 63, 0.85);
+    color: black;
     cursor: context-menu;
 }
 
@@ -1142,47 +1130,34 @@ input[type="file"] {
     cursor: default;
 }
 
-
-/* #text span span {
-  background-color: #309b30;
-}
-
-#text span span span {
-  background-color: #238423;
-}
-
-#text span span span span {
-  background-color: #186818;
-} */
-
-.blueComments {
+/* .blueComments {
     background-color: rgba(100, 100, 255);
     cursor: context-menu;
-}
+} */
 
-.colorOneComments{
-    background-color: rgba(0,100,100);
+.colorOneComments {
+    background-color: #7BDB93;
     cursor: context-menu;
 }
 
-.colorTwoComments{
-    background-color: rgba(0,50,150);
+.colorTwoComments {
+    background-color: rgba(91, 180, 220, 0.85);
     cursor: context-menu;
 }
 
-.colorThreeComments{
-  background-color: rgba(0,150,50);
+.colorThreeComments {
+    background-color: #BEA8E9;
+    cursor: context-menu;
 }
 
-.colorFourComments{
-    background-color: rgba(0, 0, 200);
+.colorFourComments {
+    background-color: #EE6055;
     cursor: context-menu;
 }
 
 /* .colorFourComments{
   background-color: rgba(0,200,0)
 } */
-
 
 /*-----------------selectingMenu-------------------*/
 
@@ -1191,31 +1166,35 @@ input[type="file"] {
     padding: 0px;
 }
 
-.usersMenuTitle {
+.menuOptionTitle {
     font-size: 16px;
     margin-bottom: 4px;
     margin-left: 4px;
 }
 
-.userSelectMenu ul,
-.workSelectMenu ul {
-    height: 96px;
+.userSelectMenu, .workSelectMenu {
+    margin-top: 10px;
+    /* display: none; */
+}
+
+.userSelectMenu ul, .workSelectMenu ul {
+    height: 100px;
     width: auto;
     overflow-y: scroll;
 }
 
-.usersMenuOptions,
-.worksMenuOptions {
+.usersMenuOptions, .worksMenuOptions, .menuOptions {
     width: 100%;
-    /* background-color: #efebe9; */
     background-color: #d7d3d1;
     /* font-weight: bold; */
     cursor: pointer;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.87);
+    /* border-bottom: 1px solid rgba(0, 0, 0, 0.87); */
+    /* border-left : 2px solid rgba(99,98,97,0.7); */
+    border-bottom: 1px solid rgba(99, 98, 97, 0.7);
+    border-right: 1px solid rgba(99, 98, 97, 0.7);
 }
 
-.usersMenuOptions:hover,
-.worksMenuOptions:hover {
+.usersMenuOptions:hover, .worksMenuOptions:hover, .menuOptions:hover {
     background-color: #a7a6a5;
 }
 
@@ -1227,13 +1206,11 @@ input[type="file"] {
     margin-left: 4px;
 }
 
-.searchUser,
-.searchLit,
-.searchWhiteList {
+.searchCourse, .searchUser, .searchLit, .searchWhiteList {
     font-size: 16px;
     padding: 12px 20px 12px 20px;
     background-color: #f3f1ef;
-    /* margin-bottom: 12px; */
+    /* margin-bottom: 5px; */
     border: 0px;
     border-bottom: 1px solid rgba(0, 0, 0, 0.87);
     background-color: rgba(255, 255, 255, 0.9);
@@ -1241,20 +1218,9 @@ input[type="file"] {
     width: 100%;
 }
 
-.workMenuSelected,
-.litSettingOptionSelected,
-.usersMenuSelected {
+.workMenuSelected, .litSettingOptionSelected, .usersMenuSelected {
     background-color: #bfbcba;
 }
-
-.settingOptions div {
-    /* font-weight: bold; */
-    margin-top: 5px;
-    margin-bottom: 5px;
-    margin-left: 5px;
-    font-size: 1.15em;
-}
-
 
 /*-----------------workTitle-----------------------*/
 
@@ -1270,7 +1236,6 @@ input[type="file"] {
     font-family: monospace;
 }
 
-
 /*--------------------closeBox--------------*/
 
 .closeReplyBoxDiv .closeCommentBoxDiv {
@@ -1279,8 +1244,7 @@ input[type="file"] {
     flex-grow: 1;
 }
 
-.closeReplyBox,
-.closeCommentBox {
+.closeReplyBox, .closeCommentBox {
     /* background-color: #f44336; */
     /* color: white; */
     /* border: 1px solid #c13328; */
@@ -1291,7 +1255,6 @@ input[type="file"] {
     /* justify-content: center; */
     /* flex-grow: 1; */
     cursor: pointer;
-
     color: black;
     font-size: 25px;
     background-color: red;
@@ -1337,7 +1300,7 @@ input[type="file"] {
     visibility: hidden;
     width: 300px;
     font-size: 16px;
-    background-color: #4CAF50;
+    background-color: rgba(76, 175, 80, 0.9);
     color: #fff;
     text-align: center;
     border-radius: 6px;
@@ -1370,7 +1333,7 @@ input[type="file"] {
     visibility: hidden;
     width: 250px;
     font-size: 16px;
-    background-color: #4CAF50;
+    background-color: rgba(76, 175, 80, 0.9);
     text-align: center;
     position: absolute;
     color: white;
@@ -1387,20 +1350,47 @@ input[type="file"] {
     left: 50%;
 }
 
-
 /*-----------------settingPage---------------------*/
 
 .disabledHeaderTab {
     background-color: grey;
 }
 
+#settingBase {
+    display: none;
+}
+
 #settingTitle {
     font-size: 20px;
     font-weight: bold;
+    margin-bottom: 6px;
 }
 
-.settingTitles {
+.settingOptions label {
+    /* font-weight: bold; */
+    margin-top: 4px;
+    margin-bottom: 2px;
+    margin-left: 5px;
+    font-size: 1.15em;
+    display: block;
+    width: 300px;
+    height: 40px;
+    /* height: 40px; */
+}
+
+.deleteWorkButton {
+    color: Red;
     font-weight: bold;
+}
+
+.litWhiteListButton, .deleteWorkButton, .settingDataButton {
+    margin-top: 4px;
+    margin-bottom: 4px;
+    margin-left: 5px;
+    font-size: 16px;
+    height: 40px;
+    display: flex;
+    align-items: center;
 }
 
 .whiteListSettingBase ul {
@@ -1409,28 +1399,21 @@ input[type="file"] {
     overflow-y: scroll;
 }
 
-.settingUsers,
-.settingLit {
+.settingUsers, .settingLit {
     background-color: #efebe9;
     font-weight: bold;
 }
 
-.settingUsers:hover,
-.settingLit:hover,
-.litDelButton:hover,
-.litEditButton:hover,
-.litWhiteListButton:hover {
+.settingUsers:hover, .settingLit:hover, .litEditButton:hover, .litWhiteListButton:hover, .deleteWorkButton:hover, .settingDataButton:hover {
     background-color: #bfbcba;
     cursor: pointer;
 }
 
-#litSettingButton,
-#userSettingButton {
+#litSettingButton, #userSettingButton {
     float: right;
 }
 
-.litSettingBaseTitle,
-.userSettingBaseTitle {
+.litSettingBaseTitle, .userSettingBaseTitle {
     font-size: 16px;
     font-weight: bold;
 }
@@ -1467,7 +1450,6 @@ input[type="file"] {
     padding-left: 4px;
 }
 
-
 /*----------new toast------------------*/
 
 #toast-notification1 {
@@ -1495,7 +1477,6 @@ input[type="file"] {
     background-image: url(../img/smalllogo.svg);
     background-repeat: no-repeat;
 }
-
 
 /*-----------phone screen size -----------*/
 
@@ -1597,7 +1578,6 @@ input[type="file"] {
     }
 }
 
-
 /* Small devices (portrait tablets and large phones, 600px and up) */
 
 @media only screen and (min-width: 600px) {
@@ -1606,21 +1586,17 @@ input[type="file"] {
   } */
 }
 
-
 /* Medium devices (landscape tablets, 768px and up) */
 
 @media only screen and (min-width: 768px) {}
-
 
 /* Large devices (laptops/desktops, 992px and up) */
 
 @media only screen and (min-width: 992px) {}
 
-
 /* Extra large devices (large laptops and desktops, 1200px and up) */
 
 @media only screen and (min-width: 1200px) {}
-
 
 /* old phone style*/
 
@@ -1679,25 +1655,28 @@ input[type="file"] {
         margin-top: 0%;
         line-height: 1.5;
     }
-   .commentText {
-       padding: 2%;
-       width: auto;
-   }
-   .headText {
-       line-height: 1;
-   }
-   .firstPage {
-       width: auto;
-   }
+    .commentText {
+        padding: 2%;
+        width: auto;
+    }
+    .headText {
+        line-height: 1;
+    }
+    .firstPage {
+        width: auto;
+    }
 }
 
 /*--------------cardbox--------------------*/
+
 #cardbox {
+    margin-top: 150px;
     border-radius: .75rem;
     -moz-user-select: -moz-none;
     -khtml-user-select: none;
     -webkit-user-select: none;
     -ms-user-select: none;
+    transition: all 200ms linear !important;
 }
 
 .introBoxes {
