@@ -65,7 +65,7 @@ class Work
 
 class CreateWork
 {
-    public function __construct($path, $skeletonUser)
+    public function __construct($path, $coursesPath, $skeletonUser)
     {
         /**
          * Empty directories we want to create in the $work directory
@@ -74,13 +74,14 @@ class CreateWork
             "data/threads",
         );
         $this->path         = $path;
+        $this->coursesPath  = $coursesPath;
         $this->skeletonUser = $skeletonUser;
     }
 
     /**
      * Initialization function
      */
-    public function init($creator, $work, $privacy, $tmpFilePath)
+    public function init($creator, $work, $privacy, $course, $firstName, $lastName, $tmpFilePath)
     {
         /**
          * Create the user directory if it doesn't exist
@@ -120,7 +121,7 @@ class CreateWork
         /**
          * Creating the index.html file with Mammoth
          */
-        $destinationPath = $pathOfWork . "/index.html";
+        $destinationPath = escapeshellarg($pathOfWork . "/index.html");
         $execString      = "/home1/tltsecure/.local/bin/mammoth $tmpFilePath $destinationPath 2>${tmpFilePath}.out.txt";
         system($execString);
         unlink($tmpFilePath);
@@ -132,10 +133,22 @@ class CreateWork
          * Creating the default permissions.json file
          */
         require 'Permissions.php';
-        $permissions           = new DefaultPermissions;
-        $permissions->privacy  = $privacy;
-        $permissions->admins[] = $creator;
+        $permissions                     = new DefaultPermissions;
+        $permissions->privacy            = $privacy;
+        $permissions->admins[]           = $creator;
+        $permissions->creator_first_name = $firstName;
+        $permissions->creator_last_name  = $lastName;
         file_put_contents($pathOfWork . "/permissions.json", json_encode($permissions));
+
+        /**
+         * Create a symlink in the correct course directory
+         */
+        if (!symlink($pathOfWork, $this->coursesPath . $course . "/" . $creator . "###" . $work)) {
+            json_encode(array(
+                "status"  => "error",
+                "message" => "unable to place the directory in the specified course",
+            ));
+        }
 
         return json_encode(array(
             "status"  => "ok",

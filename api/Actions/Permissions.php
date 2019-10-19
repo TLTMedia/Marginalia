@@ -327,5 +327,7 @@ class DefaultPermissions
         $this->admins                    = array();
         $this->public                    = true;
         $this->comments_require_approval = false;
+        $this->creator_first_name        = "";
+        $this->creator_last_name         = "";
     }
 }

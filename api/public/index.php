@@ -70,9 +70,28 @@ $app->get("/", function () use ($app) {
  */
 $app->get("/get_creators", function () use ($app, $PATH) {
     require "../Actions/Users.php";
-    $users = new Users($PATH);
+    $users = new Users($app->log, $PATH);
 
     echo $users->getCreators();
+});
+
+/**
+ * Gets a list of all the users (and their name) that have a work in a specified course
+ */
+$app->get("/get_creators_of_course", function () use ($app, $PATH, $PATH_COURSES, $parameters, $authUniqueId) {
+    $data = $app->request->get();
+    $parameters->paramCheck($data, array(
+        "course",
+    ));
+
+    require "../Actions/Users.php";
+    $users = new Users($app->log, $PATH);
+
+    echo $users->getCreatorsOfCourse(
+        $PATH_COURSES,
+        $data["course"],
+        $authUniqueId
+    );
 });
 
 /**
@@ -81,7 +100,7 @@ $app->get("/get_creators", function () use ($app, $PATH) {
  */
 $app->get("/get_current_user", function () use ($app, $PATH, $authUniqueId, $authFirstName, $authLastName) {
     require "../Actions/Users.php";
-    $users = new Users($PATH);
+    $users = new Users($app->log, $PATH);
 
     echo $users->getCurrentUser(
         $authFirstName,
@@ -158,7 +177,7 @@ $app->get("/get_works", function () use ($app, $PATH, $parameters, $authUniqueId
     ));
 
     require "../Actions/Users.php";
-    $users = new Users($PATH);
+    $users = new Users($app->log, $PATH);
 
     echo $users->getUserWorks(
         $data["eppn"],
@@ -176,7 +195,7 @@ $app->get("/get_work", function () use ($app, $PATH, $parameters, $authUniqueId)
     ));
 
     require "../Actions/Users.php";
-    $users        = new Users($PATH);
+    $users        = new Users($app->log, $PATH);
     $workFullPath = $PATH . $data["eppn"] . "/works/" . $data["work"];
 
     echo $users->getUserWork(
@@ -320,7 +339,7 @@ $app->post("/set_require_approval", function () use ($app, $PATH, $parameters, $
 /**
  * Create a new work
  */
-$app->post("/create_work", function () use ($app, $PATH, $SKELETON_PATH, $parameters, $authUniqueId) {
+$app->post("/create_work", function () use ($app, $PATH, $PATH_COURSES, $SKELETON_PATH, $parameters, $authUniqueId, $authFirstName, $authLastName) {
     $data = $app->request->post();
     $parameters->paramCheck($data, array(
         "work", "privacy",
@@ -337,12 +356,15 @@ $app->post("/create_work", function () use ($app, $PATH, $SKELETON_PATH, $parame
     }
 
     require "../Actions/Work.php";
-    $newWork = new CreateWork($PATH, $SKELETON_PATH);
+    $newWork = new CreateWork($PATH, $PATH_COURSES, $SKELETON_PATH);
 
     echo $newWork->init(
         $authUniqueId,
         $data["work"],
         $data["privacy"],
+        "WRT 102 - Fall 2019", //"Other - Fall 2019", // temporarily hard coded value ... non-trivial to get the course view in upload gui
+        $authFirstName,
+        $authLastName,
         $tempFile
     );
 });
@@ -582,6 +604,38 @@ $app->get("/courses", function () use ($app, $PATH_COURSES, $responseFmt, $authU
 /**
  * Adds a course to the courses list. Only course admins defined in courses/permissions.json may add courses.
  */
+$app->post("/add_course", function () use ($app, $PATH, $parameters, $authUniqueId) {
+    $data = json_decode($app->request->getBody(), true);
+    $parameters->paramCheck($data, array(
+        "course",
+    ));
+
+    require "../Actions/Comments.php";
+    $comments = new Courses($app->log, $PATH_COURSES, $authUniqueId);
+
+    echo $responseFmt->message(
+        $comments->addCourse(
+            $data["course"]
+        )
+    );
+});
+
+$app->get("/get_works_of_course_creator", function () use ($app, $PATH, $PATH_COURSES, $parameters, $authUniqueId) {
+    $data = $app->request->get();
+    $parameters->paramCheck($data, array(
+        "creator", "course",
+    ));
+
+    require "../Actions/Users.php";
+    $users = new Users($app->log, $PATH);
+
+    echo $users->getWorksOfCourseAndCreator(
+        $data["creator"],
+        $data["course"],
+        $PATH_COURSES,
+        $authUniqueId
+    );
+});
 
 /**
  * Adds a course admin; pre-existing course-admin's can create courses... They can also add other users as course-admins

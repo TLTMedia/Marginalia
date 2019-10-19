@@ -2,21 +2,18 @@
 
 class Users
 {
-    public function __construct($path)
+    public function __construct($logger, $path)
     {
-        $this->path = $path;
+        $this->logger = $logger;
+        $this->path   = $path;
     }
-
-    /**
-     * Create User
-     */
 
     /**
      * Returns a list of all the work creators
      */
     public function getCreators()
     {
-        $userFolder = glob("../../users/*");
+        $userFolder = glob($this->path . "*");
         $allNetIDs  = array();
 
         foreach ($userFolder as $userid) {
@@ -28,6 +25,105 @@ class Users
             "status" => "ok",
             "data"   => $allNetIDs,
         ));
+    }
+
+    /**
+     * Returns list (obj) of all the work creators of a specific course
+     */
+    public function getCreatorsOfCourse($coursesPath, $course, $eppn)
+    {
+        /**
+         * Check if the course is valid
+         */
+        require 'Courses.php';
+        $courses    = new Courses($this->logger, $coursesPath, $eppn);
+        $allCourses = $courses->getCourses();
+        if (!in_array($course, $allCourses)) {
+            return json_encode(array(
+                "status" => "error",
+                "data"   => "course does not exist",
+            ));
+        }
+
+        /**
+         * Go into the specified course and get all dirs
+         */
+        $userFolder     = glob($coursesPath . $course . "/*");
+        $allNetIDs      = array();
+        $uniqueUserData = array();
+
+        foreach ($userFolder as $userid) {
+            $netid = substr($userid, strrpos($userid, '/') + 1);
+            $netid = substr($netid, 0, strpos($netid, "#"));
+            if (!in_array($netid, $allNetIDs)) {
+                array_push($allNetIDs, $netid);
+
+                /**
+                 * Get the real path from the symlink in courses
+                 */
+                $realLink = readlink($coursesPath . $course . "/" . $userid);
+                if (!$realLink) {
+                    return json_encode(array(
+                        "status" => "error",
+                        "data"   => "unable to find work in courses directory (symlink broken)",
+                    ));
+                }
+
+                /**
+                 * Get first and last name of the author
+                 */
+                $permissionData = file_get_contents($realLink . "/permissions.json");
+                if (!$permissionData) {
+                    return json_encode(array(
+                        "status" => "error",
+                        "data"   => "unable to get permissions file from work. does permissions exist for work?",
+                    ));
+                }
+
+                $permissionData = json_decode($permissionData);
+                //var_dump($permissionData);
+                $uniqueUserData[] = array(
+                    "eppn"      => $netid,
+                    "firstName" => $permissionData->creator_first_name,
+                    "lastName"  => $permissionData->creator_last_name,
+                );
+            }
+        }
+
+        return json_encode(array(
+            "status" => "ok",
+            "data"   => $uniqueUserData,
+        ));
+    }
+
+    /**
+     * Get works of a specified creator in a course
+     */
+    public function getWorksOfCourseAndCreator($creator, $course, $coursesPath, $currentEppn)
+    {
+        require 'Courses.php';
+        $courses     = new Courses($this->logger, $coursesPath, $currentEppn);
+        $courseWorks = $courses->getWorksInCourseByCreator($course, $creator);
+
+        $allUserWorks = json_decode($this->getUserWorks($creator, $currentEppn));
+        if ($allUserWorks->status == "ok") {
+            /**
+             * Why bother getting the intersection? B/c getUserWorks() is permissions safe and Courses.php isn't
+             */
+            $allUserWorksCanViewClean = array();
+            foreach ($allUserWorks->data as $viewableWork) {
+                $allUserWorksCanViewClean[] = substr($viewableWork, 0, strrpos($viewableWork, '.'));
+            }
+            return json_encode(array(
+                "status" => "ok",
+                "data"   => array_intersect($allUserWorksCanViewClean, $courseWorks),
+            ));
+        } else {
+            return json_encode(array(
+                "status" => "error",
+                "data"   => "unable to get user works, " . $allUserWorks->data,
+            ));
+        }
     }
 
     /**
