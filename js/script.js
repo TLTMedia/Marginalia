@@ -1,6 +1,13 @@
+/**
+ * This global is here potentially forever or until I can figure out how to make $.address work not in async
+ */
+const event_queue = new Array();
+
+/** 
+ * These globals are temporary until javascript is refactored into modules 
+ */
 var API;
 var TEXTSPACE = "textSpace";
-
 var currentUser = {};
 var remSpan; // holds the name of made and clicked spans
 
@@ -17,6 +24,7 @@ init = async ({ state = state, ui = ui, api = api, courses = courses, users = us
     $(".loader").hide();
     $("#text").hide();
     $("#addLitBase").hide();
+    $("#tutorialBase").hide();
 
     /** Populate the courses select dropdown */
     let courses_list = await courses.get_course_list();
@@ -27,7 +35,7 @@ init = async ({ state = state, ui = ui, api = api, courses = courses, users = us
             ui.ui_events.do_course_search();
         });
         // //make the white list
-        // makeWhiteListSettingBase(user_list);
+        //makeWhiteListSettingBase(user_list);
     }
 
     $(window).on("resize", function () {
@@ -35,10 +43,6 @@ init = async ({ state = state, ui = ui, api = api, courses = courses, users = us
         $("#text").css("height", $("#litDiv").height() + "px");
         $("html").css("font-size", (stageWidth / 60) + "px");
     }).trigger("resize");
-
-    $.address.externalChange(() => {
-        loadFromDeepLink();
-    });
 
     /**
      * Prompt if they want to leave the page when clicking on a link in the work
@@ -53,6 +57,18 @@ init = async ({ state = state, ui = ui, api = api, courses = courses, users = us
             }
         });
     });
+
+    /**
+     * Execute events in the event queue.
+     * This is made primarily for the jQuery.Address library,
+     * since it cannot be placed in the scope of an async function.
+     * But it calls functions initialized by the async...
+     * 
+     * TODO: maybe you can put it in a non-async module loaded in later?
+     */
+    for (evt in event_queue) {
+        event_queue[evt]["name"](...event_queue[evt]["parameters"]);
+    }
 }
 
 function bindRedirectConfirmation(specificElement) {
