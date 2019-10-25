@@ -186,7 +186,7 @@ function saveCommentOrReply(dataForSave, isFirstComment) {
             $('.' + escapeSpecialChar(remSpan)).removeClass(remSpan);
             let allComments = createCommentData();
             handleStartEndDiv(allComments);
-            updateTypeSelector(dataForSave["replyHash"], dataForSave["commentType"]);
+            colorNotUsedTypeSelector(dataForSave["author"],dataForSave["work"]);
             updateCommenterSelectors();
             //update the click event on this new added comment
             allowClickOnComment(dataForSave["work"], dataForSave["author"]);
@@ -244,7 +244,7 @@ function editOrDelete(dataForEditOrDelete, isEdit) {
         if (isEdit) {
             if (dataForEditOrDelete["type"]) {
                 $(".commented-selection" + "[commentId = '" + dataForEditOrDelete["hash"] + "']").attr("typeof", dataForEditOrDelete["type"]);
-                updateTypeSelector(dataForEditOrDelete["hash"], dataForEditOrDelete["type"]);
+                colorNotUsedTypeSelector(dataForEditOrDelete["creator"], dataForEditOrDelete["work"]);
             }
         }
         else {
@@ -253,7 +253,7 @@ function editOrDelete(dataForEditOrDelete, isEdit) {
             if (firstCommentId == $("#replies").attr("deletedid")) {
                 checkSpansNeedRecover(firstCommentId, removeDeletedSpan);
                 updateCommenterSelectors(firstCommentId);
-                updateTypeSelector(undefined, "All");
+                colorNotUsedTypeSelector(dataForEditOrDelete["creator"],dataForEditOrDelete["work"]);
                 $("#replies").parent().hide();
             }
             else {
