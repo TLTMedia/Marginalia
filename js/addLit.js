@@ -7,12 +7,46 @@ function showAddLitPage() {
         $("#addLitSecondPage").hide();
         $("#doneAddLit").hide();
         /* Makes the checkbox button ('page is private') clickable ... */
-        componentHandler.upgradeElement($("#privateCheck")[0]);
+        API.request({
+            endpoint: "courses",
+            method: "GET"
+        }).then((data) => {
+            makeAddLitCourseOptions(data)
+        });
+        //TutorialButton
+        $("#helpForAddLit").off().on("click", () => {
+            var tutorialData = [
+                 [".fileContainer", 1,"Select a file from your device"],
+                 [".nameContainer", 2, "Name your work"],
+                 [".addLitCourseMenu", 3, "Select a course that you want to upload your work for"],
+                 [".privateContainer", 4,"Check the box if you want your work to be private. (you are able to change your work's privacy after you upload it)"],
+                 ["#addUploadButton", 5, "Click to upload"]
+            ];
+            var specialStepData = {};
+            makeTutorial(tutorialData);
+            startTutorial(tutorialData,specialStepData);
+        });
+        componentHandler.upgradeAllRegistered();
 
         goBackButtonAction();
         doneAddLitButtonAction();
         addFileAndUpload();
     });
+}
+
+function makeAddLitCourseOptions(data) {
+    courseList = $(".courseListForAddLit");
+    for (var course in data) {
+        var option = $("<li/>", {
+            class: "mdl-menu__item courseOptionForAddLit",
+            text: data[course],
+            click: (evt) => {
+                $("#addLitSelectedCourse").empty().text("Current selected course: " + evt["currentTarget"]["textContent"]);
+            }
+        });
+        courseList.append(option);
+    }
+    componentHandler.upgradeAllRegistered();
 }
 
 function goBackButtonAction() {
@@ -56,11 +90,19 @@ function addFileAndUpload() {
         $("#fileName").text(fileName);
         $(".tempNameContainer").hide();
         $(".nameContainer").show();
-        $("#addNameInput").val(fileName.substr(0, fileName.lastIndexOf('.')) || fileName);
+        if ($("#addNameInput").val().length > 0) {
+            // don't do anything because the user already typed in a name and we don't want to overwrite it.
+        } else {
+            $("#addNameInput").val(fileName.substr(0, fileName.lastIndexOf('.')) || fileName);
+        }
     });
 
     $("#addUploadButton").on("click", function () {
         var name = $("#addNameInput").val();
+        var reg = /:\s.+/;
+        var x = $("#addLitSelectedCourse").text().match(reg);
+        var course = x == null ? undefined : x[0].slice(2);
+        console.log(course);
         if (name == "" || name.length > 100) {
             launchToastNotifcation("Please choose a file name no longer than 100 characters");
         }
@@ -69,8 +111,63 @@ function addFileAndUpload() {
         }
         else if (!/^[a-zA-Z0-9_\-\.\s]+$/.test(name)) {
             launchToastNotifcation("Please choose a file name without special characters");
-        } else {
-            saveLit({ work: name, privacy: $("#privateCheck").is('.is-checked'), data: fileToSave });
+        }
+        else if (course == undefined) {
+            launchToastNotifcation("Please select a course before you update your work");
+        }
+        else {
+            saveLit({ work: name, privacy: $("#privateCheck").is('.is-checked'), data: fileToSave, course: course });
+        }
+    });
+}
+
+function saveLit({ work, privacy, data, course } = {}) {
+    if (data.size > 2000000) {
+        alert("Error: File too large. Can't be larger than 2Mb.");
+        return;
+    }
+    const formData = new FormData();
+    formData.append("file", data);
+    formData.append("work", work);
+    formData.append("privacy", privacy);
+    formData.append("course", course);
+    API.request({
+        endpoint: "create_work",
+        method: "POST",
+        data: formData,
+        dataType: "form",
+    }).then(data => {
+        launchToastNotifcation(work + " is successfully created");
+        $("#addLitSecondPage").show();
+        $("#doneAddLit").show();
+        $("#addLitFirstPage").hide();
+        $(".uploadNotification").html('"<i>' + work + '</i>" is successfully created');
+        addNewUser();
+    });
+}
+
+function addNewUser() {
+    API.request({
+        endpoint: "get_creators",
+        method: "GET"
+    }).then((creators) => {
+        console.log(creators);
+        let isCurrentUserNewCreator = true;
+        let count = 0;
+        for (var i = 0; i < creators.length; i++) {
+            if (creators[i] == currentUser.eppn) {
+                count++;
+                if (count > 1) {
+                    isCurrentUserNewCreator = false;
+                }
+            }
+        }
+        if (isCurrentUserNewCreator) {
+            console.log("adddddddd")
+            let newCreator = createUserMenuOption(currentUser.eppn);
+            if (newCreator) {
+                $(".usersMenu").append(newCreator);
+            }
         }
     });
 }

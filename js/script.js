@@ -1,6 +1,13 @@
+/**
+ * This global is here potentially forever or until I can figure out how to make $.address work not in async
+ */
+const event_queue = new Array();
+
+/**
+ * These globals are temporary until javascript is refactored into modules
+ */
 var API;
 var TEXTSPACE = "textSpace";
-
 var currentUser = {};
 var remSpan; // holds the name of made and clicked spans
 
@@ -17,6 +24,7 @@ init = async ({ state = state, ui = ui, api = api, courses = courses, users = us
     $(".loader").hide();
     $("#text").hide();
     $("#addLitBase").hide();
+    $("#tutorialBase").hide();
 
     /** Populate the courses select dropdown */
     let courses_list = await courses.get_course_list();
@@ -27,18 +35,54 @@ init = async ({ state = state, ui = ui, api = api, courses = courses, users = us
             ui.ui_events.do_course_search();
         });
         // //make the white list
-        // makeWhiteListSettingBase(user_list);
+        //makeWhiteListSettingBase(user_list);
     }
 
+
+    $("#litadd").on("click", function (evt) {
+        $(".headerTab").removeClass("active");
+        $("#litadd").addClass("active");
+        showAddLitPage();
+        resetWhiteListPage();
+    });
+
+    $("#setting").addClass("disabledHeaderTab");
+    $("#setting").off().on("click", () => {
+        // let author = $("#setting").attr("author");
+        // let work = $("#setting").attr("work");
+        if ($("#setting").hasClass("disabledHeaderTab")) {
+            launchToastNotifcation("Please select a work first");
+        }
+        //if user is not the author they don't have the ability to change the setting
+        else if (!isCurrentUserSelectedUser(state.selected_creator)) {
+            console.log(state.selected_creator)
+            launchToastNotifcation("You don't have the permission to do this action");
+        }
+        else {
+            console.log("should o[pen]")
+            $(".headerTab").removeClass("active");
+            $("#setting").addClass("active");
+            litSettingButtonOnClick(state.selected_course, state.selected_work, state.selected_creator);
+        }
+    });
+
+    $("#home").off().on("click", function () {
+        $(".headerTab").removeClass("active");
+        $(this).addClass("active");
+        homeButtonAction();
+        resetWhiteListPage();
+        $(".selectorOpener").remove();
+    });
+
+
+    /**
+     * Leave these functions at the bottom of init()
+     */
     $(window).on("resize", function () {
         let stageWidth = $(window).width();
         $("#text").css("height", $("#litDiv").height() + "px");
         $("html").css("font-size", (stageWidth / 60) + "px");
     }).trigger("resize");
-
-    $.address.externalChange(() => {
-        loadFromDeepLink();
-    });
 
     /**
      * Prompt if they want to leave the page when clicking on a link in the work
@@ -49,30 +93,22 @@ init = async ({ state = state, ui = ui, api = api, courses = courses, users = us
                 return;
             } else {
                 $(currentElement).addClass("redirection-binded");
-                bindRedirectConfirmation(currentElement);
+                ui.ui_events.bind_redirect_confirmation(currentElement);
             }
         });
     });
-}
 
-function bindRedirectConfirmation(specificElement) {
-    $(specificElement).on("click", function (event) {
-        if (($(specificElement).attr("href")).indexOf(window.location.host) !== -1) {
-            // console.log("do nothing is same host");
-        } else if (($(specificElement).attr("href")).indexOf("javascript:void(0);") !== -1) {
-            // console.log("do nothing is javascript void event");
-        } else if ($(specificElement).attr("href").charAt(0) == "#") {
-            // console.log("do nothing is just hash placeholder tag");
-        } else {
-            event.preventDefault();
-            let res = confirm("Are you sure you want to visit the URL:\n\n" + $(specificElement).attr("href"));
-            if (res) {
-                window.location = $(specificElement).attr("href");
-            } else {
-                return;
-            }
-        }
-    });
+    /**
+     * Execute events in the event queue.
+     * This is made primarily for the jQuery.Address library,
+     * since it cannot be placed in the scope of an async function.
+     * But it calls functions initialized by the async...
+     *
+     * TODO: maybe you can put it in a non-async module loaded in later?
+     */
+    for (evt in event_queue) {
+        event_queue[evt]["name"](...event_queue[evt]["parameters"]);
+    }
 }
 
 // Creates a visual list of all users which gives access to their folders
@@ -134,7 +170,7 @@ function createWorkTitle(textChosen) {
     });
     let workTitleSpan = $("<span/>", {
         id: "workTitleSpan",
-        text: textChosen
+        text: decodeURIComponent(textChosen)
     });
     workTitle.append(workTitleSpan);
     $("#text").append(workTitle);
@@ -149,11 +185,24 @@ function createTips(workTitle) {
         class: "material-icons tipsIcon",
         text: "help"
     });
-    let text = $("<span/>", {
-        class: "tipsText"
+    // let text = $("<span/>", {
+    //     class: "tipsText"
+    // });
+    //text.html("The <span style = 'color : darkred'>Dark Red</span> comments with underlines are the comments that are not approved yet.\nThe <span style = 'color : orangered'>Orange</span> comments are comments that have unapproved replies.");
+    //tips.append(icon, text);
+    tips.append(icon);
+    tips.on("click",()=>{
+        tutorialData = [
+          ["#textSpace", 1,"Highlight the text to comment"],
+          [".commented-selection:first", 2, "Click on the highlight text to read the comments"],
+          ["#replies", 3, "comments are shown in here"]
+        ];
+        specialStepData = {
+           3: ["click", "#replies"]
+        }
+        makeTutorial(tutorialData);
+        startTutorial(tutorialData,specialStepData);
     });
-    text.html("The <span style = 'color : darkred'>Dark Red</span> comments with underlines are the comments that are not approved yet.\nThe <span style = 'color : orangered'>Orange</span> comments are comments that have unapproved replies.");
-    tips.append(icon, text);
     workTitle.prepend(tips);
 }
 
@@ -217,7 +266,7 @@ loadUserComments = (selected_eppn, textChosen, selectedType, selectedCommenter) 
         console.log(reverseSortedCommentData);
         renderComments(reverseSortedCommentData, selected_eppn, textChosen, getUnapprovedComments);
         if (isTypeAndCommenterUndefiend) {
-            makeSelector(createListOfCommenter(data), colorNotUsedTypeSelector);
+            makeSelector(selected_eppn, textChosen, reverseSortedCommentData, colorNotUsedTypeSelector);
         }
     });
 }

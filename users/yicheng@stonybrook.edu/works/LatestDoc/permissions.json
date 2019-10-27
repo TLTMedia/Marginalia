@@ -1,0 +1,9 @@
+{
+    "admins": [
+        "yicheng@stonybrook.edu"
+    ],
+    "comments_require_approval": true,
+    "creator_first_name": "Yi-Cheng",
+    "creator_last_name": "Cheng",
+    "public": true
+}

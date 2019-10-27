@@ -1,7 +1,7 @@
 /**
  * Initialization of Marginalia scripts begin here
  */
-import { InterfaceController, APIHandler, CoursesData, UsersData, WorksData, Toast, Comments, RangyHelper } from './Modules/ModuleLoader.js';
+import { InterfaceController, APIHandler, CoursesData, UsersData, WorksData, Toast } from './Modules/ModuleLoader.js';
 
 (async () => {
     const state = {};

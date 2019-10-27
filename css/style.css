@@ -1,9 +1,17 @@
+:root {
+    --bg-main-marginalia: rgba(0, 150, 136, 1.0);
+}
+
 *:focus {
     outline: none;
 }
 
 #text a {
     color: blue !important;
+}
+
+#text {
+    margin-top: 50px;
 }
 
 body {
@@ -92,11 +100,6 @@ i.private {
 .pleaseSelect {
     /* font-weight: bold; */
     padding-bottom: 10px;
-}
-
-.usersMenu {
-    font-weight: bold;
-    font-size: .75rem;
 }
 
 .chosenText {
@@ -1017,6 +1020,12 @@ input[type="file"] {
     }
 }
 
+/*----------------tutorial----------------------*/
+
+.tutorialButton>i: hover {
+    color: #00786c!important;
+}
+
 /*-----------------repliesToolBar----------------*/
 
 .toolBar {
@@ -1043,7 +1052,11 @@ input[type="file"] {
 
 #addLitBase {
     font-weight: bold;
-    font-size: .55rem;
+    font-size: 13px;
+}
+
+#addLitBase div {
+    margin-bottom: 5px;
 }
 
 .uploadNotification {
@@ -1067,6 +1080,22 @@ input[type="file"] {
 }
 
 /*=================headerTab=======================*/
+
+#header-main-menu {
+    z-index: 2;
+    height: 64px;
+}
+
+#header-sub-menu {
+    background-color: var(--bg-main-marginalia);
+    border-top: 1px solid rgba(0, 0, 0, 0.4);
+    z-index: 1;
+    position: absolute;
+    /** A way of hiding it, but keeping the formatting. */
+    top: -64px;
+    width: 100%;
+    height: 44px;
+}
 
 /* #header {
     background-color: #4db6ac;
@@ -1172,13 +1201,19 @@ input[type="file"] {
     margin-left: 4px;
 }
 
+.usersMenu, .worksMenu {
+    height: 100px;
+    font-weight: bold;
+    font-size: .75rem;
+}
+
 .userSelectMenu, .workSelectMenu {
     margin-top: 10px;
     /* display: none; */
 }
 
 .userSelectMenu ul, .workSelectMenu ul {
-    height: 100px;
+    /* height: 100px; */
     width: auto;
     overflow-y: scroll;
 }
@@ -1314,9 +1349,9 @@ input[type="file"] {
     right: 5%;
 }
 
-#tips:hover .tipsText {
+/* #tips:hover .tipsText {
     visibility: visible;
-}
+} */
 
 .replyBoxTips {
     width: 20px;

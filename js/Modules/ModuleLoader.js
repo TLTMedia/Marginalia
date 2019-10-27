@@ -5,6 +5,3 @@ export { CoursesData } from './CoursesData.js';
 export { UsersData } from './UsersData.js';
 export { WorksData } from './WorksData.js';
 export { Toast } from './Toast.js';
-
-export { Comments } from '../Comments.js';
-export { RangyHelper } from '../RangyHelper.js';

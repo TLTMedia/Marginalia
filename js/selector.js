@@ -1,4 +1,4 @@
-function makeSelector(commenters, callback) {
+function makeSelector(selected_eppn, textChosen,data, callback) {
     let buttonTypes = [
         'All',
         'Historical',
@@ -8,8 +8,8 @@ function makeSelector(commenters, callback) {
         'Question'
     ];
     makeTypeSelector(buttonTypes);
-    makeCommentersSelector(commenters);
-    callback();
+    makeCommentersSelector(createListOfCommenter(data));
+    callback(selected_eppn, textChosen);
     makeSelectorDrawerOpener();
     hideAllSelector();
 }
@@ -142,7 +142,8 @@ function makeSelectorOptions(option, mode) {
         let currentSelectedType;
         let currentSelectedCommenter;
         if (evt["currentTarget"]["attributes"]["name"]["value"] == 'commenterSelector') {
-            currentSelectedType = $("#typeSelector").attr("currentTarget");
+            currentSelectedType = $("#typeSelector").attr("currentTarget") ?  $("#typeSelector").attr('currentTarget') : 'All';
+            console.log(currentSelectedType)
             currentSelectedCommenter = evt["currentTarget"]["id"];
             $("#commenterSelector").attr('currentTarget', currentSelectedCommenter);
         }
@@ -177,27 +178,35 @@ function unwrapEveryComments() {
     endDivs.remove();
 }
 
-function colorNotUsedTypeSelector() {
-    var comments = $("#text").find(".commented-selection, .hiddenComments");
-    let key = ["Historical", "Analytical", "Comment", "Definition", "Question"];
-    let buttonTypes = {
-        "Historical": 0,
-        "Analytical": 0,
-        "Comment": 0,
-        "Definition": 0,
-        "Question": 0
-    };
-    for (var i = 0; i < comments.length; i++) {
-        let type = comments[i]["attributes"]["typeof"]["value"];
-        buttonTypes[type] += 1;
-    }
-    key.forEach((element) => {
-        if (buttonTypes[element] == 0) {
-            $("#button" + element).addClass("notUsedType");
+function colorNotUsedTypeSelector(selected_eppn,textChosen) {
+    API.request({
+        endpoint: "get_highlights",
+        data: {
+          creator: selected_eppn,
+          work: textChosen
         }
-        else {
-            $("#button" + element).removeClass("notUsedType");
+    }).then((data) => {
+      console.log(data)
+        let key = ["Historical", "Analytical", "Comment", "Definition", "Question"];
+        let buttonTypes = {
+            "Historical": 0,
+            "Analytical": 0,
+            "Comment": 0,
+            "Definition": 0,
+            "Question": 0
+        };
+        for (var i = 0; i < data.length; i++) {
+            let type = data[i]["commentType"];
+            buttonTypes[type] += 1;
         }
+        key.forEach((element) => {
+            if (buttonTypes[element] == 0) {
+                $("#button" + element).addClass("notUsedType");
+            }
+            else {
+                $("#button" + element).removeClass("notUsedType");
+            }
+        });
     });
 }
 
@@ -223,9 +232,4 @@ function updateCommenterSelectors() {
     if (!$("#typeSelector").find("ul").is(":visible")) {
         hideAllSelector();
     }
-}
-
-// hash is not needed if the comment is deleted
-function updateTypeSelector(hash, type) {
-    colorNotUsedTypeSelector();
 }
