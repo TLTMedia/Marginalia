@@ -41,7 +41,7 @@ class APIResponse
      */
     public function arrayToAPIObject($array)
     {
-        if (!in_array("status", $array)) {
+        if (!array_key_exists("status", $array)) {
             $array["status"] = "ok";
         }
         return json_encode($array);

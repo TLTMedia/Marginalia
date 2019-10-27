@@ -1,7 +1,11 @@
 <div id="addedLitBase">
   <div id = "addLitFirstPage">
+    <div id = "helpForAddLit" class = "tutorialButton" style = "float:right">
+        <i class = "material-icons">
+          help_outline
+        </i>
+    </div>
     <div id="fileSystemTitle">File Input System</div>
-
     <div class="tempNameContainer" style="margin-top:10px;"></div>
     <div class="nameContainer">
         <span>Name of Text: </span>
@@ -21,6 +25,15 @@
         <span id="fileName">*.docx</span>
     </div>
 
+    <div class = "addLitCourseMenu">
+        <span id = "addLitSelectedCourse">Please select a course to upload your work</span>
+        <button id= "courseMenuButton" class="mdl-button mdl-js-button mdl-button--icon">
+          <i class="material-icons">more_vert</i>
+        </button>
+        <ul class= "courseListForAddLit mdl-menu mdl-menu--bottom-left mdl-js-menu" for = "courseMenuButton">
+        </ul>
+    </div>
+
     <div class="privateContainer">
         <label id="privateCheck" class="mdl-checkbox mdl-js-checkbox is-upgraded" for="privateChk">
             <input type="checkbox" id="privateChk" class="mdl-checkbox__input mdl-js-ripple-effect">
@@ -31,9 +44,8 @@
             </span>
         </label>
     </div>
-
     <label id="addUploadButton" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored">
-        Upload
+            Upload
     </label>
 </div>
   <div id = "addLitSecondPage">

@@ -134,7 +134,7 @@ class CreateWork
          */
         require 'Permissions.php';
         $permissions                     = new DefaultPermissions;
-        $permissions->privacy            = $privacy;
+        $permissions->public             = $privacy;
         $permissions->admins[]           = $creator;
         $permissions->creator_first_name = $firstName;
         $permissions->creator_last_name  = $lastName;

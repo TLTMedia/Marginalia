@@ -1,21 +1,39 @@
+function updateSettingPage(selected_eppn, textChosen, course) {
+    if(course == undefined){
+        $("#setting").removeClass("disabledHeaderTab");
+        $("#setting").attr({
+            "author": selected_eppn,
+            "work": textChosen
+        });
+    }
+    else{
+        $("#setting").attr("course",course)
+    }
+    $("#settingBase").hide();
+}
+
 function resetWhiteListSearch() {
     $(".searchWhiteList").val("");
     searchAction($(".searchWhiteList"), $(".whiteList"), "user");
 }
 
-function resetWhiteListPage() {
-    enableAllWhiteListOption();
-    let whiteList = $(".whiteListCheckBox");
-    for (var i = 0; i < whiteList.length; i++) {
-        console.log(whiteList[i]["attributes"]["id"]["value"]);
-        let id = whiteList[i]["attributes"]["id"]["value"];
-        //checkbox is still checked
-        if ($("#" + escapeSpecialChar(id)).parent("label").hasClass("is-checked")) {
-            console.log("uncheck");
-            $("#" + escapeSpecialChar(id)).off().click();
-        }
-    }
+function resetWhiteListPage(){
+    $(".whiteListSettingBase").empty();
 }
+
+// function resetWhiteListPage() {
+//     enableAllWhiteListOption();
+//     let whiteList = $(".whiteListCheckBox");
+//     for (var i = 0; i < whiteList.length; i++) {
+//         console.log(whiteList[i]["attributes"]["id"]["value"]);
+//         let id = whiteList[i]["attributes"]["id"]["value"];
+//         //checkbox is still checked
+//         if ($("#" + escapeSpecialChar(id)).parent("label").hasClass("is-checked")) {
+//             console.log("uncheck");
+//             $("#" + escapeSpecialChar(id)).off().click();
+//         }
+//     }
+// }
 
 function settingGoBackButtonOnClick() {
     if ($("#settingBase").is(":visible")) {
@@ -104,21 +122,21 @@ function makeWhiteListSettingBase(user_list) {
     });
     for (i in user_list) {
         let user = $("<li/>", {
-            text: user_list[i],
+            text: user_list[i]["firstName"] + " " + user_list[i]["lastName"],
             class: 'mdl-list__item whiteListOption',
-            commenterId: user_list[i]
+            commenterId: user_list[i]["eppn"]
         });
         let span = $("<span/>", {
             class: "mdl-list__item-secondary-action whiteListCheckBoxSpan"
         });
         let label = $("<label/>", {
             class: "mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect",
-            for: "wl_" + user_list[i]
+            for: "wl_" + user_list[i]["eppn"]
         });
         let input = $("<input/>", {
             class: "mdl-checkbox__input whiteListCheckBox",
             type: "checkbox",
-            id: "wl_" + user_list[i]
+            id: "wl_" + user_list[i]["eppn"]
         });
         $(label).append(input);
         $(span).append(label);
@@ -165,12 +183,12 @@ function checkIsCommentNeedApproval(selected_eppn, litId) {
     });
 }
 
-function litSettingButtonOnClick(selectedLitId, selected_eppn) {
-    $("#nonTitleContent").hide();
+function litSettingButtonOnClick(course, selectedLitId, selected_eppn) {
+    $("#nonTitleContent , #addLitBase").hide();
     $("#settingBase").show();
-    $(".whiteListSettingBase, .settingDataBase, #addLitBase").hide();
+    $(".whiteListSettingBase, .settingDataBase").hide();
     $(".litSettingBase").empty().fadeIn();
-    $("#settingTitle").text("Settings For : " + selected_eppn + "'s " + selectedLitId);
+    $("#settingTitle").text("Settings For : " + $("#setting").attr("course") + " " + selected_eppn + "'s " + selectedLitId);
     let settingOptions = $("<div/>", {
         class: "settingOptions"
     });
@@ -181,14 +199,21 @@ function litSettingButtonOnClick(selectedLitId, selected_eppn) {
     makeSettingSwitch("commentsNeedApproval", "Comments Require Approval?", selectedLitId, selected_eppn, checkIsCommentNeedApproval);
 
     // whiteListPageOpener
-    makeSettingButton(selectedLitId, selected_eppn, "litWhiteListButton", "Manage White List");
-    makeSettingButton(selectedLitId, selected_eppn, "settingDataButton", "Work Data");
-    makeSettingButton(selectedLitId, selected_eppn, "deleteWorkButton", "Delete Work");
-    // makeWhiteListButton(selectedLitId, selected_eppn);
-    // makeDeleteWorkButton(selectedLitId,selected_eppn);
+    makeSettingButton(course, selectedLitId, selected_eppn, "litWhiteListButton", "Manage White List");
+    makeSettingButton(course, selectedLitId, selected_eppn, "settingDataButton", "Work's Data");
+    makeSettingButton(course, selectedLitId, selected_eppn, "deleteWorkButton", "Delete Work");
     //activate the go back button
     $("#settingGoBack").children().off().on("click", () => {
         settingGoBackButtonOnClick();
+    });
+    addTutorialClass();
+}
+
+function addTutorialClass(){
+    //settingTutorial
+    let privacySwitch = $(".settingSwitch"+"[for = 'privacySwitch']").addClass("privacySwitch");
+    privacySwitch.attr({
+        "data-hint": "Toggle the switch to set the work's privacy"
     });
 }
 
@@ -212,9 +237,6 @@ function makeSettingSwitch(purpose, text, litId, selected_eppn, callback) {
         class: "mdl-switch__input"
     });
 
-    // $(".settingOptions").append(option);
-    // $(option).append(label);
-
     $(".settingOptions").append(label)
     $(label).append(span, input);
     componentHandler.upgradeAllRegistered();
@@ -230,7 +252,7 @@ function makeSettingSwitch(purpose, text, litId, selected_eppn, callback) {
     });
 }
 
-function makeSettingButton(litId, selected_eppn, buttonName, buttonText) {
+function makeSettingButton(course, litId, selected_eppn, buttonName, buttonText) {
     let button = $("<div/>", {
         class: buttonName,
         text: buttonText
@@ -241,7 +263,7 @@ function makeSettingButton(litId, selected_eppn, buttonName, buttonText) {
             if (isCurrentUserSelectedUser(selected_eppn, true)) {
                 $(".litSettingOptionSelected").removeClass("litSettingOptionSelected");
                 $(this).addClass("litSettingOptionSelected");
-                showWhiteListSettingBase(litId, selected_eppn);
+                showWhiteListSettingBase(course, litId, selected_eppn,updateWhiteListBase);
             }
         });
         $(button).append(`<i class="material-icons whiteListLinkIcon">link</i>`);
@@ -267,7 +289,7 @@ function makeSettingButton(litId, selected_eppn, buttonName, buttonText) {
 //TODO php for commentsNeedApproval
 function workSettingSwitchOnChange(evt, litId, selected_eppn) {
     let currentTarget = evt["currentTarget"]["id"];
-    let endPoint, message, isWorkPublic, commentsNeedApproval;
+    let endPoint, message;
     let isSelected;
     let data = {};
     if (currentTarget == "privacySwitch") {
@@ -278,16 +300,13 @@ function workSettingSwitchOnChange(evt, litId, selected_eppn) {
             data.work = litId;
             data.privacy = false;
             message = "current work is set to private";
-            isWorkPublic = "private";
         } else {
             endPoint = "set_privacy";
             data.creator = selected_eppn;
             data.work = litId;
             data.privacy = true;
             message = "current work is set to public";
-            isWorkPublic = "public";
         }
-        $("#setting").attr("isWorkPublic", isWorkPublic);
     }
     else {
         isSelected = $("#commentsNeedApprovalSwitch").is(":checked");
@@ -297,7 +316,6 @@ function workSettingSwitchOnChange(evt, litId, selected_eppn) {
             data.creator = selected_eppn;
             data.work = litId;
             data.approval = true;
-            commentsNeedApproval = "needApproval";
         }
         else {
             message = "comments don't need approval for current work";
@@ -305,9 +323,7 @@ function workSettingSwitchOnChange(evt, litId, selected_eppn) {
             data.creator = selected_eppn;
             data.work = litId;
             data.approval = false;
-            commentsNeedApproval = "noApproval";
         }
-        $("#setting").attr("commentsNeedApproval", commentsNeedApproval);
     }
     API.request({
         endpoint: endPoint,
@@ -476,11 +492,25 @@ function getWorkCommentsData(type, commenter, all) {
 }
 
 //litId = literature name , selected_eppn = creator of the literature
-function showWhiteListSettingBase(litId, selected_eppn) {
+function showWhiteListSettingBase(course, litId, selected_eppn, callback) {
     enableAllWhiteListOption();
     $(".whiteListSettingBase").fadeIn();
     $(".litSettingBase").hide();
     $(".whiteListCheckBoxSpan").children("label").removeClass("is-checked");
+    API.request({
+        endpoint: "get_creators_of_course",
+        method: "GET",
+        data: {
+          course: course
+        }
+    }).then((users)=>{
+        console.log(users);
+        makeWhiteListSettingBase(users);
+    });
+    callback(litId, selected_eppn);
+}
+
+function updateWhiteListBase(litId, selected_eppn){
     let endPoint = "get_permissions_list";
     console.log(endPoint)
     API.request({

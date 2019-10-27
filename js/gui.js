@@ -1,108 +1,5 @@
-//TODO clean this function
-$(window).ready(function () {
-    $("#litadd").on("click", function (evt) {
-        $(".headerTab").removeClass("active");
-        $("#litadd").addClass("active");
-        showAddLitPage();
-        resetWhiteListPage();
-    });
-
-    $("#setting").addClass("disabledHeaderTab");
-    $("#setting").off().on("click", () => {
-        let author = $("#setting").attr("author");
-        let work = $("#setting").attr("work");
-        if ($("#setting").hasClass("disabledHeaderTab")) {
-            launchToastNotifcation("Please select a work first");
-        }
-        //if user is not the author they don't have the ability to change the setting
-        else if (!isCurrentUserSelectedUser(author)) {
-            launchToastNotifcation("You don't have the permission to do this action");
-        }
-        else {
-            $(".headerTab").removeClass("active");
-            $("#setting").addClass("active");
-            litSettingButtonOnClick(work, author);
-        }
-    });
-
-    $("#home").off().on("click", function () {
-        $(".headerTab").removeClass("active");
-        $(this).addClass("active");
-        homeButtonAction();
-        resetWhiteListPage();
-        $(".selectorOpener").remove();
-    });
-
-
-});
-
-function saveLit({ work, privacy, data } = {}) {
-    if (data.size > 2000000) {
-        alert("Error: File too large. Can't be larger than 2Mb.");
-        return;
-    }
-    const formData = new FormData();
-    formData.append("file", data);
-    formData.append("work", work);
-    formData.append("privacy", privacy);
-    API.request({
-        endpoint: "create_work",
-        method: "POST",
-        data: formData,
-        dataType: "form",
-    }).then(data => {
-        launchToastNotifcation(work + " is successfully created");
-        $("#addLitSecondPage").show();
-        $("#doneAddLit").show();
-        $("#addLitFirstPage").hide();
-        $(".uploadNotification").html('"<i>' + work + '</i>" is successfully created');
-        addNewUser();
-    });
-}
-
-function addNewUser() {
-    API.request({
-        endpoint: "get_creators",
-        method: "GET"
-    }).then((creators) => {
-        console.log(creators);
-        let isCurrentUserNewCreator = true;
-        let count = 0;
-        for (var i = 0; i < creators.length; i++) {
-            if (creators[i] == currentUser.eppn) {
-                count++;
-                if (count > 1) {
-                    isCurrentUserNewCreator = false;
-                }
-            }
-        }
-        if (isCurrentUserNewCreator) {
-            console.log("adddddddd")
-            let newCreator = createUserMenuOption(currentUser.eppn);
-            if (newCreator) {
-                $(".usersMenu").append(newCreator);
-            }
-        }
-    });
-}
-
-
 function showLink(value) {
     $.address.value(value);
-}
-
-function loadFromDeepLink() {
-    if (location.hash) {
-        [, api, ...rest] = location.hash.split("#")[1].split("/");
-        if (api == "get_work") {
-            console.log("loading from deep link");
-            selectLit(...rest);
-
-        }
-        console.log(api);
-    } else {
-        homeButtonAction();
-    }
 }
 
 function homeButtonAction() {
@@ -110,6 +7,7 @@ function homeButtonAction() {
     showLink("");
     $("#text , .userFiles, #settingBase, #addLitBase").hide();
     $("#nonTitleContent").show();
+    $(".userSelectMenu, .workSelectMenu").hide();
     $(".chosenUser, .chosenFile, .typeSelector, .commenterSelector").empty();
     //disable the setting header tab
     $("#setting").addClass("disabledHeaderTab");
@@ -133,6 +31,7 @@ createUserSelectScreen = async ({ users = users } = {}) => {
         searchAction(input, ul, "user");
     });
     //make the white list
+    console.log(user_list)
     makeWhiteListSettingBase(user_list);
 }
 
@@ -200,6 +99,7 @@ function getUserWorks(selected_eppn) {
 
 
 function selectLit(selected_eppn, textChosen) {
+    console.log("called selectLit with", selected_eppn, textChosen);
     $("#text").empty();
     $(".chosenUser").text(selected_eppn + ":");
     $(".chosenFile").text(textChosen);
@@ -213,6 +113,7 @@ function selectLit(selected_eppn, textChosen) {
         },
     }).then(data => {
         if (data["status"] != "error") {
+            console.log("hihihihihi ")
             let literatureText = data;
             buildHTMLFile(literatureText, selected_eppn, textChosen);
             updateSettingPage(selected_eppn, textChosen);
@@ -227,14 +128,4 @@ function selectLit(selected_eppn, textChosen) {
     window.scrollTo(0, $("#cardbox").position().top + $("#cardbox").height());
     //check the permission for approving comments
     checkworkAdminList(selected_eppn, textChosen, "approvedComments");
-}
-
-function updateSettingPage(selected_eppn, textChosen) {
-    let endPoint = "comments_need_approval/" + selected_eppn + "/" + textChosen; // unused?
-    $("#setting").removeClass("disabledHeaderTab");
-    $("#setting").attr({
-        "author": selected_eppn,
-        "work": textChosen
-    });
-    $("#settingBase").hide();
 }

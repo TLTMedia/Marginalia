@@ -108,14 +108,14 @@ class Permissions
      * Initially checks whether the current user is allowed to do so
      *  -> needs to get the works' `permissions.json` page and see if $eppn is in it
      */
-    public function setPermissionsPrivacy($creator, $work, $currentUser, $public)
+    public function setPermissionsPrivacy($creator, $work, $currentUser, $privacy)
     {
         $pathOfWork = $this->path . "$creator/works/$work";
 
         /**
          * if $privacy isn't either 'public' or 'private' return error
          */
-        if (!in_array($public, array(true, false))) {
+        if (!in_array($privacy, array(true, false))) {
             return json_encode(array(
                 "status"  => "error",
                 "message" => "invalid privacy type",
@@ -134,12 +134,13 @@ class Permissions
         }
 
         $permissionsData         = json_decode($this->__getRawPermissionsList($pathOfWork));
-        $permissionsData->public = json_encode($public);
+        $permissionsData->public = $privacy;
         $filePath                = $pathOfWork . "/permissions.json";
         file_put_contents($filePath, json_encode($permissionsData));
 
         return json_encode(array(
-            "status" => "ok",
+            "status"  => "ok",
+            "message" => "set work privacy to " . json_encode($privacy),
         ));
     }
 
@@ -165,7 +166,7 @@ class Permissions
         }
 
         $permissionsData                            = json_decode($this->__getRawPermissionsList($pathOfWork));
-        $permissionsData->comments_require_approval = json_encode($approval);
+        $permissionsData->comments_require_approval = $approval;
         $filePath                                   = $pathOfWork . "/permissions.json";
         file_put_contents($filePath, json_encode($permissionsData));
 
