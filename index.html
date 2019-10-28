@@ -38,10 +38,6 @@
     <!-- Our init function entry point -->
     <script defer type="module" src="./js/App.js" crossorigin="use-credentials"></script>
 
-    <!-- Other scripts that cannot/shouldn't be loaded via the init() -->
-    <!-- Cannot be loaded via init() b/c $.address event listeners break in async functions -->
-    <script src="js/address.js"></script>
-
     <!-- Other scripts that aren't loaded via the init()... TODO: YET. -->
     <script src="js/rangyHelpers.js"></script>
     <script src="js/script.js"></script>
@@ -89,8 +85,8 @@
                             <a class="mdl-navigation__link headerTab headerUpload" id="home" href="#">Home</a>
                             <a class="mdl-navigation__link headerTab headerUpload" id="litadd" href="#">Add
                                 Literature</a>
-                            <a class="mdl-navigation__link headerTab headerUpload" id="setting"
-                                href="javascript:void(0);">Settings</a>
+                            <!-- <a class="mdl-navigation__link headerTab headerUpload" id="setting"
+                                href="javascript:void(0);">Settings</a> -->
                         </nav>
                     </div>
                     <!-- Bottom row -->
@@ -98,8 +94,8 @@
                         <div class="mdl-layout-spacer"></div>
                         <!-- Navigation -->
                         <nav class="mdl-navigation">
-                            <a class="mdl-navigation__link" href="#">Filters</a>
-                            <a class="mdl-navigation__link" href="#">Settings</a>
+                            <a class="mdl-navigation__link" href="javascript:void(0);">Filters</a>
+                            <a id="setting" class="mdl-navigation__link" href="javascript:void(0);">Settings</a>
                         </nav>
                     </div>
                 </header>

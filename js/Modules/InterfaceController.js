@@ -1,22 +1,40 @@
-import { InterfaceEvents } from './ModuleLoader.js';
+import { BaseEventBinds, InterfaceEvents } from './ModuleLoader.js';
 
 export class InterfaceController {
     constructor(state, modal, users_data, works_data) {
         console.log("InterfaceController Module Loaded");
 
-        /** String Constants */
-        this.main_marginalia_data_form = "#cardbox";
-        this.main_sub_menu = "#header-sub-menu";
-        this.courses_menu_section = ".courseSelectMenu";
-        this.courses_dropdown_menu = ".coursesMenu";
-        this.users_menu_section = ".userSelectMenu";
-        this.users_dropdown_menu = ".usersMenu";
-        this.works_menu_section = ".workSelectMenu";
-        this.works_dropdown_menu = ".worksMenu";
-        this.dropdown_menu_options_class = "menuOptions";
+        /**
+         * String Constants of Ids
+         */
+        this.id_constants = {
+            main_marginalia_data_form: "#cardbox",
+            main_sub_menu: "#header-sub-menu",
+        };
+
+        /**
+         * String Constants of Classes
+         */
+        this.class_constants = {
+            courses_menu_section: ".courseSelectMenu",
+            courses_dropdown_menu: ".coursesMenu",
+            users_menu_section: ".userSelectMenu",
+            users_dropdown_menu: ".usersMenu",
+            works_menu_section: ".workSelectMenu",
+            works_dropdown_menu: ".worksMenu",
+        };
+
+        /** 
+         * String Constants 
+         */
+        this.string_constants = {
+            dropdown_menu_options_class: "menuOptions",
+        };
 
         this.state = state;
         this.modal = modal;
+
+        this.page_events = new BaseEventBinds({ state: state, ui: this });
         this.ui_events = new InterfaceEvents(state, users_data, works_data, this);
     }
 
@@ -27,9 +45,9 @@ export class InterfaceController {
      * @returns {Boolean} true if success, false on error
      */
     populate_courses_dropdown(courses_list) {
-        const menu_section_users = $(this.users_menu_section);
-        const menu_section_works = $(this.works_menu_section);
-        const menu = $(this.courses_dropdown_menu);
+        const menu_section_users = $(this.class_constants.users_menu_section);
+        const menu_section_works = $(this.class_constants.works_menu_section);
+        const menu = $(this.class_constants.courses_dropdown_menu);
 
         /** Empty out the menu if there's any existing choices */
         menu.empty();
@@ -43,6 +61,7 @@ export class InterfaceController {
                 continue;
             } else {
                 console.error("An error occured while appending to the course dropdown menu");
+
                 return false;
             }
         }
@@ -62,10 +81,10 @@ export class InterfaceController {
      * @returns {Boolean} true on success, false on error
      */
     append_course_dropdown(course_name) {
-        const menu = $(this.courses_dropdown_menu);
+        const menu = $(this.class_constants.courses_dropdown_menu);
 
         const course_item = $("<li/>", {
-            class: "mdl-list__item " + this.dropdown_menu_options_class,
+            class: "mdl-list__item " + this.string_constants.dropdown_menu_options_class,
             text: course_name,
             click: () => {
                 this.ui_events.click_course_option(event, course_name);
@@ -85,18 +104,24 @@ export class InterfaceController {
      */
     populate_users_dropdown(users_list) {
 
-        const menu_section_users = $(this.users_menu_section);
-        const menu_section_works = $(this.works_menu_section);
-        const menu = $(this.users_dropdown_menu);
+        const menu_section_users = $(this.class_constants.users_menu_section);
+        const menu_section_works = $(this.class_constants.works_menu_section);
+        const menu = $(this.class_constants.users_dropdown_menu);
 
-        menu_section_works.hide("slide", { direction: "up" }, 300);
+        menu_section_works.hide("slide", {
+            direction: "up"
+        }, 300);
 
         /** Empty out the menu if there's any existing choices */
         menu.empty();
 
         if (users_list.length == 0) {
-            menu_section_users.hide("slide", { direction: "up" }, 300);
+            menu_section_users.hide("slide", {
+                direction: "up"
+            }, 300);
+
             this.modal.create_toast("There are no users in this course");
+
             return true;
         }
 
@@ -105,11 +130,14 @@ export class InterfaceController {
                 continue;
             } else {
                 console.error("An error occured while appending to the user dropdown menu");
+
                 return false;
             }
         }
 
-        menu_section_users.finish().show("slide", { direction: "up" }, 300);
+        menu_section_users.finish().show("slide", {
+            direction: "up"
+        }, 300);
 
         return true;
     }
@@ -123,10 +151,10 @@ export class InterfaceController {
      * @returns {Boolean} true on success, false on error
      */
     append_user_dropdown(user_name) {
-        const menu = $(this.users_dropdown_menu);
+        const menu = $(this.class_constants.users_dropdown_menu);
 
         const user_item = $("<li/>", {
-            class: "mdl-list__item " + this.dropdown_menu_options_class,
+            class: "mdl-list__item " + this.string_constants.dropdown_menu_options_class,
             text: user_name.firstName + " " + user_name.lastName,
             click: () => {
                 this.ui_events.click_user_option(event, user_name.eppn);
@@ -145,15 +173,19 @@ export class InterfaceController {
      * @returns {Boolean} true if success, false on error
      */
     populate_works_dropdown(works_list) {
-        const menu_section = $(this.works_menu_section);
-        const menu = $(this.works_dropdown_menu);
+        const menu_section = $(this.class_constants.works_menu_section);
+        const menu = $(this.class_constants.works_dropdown_menu);
 
         /** Empty out the menu if there's any existing choices */
         menu.empty();
 
         if (works_list.length == 0) {
-            menu_section.hide("slide", { direction: "up" }, 300);
+            menu_section.hide("slide", {
+                direction: "up"
+            }, 300);
+
             this.modal.create_toast("There are no works in this for this user in this course");
+
             return true;
         }
 
@@ -162,11 +194,14 @@ export class InterfaceController {
                 continue;
             } else {
                 console.error("An error occured while appending to the work dropdown menu");
+
                 return false;
             }
         }
 
-        menu_section.finish().show("slide", { direction: "up" }, 300);
+        menu_section.finish().show("slide", {
+            direction: "up"
+        }, 300);
 
         return true;
     }
@@ -180,10 +215,10 @@ export class InterfaceController {
      * @returns {Boolean} true on success, false on error
      */
     append_work_dropdown(work) {
-        const menu = $(this.works_dropdown_menu);
+        const menu = $(this.class_constants.works_dropdown_menu);
 
         const work_item = $("<li/>", {
-            class: "mdl-list__item " + this.dropdown_menu_options_class,
+            class: "mdl-list__item " + this.string_constants.dropdown_menu_options_class,
             text: work,
             click: () => {
                 this.ui_events.click_work_option(event, work);
@@ -199,7 +234,8 @@ export class InterfaceController {
      * Clear the user selection dropdown
      */
     clear_user_selection() {
-        const menu = $(this.users_dropdown_menu);
+        const menu = $(this.class_consants.users_dropdown_menu);
+
         menu.empty();
     }
 
@@ -207,17 +243,9 @@ export class InterfaceController {
      * Clear the work selection dropdown
      */
     clear_work_selection() {
-        const menu = $(this.works_dropdown_menu);
-        menu.empty();
-    }
+        const menu = $(this.class_constants.works_dropdown_menu);
 
-    /**
-     * Collapse the main menu
-     */
-    collapse_mode() {
-        const form = $(this.main_marginalia_data_form);
-        // form.hide("slide", { direction: "down" }, 1000);
-        // form.fadeOut("slow");
+        menu.empty();
     }
 
     /**
@@ -238,11 +266,62 @@ export class InterfaceController {
      * Show the sub-menu
      */
     show_sub_menu() {
-        const menu = $(this.main_sub_menu);
+        const menu = $(this.id_constants.main_sub_menu);
         menu.css({
             "top": 64,
         });
+
         menu.show();
     }
 
+    /**
+     * Hide the sub-menu
+     */
+    hide_sub_menu() {
+        const menu = $(this.id_constants.main_sub_menu);
+        menu.css({
+            "top": -64,
+        });
+
+        menu.show();
+    }
+
+    /**
+     * Show the main cardbox
+     */
+    show_main_cardbox() {
+        const menu = $(this.id_constants.main_marginalia_data_form);
+
+        menu.show();
+    }
+
+    /**
+     * Hide the main cardbox
+     */
+    hide_main_cardbox() {
+        const menu = $(this.id_constants.main_marginalia_data_form);
+
+        menu.hide();
+    }
+
+    /**
+     * Show home page; which inclues the main cardbox.
+     */
+    show_home_page() {
+        // removes the hash from the url
+        history.pushState(null, null, ' ');
+
+        // show the main cardbox again
+        this.show_main_cardbox();
+
+        // TODO: 
+        $("#text , .userFiles, #settingBase, #addLitBase").hide();
+        $("#nonTitleContent").show();
+        $(".userSelectMenu, .workSelectMenu").hide();
+        $(".chosenUser, .chosenFile, .typeSelector, .commenterSelector").empty();
+        // $("#setting").addClass("disabledHeaderTab");
+        $(".headerTab").removeClass("active");
+        $("#home").addClass("active");
+        hideAllBoxes();
+    }
 }

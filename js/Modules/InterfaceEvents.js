@@ -14,9 +14,10 @@ export class InterfaceEvents {
         if (!this.ui.populate_users_dropdown(users)) {
             console.error("error while attempting to populate courses dropdown");
         }
-        //TODO find a better place to get the selected course
-        console.log(course)
+
+        // TODO: find a better place to get the selected course
         updateSettingPage("", "", course);
+
         this.ui.clear_work_selection();
     }
 
@@ -32,6 +33,11 @@ export class InterfaceEvents {
         this.state.selected_work = work;
 
         /**
+         * Hide the main cardbox/home page
+         */
+        this.ui.hide_main_cardbox();
+
+        /**
          * Show the submenu for the work
          */
         this.ui.show_sub_menu();
@@ -41,8 +47,6 @@ export class InterfaceEvents {
          * Load Work
          */
         selectLit(this.state.selected_creator, this.state.selected_work);
-
-        this.ui.collapse_mode();
     }
 
     bind_redirect_confirmation(specificElement) {

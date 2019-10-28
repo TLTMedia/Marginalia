@@ -9,6 +9,7 @@ export class CoursesData {
         let course_list = this.api.request({
             endpoint: 'courses'
         });
+
         return await course_list;
     }
 }

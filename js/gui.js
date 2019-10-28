@@ -1,22 +1,3 @@
-function showLink(value) {
-    $.address.value(value);
-}
-
-function homeButtonAction() {
-    //TODO try get rid of the extra pound
-    showLink("");
-    $("#text , .userFiles, #settingBase, #addLitBase").hide();
-    $("#nonTitleContent").show();
-    $(".userSelectMenu, .workSelectMenu").hide();
-    $(".chosenUser, .chosenFile, .typeSelector, .commenterSelector").empty();
-    //disable the setting header tab
-    $("#setting").addClass("disabledHeaderTab");
-    $(".headerTab").removeClass("active");
-    $("#home").addClass("active");
-    hideAllBoxes();
-}
-//----------------------------------------------------------
-
 createUserSelectScreen = async ({ users = users } = {}) => {
     $(".workSelectMenu").hide();
     user_list = users.creator_list;
@@ -84,7 +65,9 @@ function getUserWorks(selected_eppn) {
                 click: function (evt) {
                     if ($(this).attr("disabled") == undefined) {
                         $(".worksMenuOptions").attr("disabled", "disabled");
-                        setTimeout(function () { $(".worksMenuOptions").removeAttr("disabled") }, 500);
+                        setTimeout(function () {
+                            $(".worksMenuOptions").removeAttr("disabled")
+                        }, 500);
                         $(".worksMenuOptions").removeClass("workMenuSelected");
                         $(this).addClass("workMenuSelected");
                         let selectedWorkId = $(this).attr("id")
@@ -103,8 +86,8 @@ function selectLit(selected_eppn, textChosen) {
     $("#text").empty();
     $(".chosenUser").text(selected_eppn + ":");
     $(".chosenFile").text(textChosen);
-    let endpoint = 'get_work'
-    showLink(endpoint + "/" + selected_eppn + "/" + textChosen);
+    let endpoint = 'get_work';
+    $.address.value(endpoint + "/" + selected_eppn + "/" + textChosen);
     API.request({
         endpoint: endpoint,
         data: {
@@ -117,8 +100,7 @@ function selectLit(selected_eppn, textChosen) {
             let literatureText = data;
             buildHTMLFile(literatureText, selected_eppn, textChosen);
             updateSettingPage(selected_eppn, textChosen);
-        }
-        else {
+        } else {
             //if work doesn't exist redirect to home
             $("#home").click();
             launchToastNotifcation("work don't exist");

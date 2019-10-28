@@ -1,8 +1,8 @@
 export class APIHandler {
-    constructor({ base_url = location.pathname + 'api/public/' } = {}) {
+    constructor() {
         console.log("APIHandler Module Loaded");
 
-        this.base_url = base_url;
+        this.base_url = location.pathname + "api/public/";
     }
 
     parseGetData(data) {
@@ -10,10 +10,11 @@ export class APIHandler {
         for (let key in data) {
             res += "&" + key + "=" + data[key];
         }
+
         return res;
     }
 
-    request({ endpoint = 'get_creators', method = 'GET', data = '', dataType = 'object', callback } = {}) {
+    request({ endpoint = 'get_creators', method = 'GET', data = '', dataType = 'object', callback }) {
         let getData = '';
         if (method == 'GET') {
             getData = this.parseGetData(data);
@@ -23,8 +24,9 @@ export class APIHandler {
         } else if (method == 'POST' && dataType == 'form') {
             // do nothing with the data
         }
-        
+
         let defer = $.Deferred();
+
         $.ajax({
             url: this.base_url + endpoint + '?modular=true' + getData,
             method: method,
@@ -36,13 +38,16 @@ export class APIHandler {
         }).done(data => {
             if (data['status'] == 'error') {
                 console.log("ERROR", data);
+
                 launchToastNotifcation(data.message);
+
                 return;
             } else if (data['status'] !== 'ok') {
                 console.log("NOK", data);
+
                 return;
             } else {
-                // TODO add additional part
+                // TODO: add additional part
                 let returnMessages = {
                     data: data['data'],
                     message: data['message'],

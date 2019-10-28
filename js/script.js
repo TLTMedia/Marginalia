@@ -1,9 +1,4 @@
 /**
- * This global is here potentially forever or until I can figure out how to make $.address work not in async
- */
-const event_queue = new Array();
-
-/**
  * These globals are temporary until javascript is refactored into modules
  */
 var API;
@@ -16,7 +11,7 @@ var remSpan; // holds the name of made and clicked spans
   Loads the userdata obtained by the netID login
   Loads the users folder and creates a button for each user
 */
-init = async ({ state = state, ui = ui, api = api, courses = courses, users = users } = {}) => {
+init = async ({ state = state, ui = ui, api = api, courses = courses, users = users }) => {
     /** For legacy purposes... */
     API = api;
     currentUser = users.current_user;
@@ -26,18 +21,44 @@ init = async ({ state = state, ui = ui, api = api, courses = courses, users = us
     $("#addLitBase").hide();
     $("#tutorialBase").hide();
 
-    /** Populate the courses select dropdown */
+    /**
+     * Load & bind home page events
+     */
+    ui.page_events.home_init();
+
+    /**
+     * Determine whether the first thing we load is "home" or a doc via deep link
+     */
+    if (state.deep_link.function == "show_work") {
+        // show the sub-menu
+        ui.show_sub_menu();
+
+        // hide the main cardbox
+        ui.hide_main_cardbox();
+
+        // select the specified work
+        // TODO: modularize
+        selectLit(...state.deep_link.parameters);
+    } else if (state.deep_link.function == "show_home") {
+        ui.show_home_page();
+    } else {
+        // Shouldn't be reachable
+        // Possible that jQuery.Address failed to load
+        console.error("Error; Possible that jQuery.Address failed to load");
+    }
+
+    /** 
+     * Populate the courses select dropdown 
+     */
     let courses_list = await courses.get_course_list();
+
     if (!ui.populate_courses_dropdown(courses_list)) {
         console.error("error while attempting to populate courses dropdown");
     } else {
         $(".searchCourse").on("keyup", () => {
             ui.ui_events.do_course_search();
         });
-        // //make the white list
-        //makeWhiteListSettingBase(user_list);
     }
-
 
     $("#litadd").on("click", function (evt) {
         $(".headerTab").removeClass("active");
@@ -46,7 +67,6 @@ init = async ({ state = state, ui = ui, api = api, courses = courses, users = us
         resetWhiteListPage();
     });
 
-    $("#setting").addClass("disabledHeaderTab");
     $("#setting").off().on("click", () => {
         // let author = $("#setting").attr("author");
         // let work = $("#setting").attr("work");
@@ -57,23 +77,13 @@ init = async ({ state = state, ui = ui, api = api, courses = courses, users = us
         else if (!isCurrentUserSelectedUser(state.selected_creator)) {
             console.log(state.selected_creator)
             launchToastNotifcation("You don't have the permission to do this action");
-        }
-        else {
+        } else {
             console.log("should o[pen]")
             $(".headerTab").removeClass("active");
             $("#setting").addClass("active");
             litSettingButtonOnClick(state.selected_course, state.selected_work, state.selected_creator);
         }
     });
-
-    $("#home").off().on("click", function () {
-        $(".headerTab").removeClass("active");
-        $(this).addClass("active");
-        homeButtonAction();
-        resetWhiteListPage();
-        $(".selectorOpener").remove();
-    });
-
 
     /**
      * Leave these functions at the bottom of init()
@@ -97,18 +107,6 @@ init = async ({ state = state, ui = ui, api = api, courses = courses, users = us
             }
         });
     });
-
-    /**
-     * Execute events in the event queue.
-     * This is made primarily for the jQuery.Address library,
-     * since it cannot be placed in the scope of an async function.
-     * But it calls functions initialized by the async...
-     *
-     * TODO: maybe you can put it in a non-async module loaded in later?
-     */
-    for (evt in event_queue) {
-        event_queue[evt]["name"](...event_queue[evt]["parameters"]);
-    }
 }
 
 // Creates a visual list of all users which gives access to their folders
@@ -191,17 +189,17 @@ function createTips(workTitle) {
     //text.html("The <span style = 'color : darkred'>Dark Red</span> comments with underlines are the comments that are not approved yet.\nThe <span style = 'color : orangered'>Orange</span> comments are comments that have unapproved replies.");
     //tips.append(icon, text);
     tips.append(icon);
-    tips.on("click",()=>{
+    tips.on("click", () => {
         tutorialData = [
-          ["#textSpace", 1,"Highlight the text to comment"],
-          [".commented-selection:first", 2, "Click on the highlight text to read the comments"],
-          ["#replies", 3, "comments are shown in here"]
+            ["#textSpace", 1, "Highlight the text to comment"],
+            [".commented-selection:first", 2, "Click on the highlight text to read the comments"],
+            ["#replies", 3, "comments are shown in here"]
         ];
         specialStepData = {
-           3: ["click", "#replies"]
+            3: ["click", "#replies"]
         }
         makeTutorial(tutorialData);
-        startTutorial(tutorialData,specialStepData);
+        startTutorial(tutorialData, specialStepData);
     });
     workTitle.prepend(tips);
 }
@@ -306,7 +304,14 @@ function allowClickOnComment(textChosen, selected_eppn) {
     });
 }
 
-function highlightText({ startIndex, endIndex, commentType, eppn, hash, approved }) {
+function highlightText({
+    startIndex,
+    endIndex,
+    commentType,
+    eppn,
+    hash,
+    approved
+}) {
     let range = rangy.createRange();
     range.selectCharacters(document.getElementById(TEXTSPACE), startIndex, endIndex);
     let area = rangy.createClassApplier("commented-selection", {
@@ -319,8 +324,18 @@ function highlightText({ startIndex, endIndex, commentType, eppn, hash, approved
         }
     });
     area.applyToRange(range);
-    $("<param/>", { class: 'startDiv', commentId: hash, startIndex: startIndex, colorId: 0 }).insertBefore(".commented-selection" + "[commentId = '" + hash + "']");
-    $("<param/>", { class: 'endDiv', commentId: hash, endIndex: endIndex, colorId: 0 }).insertAfter(".commented-selection" + "[commentId = '" + hash + "']");
+    $("<param/>", {
+        class: 'startDiv',
+        commentId: hash,
+        startIndex: startIndex,
+        colorId: 0
+    }).insertBefore(".commented-selection" + "[commentId = '" + hash + "']");
+    $("<param/>", {
+        class: 'endDiv',
+        commentId: hash,
+        endIndex: endIndex,
+        colorId: 0
+    }).insertAfter(".commented-selection" + "[commentId = '" + hash + "']");
 }
 
 function handleStartEndDiv(commentData) {
@@ -407,8 +422,7 @@ function colorOverLappedComments(commentHash) {
                 $(".commented-selection" + "[commentId = '" + commentHash + "']").addClass(commentsColorClass[(prevStartColorId + 1)]);
                 startDiv.attr("colorId", prevStartColorId + 1);
                 endDiv.attr("colorId", prevStartColorId + 1);
-            }
-            else if (prevStartColorId == 3) {
+            } else if (prevStartColorId == 3) {
                 $(".commented-selection" + "[commentId = '" + commentHash + "']").addClass(commentsColorClass[0]);
                 startDiv.attr("colorId", 0);
                 endDiv.attr("colorId", 0);
@@ -435,8 +449,7 @@ function colorAdjacentComments(commentHash) {
                 $(".commented-selection" + "[commentId = '" + commentHash + "']").addClass(commentsColorClass[prevEndDivData["colorId"] + 1]);
                 $(".startDiv" + "[commentId = '" + commentHash + "']").attr("colorId", prevEndDivData["colorId"] + 1);
                 $(".endDiv" + "[commentId = '" + commentHash + "']").attr("colorId", prevEndDivData["colorId"] + 1);
-            }
-            else if (prevEndDivData["colorId"] == 3) {
+            } else if (prevEndDivData["colorId"] == 3) {
                 $(".commented-selection" + "[commentId = '" + commentHash + "']").addClass(commentsColorClass[0]);
                 $(".startDiv" + "[commentId = '" + commentHash + "']").attr("colorId", 0);
                 $(".endDiv" + "[commentId = '" + commentHash + "']").attr("colorId", 0);
@@ -485,8 +498,7 @@ function getUnapprovedComments(workCreator, work) {
             //the first Level is unapproved
             if (ancesHash == hash) {
                 $(".commented-selection" + "[commentId = '" + hash + "']").addClass("unapprovedComments");
-            }
-            else {
+            } else {
                 $(".commented-selection" + "[commentId = '" + ancesHash + "']").addClass("threadNotApproved");
             }
         });
@@ -510,8 +522,7 @@ function get_comment_chain_API_request(jsonData, commentSpanId) {
 function readThreads(threads, work, workCreator, parentId = null) {
     if (threads.length == 0) {
         return;
-    }
-    else {
+    } else {
         for (var i = 0; i < threads.length; i++) {
             //TODO make it pass a object instead of every thing
             let dataForReplies = {
@@ -540,7 +551,9 @@ function createCommentData() {
     let commentData = [];
     for (var i = 0; i < comments.length; i++) {
         let commentHash = comments[i]['attributes']['commentId']['value'];
-        let c = { hash: commentHash }
+        let c = {
+            hash: commentHash
+        }
         let commentExist = false;
         for (var j = 0; j < commentData.length; j++) {
             if (commentData[j].hash == commentHash) {
@@ -577,8 +590,7 @@ function createListOfCommenter(data) {
 function isCurrentUserSelectedUser(selected_eppn, needNotification) {
     if (selected_eppn == currentUser.eppn) {
         return true;
-    }
-    else {
+    } else {
         if (needNotification) {
             launchToastNotifcation("You don't have permission to do this action");
         }
@@ -610,8 +622,7 @@ function checkworkAdminList(selected_eppn, litId, mode) {
             if (mode == "approvedComments") {
                 $("#replies").attr("isCurrentUserAdmin", false);
             }
-        }
-        else {
+        } else {
             if (mode == "approvedComments") {
                 $("#replies").attr("isCurrentUserAdmin", true);
             }
@@ -620,7 +631,9 @@ function checkworkAdminList(selected_eppn, litId, mode) {
 }
 
 function launchToastNotifcation(data) {
-    var message = { message: data }
+    var message = {
+        message: data
+    }
     var snackbarContainer = document.querySelector('.mdl-js-snackbar');
     snackbarContainer.MaterialSnackbar.showSnackbar(message);
 }
@@ -635,7 +648,10 @@ function adjustDialogPosition(evt, width, height, marginX, marginY) {
     if (evt.pageX + width > $(window).width()) {
         newLeft = $(window).width() - (width + marginX) + "px";
     }
-    return { newTop, newLeft }
+    return {
+        newTop,
+        newLeft
+    }
 }
 
 //fucntions that were made by ppl before

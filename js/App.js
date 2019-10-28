@@ -1,10 +1,17 @@
 /**
  * Initialization of Marginalia scripts begin here
  */
-import { InterfaceController, APIHandler, CoursesData, UsersData, WorksData, Toast } from './Modules/ModuleLoader.js';
+import { InterfaceController, APIHandler, CoursesData, UsersData, WorksData, Toast, Address } from './Modules/ModuleLoader.js';
 
 (async () => {
     const state = {};
+
+    /**
+     * Address object must be created before any awaits.
+     * Otherwise its event listeners do not fire off.
+     */
+    const address = new Address({ state: state });
+
     const toast = new Toast();
     const api = new APIHandler();
 
@@ -37,14 +44,6 @@ import { InterfaceController, APIHandler, CoursesData, UsersData, WorksData, Toa
      * Classes that need awaited objects
      */
     const ui = new InterfaceController(state, toast, users_data, works_data);
-
-    // const dom = new Dom({api: api});
-    // let my_works = await users.get_user_works(users.current_user['eppn']);
-    // console.log(my_works);
-    // console.log(users);
-
-    // const comments = await new Comments({api: api, work: my_works[0], eppn:
-    // users.current_user['eppn']}); console.log(comments)
 
     init({
         state: state,
