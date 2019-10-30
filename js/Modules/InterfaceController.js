@@ -1,7 +1,7 @@
 import { BaseEventBinds, InterfaceEvents } from './ModuleLoader.js';
 
 export class InterfaceController {
-    constructor(state, modal, users_data, works_data) {
+    constructor({ state = state, toast = toast, users_data = users_data, works_data = works_data, courses_data = courses_data }) {
         console.log("InterfaceController Module Loaded");
 
         /**
@@ -22,6 +22,7 @@ export class InterfaceController {
             users_dropdown_menu: ".usersMenu",
             works_menu_section: ".workSelectMenu",
             works_dropdown_menu: ".worksMenu",
+            whitelist_list: ".whiteList",
         };
 
         /** 
@@ -32,9 +33,9 @@ export class InterfaceController {
         };
 
         this.state = state;
-        this.modal = modal;
+        this.toast = toast;
 
-        this.page_events = new BaseEventBinds({ state: state, ui: this });
+        this.page_events = new BaseEventBinds({ state: state, ui: this, courses_data: courses_data, works_data: works_data });
         this.ui_events = new InterfaceEvents(state, users_data, works_data, this);
     }
 
@@ -120,7 +121,7 @@ export class InterfaceController {
                 direction: "up"
             }, 300);
 
-            this.modal.create_toast("There are no users in this course");
+            this.toast.create_toast("There are no users in this course");
 
             return true;
         }
@@ -184,7 +185,7 @@ export class InterfaceController {
                 direction: "up"
             }, 300);
 
-            this.modal.create_toast("There are no works in this for this user in this course");
+            this.toast.create_toast("There are no works in this for this user in this course");
 
             return true;
         }
@@ -306,6 +307,7 @@ export class InterfaceController {
 
     /**
      * Show home page; which inclues the main cardbox.
+     * TODO:
      */
     show_home_page() {
         // removes the hash from the url
@@ -315,7 +317,8 @@ export class InterfaceController {
         this.show_main_cardbox();
 
         // TODO: 
-        $("#text , .userFiles, #settingBase, #addLitBase").hide();
+        $("#text , .userFiles, #addLitBase").hide();
+        // $("#settingsBase").hide();
         $("#nonTitleContent").show();
         $(".userSelectMenu, .workSelectMenu").hide();
         $(".chosenUser, .chosenFile, .typeSelector, .commenterSelector").empty();
@@ -323,5 +326,93 @@ export class InterfaceController {
         $(".headerTab").removeClass("active");
         $("#home").addClass("active");
         hideAllBoxes();
+    }
+
+    /**
+     * TODO:
+     * Show settings menu
+     */
+    show_settings() {
+        let course = this.state.selected_course;
+        let selectedLitId = this.state.selected_work;
+        let selected_eppn = this.state.selected_creator;
+
+        $("#settings-modal").modal({
+            closeClass: 'icon-remove',
+            closeText: '!'
+        });
+
+        $("#nonTitleContent , #addLitBase").hide();
+        $("#settingTitle").text("Settings:" + " " + selected_eppn + " - " + decodeURI(selectedLitId));
+
+        // TODO: make into plain html, so that it doesn't keep appending each time you reopen settings
+        //privacy Switch
+        makeSettingSwitch("privacy", "Work is Private?", selectedLitId, selected_eppn, checkIsWorkPublic);
+        //commentNeedApproval switch
+        makeSettingSwitch("commentsNeedApproval", "Comments Require Approval?", selectedLitId, selected_eppn, checkIsCommentNeedApproval);
+
+        addTutorialClass();
+    }
+
+    /**
+     * Populate Whitelist
+     * TODO: string constants
+     */
+    populate_whitelist(user_list) {
+        $(this.class_constants.whitelist_list).empty();
+
+        for (let i in user_list) {
+            let user = $("<li/>", {
+                text: user_list[i]["firstName"] + " " + user_list[i]["lastName"],
+                class: 'mdl-list__item whiteListOption',
+                commenterId: user_list[i]["eppn"]
+            });
+
+            let span = $("<span/>", {
+                class: "mdl-list__item-secondary-action whiteListCheckBoxSpan"
+            });
+
+            let label = $("<label/>", {
+                class: "mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect",
+                for: "wl_" + user_list[i]["eppn"]
+            });
+
+            let input = $("<input/>", {
+                class: "mdl-checkbox__input whiteListCheckBox",
+                type: "checkbox",
+                id: "wl_" + user_list[i]["eppn"]
+            });
+
+            $(label).append(input);
+            $(span).append(label);
+            $(user).append(span);
+            $(this.class_constants.whitelist_list).append(user);
+        }
+
+        componentHandler.upgradeAllRegistered();
+    }
+
+    /**
+     * Highlight whitelist admins
+     * TODO: string constants
+     */
+    highlight_whitelist_admins(admin_list) {
+        for (let i = 0; i < admin_list.length; i++) {
+            let whiteListUser = admin_list[i];
+            let inputs = $(".whiteList").find("input");
+
+            for (let j = 0; j < inputs.length; j++) {
+                if (inputs[j]["id"].split("_")[1] == whiteListUser) {
+                    $("#" + escapeSpecialChar(inputs[j]["id"])).off().click();
+                }
+            }
+        }
+
+        // disable the creator from the whitelist
+        $("#" + escapeSpecialChar("wl_" + this.state.selected_creator)).attr("disabled", true);
+
+        $(".whiteListCheckBox").off().on("change", async event => {
+            await this.ui_events.click_user_on_whitelist(event);
+        });
     }
 }

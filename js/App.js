@@ -43,7 +43,13 @@ import { InterfaceController, APIHandler, CoursesData, UsersData, WorksData, Toa
     /**
      * Classes that need awaited objects
      */
-    const ui = new InterfaceController(state, toast, users_data, works_data);
+    const ui = new InterfaceController({
+        state: state,
+        toast: toast,
+        users_data: users_data,
+        works_data: works_data,
+        courses_data: courses_data
+    });
 
     init({
         state: state,

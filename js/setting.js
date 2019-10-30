@@ -1,15 +1,15 @@
 function updateSettingPage(selected_eppn, textChosen, course) {
-    if(course == undefined){
+    if (course == undefined) {
         $("#setting").removeClass("disabledHeaderTab");
         $("#setting").attr({
             "author": selected_eppn,
             "work": textChosen
         });
     }
-    else{
-        $("#setting").attr("course",course)
+    else {
+        $("#setting").attr("course", course)
     }
-    $("#settingBase").hide();
+    // $("#settingBase").hide();
 }
 
 function resetWhiteListSearch() {
@@ -17,7 +17,7 @@ function resetWhiteListSearch() {
     searchAction($(".searchWhiteList"), $(".whiteList"), "user");
 }
 
-function resetWhiteListPage(){
+function resetWhiteListPage() {
     $(".whiteListSettingBase").empty();
 }
 
@@ -35,26 +35,6 @@ function resetWhiteListPage(){
 //     }
 // }
 
-function settingGoBackButtonOnClick() {
-    if ($("#settingBase").is(":visible")) {
-        if ($(".litSettingBase").is(":visible")) {
-            $("#setting").removeClass("active");
-            $("#settingBase").hide();
-            $("#nonTitleContent").show();
-        }
-        else if ($(".whiteListSettingBase").is(":visible")) {
-            $(".whiteListSettingBase").hide();
-            resetWhiteListSearch();
-            resetWhiteListPage();
-            $(".litSettingBase").show();
-        }
-        else if ($(".settingDataBase").is(":visible")) {
-            $(".settingDataBase").hide();
-            $(".litSettingBase").show();
-            adjustCardBoxSize(undefined);
-        }
-    }
-}
 
 // mode will be user / work
 function searchAction(input, ul, mode) {
@@ -183,35 +163,9 @@ function checkIsCommentNeedApproval(selected_eppn, litId) {
     });
 }
 
-function litSettingButtonOnClick(course, selectedLitId, selected_eppn) {
-    $("#nonTitleContent , #addLitBase").hide();
-    $("#settingBase").show();
-    $(".whiteListSettingBase, .settingDataBase").hide();
-    $(".litSettingBase").empty().fadeIn();
-    $("#settingTitle").text("Settings For : " + $("#setting").attr("course") + " " + selected_eppn + "'s " + selectedLitId);
-    let settingOptions = $("<div/>", {
-        class: "settingOptions"
-    });
-    $(".litSettingBase").append(settingOptions);
-    //privacy Switch
-    makeSettingSwitch("privacy", "Work is Private?", selectedLitId, selected_eppn, checkIsWorkPublic);
-    //commentNeedApproval switch
-    makeSettingSwitch("commentsNeedApproval", "Comments Require Approval?", selectedLitId, selected_eppn, checkIsCommentNeedApproval);
-
-    // whiteListPageOpener
-    makeSettingButton(course, selectedLitId, selected_eppn, "litWhiteListButton", "Manage White List");
-    makeSettingButton(course, selectedLitId, selected_eppn, "settingDataButton", "Work's Data");
-    makeSettingButton(course, selectedLitId, selected_eppn, "deleteWorkButton", "Delete Work");
-    //activate the go back button
-    $("#settingGoBack").children().off().on("click", () => {
-        settingGoBackButtonOnClick();
-    });
-    addTutorialClass();
-}
-
-function addTutorialClass(){
+function addTutorialClass() {
     //settingTutorial
-    let privacySwitch = $(".settingSwitch"+"[for = 'privacySwitch']").addClass("privacySwitch");
+    let privacySwitch = $(".settingSwitch" + "[for = 'privacySwitch']").addClass("privacySwitch");
     privacySwitch.attr({
         "data-hint": "Toggle the switch to set the work's privacy"
     });
@@ -252,39 +206,40 @@ function makeSettingSwitch(purpose, text, litId, selected_eppn, callback) {
     });
 }
 
-function makeSettingButton(course, litId, selected_eppn, buttonName, buttonText) {
-    let button = $("<div/>", {
-        class: buttonName,
-        text: buttonText
-    });
-    if (buttonName == "litWhiteListButton") {
-        button.on("click", (evt) => {
-            //console.log("white list!");
-            if (isCurrentUserSelectedUser(selected_eppn, true)) {
-                $(".litSettingOptionSelected").removeClass("litSettingOptionSelected");
-                $(this).addClass("litSettingOptionSelected");
-                showWhiteListSettingBase(course, litId, selected_eppn,updateWhiteListBase);
-            }
-        });
-        $(button).append(`<i class="material-icons whiteListLinkIcon">link</i>`);
-        componentHandler.upgradeAllRegistered();
-    }
-    else if (buttonName == "deleteWorkButton") {
-        button.on("click", (evt) => {
-            if (isCurrentUserSelectedUser(selected_eppn, true)) {
-                if (confirm("Are you sure you want to delete the work " + litId + "?")) {
-                    deleteWork(litId, selected_eppn, undefined);
-                }
-            }
-        })
-    }
-    else if (buttonName == "settingDataButton") {
-        button.on("click", (evt) => {
-            showWorkSettingDataBase(selected_eppn, litId);
-        })
-    }
-    $(".settingOptions").append(button);
-}
+/** NOTE: modularized @BaseEventBinds */
+// function makeSettingButton(course, litId, selected_eppn, buttonName, buttonText) {
+//     let button = $("<div/>", {
+//         class: buttonName,
+//         text: buttonText
+//     });
+//     if (buttonName == "litWhiteListButton") {
+//         button.on("click", (evt) => {
+//             //console.log("white list!");
+//             if (isCurrentUserSelectedUser(selected_eppn, true)) {
+//                 $(".litSettingOptionSelected").removeClass("litSettingOptionSelected");
+//                 $(this).addClass("litSettingOptionSelected");
+//                 showWhiteListSettingBase(course, litId, selected_eppn, updateWhiteListBase);
+//             }
+//         });
+//         $(button).append(`<i class="material-icons whiteListLinkIcon">link</i>`);
+//         componentHandler.upgradeAllRegistered();
+//     }
+//     else if (buttonName == "deleteWorkButton") {
+//         button.on("click", (evt) => {
+//             if (isCurrentUserSelectedUser(selected_eppn, true)) {
+//                 if (confirm("Are you sure you want to delete the work " + litId + "?")) {
+//                     deleteWork(litId, selected_eppn, undefined);
+//                 }
+//             }
+//         })
+//     }
+//     else if (buttonName == "settingDataButton") {
+//         button.on("click", (evt) => {
+//             showWorkSettingDataBase(selected_eppn, litId);
+//         })
+//     }
+//     $(".settingOptions").append(button);
+// }
 
 //TODO php for commentsNeedApproval
 function workSettingSwitchOnChange(evt, litId, selected_eppn) {
@@ -370,40 +325,40 @@ function deleteWork(litId, selected_eppn, userWorkCount) {
     }
 }
 
-function adjustCardBoxSize(target) {
-    //reset
-    if (target == undefined) {
-        $(".introBoxes").css({
-            "width": "",
-            "max-width": ""
-        });
-    }
-    else {
-        let targetWidth = $("." + target).width();
-        targetWidth += 100;
-        $(".introBoxes").css({
-            "width": targetWidth,
-            "max-width": targetWidth
-        });
-    }
-}
+// function adjustCardBoxSize(target) {
+//     //reset
+//     if (target == undefined) {
+//         $(".introBoxes").css({
+//             "width": "",
+//             "max-width": ""
+//         });
+//     }
+//     else {
+//         let targetWidth = $("." + target).width();
+//         targetWidth += 100;
+//         $(".introBoxes").css({
+//             "width": targetWidth,
+//             "max-width": targetWidth
+//         });
+//     }
+// }
 
-function showWorkSettingDataBase(selected_eppn, litId) {
-    $(".litSettingBase").hide();
-    $(".settingDataBase").show();
-    let tbody = $(".settingDataTable").find("tbody");
-    tbody.empty();
-    let isHeadCreated = $(".settingDataTable").find("thead").children().length;
-    console.log(isHeadCreated);
-    if (isHeadCreated) {
-        createDataTableBody(selected_eppn, litId);
-    }
-    else {
-        createDataTableHeader();
-        createDataTableBody(selected_eppn, litId);
-    }
-    adjustCardBoxSize("settingDataTable");
-}
+// function showWorkSettingDataBase(selected_eppn, litId) {
+//     // $(".litSettingBase").hide();
+//     $(".settingDataBase").show();
+//     let tbody = $("#settingDataTable").find("tbody");
+//     tbody.empty();
+//     let isHeadCreated = $("#settingDataTable").find("thead").children().length;
+//     console.log(isHeadCreated);
+//     if (isHeadCreated) {
+//         createDataTableBody(selected_eppn, litId);
+//     }
+//     else {
+//         createDataTableHeader();
+//         createDataTableBody(selected_eppn, litId);
+//     }
+//     // adjustCardBoxSize("settingDataTable");
+// }
 
 function createDataTableHeader() {
     let thead_tr = $("<tr/>");
@@ -411,7 +366,9 @@ function createDataTableHeader() {
         class: "mdl-data-table__cell--non-numeric",
         text: "Name/Type"
     });
+
     thead_tr.append(nameTableHead);
+
     let dataTableHead = ["All Comments", "Unapproved Comments"];
     for (var i in dataTableHead) {
         let header = $("<th/>", {
@@ -419,7 +376,9 @@ function createDataTableHeader() {
         });
         thead_tr.append(header);
     }
-    $(".settingDataTable").find("thead").append(thead_tr);
+
+    $("#settingDataTable").find("thead").append(thead_tr);
+
     componentHandler.upgradeAllRegistered();
 }
 
@@ -438,7 +397,7 @@ function createDataTableBody(selected_eppn, litId) {
             num.html(data[j]);
             tr.append(num)
         }
-        $(".settingDataTable").find("tbody").append(tr);
+        $("#settingDataTable").find("tbody").append(tr);
     }
     API.request({
         endpoint: "get_highlights",
@@ -462,7 +421,7 @@ function createDataTableBody(selected_eppn, litId) {
                 num.html(data[j]);
                 tr.append(num);
             }
-            $(".settingDataTable").find("tbody").append(tr);
+            $("#settingDataTable").find("tbody").append(tr);
         }
     });
     componentHandler.upgradeAllRegistered();
@@ -491,88 +450,86 @@ function getWorkCommentsData(type, commenter, all) {
     return data.length
 }
 
+// NOTE: modularized
 //litId = literature name , selected_eppn = creator of the literature
-function showWhiteListSettingBase(course, litId, selected_eppn, callback) {
-    enableAllWhiteListOption();
-    $(".whiteListSettingBase").fadeIn();
-    $(".litSettingBase").hide();
-    $(".whiteListCheckBoxSpan").children("label").removeClass("is-checked");
-    API.request({
-        endpoint: "get_creators_of_course",
-        method: "GET",
-        data: {
-          course: course
-        }
-    }).then((users)=>{
-        console.log(users);
-        makeWhiteListSettingBase(users);
-    });
-    callback(litId, selected_eppn);
-}
+// function showWhiteListSettingBase(course, litId, selected_eppn, callback) {
+//     enableAllWhiteListOption();
+//     $(".whiteListSettingBase").fadeIn();
+//     // $(".litSettingBase").hide();
+//     $(".whiteListCheckBoxSpan").children("label").removeClass("is-checked");
+//     API.request({
+//         endpoint: "get_creators_of_course",
+//         method: "GET",
+//         data: {
+//             course: course
+//         }
+//     }).then((users) => {
+//         console.log(users);
+//         makeWhiteListSettingBase(users);
+//     });
+//     callback(litId, selected_eppn);
+// }
 
-function updateWhiteListBase(litId, selected_eppn){
-    let endPoint = "get_permissions_list";
-    console.log(endPoint)
-    API.request({
-        endpoint: endPoint,
-        method: "GET",
-        data: {
-            eppn: selected_eppn,
-            work: litId,
-        }
-    }).then((data) => {
-        for (var i = 0; i < data["admins"].length; i++) {
-            let whiteListUser = data["admins"][i];
-            let inputs = $(".whiteList").find("input");
-            for (var j = 0; j < inputs.length; j++) {
-                if (inputs[j]["id"].split("_")[1] == whiteListUser) {
-                    $("#" + escapeSpecialChar(inputs[j]["id"])).off().click();
-                    console.log(inputs[j]["id"]);
-                }
-            }
-        }
-        disableCreatorWhiteListOption(litId, selected_eppn);
-        $(".whiteListCheckBox").off().on("change", (evt) => {
-            addUserToWhiteList(evt["currentTarget"]["id"], litId);
-            console.log("clicked");
-        });
-    });
-}
+// function updateWhiteListBase(litId, selected_eppn) {
+//     let endPoint = "get_permissions_list";
+//     console.log(endPoint)
+//     API.request({
+//         endpoint: endPoint,
+//         method: "GET",
+//         data: {
+//             eppn: selected_eppn,
+//             work: litId,
+//         }
+//     }).then((data) => {
+//         for (var i = 0; i < data["admins"].length; i++) {
+//             let whiteListUser = data["admins"][i];
+//             let inputs = $(".whiteList").find("input");
+//             for (var j = 0; j < inputs.length; j++) {
+//                 if (inputs[j]["id"].split("_")[1] == whiteListUser) {
+//                     $("#" + escapeSpecialChar(inputs[j]["id"])).off().click();
+//                     console.log(inputs[j]["id"]);
+//                 }
+//             }
+//         }
+//         disableCreatorWhiteListOption(litId, selected_eppn);
+//         $(".whiteListCheckBox").off().on("change", (evt) => {
+//             addUserToWhiteList(evt["currentTarget"]["id"], litId);
+//             console.log("clicked");
+//         });
+//     });
+// }
 
-function enableAllWhiteListOption() {
-    $(".whiteListCheckBox").removeAttr("disabled");
-}
+// function enableAllWhiteListOption() {
+//     $(".whiteListCheckBox").removeAttr("disabled");
+// }
 
 //litId = literature name, selected_eppn = creator of the work
-function disableCreatorWhiteListOption(litId, selected_eppn) {
-    let inputId = "wl_" + selected_eppn;
-    $("#" + escapeSpecialChar(inputId)).attr("disabled", true);
-}
+// function disableCreatorWhiteListOption(litId, selected_eppn) {
+//     let inputId = "wl_" + selected_eppn;
+//     $("#" + escapeSpecialChar(inputId)).attr("disabled", true);
+// }
 
-function addUserToWhiteList(selected_eppn, litId) {
-    let eppn = selected_eppn.split("_")[1];
-    let endPoint;
-    let data = {};
-    if ($("#" + escapeSpecialChar(selected_eppn)).is(":checked")) {
-        endPoint = "add_permission";
-        data.work = litId;
-        data.eppn = eppn;
-        //TODO notification is not well enough
-        launchToastNotifcation(eppn + " is added to the white list");
-    }
-    else {
-        endPoint = "remove_permission";
-        data.work = litId;
-        data.eppn = eppn;
-        //TODO notification is not well enough
-        launchToastNotifcation(eppn + " is removed from the white list");
-    }
-    API.request({
-        endpoint: endPoint,
-        method: "POST",
-        data: data,
-    }).then(data => {
-        console.log(data);
-        console.log(endPoint);
-    });
-}
+// function addUserToWhiteList(selected_eppn, litId) {
+//     let eppn = selected_eppn.split("_")[1];
+//     let endPoint;
+//     let data = {};
+//     if ($("#" + escapeSpecialChar(selected_eppn)).is(":checked")) {
+//         endPoint = "add_permission";
+//         data.work = litId;
+//         data.eppn = eppn;
+//         launchToastNotifcation(eppn + " is added to the white list");
+//     } else {
+//         endPoint = "remove_permission";
+//         data.work = litId;
+//         data.eppn = eppn;
+//         launchToastNotifcation(eppn + " is removed from the white list");
+//     }
+//     API.request({
+//         endpoint: endPoint,
+//         method: "POST",
+//         data: data,
+//     }).then(data => {
+//         console.log(data);
+//         console.log(endPoint);
+//     });
+// }

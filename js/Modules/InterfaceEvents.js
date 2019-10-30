@@ -49,6 +49,23 @@ export class InterfaceEvents {
         selectLit(this.state.selected_creator, this.state.selected_work);
     }
 
+    async click_user_on_whitelist(event) {
+        let eppn_modify = event.currentTarget.id.split("_")[1];
+
+        /**
+         * NOTE: The eppn passed in is the eppn of the user to add to the list,
+         * It's assumed that the "work" (for these 2 endpoints) is the currently logged in user.
+         */
+        let res;
+        if ($("#wl_" + escapeSpecialChar(eppn_modify)).is(":checked")) {
+            res = await this.works_data.add_work_permission(this.state.selected_work, eppn_modify);
+        } else {
+            res = await this.works_data.remove_work_permission(this.state.selected_work, eppn_modify);
+        }
+
+        this.ui.toast.create_toast(res);
+    }
+
     bind_redirect_confirmation(specificElement) {
         $(specificElement).on("click", function (event) {
             if (($(specificElement).attr("href")).indexOf(window.location.host) !== -1) {

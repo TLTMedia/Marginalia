@@ -12,14 +12,24 @@ var remSpan; // holds the name of made and clicked spans
   Loads the users folder and creates a button for each user
 */
 init = async ({ state = state, ui = ui, api = api, courses = courses, users = users }) => {
-    /** For legacy purposes... */
+    /** 
+     * TODO: For legacy purposes... 
+     */
     API = api;
-    currentUser = users.current_user;
 
     $(".loader").hide();
     $("#text").hide();
     $("#addLitBase").hide();
     $("#tutorialBase").hide();
+
+    /**
+     * Set the current user in the state
+     */
+    state.current_user = await users.get_current_user();
+    /**
+     * TODO: here for legacy purposes...
+     */
+    currentUser = state.current_user;
 
     /**
      * Load & bind home page events
@@ -29,22 +39,28 @@ init = async ({ state = state, ui = ui, api = api, courses = courses, users = us
     /**
      * Determine whether the first thing we load is "home" or a doc via deep link
      */
-    if (state.deep_link.function == "show_work") {
-        // show the sub-menu
-        ui.show_sub_menu();
-
-        // hide the main cardbox
-        ui.hide_main_cardbox();
-
-        // select the specified work
-        // TODO: modularize
-        selectLit(...state.deep_link.parameters);
-    } else if (state.deep_link.function == "show_home") {
+    if (!state.hasOwnProperty("deep_link")) {
         ui.show_home_page();
     } else {
-        // Shouldn't be reachable
-        // Possible that jQuery.Address failed to load
-        console.error("Error; Possible that jQuery.Address failed to load");
+        if (state.deep_link.function == "show_work") {
+            // show the sub-menu
+            ui.show_sub_menu();
+
+            // hide the main cardbox
+            ui.hide_main_cardbox();
+
+            // set the selected creator and work of the work from the deep link
+            state.selected_creator = state.deep_link.parameters[0];
+            state.selected_work = decodeURI(state.deep_link.parameters[1]);
+            // TODO: ASAP
+            state.selected_course = "WRT 102 - Fall 2019";
+
+            // select the specified work
+            // TODO: modularize
+            selectLit(...state.deep_link.parameters);
+        } else if (state.deep_link.function == "show_home") {
+            ui.show_home_page();
+        }
     }
 
     /** 
@@ -65,24 +81,6 @@ init = async ({ state = state, ui = ui, api = api, courses = courses, users = us
         $("#litadd").addClass("active");
         showAddLitPage();
         resetWhiteListPage();
-    });
-
-    $("#setting").off().on("click", () => {
-        // let author = $("#setting").attr("author");
-        // let work = $("#setting").attr("work");
-        if ($("#setting").hasClass("disabledHeaderTab")) {
-            launchToastNotifcation("Please select a work first");
-        }
-        //if user is not the author they don't have the ability to change the setting
-        else if (!isCurrentUserSelectedUser(state.selected_creator)) {
-            console.log(state.selected_creator)
-            launchToastNotifcation("You don't have the permission to do this action");
-        } else {
-            console.log("should o[pen]")
-            $(".headerTab").removeClass("active");
-            $("#setting").addClass("active");
-            litSettingButtonOnClick(state.selected_course, state.selected_work, state.selected_creator);
-        }
     });
 
     /**
@@ -232,7 +230,6 @@ loadUserComments = (selected_eppn, textChosen, selectedType, selectedCommenter) 
     if (isTypeAndCommenterUndefiend) {
         $("#text").hide();
         $("#textSpace").hide();
-        $("#textTitle").hide();
         endpoint = "get_highlights";
         data = {
             creator: selected_eppn,
@@ -274,7 +271,6 @@ loadUserComments = (selected_eppn, textChosen, selectedType, selectedCommenter) 
 renderComments = (commentData, selected_eppn, textChosen, callback) => {
     $("#text").fadeIn();
     $("#textSpace").fadeIn();
-    $("#textTitle").fadeIn();
     let temp;
     for (let i = 0; i < commentData.length; i++) {
         highlightText({
