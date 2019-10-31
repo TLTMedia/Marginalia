@@ -120,9 +120,11 @@ class CreateWork
 
         /**
          * Creating the index.html file with Mammoth
+         * NOTE: I'm specifying the python to execute mammoth with for a reason.
+         * See: https://github.com/SBUtltmedia/Marginalia/issues/51
          */
         $destinationPath = escapeshellarg($pathOfWork . "/index.html");
-        $execString      = "/home1/tltsecure/.local/bin/mammoth $tmpFilePath $destinationPath 2>${tmpFilePath}.out.txt";
+        $execString      = "/home1/tltsecure/.pyenv/shims/python /home1/tltsecure/.local/bin/mammoth $tmpFilePath $destinationPath 2>${tmpFilePath}.out.txt";
         system($execString);
         unlink($tmpFilePath);
 
