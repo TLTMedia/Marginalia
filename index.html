@@ -21,6 +21,9 @@
         src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script>
     <script type="text/javascript"
         src="https://cdnjs.cloudflare.com/ajax/libs/jquery.address/1.6/jquery.address.js"></script>
+    <script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css" />
 
     <!-- JS Scripts -->
     <!--[if lt IE 9]>
@@ -38,10 +41,6 @@
     <!-- Our init function entry point -->
     <script defer type="module" src="./js/App.js" crossorigin="use-credentials"></script>
 
-    <!-- Other scripts that cannot/shouldn't be loaded via the init() -->
-    <!-- Cannot be loaded via init() b/c $.address event listeners break in async functions -->
-    <script src="js/address.js"></script>
-
     <!-- Other scripts that aren't loaded via the init()... TODO: YET. -->
     <script src="js/rangyHelpers.js"></script>
     <script src="js/script.js"></script>
@@ -49,12 +48,10 @@
     <script src="js/replyBoxAction.js"></script>
     <script src="js/commentBoxAction.js"></script>
     <script src="js/setting.js"></script>
-    <script src="js/gui.js"></script>
     <script src="js/addLit.js"></script>
     <script src="js/visualTutorial.js"></script>
 
     <script defer type="text/javascript">
-        // alert("Sorry for any inconvenience, currently under maintenance.\n Check back in a few hours.");
         $(document).on("DOMNodeInserted", e => {
             const classes = $(e.target).attr("class");
             if (classes && classes.match(/^hl_/)) {
@@ -89,8 +86,6 @@
                             <a class="mdl-navigation__link headerTab headerUpload" id="home" href="#">Home</a>
                             <a class="mdl-navigation__link headerTab headerUpload" id="litadd" href="#">Add
                                 Literature</a>
-                            <a class="mdl-navigation__link headerTab headerUpload" id="setting"
-                                href="javascript:void(0);">Settings</a>
                         </nav>
                     </div>
                     <!-- Bottom row -->
@@ -98,36 +93,83 @@
                         <div class="mdl-layout-spacer"></div>
                         <!-- Navigation -->
                         <nav class="mdl-navigation">
-                            <a class="mdl-navigation__link" href="#">Filters</a>
-                            <a class="mdl-navigation__link" href="#">Settings</a>
+                            <a class="mdl-navigation__link" href="javascript:void(0);">Filters</a>
+                            <a id="setting" class="mdl-navigation__link" href="javascript:void(0);">Settings</a>
                         </nav>
                     </div>
                 </header>
                 <main class="mainContent">
                     <div class="page-content">
+                        <!-- begin add-lit-modal; NOTE: Its contents are dynamically inserted. -->
+                        <div id="add-lit-modal" class="modal">
+                            <div id="addLitBase"></div>
+                        </div>
+                        <!-- end add-lit-modal -->
+
+                        <!-- begin settings-modal -->
+                        <div id="settings-modal" class="modal">
+                            <div id="settingBase">
+                                <center>
+                                    <div id="settingTitle">Settings</div>
+                                </center>
+                                <div class="litSettingBase">
+                                    <div class="settingOptions">
+                                        <div class="litWhiteListButton">Manage White List
+                                            <i class="material-icons whiteListLinkIcon">link</i>
+                                        </div>
+                                        <div class="settingDataButton">Work Data</div>
+                                        <div class="deleteWorkButton">Delete Work</div>
+
+                                        <label class="settingSwitch mdl-switch mdl-js-switch" for="privacySwitch">
+                                            <!-- TODO: make this a radio button instead -->
+                                            <span class="mdl-switch__label">Work is private</span>
+                                            <input type="checkbox" id="privacySwitch" class="mdl-switch__input" />
+                                        </label>
+
+                                        <label class="commentsNeedApprovalSwitch mdl-switch mdl-js-switch"
+                                            for="commentsNeedApprovalSwitch">
+                                            <!-- TODO: make this a radio button instead -->
+                                            <span class="mdl-switch__label">Comments require approval</span>
+                                            <input type="checkbox" id="commentsNeedApprovalSwitch"
+                                                class="mdl-switch__input" />
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- end settings-modal -->
+
+                        <!-- whitelist-modal -->
+                        <div id="whitelist-modal" class="modal">
+                            <div class="whiteListSettingBase">
+                                <center>
+                                    Whitelist Settings
+                                </center>
+                                <ul class="mdl-list whiteList">
+
+                                </ul>
+                            </div>
+                        </div>
+                        <!-- end whitelist-modal -->
+
+                        <!-- workdata-modal -->
+                        <div id="workdata-modal" class="modal">
+                            <div class="settingDataBase">
+                                <center>
+                                    WorkData
+                                </center>
+                                <table id="settingDataTable" class="mdl-data-table mdl-js-data-table">
+                                    <thead></thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <!-- end workdata-modal -->
+
+                        <!-- begin firstPage -->
                         <div id="firstPage">
                             <div id="cardbox" class="introBoxes">
                                 <div class="titleText">Marginalia</div>
-                                <div id="addLitBase"></div>
-                                <div id="settingBase">
-                                    <div id="settingTitle">Settings</div>
-                                    <div class="litSettingBase"></div>
-                                    <div class="whiteListSettingBase"></div>
-                                    <div class="settingDataBase">
-                                        <table class="mdl-data-table mdl-js-data-table settingDataTable">
-                                            <thead>
-                                            </thead>
-                                            <tbody>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                    <div id="settingGoBack" style="margin-bottom:0px">
-                                        <button class="mdl-button mdl-js-button mdl-button--icon">
-                                            <span class="material-icons">arrow_back</span>
-                                        </button>
-                                        Go Back
-                                    </div>
-                                </div>
                                 <div id="nonTitleContent">
                                     <div class="pleaseSelect">
                                         <span>Please select your course.</span>
@@ -149,22 +191,26 @@
                                         <ul class="mdl-list worksMenu"></ul>
                                     </div>
                                 </div>
-                            </div> <!-- end cardbox -->
-                        </div> <!-- end firstPage -->
+                            </div>
+                        </div>
+                        <!-- end firstPage -->
+
                         <div id="commentBox"></div>
                         <div id="replies"></div>
                         <div id="comApproval"></div>
                         <div id="deleteFileChoice"></div>
                         <div id="moderateFileChoice"></div>
                         <div id="userPrivateList"></div>
-                        <div class="loader" id="loadingSign"></div>
+
                         <div class="selector">
                             <div class="typeSelector" id="typeSelector"></div>
                             <div class="commenterSelector" id="commenterSelector"></div>
                         </div>
-                        <div id="text" visible="false">
-                            <div id="textTitle"></div>
-                        </div>
+
+                        <!-- The area where the work text gets populated -->
+                        <div id="text" visible="false"></div>
+
+                        <!-- Toast notification -->
                         <div id="toast-notification1" class="mdl-js-snackbar mdl-snackbar">
                             <div id="logo1"></div>
                             <div class="mdl-snackbar__text"></div>

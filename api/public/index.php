@@ -362,7 +362,7 @@ $app->post("/create_work", function () use ($app, $PATH, $PATH_COURSES, $SKELETO
         $authUniqueId,
         $data["work"],
         $data["privacy"],
-        $data["course"], //"Other - Fall 2019", // temporarily hard coded value ... non-trivial to get the course view in upload gui
+        $data["course"],
         $authFirstName,
         $authLastName,
         $tempFile

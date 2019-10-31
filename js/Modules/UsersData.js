@@ -11,7 +11,7 @@ export class UsersData {
          */
         return (async () => {
             this.creator_list = await this.get_creators();
-            this.current_user = await this.get_current_user();
+
             return this;
         })();
     }
@@ -23,6 +23,7 @@ export class UsersData {
                 course: course,
             },
         });
+
         return await user_list;
     }
 
@@ -31,6 +32,7 @@ export class UsersData {
             endpoint: 'get_creators',
             data: this.grouping,
         });
+
         return await user_list;
     }
 
@@ -38,6 +40,7 @@ export class UsersData {
         let user = this.api.request({
             endpoint: 'get_current_user',
         });
+
         return await user;
     }
 
@@ -48,14 +51,14 @@ export class UsersData {
                 eppn: eppn,
             },
         });
-        /* remove '.html' */
-        this.selected_user_works.forEach((work, index) => {
-            this.selected_user_works[index] = this.selected_user_works[index].substr(0, this.selected_user_works[index].lastIndexOf('\.'));
-        });
-        return this.selected_user_works;
-    }
 
-    async get_course_users() {
-        console.log(this.state);
+        /**
+         * removes ".html"
+         */
+        this.selected_user_works.forEach(_, i => {
+            this.selected_user_works[i] = this.selected_user_works[i].substr(0, this.selected_user_works[i].lastIndexOf('\.'));
+        });
+
+        return this.selected_user_works;
     }
 }
