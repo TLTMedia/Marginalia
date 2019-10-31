@@ -1,5 +1,5 @@
 function showAddLitPage() {
-    $("#settingBase").hide();
+    $("#settingBase, #tutorialBase").hide();
     $(".workSelectMenu").hide();
     $("#addLitBase").load("parts/upload.htm", function () {
         $(this).fadeIn();
@@ -12,19 +12,6 @@ function showAddLitPage() {
             method: "GET"
         }).then((data) => {
             makeAddLitCourseOptions(data)
-        });
-        //TutorialButton
-        $("#helpForAddLit").off().on("click", () => {
-            var tutorialData = [
-                 [".fileContainer", 1,"Select a file from your device"],
-                 [".nameContainer", 2, "Name your work"],
-                 [".addLitCourseMenu", 3, "Select a course that you want to upload your work for"],
-                 [".privateContainer", 4,"Check the box if you want your work to be private. (you are able to change your work's privacy after you upload it)"],
-                 ["#addUploadButton", 5, "Click to upload"]
-            ];
-            var specialStepData = {};
-            makeTutorial(tutorialData);
-            startTutorial(tutorialData,specialStepData);
         });
         componentHandler.upgradeAllRegistered();
 

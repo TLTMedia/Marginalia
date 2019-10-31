@@ -48,8 +48,6 @@ init = async ({ state = state, ui = ui, api = api, courses = courses, users = us
 
     $("#setting").addClass("disabledHeaderTab");
     $("#setting").off().on("click", () => {
-        // let author = $("#setting").attr("author");
-        // let work = $("#setting").attr("work");
         if ($("#setting").hasClass("disabledHeaderTab")) {
             launchToastNotifcation("Please select a work first");
         }
@@ -59,7 +57,6 @@ init = async ({ state = state, ui = ui, api = api, courses = courses, users = us
             launchToastNotifcation("You don't have the permission to do this action");
         }
         else {
-            console.log("should o[pen]")
             $(".headerTab").removeClass("active");
             $("#setting").addClass("active");
             litSettingButtonOnClick(state.selected_course, state.selected_work, state.selected_creator);
@@ -67,12 +64,12 @@ init = async ({ state = state, ui = ui, api = api, courses = courses, users = us
     });
 
     $("#home").off().on("click", function () {
-        $(".headerTab").removeClass("active");
-        $(this).addClass("active");
         homeButtonAction();
-        resetWhiteListPage();
-        $(".selectorOpener").remove();
     });
+
+    $("#tutorial").off().on("click",function(){
+        showTutorialPage();
+    })
 
 
     /**
@@ -185,24 +182,24 @@ function createTips(workTitle) {
         class: "material-icons tipsIcon",
         text: "help"
     });
-    // let text = $("<span/>", {
-    //     class: "tipsText"
-    // });
-    //text.html("The <span style = 'color : darkred'>Dark Red</span> comments with underlines are the comments that are not approved yet.\nThe <span style = 'color : orangered'>Orange</span> comments are comments that have unapproved replies.");
-    //tips.append(icon, text);
-    tips.append(icon);
-    tips.on("click",()=>{
-        tutorialData = [
-          ["#textSpace", 1,"Highlight the text to comment"],
-          [".commented-selection:first", 2, "Click on the highlight text to read the comments"],
-          ["#replies", 3, "comments are shown in here"]
-        ];
-        specialStepData = {
-           3: ["click", "#replies"]
-        }
-        makeTutorial(tutorialData);
-        startTutorial(tutorialData,specialStepData);
+    let text = $("<span/>", {
+        class: "tipsText"
     });
+    text.html("The <span style = 'color : darkred'>Dark Red</span> comments with underlines are the comments that are not approved yet.\nThe <span style = 'color : orangered'>Orange</span> comments are comments that have unapproved replies.");
+    tips.append(icon, text);
+    tips.append(icon);
+    // tips.on("click",()=>{
+    //     tutorialData = [
+    //       ["#textSpace", 1,"Highlight the text to comment"],
+    //       [".commented-selection:first", 2, "Click on the highlight text to read the comments"],
+    //       ["#replies", 3, "comments are shown in here"]
+    //     ];
+    //     specialStepData = {
+    //        3: ["click", "#replies"]
+    //     }
+    //     makeTutorial(tutorialData);
+    //     startTutorial(tutorialData,specialStepData);
+    // });
     workTitle.prepend(tips);
 }
 
@@ -302,6 +299,7 @@ renderComments = (commentData, selected_eppn, textChosen, callback) => {
 function allowClickOnComment(textChosen, selected_eppn) {
     //highlight on top of other's comment will bring them to the reply box
     $(".commented-selection").off().on("mouseup", function (evt) {
+        console.log("click on comment")
         clickOnComment(textChosen, selected_eppn, evt);
     });
 }

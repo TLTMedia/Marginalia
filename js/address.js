@@ -6,15 +6,33 @@
 $.address.init(() => {
     console.log("jQuery.Address Library Loaded");
 }).externalChange(function () {
+    let addressTypes = {
+        "addlit": {
+          "name": showAddLitPage
+        },
+        "tutorial":{
+          "name": showTutorialPage
+        },
+        "get_work":{
+          "name": selectLit
+        }
+    }
     if (location.hash) {
         [, api, ...rest] = location.hash.split("#")[1].split("/");
-        if (api == "get_work") {
-            let obj = {
-                "name": selectLit,
-                "parameters": [...rest],
-            };
-            event_queue.push(obj);
+        console.log(api)
+        if (api in addressTypes) {
+            let obj = addressTypes[api];
+            obj["parameters"] = [...rest]
+            event_queue.push(obj)
         }
+        //CHANGED so deep link can also direct to addLit and tutorial page
+        // if (api == "get_work") {
+        //     let obj = {
+        //         "name": selectLit,
+        //         "parameters": [...rest],
+        //     };
+        //     event_queue.push(obj);
+        // }
     } else {
         let obj = {
             "name": homeButtonAction,

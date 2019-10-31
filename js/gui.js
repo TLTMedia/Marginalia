@@ -3,17 +3,20 @@ function showLink(value) {
 }
 
 function homeButtonAction() {
-    //TODO try get rid of the extra pound
     showLink("");
-    $("#text , .userFiles, #settingBase, #addLitBase").hide();
+    $(".headerTab").removeClass("active");
+    $("#home").addClass("active");
+    $(".selectorOpener").remove();
+    $("#text , .userFiles, #settingBase, #addLitBase, #tutorialBase").hide();
     $("#nonTitleContent").show();
     $(".userSelectMenu, .workSelectMenu").hide();
     $(".chosenUser, .chosenFile, .typeSelector, .commenterSelector").empty();
     //disable the setting header tab
-    $("#setting").addClass("disabledHeaderTab");
     $(".headerTab").removeClass("active");
     $("#home").addClass("active");
     hideAllBoxes();
+    disableSettingPage();
+    resetWhiteListPage();
 }
 //----------------------------------------------------------
 

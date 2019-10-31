@@ -12,6 +12,11 @@ function updateSettingPage(selected_eppn, textChosen, course) {
     $("#settingBase").hide();
 }
 
+function disableSettingPage(){
+    $("#setting").addClass("disabledHeaderTab")
+    $("#setting").removeAttr("author work course");
+}
+
 function resetWhiteListSearch() {
     $(".searchWhiteList").val("");
     searchAction($(".searchWhiteList"), $(".whiteList"), "user");
@@ -184,7 +189,7 @@ function checkIsCommentNeedApproval(selected_eppn, litId) {
 }
 
 function litSettingButtonOnClick(course, selectedLitId, selected_eppn) {
-    $("#nonTitleContent , #addLitBase").hide();
+    $("#nonTitleContent , #addLitBase, #tutorialBase").hide();
     $("#settingBase").show();
     $(".whiteListSettingBase, .settingDataBase").hide();
     $(".litSettingBase").empty().fadeIn();
@@ -206,16 +211,7 @@ function litSettingButtonOnClick(course, selectedLitId, selected_eppn) {
     $("#settingGoBack").children().off().on("click", () => {
         settingGoBackButtonOnClick();
     });
-    addTutorialClass();
-}
-
-function addTutorialClass(){
-    //settingTutorial
-    let privacySwitch = $(".settingSwitch"+"[for = 'privacySwitch']").addClass("privacySwitch");
-    privacySwitch.attr({
-        "data-hint": "Toggle the switch to set the work's privacy"
-    });
-}
+  }
 
 // purpose : privacy / commentsNeedApproval
 // return the input element and the event will be handle out side this function
