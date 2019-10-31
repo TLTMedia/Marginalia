@@ -48,12 +48,10 @@
     <script src="js/replyBoxAction.js"></script>
     <script src="js/commentBoxAction.js"></script>
     <script src="js/setting.js"></script>
-    <script src="js/gui.js"></script>
     <script src="js/addLit.js"></script>
     <script src="js/visualTutorial.js"></script>
 
     <script defer type="text/javascript">
-        // alert("Sorry for any inconvenience, currently under maintenance.\n Check back in a few hours.");
         $(document).on("DOMNodeInserted", e => {
             const classes = $(e.target).attr("class");
             if (classes && classes.match(/^hl_/)) {
@@ -102,6 +100,12 @@
                 </header>
                 <main class="mainContent">
                     <div class="page-content">
+                        <!-- begin add-lit-modal; NOTE: Its contents are dynamically inserted. -->
+                        <div id="add-lit-modal" class="modal">
+                            <div id="addLitBase"></div>
+                        </div>
+                        <!-- end add-lit-modal -->
+
                         <!-- begin settings-modal -->
                         <div id="settings-modal" class="modal">
                             <div id="settingBase">
@@ -115,6 +119,20 @@
                                         </div>
                                         <div class="settingDataButton">Work Data</div>
                                         <div class="deleteWorkButton">Delete Work</div>
+
+                                        <label class="settingSwitch mdl-switch mdl-js-switch" for="privacySwitch">
+                                            <!-- TODO: make this a radio button instead -->
+                                            <span class="mdl-switch__label">Work is private</span>
+                                            <input type="checkbox" id="privacySwitch" class="mdl-switch__input" />
+                                        </label>
+
+                                        <label class="commentsNeedApprovalSwitch mdl-switch mdl-js-switch"
+                                            for="commentsNeedApprovalSwitch">
+                                            <!-- TODO: make this a radio button instead -->
+                                            <span class="mdl-switch__label">Comments require approval</span>
+                                            <input type="checkbox" id="commentsNeedApprovalSwitch"
+                                                class="mdl-switch__input" />
+                                        </label>
                                     </div>
                                 </div>
                             </div>
@@ -152,7 +170,6 @@
                         <div id="firstPage">
                             <div id="cardbox" class="introBoxes">
                                 <div class="titleText">Marginalia</div>
-                                <div id="addLitBase"></div>
                                 <div id="nonTitleContent">
                                     <div class="pleaseSelect">
                                         <span>Please select your course.</span>
@@ -184,7 +201,7 @@
                         <div id="deleteFileChoice"></div>
                         <div id="moderateFileChoice"></div>
                         <div id="userPrivateList"></div>
-                        <div class="loader" id="loadingSign"></div>
+
                         <div class="selector">
                             <div class="typeSelector" id="typeSelector"></div>
                             <div class="commenterSelector" id="commenterSelector"></div>

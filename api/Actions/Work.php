@@ -84,6 +84,17 @@ class CreateWork
     public function init($creator, $work, $privacy, $course, $firstName, $lastName, $tmpFilePath)
     {
         /**
+         * These are being read in as strings when sent over formData.
+         * & we need to flip them b/c of frontend-backend jargon differences.
+         * (public vs private vs privacy...)
+         */
+        if ($privacy == "true") {
+            $privacy = false;
+        } else {
+            $privacy = true;
+        }
+
+        /**
          * Create the user directory if it doesn't exist
          */
         if (!file_exists($this->path . $creator)) {
@@ -141,6 +152,18 @@ class CreateWork
         $permissions->creator_first_name = $firstName;
         $permissions->creator_last_name  = $lastName;
         file_put_contents($pathOfWork . "/permissions.json", json_encode($permissions));
+
+        /**
+         * Delete the existing symlink if it exists
+         */
+        if (is_link($this->coursesPath . $course . "/" . $creator . "###" . $work)) {
+            if (!unlink($this->coursesPath . $course . "/" . $creator . "###" . $work)) {
+                json_encode(array(
+                    "status"  => "error",
+                    "message" => "unable to remove old symlink",
+                ));
+            }
+        }
 
         /**
          * Create a symlink in the correct course directory

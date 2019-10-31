@@ -1,7 +1,7 @@
 /**
  * Initialization of Marginalia scripts begin here
  */
-import { InterfaceController, APIHandler, CoursesData, UsersData, WorksData, Toast, Address } from './Modules/ModuleLoader.js';
+import { InterfaceController, APIHandler, CoursesData, UsersData, WorksData, CommentsData, Toast, Address } from './Modules/_ModuleLoader.js';
 
 (async () => {
     const state = {};
@@ -19,12 +19,19 @@ import { InterfaceController, APIHandler, CoursesData, UsersData, WorksData, Toa
      * Since we're using multiple await's in a single async - 
      * we must first declare each, then we can await them all 
      */
-    const courses_init = new CoursesData(api);
+    const courses_init = new CoursesData({
+        state: state,
+        api: api,
+    });
     const users_init = new UsersData({
         state: state,
         api: api,
     });
     const works_init = new WorksData({
+        state: state,
+        api: api,
+    });
+    const comments_init = new CommentsData({
         state: state,
         api: api,
     });
@@ -39,6 +46,7 @@ import { InterfaceController, APIHandler, CoursesData, UsersData, WorksData, Toa
     const courses_data = await courses_init;
     const users_data = await users_init;
     const works_data = await works_init;
+    const comments_data = await comments_init;
 
     /**
      * Classes that need awaited objects
@@ -48,7 +56,8 @@ import { InterfaceController, APIHandler, CoursesData, UsersData, WorksData, Toa
         toast: toast,
         users_data: users_data,
         works_data: works_data,
-        courses_data: courses_data
+        courses_data: courses_data,
+        comments_data: comments_data,
     });
 
     init({
@@ -56,6 +65,6 @@ import { InterfaceController, APIHandler, CoursesData, UsersData, WorksData, Toa
         ui: ui,
         api: api,
         courses: courses_data,
-        users: users_data
+        users: users_data,
     });
 })();

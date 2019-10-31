@@ -1,13 +1,14 @@
-import { BaseEventBinds, InterfaceEvents } from './ModuleLoader.js';
+import { BaseEventBinds, InterfaceEvents } from './_ModuleLoader.js';
 
 export class InterfaceController {
-    constructor({ state = state, toast = toast, users_data = users_data, works_data = works_data, courses_data = courses_data }) {
+    constructor({ state = state, toast = toast, users_data = users_data, works_data = works_data, courses_data = courses_data, comments_data = comments_data }) {
         console.log("InterfaceController Module Loaded");
 
         /**
          * String Constants of Ids
          */
         this.id_constants = {
+            main_lit_text: "#text",
             main_marginalia_data_form: "#cardbox",
             main_sub_menu: "#header-sub-menu",
         };
@@ -34,9 +35,21 @@ export class InterfaceController {
 
         this.state = state;
         this.toast = toast;
+        this.works_data = works_data;
 
-        this.page_events = new BaseEventBinds({ state: state, ui: this, courses_data: courses_data, works_data: works_data });
-        this.ui_events = new InterfaceEvents(state, users_data, works_data, this);
+        this.base_events = new BaseEventBinds({
+            state: state,
+            ui: this,
+            courses_data: courses_data,
+            works_data: works_data,
+            comments_data: comments_data,
+        });
+        this.ui_events = new InterfaceEvents({
+            state: state,
+            ui: this,
+            users_data: users_data,
+            works_data: works_data,
+        });
     }
 
     /**
@@ -250,20 +263,6 @@ export class InterfaceController {
     }
 
     /**
-     * Filter the courses out
-     */
-    filter_courses_dropdown(list, search_key) {
-        list.each((_, element) => {
-            let course_name = $(element).html();
-            if (course_name.toUpperCase().indexOf(search_key.toUpperCase()) != -1) {
-                $(element).show();
-            } else {
-                $(element).hide();
-            }
-        });
-    }
-
-    /**
      * Show the sub-menu
      */
     show_sub_menu() {
@@ -306,6 +305,13 @@ export class InterfaceController {
     }
 
     /**
+     * Hide the work page
+     */
+    hide_work_page() {
+        $("#text").hide();
+    }
+
+    /**
      * Show home page; which inclues the main cardbox.
      * TODO:
      */
@@ -317,7 +323,7 @@ export class InterfaceController {
         this.show_main_cardbox();
 
         // TODO: 
-        $("#text , .userFiles, #addLitBase").hide();
+        //$("#text , .userFiles, #addLitBase").hide();
         // $("#settingsBase").hide();
         $("#nonTitleContent").show();
         $(".userSelectMenu, .workSelectMenu").hide();
@@ -342,14 +348,14 @@ export class InterfaceController {
             closeText: '!'
         });
 
-        $("#nonTitleContent , #addLitBase").hide();
+        $("#nonTitleContent").hide();
         $("#settingTitle").text("Settings:" + " " + selected_eppn + " - " + decodeURI(selectedLitId));
 
         // TODO: make into plain html, so that it doesn't keep appending each time you reopen settings
         //privacy Switch
-        makeSettingSwitch("privacy", "Work is Private?", selectedLitId, selected_eppn, checkIsWorkPublic);
+        //makeSettingSwitch("privacy", "Work is Private?", selectedLitId, selected_eppn, checkIsWorkPublic);
         //commentNeedApproval switch
-        makeSettingSwitch("commentsNeedApproval", "Comments Require Approval?", selectedLitId, selected_eppn, checkIsCommentNeedApproval);
+        //makeSettingSwitch("commentsNeedApproval", "Comments Require Approval?", selectedLitId, selected_eppn, checkIsCommentNeedApproval);
 
         addTutorialClass();
     }
@@ -414,5 +420,36 @@ export class InterfaceController {
         $(".whiteListCheckBox").off().on("change", async event => {
             await this.ui_events.click_user_on_whitelist(event);
         });
+    }
+
+    /**
+     * Render a specified work (selectLit)
+     */
+    async render_literature() {
+        const render_area = $(this.id_constants.main_lit_text);
+
+        // empty out the old work
+        render_area.empty();
+
+        // get the work data
+        let data = await this.works_data.get_work_data();
+        if (data.status == "ok") {
+            // set the deep link
+            $.address.value("get_work/" + this.state.selected_course + "/" + this.state.selected_creator + "/" + this.state.selected_work);
+
+            // TODO:
+            buildHTMLFile(data.data, this.state.selected_creator, this.state.selected_work);
+
+            // update the settings page
+            await this.base_events.settings_events.postload();
+
+            // TODO:
+            checkworkAdminList(this.state.selected_creator, this.state.selected_work, "approvedComments");
+        } else {
+            this.toast.create_toast("Error loading work. \n" + data.data);
+
+            // work doesn't exist so load home
+            $("#home").click();
+        }
     }
 }

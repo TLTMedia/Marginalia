@@ -5,5 +5,6 @@ export { APIHandler } from './APIHandler.js';
 export { CoursesData } from './CoursesData.js';
 export { UsersData } from './UsersData.js';
 export { WorksData } from './WorksData.js';
+export { CommentsData } from './CommentsData.js';
 export { Toast } from './Toast.js';
 export { Address } from './Address.js';

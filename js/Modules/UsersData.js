@@ -11,7 +11,6 @@ export class UsersData {
          */
         return (async () => {
             this.creator_list = await this.get_creators();
-            this.current_user = await this.get_current_user();
 
             return this;
         })();

@@ -18,8 +18,6 @@ init = async ({ state = state, ui = ui, api = api, courses = courses, users = us
     API = api;
 
     $(".loader").hide();
-    $("#text").hide();
-    $("#addLitBase").hide();
     $("#tutorialBase").hide();
 
     /**
@@ -32,9 +30,9 @@ init = async ({ state = state, ui = ui, api = api, courses = courses, users = us
     currentUser = state.current_user;
 
     /**
-     * Load & bind home page events
+     * Load & bind initial base events
      */
-    ui.page_events.home_init();
+    ui.base_events.init();
 
     /**
      * Determine whether the first thing we load is "home" or a doc via deep link
@@ -50,38 +48,18 @@ init = async ({ state = state, ui = ui, api = api, courses = courses, users = us
             ui.hide_main_cardbox();
 
             // set the selected creator and work of the work from the deep link
-            state.selected_creator = state.deep_link.parameters[0];
-            state.selected_work = decodeURI(state.deep_link.parameters[1]);
-            // TODO: ASAP
-            state.selected_course = "WRT 102 - Fall 2019";
+            state.selected_course = decodeURI(state.deep_link.parameters[0]);
+            state.selected_creator = state.deep_link.parameters[1];
+            state.selected_work = decodeURI(state.deep_link.parameters[2]);
 
-            // select the specified work
-            // TODO: modularize
-            selectLit(...state.deep_link.parameters);
+            /**
+             * Used to be selectLit, renders the currently selected literature.
+             */
+            ui.render_literature();
         } else if (state.deep_link.function == "show_home") {
             ui.show_home_page();
         }
     }
-
-    /** 
-     * Populate the courses select dropdown 
-     */
-    let courses_list = await courses.get_course_list();
-
-    if (!ui.populate_courses_dropdown(courses_list)) {
-        console.error("error while attempting to populate courses dropdown");
-    } else {
-        $(".searchCourse").on("keyup", () => {
-            ui.ui_events.do_course_search();
-        });
-    }
-
-    $("#litadd").on("click", function (evt) {
-        $(".headerTab").removeClass("active");
-        $("#litadd").addClass("active");
-        showAddLitPage();
-        resetWhiteListPage();
-    });
 
     /**
      * Leave these functions at the bottom of init()

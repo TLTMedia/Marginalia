@@ -1,7 +1,8 @@
 export class CoursesData {
-    constructor(api) {
+    constructor({ state = state, api = api }) {
         console.log("CoursesData Module Loaded");
 
+        this.state = state;
         this.api = api;
     }
 
