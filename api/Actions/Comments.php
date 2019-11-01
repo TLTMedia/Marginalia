@@ -237,7 +237,7 @@ class Comments
          */
         $result = json_decode($this->getHighlights($creator, $work, $readerEppn));
         if ($result->status != "ok") {
-            return $result;
+            return json_encode($result);
         }
 
         $filtered = array();
