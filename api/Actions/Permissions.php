@@ -138,10 +138,19 @@ class Permissions
         $filePath                = $pathOfWork . "/permissions.json";
         file_put_contents($filePath, json_encode($permissionsData));
 
-        return json_encode(array(
-            "status"  => "ok",
-            "message" => "set work privacy to " . json_encode($privacy),
-        ));
+        if ($privacy == true) {
+            return json_encode(array(
+                "status"  => "ok",
+                "message" => "work set to public",
+                "other"   => "privacy is " . json_encode($privacy),
+            ));
+        } else {
+            return json_encode(array(
+                "status"  => "ok",
+                "message" => "work set to private",
+                "other"   => "privacy is " . json_encode($privacy),
+            ));
+        }
     }
 
     /**

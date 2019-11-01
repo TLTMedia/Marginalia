@@ -1,67 +1,71 @@
 <div id="addedLitBase">
-  <div id = "addLitFirstPage">
-    <div id = "helpForAddLit" class = "tutorialButton" style = "float:right">
-        <i class = "material-icons">
-          help_outline
-        </i>
-    </div>
-    <div id="fileSystemTitle">File Input System</div>
-    <div class="tempNameContainer" style="margin-top:10px;"></div>
-    <div class="nameContainer">
-        <span>Name of Text: </span>
-        <div class="mdl-textfield mdl-js-textfield is-upgraded">
-            <input id="addNameInput" class="mdl-textfield__input" type="text" maxlength="100">
-            <label class="mdl-textfield__label" for="addNameInput"></label>
+    <div id="addLitFirstPage">
+        <div id="helpForAddLit" class="tutorialButton" style="float:right">
+            <i class="material-icons">
+                help_outline
+            </i>
         </div>
-    </div>
 
-    <div class="fileContainer">
-        <span id="fileTitle">Choose Your File: </span>
-        <br>
-        <label id="addFileButton" class="input-custom-file mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored">
-            Choose
-            <input type="file" accept=".docx">
-        </label>
-        <span id="fileName">*.docx</span>
-    </div>
+        <div class="modal-header">Upload a document</div>
 
-    <div class = "addLitCourseMenu">
-        <span id = "addLitSelectedCourse">Please select a course to upload your work</span>
-        <button id= "courseMenuButton" class="mdl-button mdl-js-button mdl-button--icon">
-          <i class="material-icons">more_vert</i>
-        </button>
-        <ul class= "courseListForAddLit mdl-menu mdl-menu--bottom-left mdl-js-menu" for = "courseMenuButton">
-        </ul>
-    </div>
+        <div class="fileContainer">
+            <span id="fileTitle">Choose your file (.docx files):</span>
+            <label id="addFileButton"
+                class="smaller-upload-buttons input-custom-file mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored">
+                Add File
+                <input type="file" accept=".docx" style="display: none;" />
+            </label>
 
-    <div class="privateContainer">
-        <label id="privateCheck" class="mdl-checkbox mdl-js-checkbox is-upgraded" for="privateChk">
-            <input type="checkbox" id="privateChk" class="mdl-checkbox__input mdl-js-ripple-effect">
-            <span class="mdl-checkbox__label">Page is Private</span>
-            <span class="mdl-checkbox__focus-helper"></span>
-            <span class="mdl-checkbox__box-outline">
-                <span class="mdl-checkbox__tick-outline"></span>
-            </span>
-        </label>
-    </div>
-    <label id="addUploadButton" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored">
+            <br />
+        </div>
+
+        <div class="nameContainer">
+            <span>Name of File: </span>
+            <div class="mdl-textfield mdl-js-textfield is-upgraded">
+                <input id="addNameInput" class="mdl-textfield__input" type="text" maxlength="100">
+                <label class="mdl-textfield__label" for="addNameInput"></label>
+            </div>
+
+            <br />
+        </div>
+
+        <div class="addLitCourseMenu">
+            <span id="addLitSelectedCourse">Choose your course:</span>
+            <button id="courseMenuButton"
+                class="smaller-upload-buttons input-custom-file mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored">
+                Pick Course
+                <!-- <input type="button" /> -->
+            </button>
+
+            <!-- <button id="courseMenuButton" class="mdl-button mdl-js-button mdl-button--icon">
+                <i class="material-icons">more_vert</i>
+            </button> -->
+            <ul class="courseListForAddLit mdl-menu mdl-menu--bottom-left mdl-js-menu" for="courseMenuButton"></ul>
+
+            <span id="upload-for-course"></span>
+        </div>
+
+        <div class="privateContainer">
+            Work privacy:
+            <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="radio-is-public">
+                <input type="radio" id="radio-is-public" class="mdl-radio__button" name="privacy-options" value="public"
+                    checked>
+                <span class="mdl-radio__label">Public</span>
+            </label>
+            <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="radio-is-private">
+                <input type="radio" id="radio-is-private" class="mdl-radio__button" name="privacy-options"
+                    value="private">
+                <span class="mdl-radio__label">Private</span>
+            </label>
+
+            <br /><br />
+        </div>
+
+        <label id="addUploadButton"
+            class="smaller-upload-buttons mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored">
             Upload
-    </label>
-</div>
-  <div id = "addLitSecondPage">
-    <span class = "uploadNotification"></span>
-  </div>
-    <br>
-    <div id="goBack" style="margin-bottom:0px">
-        <button class="mdl-button mdl-js-button mdl-button--icon">
-            <span class="material-icons">arrow_back</span>
-        </button>
-        Go Back
+        </label>
     </div>
-    <div id="doneAddLit">
-      Finish Uploading
-        <button class="mdl-button mdl-js-button mdl-button--icon">
-            <span class="material-icons">arrow_forward</span>
-        </button>
-    </div>
+
+    <br />
 </div>
