@@ -13,7 +13,7 @@ export class Address {
 
         this.address_types = {
             "addlit": {
-                "name": showAddLitPage
+                "name": null
             },
             "tutorial": {
                 "name": showTutorialPage
@@ -33,13 +33,6 @@ export class Address {
                     function: "show_work",
                     parameters: [...rest],
                 };
-            } else if (api in this.address_types) {
-                //CHANGED so deep link can also direct to addLit and tutorial page
-                console.log("davids events");
-
-                let obj = this.address_types[api];
-                obj["parameters"] = [...rest];
-                this.state.event_queue.push(obj);
             }
         } else {
             this.state.deep_link = {

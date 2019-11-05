@@ -12,13 +12,12 @@ var remSpan; // holds the name of made and clicked spans
   Loads the users folder and creates a button for each user
 */
 init = async ({ state = state, ui = ui, api = api, courses = courses, users = users }) => {
-    /** 
-     * TODO: For legacy purposes... 
+    /**
+     * TODO: For legacy purposes...
      */
     API = api;
 
     $(".loader").hide();
-    $("#tutorialBase").hide();
 
     /**
      * Set the current user in the state
@@ -62,7 +61,7 @@ init = async ({ state = state, ui = ui, api = api, courses = courses, users = us
     }
 
     $("#tutorial").off().on("click", function () {
-        showTutorialPage();
+        showTutorialPage(ui);
     })
 
     /**
@@ -96,7 +95,6 @@ init = async ({ state = state, ui = ui, api = api, courses = courses, users = us
   The cooresponding work then has it's text and comment/reply data loaded
 */
 function buildHTMLFile(litContents, selected_eppn, textChosen) {
-    // TODO check this logic
     console.log(selected_eppn, textChosen)
     if (!$(".commentTypeDropdown").length) {
         //TODO make drop down combine with commentbox
@@ -109,7 +107,11 @@ function buildHTMLFile(litContents, selected_eppn, textChosen) {
         updateCommentBoxSaveButton(selected_eppn, textChosen);
     }
     loadUserComments(selected_eppn, textChosen);
-    createWorkTitle(textChosen);
+    let footer;
+    if(!$("footer").length){
+        footer = createPageFooter();
+    }
+    let titleAndTip = createWorkTitle(textChosen);
 
     var litDiv = $("<div/>", {
         "id": "litDiv"
@@ -135,11 +137,11 @@ function buildHTMLFile(litContents, selected_eppn, textChosen) {
     var preText = $("<div/>", {
         "id": "textSpace"
     });
-
     preText.html(litContents);
-
     litDiv.append(metaChar, metaName, link, script, preText);
-    $("#text").append(litDiv);
+    titleAndTip[0].prepend(titleAndTip[1]);
+    $("#text").append(titleAndTip[0],litDiv);
+    $("#text").append(footer);
 }
 
 function createWorkTitle(textChosen) {
@@ -151,11 +153,12 @@ function createWorkTitle(textChosen) {
         text: decodeURIComponent(textChosen)
     });
     workTitle.append(workTitleSpan);
-    $("#text").append(workTitle);
-    createTips(workTitle);
+    //$("#text").append(workTitle);
+    let tips = createTips();
+    return [workTitle,tips];
 }
 
-function createTips(workTitle) {
+function createTips() {
     let tips = $("<div/>", {
         id: "tips"
     });
@@ -163,41 +166,33 @@ function createTips(workTitle) {
         class: "material-icons tipsIcon",
         text: "help"
     });
-    // let text = $("<span/>", {
-    //     class: "tipsText"
-    // });
-    // TODO: I can't tell if the above or below is newer - DAVID
-    //text.html("The <span style = 'color : darkred'>Dark Red</span> comments with underlines are the comments that are not approved yet.\nThe <span style = 'color : orangered'>Orange</span> comments are comments that have unapproved replies.");
-    //tips.append(icon, text);
-    tips.append(icon);
-    tips.on("click", () => {
-        tutorialData = [
-            ["#textSpace", 1, "Highlight the text to comment"],
-            [".commented-selection:first", 2, "Click on the highlight text to read the comments"],
-            ["#replies", 3, "comments are shown in here"]
-        ];
-        specialStepData = {
-            3: ["click", "#replies"]
-        }
-        makeTutorial(tutorialData);
-        startTutorial(tutorialData, specialStepData);
+    let text = $("<span/>", {
+        class: "tipsText"
     });
-    text.html("The <span style = 'color : darkred'>Dark Red</span> comments with underlines are the comments that are not approved yet.\nThe <span style = 'color : orangered'>Orange</span> comments are comments that have unapproved replies.");
-    tips.append(icon, text);
-    tips.append(icon);
-    // tips.on("click",()=>{
-    //     tutorialData = [
-    //       ["#textSpace", 1,"Highlight the text to comment"],
-    //       [".commented-selection:first", 2, "Click on the highlight text to read the comments"],
-    //       ["#replies", 3, "comments are shown in here"]
-    //     ];
-    //     specialStepData = {
-    //        3: ["click", "#replies"]
-    //     }
-    //     makeTutorial(tutorialData);
-    //     startTutorial(tutorialData,specialStepData);
-    // });
-    workTitle.prepend(tips);
+    text.html("<span style = 'color : #8B0000'>Red</span> comments with underline are unapproved comments.<span style = 'color : #FF4500'>Orange</span> comments are comments with unapproved reply in the thread.")
+    tips.append(icon,text);
+    return tips
+    //workTitle.prepend(tips);
+}
+
+function createPageFooter(){
+    let footer = $("<footer/>",{
+        class : "mdl-mini-footer",
+    });
+    let leftSection = $("<div/>",{
+        class : "mdl-mini-footer__left-section"
+    });
+    let list = $("<ul/>",{
+        class : "mdl-mini-footer__link-list"
+    });
+    let help = $("<li/>");
+    help.html("Help");
+    let contact = $("<li/>");
+    contact.html("Contact Us");
+    list.append(help,contact);
+    leftSection.append(list);
+    footer.append(leftSection);
+    return footer;
 }
 
 function makeDropDown() {
@@ -225,6 +220,7 @@ function makeDropDown() {
 loadUserComments = (selected_eppn, textChosen, selectedType, selectedCommenter) => {
     let endpoint, data;
     let isTypeAndCommenterUndefiend = (selectedType == undefined && selectedCommenter == undefined);
+
     if (isTypeAndCommenterUndefiend) {
         $("#text").hide();
         $("#textSpace").hide();
@@ -245,20 +241,26 @@ loadUserComments = (selected_eppn, textChosen, selectedType, selectedCommenter) 
             filterType: selectedType == "All" ? "" : selectedType
         }
     }
+
     API.request({
         endpoint: endpoint,
         data: data
     }).then((data) => {
         let sortedCommentData = [];
+
         for (var i = 0; i < data.length; i++) {
             let comment = data[i];
             sortedCommentData = sortCommentsByStartIndex(sortedCommentData, comment);
         }
+
         // reverse the list so the comments are created by the order of the startIndex. (bigger startIndex get created first)
         reverseSortedCommentData = reverseList(sortedCommentData);
         console.log(reverseSortedCommentData);
+
         renderComments(reverseSortedCommentData, selected_eppn, textChosen, getUnapprovedComments);
+
         if (isTypeAndCommenterUndefiend) {
+            // TODO: READ IT ALL. pass in the highlights and parse out the comment authors & the comment types (disable those not available)
             makeSelector(selected_eppn, textChosen, reverseSortedCommentData, colorNotUsedTypeSelector);
         }
     });
@@ -283,9 +285,17 @@ renderComments = (commentData, selected_eppn, textChosen, callback) => {
     handleStartEndDiv(commentData);
     $("#text").css("height", $("#litDiv").height() + "px");
     //highlight to post comments
-    $("#litDiv").on("mouseup", function (evt) {
-        console.log(evt)
-        highlightCurrentSelection(evt);
+    $("#litDiv").off().on("mouseup", function (evt) {
+        //TODO this is triggered everytime when we click on a comment need to fix this
+        if (evt["target"]["classList"][0] == "commented-selection") {
+            launchToastNotifcation("You are not allowed to highlight inside someone's comment.");
+            launchToastNotifcation("If you want to start another kind of discussion, please use the filter first.");
+        }
+        else {
+            let selectedType = $("#typeSelector").attr("currentTarget");
+            console.log(selectedType)
+            highlightCurrentSelection(evt, selectedType);
+        }
     });
     allowClickOnComment(textChosen, selected_eppn);
     callback(selected_eppn, textChosen);
@@ -293,9 +303,21 @@ renderComments = (commentData, selected_eppn, textChosen, callback) => {
 //call this function to enable the clickEvent on .commented-selection
 function allowClickOnComment(textChosen, selected_eppn) {
     //highlight on top of other's comment will bring them to the reply box
-    $(".commented-selection").off().on("mouseup", function (evt) {
+    $(".commented-selection").off().on("click", function (evt) {
+        evt.stopPropagation();
         console.log("click on comment")
-        clickOnComment(textChosen, selected_eppn, evt);
+        console.log($(this))
+        data = {
+            "work": textChosen,
+            "author": selected_eppn,
+            "commentCreator": $(this).attr("creator"),
+            "commentId": $(this).attr("commentId"),
+            "commentType": $(this).attr("typeof"),
+            "evtPageX": evt.pageX,
+            "evtPageY": evt.pageY,
+            "evtClientY": evt.clientY
+        }
+        clickOnComment(data);
     });
 }
 
@@ -397,11 +419,8 @@ function handleIncorrectTemplate() {
     });
 }
 
-// TODO make a recursive to check if all it's parent is hidden
+
 function colorOverLappedComments(commentHash) {
-    // remove the parentHash first and reassign them if needed
-    // $(".startDiv"+"[commentId = '"+commentHash+"']").removeAttr("parentHash");
-    // $(".endDiv"+"[commentId = '"+commentHash+"']").removeAttr("parentHash");
     let prevStartDiv = $(".startDiv" + "[commentId = '" + commentHash + "']").prevAll(".startDiv:first");
     let nextEndDiv = $(".endDiv" + "[commentId = '" + commentHash + "']").nextAll(".endDiv:first");
     let prevStartColorId = parseInt(prevStartDiv.attr("colorId"), 10);
@@ -433,10 +452,8 @@ function colorAdjacentComments(commentHash) {
         "index": prevEndDiv.attr("endIndex"),
         "colorId": parseInt(prevEndDiv.attr("colorId"), 10)
     }
-    //console.log("prevEnd", prevEndDivData["id"],prevEndDivData["index"],prevEndDivData["isBlue"]);
     let currentStartDivIndex = $(".startDiv" + "[commentId = '" + commentHash + "']").attr("startIndex");
     let currentEndDivIndex = $(".endDiv" + "[commentId = '" + commentHash + "']").attr("endIndex");
-    //console.log(commentHash,currentStartDivIndex,currentEndDivIndex);
     if (currentStartDivIndex <= parseInt(prevEndDivData["index"], 10)) {
         if ($(".commented-selection" + "[commentId = '" + prevEndDivData["id"] + "']").length != 0) {
             let commentsColorClass = ["", "colorOneComments", "colorTwoComments", "colorThreeComments", "colorFourComments"];
@@ -456,22 +473,19 @@ function colorAdjacentComments(commentHash) {
 //if current user is admin for the current work, they are able to approve the unapproved comments
 //if current user is creator of the comment, they are able to edit and delete the unapproved comment
 //approved comments don't need to check anyPermission stuff
-function clickOnComment(workChosen, workCreator, evt) {
+function clickOnComment(data) {
     $("#replies").empty();
     $("#commentBox").removeAttr("data-replyToEppn");
     $("#commentBox").removeAttr("data-replyToHash");
     $("#commentBox").attr("data-editCommentId", "-1");
     let comment_data = {
-        creator: workCreator,
-        work: workChosen,
-        commenter: evt["currentTarget"]["attributes"]["creator"]["value"],
-        hash: evt["currentTarget"]["attributes"]["commentId"]["value"]
+        creator: data["author"],
+        work: data["work"],
+        commenter: data["commentCreator"],
+        hash: data["commentId"]
     };
-    get_comment_chain_API_request(comment_data, comment_data["hash"]);
-    evt.stopPropagation();
-    displayReplyBox(evt, comment_data["hash"]);
-    // displayCommentBox(evt);
-    // hideCommentBox();
+    get_comment_chain_API_request(comment_data);
+    displayReplyBox(data);
 }
 
 function getUnapprovedComments(workCreator, work) {
@@ -500,7 +514,7 @@ function getUnapprovedComments(workCreator, work) {
     });
 }
 
-function get_comment_chain_API_request(jsonData, commentSpanId) {
+function get_comment_chain_API_request(jsonData) {
     let work = jsonData.work;
     let workCreator = jsonData.creator;
     API.request({
@@ -634,13 +648,13 @@ function launchToastNotifcation(data) {
 }
 
 //Make sure the dialog don't exceed the window
-function adjustDialogPosition(evt, width, height, marginX, marginY) {
-    let newLeft = (evt.pageX - marginX) + "px";
-    let newTop = (evt.pageY + marginY) + "px";
-    if (evt.clientY + (marginY + height) > $(window).height()) {
-        newTop = (evt.pageY - (marginY + height)) + "px";
+function adjustDialogPosition(data, width, height, marginX, marginY) {
+    let newLeft = (data["evtPageX"] - marginX) + "px";
+    let newTop = (data["evtPageY"] + marginY) + "px";
+    if (data["evtClientY"] + (marginY + height) > $(window).height()) {
+        newTop = (data["evtPageY"] - (marginY + height)) + "px";
     }
-    if (evt.pageX + width > $(window).width()) {
+    if (data["evtPageX"] + width > $(window).width()) {
         newLeft = $(window).width() - (width + marginX) + "px";
     }
     return {
