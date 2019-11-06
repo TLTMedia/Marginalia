@@ -1,170 +1,11 @@
-function makeSelector(selected_eppn, textChosen,data, callback) {
-    let buttonTypes = [
-        'All',
-        'Historical',
-        'Analytical',
-        'Comment',
-        'Definition',
-        'Question'
-    ];
-    makeTypeSelector(buttonTypes);
-    makeCommentersSelector(createListOfCommenter(data));
-    callback(selected_eppn, textChosen);
-    makeSelectorDrawerOpener();
-    hideAllSelector();
-}
-
-function hideAllSelector() {
-    $(".allTypes").hide();
-    $(".allCommenters").hide();
-}
-
-function makeSelectorDrawerOpener() {
-    if ($(".selectorOpener").length == 0) {
-        let selectorOpener = $('<button/>', {
-            class: "selectorOpener"
-        });
-        $(selectorOpener).on("click", () => {
-            if ($("#typeSelector").find("ul").is(":visible") && $("#commenterSelector").find("ul").is(":visible")) {
-                $("#typeSelector").find("ul").hide();
-                $("#commenterSelector").find("ul").hide();
-                $(selectorOpener).css({
-                    "margin-right": "0px"
-                });
-                $(selectorOpener).text("Show filters");
-            } else {
-                $("#typeSelector").find("ul").show();
-                $("#commenterSelector").find("ul").show();
-                $(selectorOpener).css({
-                    "margin-right": "176px"
-                });
-                $(selectorOpener).text("Hide filters");
-            }
-        });
-
-        $(".selector").append(selectorOpener);
-    } else {
-        $(".selectorOpener").css({
-            "margin-right": "0px"
-        });
-    }
-
-    $(".selectorOpener").text("Show filters");
-}
-
-function makeTypeSelector(buttonTypes) {
-    $("#typeSelector").empty();
-    let allTypes = $('<ul/>', {
-        class: "allTypes"
-    });
-    let selectorHeader = $('<li>', {
-        class: "selectorHeader",
-        text: "Filter By:"
-    });
-    $(allTypes).append(selectorHeader);
-    buttonTypes.forEach(function (type) {
-        let list = makeSelectorOptions(type, 'typeSelector');
-        $(allTypes).append(list);
-    });
-    $('#typeSelector').append(allTypes);
-    $("#buttonAll").addClass("is-checked");
-}
-
-function makeCommentersSelector(commenters) {
-    $("#commenterSelector").empty();
-    commenters.unshift("AllCommenters");
-    let allCommenters = $('<ul/>', {
-        class: "allCommenters"
-    });
-    let selectorHeader = $('<li>', {
-        class: "selectorHeader"
-    });
-    let searchCommenters = $('<input>', {
-        type: "text",
-        class: "commenterSelectorSearch",
-        placeholder: "Filter By Name..."
-    });
-    $(selectorHeader).append(searchCommenters);
-    $(allCommenters).append(selectorHeader);
-    commenters.forEach((data) => {
-        let list = makeSelectorOptions(data, 'commenterSelector');
-        $(allCommenters).append(list);
-    });
-    $('#commenterSelector').append(allCommenters);
-    $("#buttonAllCommenters").addClass("is-checked");
-
-    //search bar for commenters
-    $(".commenterSelectorSearch").on("keyup", () => {
-        let ul = $(".allCommenters");
-        let input = $(".commenterSelectorSearch");
-        searchAction(input, ul, "user");
-    });
-}
-
-function makeSelectorOptions(option, mode) {
-    let data = option;
-    let name;
-    let text;
-    if (mode == 'commenterSelector') {
-        name = 'commenterSelector';
-        text = data.split("@")[0];
-    }
-    else if (mode == 'typeSelector') {
-        name = 'typeSelector';
-        text = data;
-    }
-
-    let list = $('<li/>', {
-        class: "buttons"
-    });
-
-    let radioLabel = $("<label>", {
-        class: "mdl-radio mdl-js-radio",
-        id: "button" + data,
-        for: data
-    });
-
-    let input = $('<input/>', {
-        type: "radio",
-        id: data,
-        name: name,
-        class: "mdl-radio__button",
-    });
-
-    let spanText = $("<span>", {
-        class: "mdl-radio__label",
-        text: text
-    });
-
-    $(list).append(radioLabel);
-    $(radioLabel).append(input, spanText);
-    input.on("click", (evt) => {
-        let currentSelectedType;
-        let currentSelectedCommenter;
-        if (evt["currentTarget"]["attributes"]["name"]["value"] == 'commenterSelector') {
-            currentSelectedType = $("#typeSelector").attr("currentTarget") ?  $("#typeSelector").attr('currentTarget') : 'All';
-            console.log(currentSelectedType)
-            currentSelectedCommenter = evt["currentTarget"]["id"];
-            $("#commenterSelector").attr('currentTarget', currentSelectedCommenter);
-        }
-        else if (evt["currentTarget"]["attributes"]["name"]["value"] == 'typeSelector') {
-            currentSelectedType = evt["currentTarget"]["id"];
-            currentSelectedCommenter = $("#commenterSelector").attr('currentTarget') ? $("#commenterSelector").attr('currentTarget') : 'AllCommenters';
-            $("#typeSelector").attr('currentTarget', currentSelectedType);
-        }
-        selectorOnSelect(currentSelectedType, currentSelectedCommenter);
-    });
-    componentHandler.upgradeElement($(radioLabel)[0]);
-    return list;
-}
-
 //TODO need the author and the work name to enable the click event for the comments
 //TODO use a better way to store the work and author instead of getting it from DOM
-function selectorOnSelect(currentSelectedType, currentSelectedCommenter) {
+function selectorOnSelect(currentSelectedType, currentSelectedCommenter, workData) {
     unwrapEveryComments();
-    let currentWork = $("#setting").attr("work");
-    let currentCreator = $("#setting").attr("author");
+    let currentWork = workData["work"];
+    let currentCreator = workData["author"];
     loadUserComments(currentCreator, currentWork, currentSelectedType, currentSelectedCommenter);
+    console.log("loadUserComments finished");
     handleStartEndDiv(createCommentData());
     allowClickOnComment($("#setting").attr("work"), $("#setting").attr("author"));
 }
@@ -178,15 +19,15 @@ function unwrapEveryComments() {
     endDivs.remove();
 }
 
-function colorNotUsedTypeSelector(selected_eppn,textChosen) {
+function colorNotUsedTypeSelector(selected_eppn, textChosen) {
     API.request({
         endpoint: "get_highlights",
         data: {
-          creator: selected_eppn,
-          work: textChosen
+            creator: selected_eppn,
+            work: textChosen
         }
     }).then((data) => {
-      console.log(data)
+        console.log(data)
         let key = ["Historical", "Analytical", "Comment", "Definition", "Question"];
         let buttonTypes = {
             "Historical": 0,
@@ -228,7 +69,7 @@ function updateCommenterSelectors() {
             }
         }
     }
-    makeCommentersSelector(newCommenters);
+    //makeCommentersSelector(newCommenters);
     if (!$("#typeSelector").find("ul").is(":visible")) {
         hideAllSelector();
     }

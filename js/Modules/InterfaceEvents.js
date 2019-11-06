@@ -68,17 +68,21 @@ export class InterfaceEvents {
 
     bind_redirect_confirmation(specificElement) {
         $(specificElement).on("click", function (event) {
-            if (($(specificElement).attr("href")).indexOf(window.location.host) !== -1) {
+            //was called without element having .attr("href")
+            var elHref=$(specificElement).attr("href")||window.location.host;
+
+
+            if (elHref.indexOf(window.location.host) !== -1) {
                 // console.log("do nothing is same host");
-            } else if (($(specificElement).attr("href")).indexOf("javascript:void(0);") !== -1) {
+            } else if (elHref.indexOf("javascript:void(0);") !== -1) {
                 // console.log("do nothing is javascript void event");
-            } else if ($(specificElement).attr("href").charAt(0) == "#") {
+            } else if (elHref.charAt(0) == "#") {
                 // console.log("do nothing is just hash placeholder tag");
             } else {
                 event.preventDefault();
                 let res = confirm("Are you sure you want to visit the URL:\n\n" + $(specificElement).attr("href"));
                 if (res) {
-                    window.location = $(specificElement).attr("href");
+                    window.location = elHref;
                 } else {
                     return;
                 }

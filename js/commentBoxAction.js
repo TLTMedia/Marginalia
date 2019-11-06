@@ -240,7 +240,7 @@ function editOrDelete(dataForEditOrDelete, isEdit) {
     }).then((data) => {
         launchToastNotifcation(data);
         var firstCommentId = $("#replies").attr("data-firstCommentId");
-        refreshReplyBox(dataForEditOrDelete["creator"], dataForEditOrDelete["work"], $(".commented-selection" + "[commentId = '" + firstCommentId + "']").attr("creator"), firstCommentId);
+        refreshReplyBox(dataForEditOrDelete["creator"], dataForEditOrDelete["work"], $(".commented-selection" + "[commentId = '" + firstCommentId + "']").attr("creator"), firstCommentId, editData["type"]);
         if (isEdit) {
             if (dataForEditOrDelete["type"]) {
                 $(".commented-selection" + "[commentId = '" + dataForEditOrDelete["hash"] + "']").attr("typeof", dataForEditOrDelete["type"]);
@@ -382,7 +382,7 @@ function updateCommentBoxSaveButton(selected_eppn,litId){
 }
 
 //commentBox width: 500 px ,height: 331px , marginX : 10, marginY : 50
-function displayCommentBox(evt) {
+function displayCommentBox(evt,selectedType) {
     var marginX = 10;
     var marginY = 50;
     var newPosition = adjustDialogPosition(evt, 500, 331, 10, 50);
@@ -392,6 +392,11 @@ function displayCommentBox(evt) {
     })
     $("#commentBox").parent().find("#ui-id-1").contents().filter(function () { return this.nodeType == 3; }).first().replaceWith("Annotation by: " + currentUser['firstname'] + " " + currentUser['lastname']);
     $("#commentBox").parent().fadeIn();
+    if(selectedType != "All" && selectedType != undefined){
+        console.log(selectedType);
+        $(".commentTypeDropdown").val(selectedType);
+        $('.commentTypeDropdown').attr('disabled', true);
+    }
 }
 
 function hideCommentBox() {

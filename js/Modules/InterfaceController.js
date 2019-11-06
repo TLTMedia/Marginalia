@@ -11,6 +11,7 @@ export class InterfaceController {
             main_lit_text: "#text",
             main_marginalia_data_form: "#cardbox",
             main_sub_menu: "#header-sub-menu",
+            main_marginalia_first_page: "#firstPage",
         };
 
         /**
@@ -26,8 +27,8 @@ export class InterfaceController {
             whitelist_list: ".whiteList",
         };
 
-        /** 
-         * String Constants 
+        /**
+         * String Constants
          */
         this.string_constants = {
             dropdown_menu_options_class: "menuOptions",
@@ -35,7 +36,13 @@ export class InterfaceController {
 
         this.state = state;
         this.toast = toast;
+
+        /**
+         * TODO:
+         * I kind of want to avoid having data classes be used here (rather the data should be passed in...)
+         */
         this.works_data = works_data;
+        this.comments_data = comments_data;
 
         this.base_events = new BaseEventBinds({
             state: state,
@@ -288,18 +295,22 @@ export class InterfaceController {
 
     /**
      * Show the main cardbox
+     * NOTE: this now actually shows the firstPage()
      */
     show_main_cardbox() {
-        const menu = $(this.id_constants.main_marginalia_data_form);
+        // const menu = $(this.id_constants.main_marginalia_data_form);
+        const menu = $(this.id_constants.main_marginalia_first_page);
 
         menu.show();
     }
 
     /**
      * Hide the main cardbox
+     * NOTE: this now actually hides the firstPage()
      */
     hide_main_cardbox() {
-        const menu = $(this.id_constants.main_marginalia_data_form);
+        // const menu = $(this.id_constants.main_marginalia_data_form);
+        const menu = $(this.id_constants.main_marginalia_first_page);
 
         menu.hide();
     }
@@ -308,7 +319,7 @@ export class InterfaceController {
      * Hide the work page
      */
     hide_work_page() {
-        $("#text").hide();
+        $("#text-wrapper").hide();
     }
 
     /**
@@ -322,7 +333,7 @@ export class InterfaceController {
         // show the main cardbox again
         this.show_main_cardbox();
 
-        // TODO: 
+        // TODO:
         //$("#text , .userFiles, #addLitBase").hide();
         // $("#settingsBase").hide();
         $("#nonTitleContent").show();
@@ -348,17 +359,28 @@ export class InterfaceController {
             closeText: '!'
         });
 
-        $("#nonTitleContent").hide();
         $("#settingTitle").text("Settings:" + " " + selected_eppn + " - " + decodeURI(selectedLitId));
-
-        // TODO: make into plain html, so that it doesn't keep appending each time you reopen settings
-        //privacy Switch
-        //makeSettingSwitch("privacy", "Work is Private?", selectedLitId, selected_eppn, checkIsWorkPublic);
-        //commentNeedApproval switch
-        //makeSettingSwitch("commentsNeedApproval", "Comments Require Approval?", selectedLitId, selected_eppn, checkIsCommentNeedApproval);
-
-        addTutorialClass();
     }
+
+    /**
+     * Show filters menu
+     */
+    show_filters() {
+        $("#filters-modal").modal({
+            closeClass: 'icon-remove',
+            closeText: '!'
+        });
+    }
+
+    /**
+     * Show add course page
+     */
+     show_addCourse_page() {
+       $("#add-course-modal").modal({
+           closeClass: 'icon-remove',
+           closeText: '!'
+       });
+     }
 
     /**
      * Populate Whitelist
@@ -443,6 +465,13 @@ export class InterfaceController {
             // update the settings page
             await this.base_events.settings_events.postload();
 
+            // NOTE: / TODO: we are getting the comment data here & in buildHTMLFile... When I recode buildHTMLFile,
+            // take note of it already being called here. (should be able to use it?)
+            let work_comment_data = await this.comments_data.get_work_highlights();
+
+            // reset the filters - this happens here b.c. filters menu persists changes unless work is changed
+            this.base_events.filters_events.reset(work_comment_data);
+
             // TODO:
             checkworkAdminList(this.state.selected_creator, this.state.selected_work, "approvedComments");
         } else {
@@ -450,6 +479,30 @@ export class InterfaceController {
 
             // work doesn't exist so load home
             $("#home").click();
+        }
+    }
+
+    async populate_addCourse_termList(){
+        let today = new Date();
+        let year = today.getFullYear();
+        let month = today.getMonth();
+        let season = ["Spring","Summer","Fall","Winter"];
+        let years = [year,year+1];
+        if($(".termsListForAddCourse").children("li").length == 0){
+          for(let i in years){
+              for(let j in season){
+                let text = season[j]+"_"+years[i];
+                let termOption = $("<li/>",{
+                    class: "mdl-menu__item",
+                    text: text,
+                    click: ()=>{
+                        $("#selectedTerm").val(text).html(text);
+                        $("#termMenuButton").click();
+                    }
+                });
+                $(".termsListForAddCourse").append(termOption);
+              }
+          }
         }
     }
 }

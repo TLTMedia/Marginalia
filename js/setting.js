@@ -113,13 +113,13 @@ function makeWhiteListSettingBase(user_list) {
     componentHandler.upgradeAllRegistered();
 }
 
-function addTutorialClass() {
-    //settingTutorial
-    let privacySwitch = $(".settingSwitch" + "[for = 'privacySwitch']").addClass("privacySwitch");
-    privacySwitch.attr({
-        "data-hint": "Toggle the switch to set the work's privacy"
-    });
-}
+// function addTutorialClass() {
+//     //settingTutorial
+//     let privacySwitch = $(".settingSwitch" + "[for = 'privacySwitch']").addClass("privacySwitch");
+//     privacySwitch.attr({
+//         "data-hint": "Toggle the switch to set the work's privacy"
+//     });
+// }
 
 function createDataTableHeader() {
     let thead_tr = $("<tr/>");

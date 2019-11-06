@@ -39,16 +39,16 @@
     <script src="js/lightRangy/LightRange.min.js"></script>
 
     <!-- Our init function entry point -->
-    <script defer type="module" src="./js/App.js" crossorigin="use-credentials"></script>
+    <script defer type="module" src="./js/Marginalia.js" crossorigin="use-credentials"></script>
 
     <!-- Other scripts that aren't loaded via the init()... TODO: YET. -->
     <script src="js/rangyHelpers.js"></script>
     <script src="js/script.js"></script>
+    <!-- NOTE: deprecated by modularization. now in submenu -->
     <script src="js/selector.js"></script>
     <script src="js/replyBoxAction.js"></script>
     <script src="js/commentBoxAction.js"></script>
     <script src="js/setting.js"></script>
-    <script src="js/addLit.js"></script>
     <script src="js/visualTutorial.js"></script>
 
     <script defer type="text/javascript">
@@ -59,15 +59,6 @@
             }
         });
     </script>
-
-    <!--
-	<script type="text/javascript">
-		document.addEventListener("selectionchange", event => {
-			let selection = document.getSelection ? document.getSelection().toString() :  document.selection.createRange().toString() ;
-			alert(selection);
-		});
-	</script>
-	 -->
 
     <link rel="stylesheet" type="text/css" media="only screen" href="css/style.css" />
     <link rel="stylesheet" type="text/css" href="js/intro.js-2.9.3/introjs.css" />
@@ -85,28 +76,125 @@
                         <nav class="mdl-navigation mdl-layout--large-screen-only">
                             <a class="mdl-navigation__link headerTab headerUpload" id="home" href="#">Home</a>
                             <a class="mdl-navigation__link headerTab headerUpload" id="tutorial"
-                                href="#/tutorial">Tutorial</a>
-                            <a class="mdl-navigation__link headerTab headerUpload" id="litadd" href="#/addlit">Add
+                                href="javascript:void(0);">Tutorial</a>
+                            <a class="mdl-navigation__link headerTab headerUpload" id="litadd"
+                                href="javascript:void(0);">Add
                                 Literature</a>
+                            <a class="mdl-navigation__link headerTab headerUpload" id="courseadd">Add Course</a>
                         </nav>
                     </div>
                     <!-- Bottom row -->
                     <div id="header-sub-menu" class="mdl-layout__header-row">
                         <div class="mdl-layout-spacer"></div>
                         <!-- Navigation -->
-                        <nav class="mdl-navigation">
-                            <a class="mdl-navigation__link" href="javascript:void(0);">Filters</a>
-                            <a id="setting" class="mdl-navigation__link" href="javascript:void(0);">Settings</a>
+                        <nav class="nav-sub mdl-navigation">
+                            <a id="author-filters" class="nav-sub mdl-navigation__link"
+                                href="javascript:void(0);">Comment
+                                Authors</a>
+                            <ul id="menu-filters-authors"
+                                class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect"
+                                for="author-filters">
+                            </ul>
+                            <a id="type-filters" class="nav-sub mdl-navigation__link" href="javascript:void(0);">Comment
+                                Types</a>
+                            <ul id="menu-filters-types"
+                                class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect"
+                                for="type-filters">
+                                <!-- <li disabled class="mdl-menu__item" style="font-weight:bold;">Filter by type:</li> -->
+                                <li class="menu-filters-types mdl-menu__item" id="filter-show-all-types">Show All</li>
+                                <li class="menu-filters-types mdl-menu__item" id="filter-historical">Historical</li>
+                                <li class="menu-filters-types mdl-menu__item" id="filter-analytical">Analytical</li>
+                                <li class="menu-filters-types mdl-menu__item" id="filter-comment">Comment</li>
+                                <li class="menu-filters-types mdl-menu__item" id="filter-definition">Definition</li>
+                                <li class="menu-filters-types mdl-menu__item" id="filter-question">Question</li>
+                            </ul>
+                            <a id="setting" class="nav-sub mdl-navigation__link" href="javascript:void(0);">Settings</a>
                         </nav>
                     </div>
                 </header>
-                <main class="mainContent">
+                <main class="main-content">
                     <div class="page-content">
+                        <!-- begin tutorial-modal -->
+                        <div id="tutorial-modal" class="modal">
+                            <div id="tutorialBase">
+                                <center>
+                                    <div class="tutorial modal-header">Click an item to start its tutorial</div>
+                                </center>
+                                <div class="tutorialBox">
+                                    <ul class="mdl-list tutorialList">
+                                        <li class="tutorialOption firstTutorial mdl-list__item">
+                                            <span class="x mdl-list__item-primary-content">
+                                                (1) How to add works in Marginalia
+                                            </span>
+                                        </li>
+                                        <li class="mdl-list__item tutorialOption">
+                                            <span class="mdl-list__item-primary-content">
+                                                (2) How to start a discussion
+                                            </span>
+                                        </li>
+                                        <li class="mdl-list__item tutorialOption">
+                                            <span class="mdl-list__item-primary-content">
+                                                (3) How to reply to other people's discussion
+                                            </span>
+                                        </li>
+                                        <li class="mdl-list__item lastTutorial tutorialOption">
+                                            <span class="mdl-list__item-primary-content">
+                                                (4) How to use the setting page
+                                            </span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- end tutorial-modal -->
+
                         <!-- begin add-lit-modal; NOTE: Its contents are dynamically inserted. -->
                         <div id="add-lit-modal" class="modal">
                             <div id="addLitBase"></div>
                         </div>
                         <!-- end add-lit-modal -->
+
+                        <!-- begin add-course-modal -->
+                        <div id="add-course-modal" class="modal">
+                            <div id="addCourseBase">
+                                <center>
+                                  <span class="addCourseTitle modal-header">Add Course</span>
+                                  <br/>
+                                  <span style="font-size:10px">options with * are required to fill in</span>
+                                </center>
+
+                                <div class="courseName">
+                                    <span>Course code: *</span>
+                                    <div class="mdl-textfield mdl-js-textfield is-upgraded">
+                                        <input id="courseNameInput" class="mdl-textfield__input" type="text" maxlength="100">
+                                        <label class="mdl-textfield__label" for="courseNameInput"></label>
+                                    </div>
+                                </div>
+                                <div class="section">
+                                    <span>Course section:</span>
+                                    <div class="mdl-textfield mdl-js-textfield is-upgraded">
+                                        <input id="courseSectionInput" class="mdl-textfield__input" type="text" maxlength="100">
+                                        <label class="mdl-textfield__label" for="courseSectionInput"></label>
+                                    </div>
+                                </div>
+                                <br />
+                                <div class="courseTermMenu">
+                                    <span>Course term: *</span>
+                                    <button id="termMenuButton"
+                                        class="smaller-upload-buttons mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored">
+                                        Pick term
+                                    </button>
+                                    <ul class="termsListForAddCourse mdl-menu mdl-menu--bottom-left mdl-js-menu" for="termMenuButton"></ul>
+                                    <span id="selectedTerm"></span>
+                                </div>
+                                <br />
+                                <label id="finishAddCourseButton"
+                                    class="smaller-upload-buttons mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored">
+                                    Add new course
+                                </label>
+                            </div>
+                        </div>
+                        <!-- end add-course-modal -->
 
                         <!-- begin settings-modal -->
                         <div id="settings-modal" class="modal">
@@ -122,8 +210,8 @@
                                         <div class="settingDataButton">Work Data</div>
                                         <div class="deleteWorkButton">Delete Work</div>
 
-                                        <label class="settingSwitch mdl-switch mdl-js-switch" for="privacySwitch">
-                                            <!-- TODO: make this a radio button instead -->
+                                        <label class="mdl-switch mdl-js-switch privacySwitch" for="privacySwitch">
+                                            <!-- TODO: make this a radio button instead (Note from David: I don't think this should be a radio button)-->
                                             <span class="mdl-switch__label">Work is private</span>
                                             <input type="checkbox" id="privacySwitch" class="mdl-switch__input" />
                                         </label>
@@ -173,34 +261,6 @@
                             <div id="cardbox" class="introBoxes">
                                 <div class="titleText">Marginalia</div>
 
-                                <div id="tutorialBase">
-                                    <span class="tutorial title">Please select the tutorial to start it</span>
-                                    <div class="tutorialBox">
-                                        <ul class="mdl-list tutorialList">
-                                            <li class="tutorialOption firstTutorial mdl-list__item">
-                                                <span class="x mdl-list__item-primary-content">
-                                                    (1) How to add works in Marginalia
-                                                </span>
-                                            </li>
-                                            <li class="mdl-list__item tutorialOption">
-                                                <span class="mdl-list__item-primary-content">
-                                                    (2) How to start a discussion
-                                                </span>
-                                            </li>
-                                            <li class="mdl-list__item tutorialOption">
-                                                <span class="mdl-list__item-primary-content">
-                                                    (3) How to reply to other people's discussion
-                                                </span>
-                                            </li>
-                                            <li class="mdl-list__item lastTutorial tutorialOption">
-                                                <span class="mdl-list__item-primary-content">
-                                                    (4) How to use the setting page
-                                                </span>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
-
                                 <div id="nonTitleContent">
                                     <div class="pleaseSelect">
                                         <span>Please select your course.</span>
@@ -222,6 +282,7 @@
                                         <ul class="mdl-list worksMenu"></ul>
                                     </div>
                                 </div>
+
                             </div>
                         </div>
                         <!-- end firstPage -->
@@ -239,7 +300,20 @@
                         </div>
 
                         <!-- The area where the work text gets populated -->
-                        <div id="text" visible="false"></div>
+                        <div id="text-wrapper">
+                            <div id="text" visible="false"></div>
+                        </div>
+
+                        <!-- page footer -->
+                        <!-- <footer class="mdl-mini-footer">
+                            <div class="mdl-mini-footer__left-section">
+                                <div class="mdl-logo">Title</div>
+                                <ul class="mdl-mini-footer__link-list">
+                                    <li><a href="#">Help</a></li>
+                                    <li><a href="#">Privacy & Terms</a></li>
+                                </ul>
+                            </div>
+                        </footer> -->
 
                         <!-- Toast notification -->
                         <div id="toast-notification1" class="mdl-js-snackbar mdl-snackbar">

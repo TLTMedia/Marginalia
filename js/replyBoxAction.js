@@ -356,19 +356,18 @@ function commentApprovedOrUnapprovedButtonOnClick(hash, commenterEppn, work, wor
 
 // This displays the replies for the current comment box
 //TODO find a way to get the height of the replyBox
-function displayReplyBox(evt, id) {
+function displayReplyBox(data) {
     var marginX = 10;
     var marginY = 50;
-    var newPosition = adjustDialogPosition(evt, 500, 177, 10, 50);
-    console.log(evt)
-    var type = evt["currentTarget"]["attributes"]["typeof"]["value"];
+    var newPosition = adjustDialogPosition(data, 500, 177, marginX, marginY);
+    var type = data["typeOf"];
     $("#replies").parent().css({
         'top': newPosition["newTop"],
         'left': newPosition["newLeft"]
     });
     // ui-id-2 is the id for the title of the reply box
-    $("#ui-id-2").empty().html(type);
-    $("#replies").attr("data-firstCommentId", id);
+    $("#ui-id-2").empty().html(data["commentType"]);
+    $("#replies").attr("data-firstCommentId", data["commentId"]);
     $("#replies").parent().fadeIn();
 }
 
@@ -378,9 +377,12 @@ function hideReplyBox() {
 
 //commenter : the first commenter
 //hash : the first comment hash
-function refreshReplyBox(creator, work, commenter, hash) {
-    console.log(creator, work, commenter, hash);
+function refreshReplyBox(creator, work, commenter, hash, type) {
+    console.log(creator, work, commenter, hash, type);
     $("#replies").empty();
+    if(type != undefined){
+        $("#ui-id-2").html(type);
+    }
     let comment_data = {
         creator: creator,
         work: work,

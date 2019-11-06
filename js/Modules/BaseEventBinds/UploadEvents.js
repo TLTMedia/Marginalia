@@ -110,40 +110,5 @@ export class UploadEvents {
                 }
             }
         });
-
-        $("#helpForAddLit").off().on("click", () => {
-            let tutorialData = [
-                [
-                    ".fileContainer",
-                    1,
-                    "Select a file from your device"
-                ],
-                [
-                    ".nameContainer",
-                    2,
-                    "Name your work"
-                ],
-                [
-                    ".addLitCourseMenu",
-                    3,
-                    "Select a course that you want to upload your work for"
-                ],
-                [
-                    ".privateContainer",
-                    4,
-                    "Check the box if you want your work to be private. (you are able to change your work's privacy after you upload it)"
-                ],
-                [
-                    "#addUploadButton",
-                    5,
-                    "Click to upload"
-                ]
-            ];
-
-            let specialStepData = {};
-
-            makeTutorial(tutorialData);
-            startTutorial(tutorialData, specialStepData);
-        });
     }
 }

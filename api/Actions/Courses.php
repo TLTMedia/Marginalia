@@ -42,6 +42,22 @@ class Courses
         return $prettyWorks;
     }
 
+    public function userIsCoursesAdmin($eppn)
+    {
+        require 'Permissions.php';
+        $permissions = new Permissions($this->path);
+
+        $role = "user";
+        if ($permissions->userOnPermissionsList($this->path, $eppn)) {
+            $role = "admin";
+        }
+
+        return array(
+            "status" => "ok",
+            "data"   => $role,
+        );
+    }
+
     public function addCourse($courseName)
     {
         require 'Permissions.php';

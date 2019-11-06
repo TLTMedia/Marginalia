@@ -20,6 +20,7 @@ export class SettingsEvents {
             /**
              * TODO: this means that only the work creator can access the settings.
              * Maybe it should be anyone on the permissions list of the work?
+             * (David :I thought we already discuss this before that only the creator is allow to do the settings)
              */
             if (this.state.selected_creator != this.state.current_user.eppn) {
                 this.ui.toast.create_toast("You don't have the permission to do this action");
@@ -89,7 +90,7 @@ export class SettingsEvents {
                 // hide the sub menu
                 this.ui.hide_sub_menu();
 
-                // hide the work 
+                // hide the work
                 this.ui.hide_work_page();
 
                 // open the home page

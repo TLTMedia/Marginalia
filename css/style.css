@@ -1,5 +1,6 @@
 :root {
-    --bg-main-marginalia: rgba(0, 150, 136, 1.0);
+    --fg-main-marginalia: rgba(0, 150, 136, 1.0);
+    --bg-main-marginalia: #efebe9;
 }
 
 *:focus {
@@ -10,18 +11,28 @@
     color: blue !important;
 }
 
-#text {
-    display: none;
-    margin-top: 44px;
-    min-height: 100%;
-}
-
 body {
     background-color: #333333;
 }
 
+.selected-filter {
+    font-weight: bold;
+    /**
+     * mdl has this color as the element hover bg.
+     * so setting it here by default makes it look like its active
+     */
+    background-color: #eee;
+}
+
+.nav-sub {
+    height: 44px !important;
+    line-height: 44px !important;
+}
+
 .modal {
     vertical-align: initial;
+    background-color: var(--bg-main-marginalia);
+    z-index: 5;
 }
 
 .modal-header {
@@ -53,7 +64,7 @@ body {
     display: block;
     padding-left: 10px;
     border-left: 3px solid #d7d3d1;
-    background-color: #efebe9;
+    background-color: var(--bg-main-marginalia);
 }
 
 .unapproved>span {
@@ -141,8 +152,9 @@ i.private {
     padding: 2%;
     position: absolute;
     overflow: none;
-    height: 100%;
-    background-color: #efebe9;
+    /*  108 = (64 + 44); header size */
+    /* height: calc(100% - 108px); */
+    background-color: var(--bg-main-marginalia);
 }
 
 .selected {
@@ -150,7 +162,7 @@ i.private {
 }
 
 #commentBox {
-    background-color: #efebe9;
+    background-color: var(--bg-main-marginalia);
 }
 
 #commentHeader {
@@ -171,7 +183,7 @@ i.private {
 }
 
 .primaryText {
-    color: #efebe9;
+    color: var(--bg-main-marginalia);
     font-size: 25;
 }
 
@@ -193,7 +205,7 @@ i.private {
 
 .typeSelected {
     font-style: bold;
-    color: #efebe9;
+    color: var(--bg-main-marginalia);
 }
 
 /*------------------------------------------*/
@@ -527,7 +539,7 @@ text[inputtype='inputFile'] {
     margin-top: 20px;
     margin-left: 2px;
     padding: 0;
-    background-color: #EFEBE9;
+    background-color: var(--bg-main-marginalia);
     position: fixed;
     width: 100px;
 }
@@ -538,7 +550,7 @@ text[inputtype='inputFile'] {
     list-style-type: none;
     margin-top: 10px;
     padding: 0;
-    background-color: #EFEBE9;
+    background-color: var(--bg-main-marginalia);
     position: fixed;
     height: 150px;
     width: 140px;
@@ -549,7 +561,7 @@ text[inputtype='inputFile'] {
     top: calc(5rem + 45px);
     right: 10px;
     margin: auto;
-    background-color: #EFEBE9;
+    background-color: var(--bg-main-marginalia);
     font-size: 12px;
     z-index: 1;
     border-top-left-radius: 5px;
@@ -577,8 +589,7 @@ text[inputtype='inputFile'] {
     /* margin: auto; */
 }
 
-.buttons,
-.commenters {
+.buttons, .commenters {
     height: 20%;
     position: relative;
     display: block;
@@ -588,18 +599,15 @@ text[inputtype='inputFile'] {
     border-bottom-left-radius: .5rem;
 }
 
-.buttons label,
-.commenters label {
+.buttons label, .commenters label {
     padding-left: 4px;
 }
 
-.buttons input,
-.commenters input {
+.buttons input, .commenters input {
     width: 20px;
 }
 
-.buttons:hover,
-.commenters:hover {
+.buttons:hover, .commenters:hover {
     background-color: #C8C8C8;
 }
 
@@ -611,8 +619,7 @@ input[type='radio']:active {
     background-color: #C999F6;
 }
 
-.allTypes,
-.allCommenters {
+.allTypes, .allCommenters {
     -moz-user-select: -moz-none;
     -khtml-user-select: none;
     -webkit-user-select: none;
@@ -799,8 +806,7 @@ button[id^="removePrivateName_"]:hover {
     border-width: 2px;
 }
 
-#commentSave:hover,
-#commentExit:hover {
+#commentSave:hover, #commentExit:hover {
     background-color: #bfbcba;
 }
 
@@ -945,7 +951,7 @@ div[aria-describedby="inputDialog"] {
 }
 
 .ui-dialog {
-    background-color: #efebe9;
+    background-color: var(--bg-main-marginalia);
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
     border-radius: 10px;
@@ -958,7 +964,7 @@ div[aria-describedby="inputDialog"] {
 .ui-dialog-buttonpane>div {
     border-bottom-right-radius: 10px;
     border-bottom-left-radius: 10px;
-    background-color: #efebe9;
+    background-color: var(--bg-main-marginalia);
 }
 
 .ui-dialog-title {
@@ -1013,16 +1019,42 @@ input[type="file"] {
     0% {
         -webkit-transform: rotate(-1080deg);
     }
-
     100% {
         -webkit-transform: rotat
     }
 }
 
+/*----------------footer------------------------*/
+
+/* .mdl-mini-footer{
+    position: absolute;
+    left: 0px;
+    bottom: 0px;
+    width: 100%;
+    height: 30px;
+    background-color: var(--fg-main-marginalia);
+    color: white;
+    font-weight: bold;
+} */
+
 /*----------------tutorial----------------------*/
 
-.tutorialButton>i: hover {
-    color: #00786c !important;
+.introjs-overlay {
+    opacity: 0.1!important;
+}
+
+.introjs-helperLayer.introjs-fixedTooltip {
+    background-color: rgba(255, 255, 255, 0.4)
+}
+
+.tutorialOption {
+    margin-top: 5px;
+    margin-bottom: 5px;
+    cursor: pointer;
+}
+
+.tutorialOption:hover {
+    background-color: #d7d3d1;
 }
 
 /*-----------------repliesToolBar----------------*/
@@ -1068,10 +1100,12 @@ input[type="file"] {
 #header-main-menu {
     z-index: 2;
     height: 64px;
+    display: flex;
+    align-items: center;
 }
 
 #header-sub-menu {
-    background-color: var(--bg-main-marginalia);
+    background-color: var(--fg-main-marginalia);
     border-top: 1px solid rgba(0, 0, 0, 0.4);
     z-index: 1;
     position: absolute;
@@ -1079,6 +1113,11 @@ input[type="file"] {
     top: -64px;
     width: 100%;
     height: 44px;
+}
+
+.headerTab:hover {
+    cursor: pointer;
+    background-color: #00786c;
 }
 
 /* #header {
@@ -1185,29 +1224,24 @@ input[type="file"] {
     margin-left: 4px;
 }
 
-.usersMenu,
-.worksMenu {
+.usersMenu, .worksMenu {
     /* height: 100px; */
     font-weight: bold;
     font-size: .75rem;
 }
 
-.userSelectMenu,
-.workSelectMenu {
+.userSelectMenu, .workSelectMenu {
     margin-top: 10px;
     /* display: none; */
 }
 
-.userSelectMenu ul,
-.workSelectMenu ul {
+.userSelectMenu ul, .workSelectMenu ul {
     /* height: 100px; */
     width: auto;
     overflow-y: scroll;
 }
 
-.usersMenuOptions,
-.worksMenuOptions,
-.menuOptions {
+.usersMenuOptions, .worksMenuOptions, .menuOptions {
     width: 100%;
     background-color: #d7d3d1;
     /* font-weight: bold; */
@@ -1218,9 +1252,7 @@ input[type="file"] {
     border-right: 1px solid rgba(99, 98, 97, 0.7);
 }
 
-.usersMenuOptions:hover,
-.worksMenuOptions:hover,
-.menuOptions:hover {
+.usersMenuOptions:hover, .worksMenuOptions:hover, .menuOptions:hover {
     background-color: #a7a6a5;
 }
 
@@ -1232,10 +1264,7 @@ input[type="file"] {
     margin-left: 4px;
 }
 
-.searchCourse,
-.searchUser,
-.searchLit,
-.searchWhiteList {
+.searchCourse, .searchUser, .searchLit, .searchWhiteList {
     font-size: 16px;
     padding: 12px 20px 12px 20px;
     background-color: #f3f1ef;
@@ -1247,9 +1276,7 @@ input[type="file"] {
     width: 100%;
 }
 
-.workMenuSelected,
-.litSettingOptionSelected,
-.usersMenuSelected {
+.workMenuSelected, .litSettingOptionSelected, .usersMenuSelected {
     background-color: #bfbcba;
 }
 
@@ -1275,8 +1302,7 @@ input[type="file"] {
     flex-grow: 1;
 }
 
-.closeReplyBox,
-.closeCommentBox {
+.closeReplyBox, .closeCommentBox {
     /* background-color: #f44336; */
     /* color: white; */
     /* border: 1px solid #c13328; */
@@ -1294,8 +1320,7 @@ input[type="file"] {
     border: 1px solid black;
 }
 
-.closeReplyBoxIcon,
-.closeCommentBoxIcon {
+.closeReplyBoxIcon, .closeCommentBoxIcon {
     border-radius: 25px;
     color: black;
     background: red;
@@ -1323,10 +1348,10 @@ input[type="file"] {
 /*---------------------Tips------------------------*/
 
 .tipsIcon {
-    font-size: 45px;
+    font-size: 30px;
     position: fixed;
-    right: 0;
-    bottom: 1%;
+    right: 1%;
+    bottom: 10%;
 }
 
 .tipsText {
@@ -1339,17 +1364,17 @@ input[type="file"] {
     border-radius: 6px;
     padding: 5px 0;
     position: fixed;
-    z-index: 1;
+    z-index: 4;
 }
 
 #tips .tipsText {
-    bottom: 1%;
+    bottom: 11%;
     right: 5%;
 }
 
-/* #tips:hover .tipsText {
+#tips:hover .tipsText {
     visibility: visible;
-} */
+}
 
 .replyBoxTips {
     width: 20px;
@@ -1398,8 +1423,6 @@ input[type="file"] {
     height: 400px;
 }
 
-
-
 .settingOptions label {
     /* font-weight: bold; */
     margin-top: 4px;
@@ -1417,9 +1440,7 @@ input[type="file"] {
     font-weight: bold;
 }
 
-.litWhiteListButton,
-.deleteWorkButton,
-.settingDataButton {
+.litWhiteListButton, .deleteWorkButton, .settingDataButton {
     margin-top: 4px;
     margin-bottom: 4px;
     margin-left: 5px;
@@ -1433,24 +1454,17 @@ input[type="file"] {
     overflow-y: scroll;
 }
 
-.settingUsers,
-.settingLit {
-    background-color: #efebe9;
+.settingUsers, .settingLit {
+    background-color: var(--bg-main-marginalia);
     font-weight: bold;
 }
 
-.settingUsers:hover,
-.settingLit:hover,
-.litEditButton:hover,
-.litWhiteListButton:hover,
-.deleteWorkButton:hover,
-.settingDataButton:hover {
-    background-color: #bfbcba;
+.settingUsers:hover, .settingLit:hover, .litEditButton:hover, .litWhiteListButton:hover, .deleteWorkButton:hover, .settingDataButton:hover {
+    background-color: #d7d3d1;
     cursor: pointer;
 }
 
-#litSettingButton,
-#userSettingButton {
+#litSettingButton, #userSettingButton {
     float: right;
 }
 
@@ -1523,30 +1537,25 @@ input[type="file"] {
     body * {
         font-size: 12px !important;
     }
-
     #cardbox {
         width: 80%;
         /*margin is the problem*/
     }
-
     #nonTitleContent {
         width: 100%;
         display: flex;
         flex-direction: column;
         align-items: stretch;
     }
-
     .userSelectMenu .workSelectMenu {
         width: 100%;
         display: flex;
         flex-direction: column;
         overflow-y: scroll;
     }
-
     #textSpace {
         width: 100%;
     }
-
     div[aria-describedby="replies"] {
         position: fixed !important;
         bottom: 0 !important;
@@ -1557,24 +1566,20 @@ input[type="file"] {
         overflow-y: scroll;
         z-index: 1;
     }
-
     div[aria-describedby="replies"]::-webkit-scrollbar {
         width: 5px;
         height: 5px;
         background: #f3f1ef;
     }
-
     div[aria-describedby="replies"]::-webkit-scrollbar-track {
         border-radius: 5px;
         opacity: 0.0;
     }
-
     div[aria-describedby="replies"]::-webkit-scrollbar-thumb {
         border-radius: 5px;
         background: #4db6ac;
         -webkit-box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.5);
     }
-
     div[aria-describedby="commentBox"] {
         position: fixed !important;
         bottom: 0 !important;
@@ -1584,34 +1589,28 @@ input[type="file"] {
         width: 98% !important;
         z-index: 2;
     }
-
     div[aria-describedby="commentBox"]::-webkit-scrollbar {
         width: 5px;
         height: 5px;
         background: #f3f1ef;
     }
-
     div[aria-describedby="commentBox"]::-webkit-scrollbar-track {
         border-radius: 5px;
     }
-
     div[aria-describedby="commentBox"]::-webkit-scrollbar-thumb {
         border-radius: 5px;
         background: #4db6ac;
         -webkit-box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.5);
     }
-
     .commentMenu {
         display: flex;
         flex-direction: row;
     }
-
     .replyBoxTipsIcon {
         font-size: 25px !important;
         position: absolute;
         right: 0;
     }
-
     .replyBoxTipsText {
         visibility: hidden;
         width: 250px;
@@ -1623,11 +1622,9 @@ input[type="file"] {
         border-radius: 6px;
         padding: 5px 2px 5px 2px;
     }
-
     .replyBoxTipsIcon:click .replyBoxTipsText {
         visibility: visible;
     }
-
     .replyBoxTips .replyBoxTipsText {
         bottom: 101%;
         left: 50%;
@@ -1662,7 +1659,6 @@ input[type="file"] {
         height: auto;
         margin: auto;
     }
-
     /* #header {
         background-position: 4% 50%;
         background-size: 33% 100%;
@@ -1672,13 +1668,11 @@ input[type="file"] {
         margin: 5% auto;
         padding: 5%;
     }
-
     #box {
         width: auto;
         height: auto;
         margin: 0%;
     }
-
     #boxhead {
         background-color: #00796B;
         margin: 5% 0% 0% 0%;
@@ -1686,7 +1680,6 @@ input[type="file"] {
         height: 3rem;
         overflow: visible;
     }
-
     .boxLit {
         -webkit-overflow-scrolling: touch;
         width: auto;
@@ -1694,7 +1687,6 @@ input[type="file"] {
         height: 75.9%;
         margin: 0%;
     }
-
     .commentBox {
         position: absolute;
         top: 60%;
@@ -1703,7 +1695,6 @@ input[type="file"] {
         margin: auto;
         width: 100%;
     }
-
     #commentHeader {
         padding: 2%;
         width: auto;
@@ -1712,22 +1703,18 @@ input[type="file"] {
         background-repeat: no-repeat;
         background-color: #4db6ac;
     }
-
     .headText {
         margin-left: 20%;
         margin-top: 0%;
         line-height: 1.5;
     }
-
     .commentText {
         padding: 2%;
         width: auto;
     }
-
     .headText {
         line-height: 1;
     }
-
     .firstPage {
         width: auto;
     }
@@ -1736,7 +1723,6 @@ input[type="file"] {
 /*--------------cardbox--------------------*/
 
 #cardbox {
-    margin-top: 150px;
     border-radius: .75rem;
     -moz-user-select: -moz-none;
     -khtml-user-select: none;
@@ -1747,7 +1733,7 @@ input[type="file"] {
 
 .introBoxes {
     margin: 5% 0 5% 0;
-    background-color: #efebe9;
+    background-color: var(--bg-main-marginalia);
     box-shadow: 2px 2px 8px #222222;
     overflow: visible;
     align-self: center;
@@ -1758,8 +1744,29 @@ input[type="file"] {
 }
 
 #firstPage {
-    max-height: 700px;
+    /* max-height: 700px; */
     display: flex;
     flex-direction: row;
     justify-content: center;
+    height: calc(100% - 108px);
+}
+
+.page-content, .main-content {
+    height: 100%;
+}
+
+/** for modal */
+
+.blocker {
+    /** the size of the header */
+    top: 64px !important;
+}
+
+#text-wrapper {
+    display: none;
+    height: calc(100% - 108px);
+    width: 100%;
+    background-color: var(--bg-main-marginalia);
+    position: absolute;
+    top: 108px;
 }

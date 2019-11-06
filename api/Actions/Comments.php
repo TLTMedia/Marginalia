@@ -233,6 +233,11 @@ class Comments
     public function getHighlightsFiltered($creator, $work, $readerEppn, $filterEppn, $filterType)
     {
         /**
+         * Frontend no longer sends the filter with the first letter being uppercased
+         */
+        $filterType = ucfirst($filterType);
+
+        /**
          * TODO: This can be improved by creating or adding filter functionality to getCommentFiles
          */
         $result = json_decode($this->getHighlights($creator, $work, $readerEppn));

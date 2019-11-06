@@ -604,17 +604,17 @@ $app->get("/courses", function () use ($app, $PATH_COURSES, $responseFmt, $authU
 /**
  * Adds a course to the courses list. Only course admins defined in courses/permissions.json may add courses.
  */
-$app->post("/add_course", function () use ($app, $PATH, $parameters, $authUniqueId) {
+$app->post("/add_course", function () use ($app, $PATH, $PATH_COURSES, $parameters, $authUniqueId, $responseFmt) {
     $data = json_decode($app->request->getBody(), true);
     $parameters->paramCheck($data, array(
         "course",
     ));
 
-    require "../Actions/Comments.php";
-    $comments = new Courses($app->log, $PATH_COURSES, $authUniqueId);
+    require "../Actions/Courses.php";
+    $courses = new Courses($app->log, $PATH_COURSES, $authUniqueId);
 
-    echo $responseFmt->message(
-        $comments->addCourse(
+    echo $responseFmt->arrayToAPIObject(
+        $courses->addCourse(
             $data["course"]
         )
     );
@@ -634,6 +634,17 @@ $app->get("/get_works_of_course_creator", function () use ($app, $PATH, $PATH_CO
         $data["course"],
         $PATH_COURSES,
         $authUniqueId
+    );
+});
+
+$app->get("/is_courses_admin", function () use ($app, $PATH, $PATH_COURSES, $parameters, $authUniqueId, $responseFmt) {
+    require "../Actions/Courses.php";
+    $courses = new Courses($app->log, $PATH_COURSES, $authUniqueId);
+
+    echo $responseFmt->arrayToAPIObject(
+        $courses->userIsCoursesAdmin(
+            $authUniqueId
+        )
     );
 });
 

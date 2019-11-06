@@ -69,7 +69,7 @@ init = async ({ state = state, ui = ui, api = api, courses = courses, users = us
      */
     $(window).on("resize", function () {
         let stageWidth = $(window).width();
-        $("#text").css("height", $("#litDiv").height() + "px");
+        // $("#text-wrapper").css("height", $("#litDiv").height() + "px");
         $("html").css("font-size", (stageWidth / 60) + "px");
     }).trigger("resize");
 
@@ -108,9 +108,6 @@ function buildHTMLFile(litContents, selected_eppn, textChosen) {
     }
     loadUserComments(selected_eppn, textChosen);
     let footer;
-    if(!$("footer").length){
-        footer = createPageFooter();
-    }
     let titleAndTip = createWorkTitle(textChosen);
 
     var litDiv = $("<div/>", {
@@ -140,7 +137,7 @@ function buildHTMLFile(litContents, selected_eppn, textChosen) {
     preText.html(litContents);
     litDiv.append(metaChar, metaName, link, script, preText);
     titleAndTip[0].prepend(titleAndTip[1]);
-    $("#text").append(titleAndTip[0],litDiv);
+    $("#text").append(titleAndTip[0], litDiv);
     $("#text").append(footer);
 }
 
@@ -155,7 +152,7 @@ function createWorkTitle(textChosen) {
     workTitle.append(workTitleSpan);
     //$("#text").append(workTitle);
     let tips = createTips();
-    return [workTitle,tips];
+    return [workTitle, tips];
 }
 
 function createTips() {
@@ -170,30 +167,30 @@ function createTips() {
         class: "tipsText"
     });
     text.html("<span style = 'color : #8B0000'>Red</span> comments with underline are unapproved comments.<span style = 'color : #FF4500'>Orange</span> comments are comments with unapproved reply in the thread.")
-    tips.append(icon,text);
+    tips.append(icon, text);
     return tips
     //workTitle.prepend(tips);
 }
 
-function createPageFooter(){
-    let footer = $("<footer/>",{
-        class : "mdl-mini-footer",
-    });
-    let leftSection = $("<div/>",{
-        class : "mdl-mini-footer__left-section"
-    });
-    let list = $("<ul/>",{
-        class : "mdl-mini-footer__link-list"
-    });
-    let help = $("<li/>");
-    help.html("Help");
-    let contact = $("<li/>");
-    contact.html("Contact Us");
-    list.append(help,contact);
-    leftSection.append(list);
-    footer.append(leftSection);
-    return footer;
-}
+// function createPageFooter() {
+//     let footer = $("<footer/>", {
+//         class: "mdl-mini-footer",
+//     });
+//     let leftSection = $("<div/>", {
+//         class: "mdl-mini-footer__left-section"
+//     });
+//     let list = $("<ul/>", {
+//         class: "mdl-mini-footer__link-list"
+//     });
+//     let help = $("<li/>");
+//     help.html("Help");
+//     let contact = $("<li/>");
+//     contact.html("Contact Us");
+//     list.append(help, contact);
+//     leftSection.append(list);
+//     footer.append(leftSection);
+//     return footer;
+// }
 
 function makeDropDown() {
     let buttonTypes = ['Historical', 'Analytical', 'Comment', 'Definition', 'Question'];
@@ -218,11 +215,18 @@ function makeDropDown() {
 */
 
 loadUserComments = (selected_eppn, textChosen, selectedType, selectedCommenter) => {
+    if (selectedCommenter !== undefined) {
+        if (selectedCommenter.indexOf("@") == -1 && selectedCommenter != "show-all-eppns") {
+            selectedCommenter += "@stonybrook.edu"
+        }
+    }
+
+
     let endpoint, data;
     let isTypeAndCommenterUndefiend = (selectedType == undefined && selectedCommenter == undefined);
 
     if (isTypeAndCommenterUndefiend) {
-        $("#text").hide();
+        $("#text-wrapper").hide();
         $("#textSpace").hide();
         endpoint = "get_highlights";
         data = {
@@ -237,8 +241,8 @@ loadUserComments = (selected_eppn, textChosen, selectedType, selectedCommenter) 
         data = {
             creator: selected_eppn,
             work: textChosen,
-            filterEppn: selectedCommenter == "AllCommenters" ? "" : selectedCommenter,
-            filterType: selectedType == "All" ? "" : selectedType
+            filterEppn: selectedCommenter == "show-all-eppns" ? "" : selectedCommenter,
+            filterType: selectedType == "show-all-types" ? "" : selectedType
         }
     }
 
@@ -261,7 +265,7 @@ loadUserComments = (selected_eppn, textChosen, selectedType, selectedCommenter) 
 
         if (isTypeAndCommenterUndefiend) {
             // TODO: READ IT ALL. pass in the highlights and parse out the comment authors & the comment types (disable those not available)
-            makeSelector(selected_eppn, textChosen, reverseSortedCommentData, colorNotUsedTypeSelector);
+            //makeSelector(selected_eppn, textChosen, reverseSortedCommentData, colorNotUsedTypeSelector);
         }
     });
 }
@@ -269,7 +273,7 @@ loadUserComments = (selected_eppn, textChosen, selectedType, selectedCommenter) 
 //selected_eppn : work creator
 //textChosen : work Name
 renderComments = (commentData, selected_eppn, textChosen, callback) => {
-    $("#text").fadeIn();
+    $("#text-wrapper").fadeIn();
     $("#textSpace").fadeIn();
     let temp;
     for (let i = 0; i < commentData.length; i++) {
@@ -283,13 +287,16 @@ renderComments = (commentData, selected_eppn, textChosen, callback) => {
         });
     }
     handleStartEndDiv(commentData);
-    $("#text").css("height", $("#litDiv").height() + "px");
+    // $("#text").css("height", $("#litDiv").height() + "px");
     //highlight to post comments
+
+
     $("#litDiv").off().on("mouseup", function (evt) {
         //TODO this is triggered everytime when we click on a comment need to fix this
+        console.log(evt)
         if (evt["target"]["classList"][0] == "commented-selection") {
-            launchToastNotifcation("You are not allowed to highlight inside someone's comment.");
-            launchToastNotifcation("If you want to start another kind of discussion, please use the filter first.");
+            // launchToastNotifcation("You are not allowed to highlight inside someone's comment.");
+            // launchToastNotifcation("If you want to start another kind of discussion, please use the filter first.");
         }
         else {
             let selectedType = $("#typeSelector").attr("currentTarget");
@@ -305,8 +312,6 @@ function allowClickOnComment(textChosen, selected_eppn) {
     //highlight on top of other's comment will bring them to the reply box
     $(".commented-selection").off().on("click", function (evt) {
         evt.stopPropagation();
-        console.log("click on comment")
-        console.log($(this))
         data = {
             "work": textChosen,
             "author": selected_eppn,

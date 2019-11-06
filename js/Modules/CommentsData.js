@@ -37,4 +37,19 @@ export class CommentsData {
 
         return await requires_approval;
     }
+
+    /**
+     * Get the first level comments (highlights from the work)
+     */
+    async get_work_highlights() {
+        let response = this.api.request({
+            endpoint: 'get_highlights',
+            data: {
+                creator: this.state.selected_creator,
+                work: this.state.selected_work,
+            },
+        });
+
+        return await response;
+    }
 }
