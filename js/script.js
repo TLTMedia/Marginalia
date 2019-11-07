@@ -1,10 +1,16 @@
 /**
  * These globals are temporary until javascript is refactored into modules
+ * TODO: I need to check to see where these are used... I don't even know if they still are.
  */
-var API;
 var TEXTSPACE = "textSpace";
 var currentUser = {};
 var remSpan; // holds the name of made and clicked spans
+
+/**
+ * TODO: temporary global to hold our state in non-modularized deprecated functions that can't access state info.
+ */
+var API;
+var TMP_STATE;
 
 /*
   Hides the loading symbol
@@ -15,6 +21,7 @@ init = async ({ state = state, ui = ui, api = api, courses = courses, users = us
     /**
      * TODO: For legacy purposes...
      */
+    TMP_STATE = state;
     API = api;
 
     $(".loader").hide();
@@ -96,16 +103,15 @@ init = async ({ state = state, ui = ui, api = api, courses = courses, users = us
 */
 function buildHTMLFile(litContents, selected_eppn, textChosen) {
     console.log(selected_eppn, textChosen)
-    if (!$(".commentTypeDropdown").length) {
-        //TODO make drop down combine with commentbox
-        makeDropDown();
-        makeDraggableCommentBox(selected_eppn, textChosen);
-        makeDraggableReplyBox();
-        hideAllBoxes();
-    } else {
-        //TODO find a better way to do this (figure out why makeDraggableCommentBox is breaking the code if we call it twice)
-        updateCommentBoxSaveButton(selected_eppn, textChosen);
-    }
+
+    /**
+     * Make the comment box,
+     * TODO: this stuff breaks if it was already made, so find a way to only make these boxes once.
+     */
+    makeDraggableCommentBox(selected_eppn, textChosen);
+    makeDraggableReplyBox();
+    hideAllBoxes();
+
     loadUserComments(selected_eppn, textChosen);
     let footer;
     let titleAndTip = createWorkTitle(textChosen);
@@ -135,7 +141,7 @@ function buildHTMLFile(litContents, selected_eppn, textChosen) {
         "id": "textSpace"
     });
     preText.html(litContents);
-    litDiv.append(metaChar, metaName, link, script, preText);
+    litDiv.append(metaChar, metaName, link, preText);
     titleAndTip[0].prepend(titleAndTip[1]);
     $("#text").append(titleAndTip[0], litDiv);
     $("#text").append(footer);
@@ -191,6 +197,9 @@ function createTips() {
 //     footer.append(leftSection);
 //     return footer;
 // }
+
+
+
 
 function makeDropDown() {
     let buttonTypes = ['Historical', 'Analytical', 'Comment', 'Definition', 'Question'];
@@ -480,9 +489,9 @@ function colorAdjacentComments(commentHash) {
 //approved comments don't need to check anyPermission stuff
 function clickOnComment(data) {
     $("#replies").empty();
-    $("#commentBox").removeAttr("data-replyToEppn");
-    $("#commentBox").removeAttr("data-replyToHash");
-    $("#commentBox").attr("data-editCommentId", "-1");
+    $("#comment-box").removeAttr("data-replyToEppn");
+    $("#comment-box").removeAttr("data-replyToHash");
+    $("#comment-box").attr("data-editCommentId", "-1");
     let comment_data = {
         creator: data["author"],
         work: data["work"],
@@ -674,5 +683,5 @@ function adjustDialogPosition(data, width, height, marginX, marginY) {
 // Hides all movable and visable boxes on the screen
 function hideAllBoxes() {
     $("[aria-describedby='replies']").hide();
-    $("[aria-describedby='commentBox']").hide();
+    $("[aria-describedby='comment-box']").hide();
 }

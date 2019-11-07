@@ -1,17 +1,11 @@
 function makeDraggableCommentBox(workCreator, work) {
-    console.log(workCreator, work)
-    if ($("#commentBox").length) {
-        if ($(".commentTypeDropdown").length < 1) {
-            $("#commentBox").append(dropdown);
-        }
-        //TODO not sure is it correct to put remSpan here, remSpan = "hl_eppn@.stonybrook.edu"
-        //remSpan = null;
-        $("#commentBox").dialog({
-            dialogClass: "no-close",
-            modal: true,
-            width: 500,
-            use: 'comments',
-            buttons: [{
+    $("#comment-box").dialog({
+        dialogClass: "no-close",
+        modal: true,
+        width: 500,
+        use: 'comments',
+        buttons: [
+            {
                 text: "Save",
                 id: "commentSave",
                 click: function () {
@@ -25,25 +19,25 @@ function makeDraggableCommentBox(workCreator, work) {
                     exitButtonOnClick();
                 }
             },
-            ],
-            title: "Annotation by: "
-        });
-        // Making the actual commentForm system
-        var comForm = $('<form/>');
-        var textForm = $('<textarea/>', {
-            id: "textForm",
-            rows: "10",
-            cols: "80"
-        });
-        $(comForm).append(textForm);
-        $('#commentBox').append(comForm);
-        CKEDITOR.replace('textForm');
-        let closeCommentBox = createCloseCommentBoxButton();
-        // TODO find a better way to add it
-        $("#commentBox").parent().find(".ui-dialog-titlebar").prepend(closeCommentBox);
-        $(".closeCommentBox").parent().css({ position: 'relative' });
-        $(".closeCommentBox").css({ top: 0, left: 0, position: 'absolute' });
-    }
+        ],
+        title: "Annotation by: "
+    });
+    // Making the actual commentForm system
+    // var comForm = $('<form/>');
+    // var textForm = $('<textarea/>', {
+    //     id: "textForm",
+    //     rows: "10",
+    //     cols: "80"
+    // });
+    // $(comForm).append(textForm);
+    // $('#comment-box').append(comForm);
+    // CKEDITOR.replace('textForm');
+    let closeCommentBox = createCloseCommentBoxButton();
+    // TODO find a better way to add it
+    $("#comment-box").parent().find(".ui-dialog-titlebar").prepend(closeCommentBox);
+    $(".closeCommentBox").parent().css({ position: 'relative' });
+    $(".closeCommentBox").css({ top: 0, left: 0, position: 'absolute' });
+
 }
 
 function createCloseCommentBoxButton() {
@@ -56,7 +50,7 @@ function createCloseCommentBoxButton() {
         click: function () {
             exitButtonOnClick();
             // $("#replies").parent().css("z-index","1");
-            // $("#commentBox").parent().css("z-index","0");
+            // $("#comment-box").parent().css("z-index","0");
         }
     });
     var closeCommentBoxIcon = $("<i/>", {
@@ -69,7 +63,8 @@ function createCloseCommentBoxButton() {
 }
 
 function saveButtonOnClick(workCreator, work) {
-    var commentText = CKEDITOR.instances.textForm.getData();
+    var commentText = TMP_STATE.quill.getHTML();
+    // var commentText = CKEDITOR.instances.textForm.getData();
     var isTextAreaEmpty = commentText.replace(/<p>(.*)<\/p>/g, `$1`).replace(/\s/g, "").replace(/&nbsp;/g, "").length;
     if (!isTextAreaEmpty) {
         launchToastNotifcation("Please put in some comment before you save");
@@ -79,11 +74,11 @@ function saveButtonOnClick(workCreator, work) {
         var creator = workCreator;
         var commentType = $(".commentTypeDropdown").val();
         var span = $("." + escapeSpecialChar(remSpan));
-        var replyTo = $("#commentBox").attr("data-replytoeppn");
-        var replyHash = $('#commentBox').attr("data-replytohash");
+        var replyTo = $("#comment-box").attr("data-replytoeppn");
+        var replyHash = $('#comment-box').attr("data-replytohash");
         var dataForSave = getDataForSave(creator, literatureName, commentText, commentType, span, replyTo, replyHash);
         //console.log(dataForSave);
-        var editCommentID = $("#commentBox").attr("data-editCommentID");
+        var editCommentID = $("#comment-box").attr("data-editCommentID");
         //if editCommentId is not -1 it is an edit action
         if (editCommentID != "-1") {
             var commentCreatorEppn = $(".replies" + "[commentid = '" + editCommentID + "']").attr('name');
@@ -98,18 +93,18 @@ function saveButtonOnClick(workCreator, work) {
             var dataForEdit = getDataForEditOrDelete(creator, literatureName, editCommentID, commentCreatorEppn, commentType, commentText, true);
             //console.log(dataForEdit);
             editOrDelete(dataForEdit, true);
-            $("#commentBox").attr('data-editCommentID', '-1');
-            $("#commentBox").parent().fadeOut();
+            $("#comment-box").attr('data-editCommentID', '-1');
+            $("#comment-box").parent().fadeOut();
         }
         //check if the replyToEppn is undefined to see if this is a reply or not
-        else if ($("#commentBox").attr("data-replyToEppn")) {
+        else if ($("#comment-box").attr("data-replyToEppn")) {
             saveCommentOrReply(dataForSave, false);
-            $("#commentBox").parent().fadeOut();
+            $("#comment-box").parent().fadeOut();
         }
         else {
             console.log("Saved As Comment");
             saveCommentOrReply(dataForSave, true);
-            $("#commentBox").parent().fadeOut();
+            $("#comment-box").parent().fadeOut();
         }
     }
 }
@@ -160,7 +155,7 @@ function saveCommentOrReply(dataForSave, isFirstComment) {
         }
         // the first comment
         else {
-          console.log("yo")
+            console.log("yo")
             let approved;
             let index = {
                 'start': $('.' + escapeSpecialChar(remSpan)).attr("startIndex"),
@@ -186,7 +181,7 @@ function saveCommentOrReply(dataForSave, isFirstComment) {
             $('.' + escapeSpecialChar(remSpan)).removeClass(remSpan);
             let allComments = createCommentData();
             handleStartEndDiv(allComments);
-            colorNotUsedTypeSelector(dataForSave["author"],dataForSave["work"]);
+            colorNotUsedTypeSelector(dataForSave["author"], dataForSave["work"]);
             updateCommenterSelectors();
             //update the click event on this new added comment
             allowClickOnComment(dataForSave["work"], dataForSave["author"]);
@@ -253,7 +248,7 @@ function editOrDelete(dataForEditOrDelete, isEdit) {
             if (firstCommentId == $("#replies").attr("deletedid")) {
                 checkSpansNeedRecover(firstCommentId, removeDeletedSpan);
                 updateCommenterSelectors(firstCommentId);
-                colorNotUsedTypeSelector(dataForEditOrDelete["creator"],dataForEditOrDelete["work"]);
+                colorNotUsedTypeSelector(dataForEditOrDelete["creator"], dataForEditOrDelete["work"]);
                 $("#replies").parent().hide();
             }
             else {
@@ -313,19 +308,19 @@ function checkSpansNeedRecover(id, callback) {
         let pCommentCreator = parentComment.attr("creator");
         let pCommentType = parentComment.attr("typeOf");
         let pCommentApproved = parentComment.attr("approved");
-        $(".commented-selection"+"[commentId = '"+currentEndDivParentHash+"']").wrapAll("<span class = 'tempWrap'/>");
+        $(".commented-selection" + "[commentId = '" + currentEndDivParentHash + "']").wrapAll("<span class = 'tempWrap'/>");
         $(".tempWrap").removeClass().addClass("commented-selection").attr({
-          "commentid":currentEndDivParentHash,
-          "creator": pCommentCreator,
-          "typeOf": pCommentType,
-          "approved": pCommentApproved
+            "commentid": currentEndDivParentHash,
+            "creator": pCommentCreator,
+            "typeOf": pCommentType,
+            "approved": pCommentApproved
         });
-        allowClickOnComment($("#setting").attr("work"),$("#setting").attr("author"));
-        getUnapprovedComments($("#setting").attr("author"),$("#setting").attr("work"))
+        allowClickOnComment($("#setting").attr("work"), $("#setting").attr("author"));
+        getUnapprovedComments($("#setting").attr("author"), $("#setting").attr("work"))
     }
     // unwrap the next comment and recreate it with the highlightText()
     else if (parseInt(nextStartDivIndex) < parseInt(currentEndDivIndex) && nextStartDivIndex != undefined) {
-      console.log("cover the one after")
+        console.log("cover the one after")
         removeDeletedSpan(id);
         //console.log($(".commented-selection"+"[commentId = '"+nextStartDiv.attr("commentId")+"']"));
         let commentNeedRecover = $(".commented-selection" + "[commentId = '" + nextStartDiv.attr("commentId") + "']");
@@ -369,30 +364,31 @@ function checkSpansNeedRecover(id, callback) {
 }
 
 function exitButtonOnClick() {
-    CKEDITOR.instances.textForm.setData("");
+    TMP_STATE.quill.setText("");
+    //CKEDITOR.instances.textForm.setData("");
     $("#commentExit").text("Exit");
     unhighlight();
-    $("#commentBox").parent().fadeOut();
+    $("#comment-box").parent().fadeOut();
 }
 
-function updateCommentBoxSaveButton(selected_eppn,litId){
-    $("#commentSave").off().on("click", () => {
-        saveButtonOnClick(selected_eppn, litId);
-    });
-}
+// function updateCommentBoxSaveButton(selected_eppn, litId) {
+//     $("#commentSave").off().on("click", () => {
+//         saveButtonOnClick(selected_eppn, litId);
+//     });
+// }
 
 //commentBox width: 500 px ,height: 331px , marginX : 10, marginY : 50
-function displayCommentBox(evt,selectedType) {
+function displayCommentBox(evt, selectedType) {
     var marginX = 10;
     var marginY = 50;
     var newPosition = adjustDialogPosition(evt, 500, 331, 10, 50);
-    $("#commentBox").parent().css({
+    $("#comment-box").parent().css({
         'top': newPosition["newTop"],
         'left': newPosition["newLeft"]
     })
-    $("#commentBox").parent().find("#ui-id-1").contents().filter(function () { return this.nodeType == 3; }).first().replaceWith("Annotation by: " + currentUser['firstname'] + " " + currentUser['lastname']);
-    $("#commentBox").parent().fadeIn();
-    if(selectedType != "All" && selectedType != undefined){
+    $("#comment-box").parent().find("#ui-id-1").contents().filter(function () { return this.nodeType == 3; }).first().replaceWith("Annotation by: " + currentUser['firstname'] + " " + currentUser['lastname']);
+    $("#comment-box").parent().fadeIn();
+    if (selectedType != "All" && selectedType != undefined) {
         console.log(selectedType);
         $(".commentTypeDropdown").val(selectedType);
         $('.commentTypeDropdown').attr('disabled', true);
@@ -400,5 +396,5 @@ function displayCommentBox(evt,selectedType) {
 }
 
 function hideCommentBox() {
-    $("#commentBox").parent().hide();
+    $("#comment-box").parent().hide();
 }

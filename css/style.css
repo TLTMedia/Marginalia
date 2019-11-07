@@ -161,8 +161,13 @@ i.private {
     background-color: #b2dfdb;
 }
 
-#commentBox {
+#comment-box {
+    display: none;
     background-color: var(--bg-main-marginalia);
+}
+
+.ql-editor {
+    height: 200px;
 }
 
 #commentHeader {
@@ -934,10 +939,10 @@ div[aria-describedby='choices'] {
     position: absolute;
 }
 
-div[aria-describedby='commentBox'] {
+/* div[aria-describedby='commentBox'] {
     position: absolute;
     z-index: 1;
-}
+} */
 
 div[aria-describedby='moderateFileChoice'] {
     background-color: #CCC;
@@ -1580,7 +1585,7 @@ input[type="file"] {
         background: #4db6ac;
         -webkit-box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.5);
     }
-    div[aria-describedby="commentBox"] {
+    /* div[aria-describedby="commentBox"] {
         position: fixed !important;
         bottom: 0 !important;
         top: auto !important;
@@ -1588,8 +1593,8 @@ input[type="file"] {
         height: 45% !important;
         width: 98% !important;
         z-index: 2;
-    }
-    div[aria-describedby="commentBox"]::-webkit-scrollbar {
+    } */
+    /* div[aria-describedby="commentBox"]::-webkit-scrollbar {
         width: 5px;
         height: 5px;
         background: #f3f1ef;
@@ -1601,7 +1606,7 @@ input[type="file"] {
         border-radius: 5px;
         background: #4db6ac;
         -webkit-box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.5);
-    }
+    } */
     .commentMenu {
         display: flex;
         flex-direction: row;
@@ -1687,14 +1692,14 @@ input[type="file"] {
         height: 75.9%;
         margin: 0%;
     }
-    .commentBox {
+    /* .commentBox {
         position: absolute;
         top: 60%;
         left: 0%;
         height: 60%;
         margin: auto;
         width: 100%;
-    }
+    } */
     #commentHeader {
         padding: 2%;
         width: auto;

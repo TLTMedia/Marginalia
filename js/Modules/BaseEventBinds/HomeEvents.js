@@ -12,6 +12,16 @@ export class HomeEvents {
      * Preload
      */
     async preload() {
+        /**
+         * Global event necessary to facilitate highlighting, probably should be in its own events file...
+         */
+        $(document).on("DOMNodeInserted", e => {
+            const classes = $(e.target).attr("class");
+            if (classes && classes.match(/^hl_/)) {
+                $(e.target).addClass("commented-selection");
+            }
+        });
+
         /** 
          * Populate the courses select dropdown 
          */

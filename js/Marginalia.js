@@ -12,6 +12,28 @@ import { InterfaceController, APIHandler, CoursesData, UsersData, WorksData, Com
      */
     const address = new Address({ state: state });
 
+    /**
+     * Create the Quill editor
+     */
+    state.quill = new Quill("#quill-editor", {
+        theme: "snow",
+        placehold: "Type here",
+        modules: {
+            toolbar: [
+                ["bold", "italic", "underline", "strike"],
+                ["blockquote", "code-block"],
+                ["image"],
+            ],
+        }
+    });
+
+    /**
+     * Add a function to quill - to get the raw HTML of the textarea.
+     */
+    Quill.prototype.getHTML = function () {
+        return this.container.querySelector('.ql-editor').innerHTML;
+    };
+
     const toast = new Toast();
     const api = new APIHandler();
 

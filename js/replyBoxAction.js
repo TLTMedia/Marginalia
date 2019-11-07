@@ -127,36 +127,36 @@ function createReplies(dataForReplies) {
     createToolBar(inText, hash, eppn, hashForReply, approved, public, work, workCreator);
 }
 
-function createToolBar(inText, hash, eppn, hashForReply, approved, public, work, workCreator){
-    let toolBar = $("<div/>",{
-      class: "toolBar",
-      commentId : hash
+function createToolBar(inText, hash, eppn, hashForReply, approved, public, work, workCreator) {
+    let toolBar = $("<div/>", {
+        class: "toolBar",
+        commentId: hash
     });
-    $(".replies"+"[commentid = '"+hash+"']").append(toolBar);
-    let replyButton = $("<button/>",{
+    $(".replies" + "[commentid = '" + hash + "']").append(toolBar);
+    let replyButton = $("<button/>", {
         class: "replyToComments mdl-button mdl-js-button",
         commentId: hash,
-        click: (evt)=>{
-          replyButtonOnClick(evt, hash);
+        click: (evt) => {
+            replyButtonOnClick(evt, hash);
         }
     });
     replyButton.html("<i class = 'material-icons'> reply </i> <label>Reply</label>");
-    let editButton = $("<button/>",{
-      class: "editComments mdl-button mdl-js-button",
-      commentId: hash,
-      click: (evt)=>{
-        editButtonOnClick(evt, inText, hash);
-      }
+    let editButton = $("<button/>", {
+        class: "editComments mdl-button mdl-js-button",
+        commentId: hash,
+        click: (evt) => {
+            editButtonOnClick(evt, inText, hash);
+        }
     });
     editButton.html("<i class = 'material-icons'> edit </i> <label>Edit</label>");
-    if(approved && isCurrentUserSelectedUser(eppn, false)){
-      toolBar.append(replyButton, editButton);
+    if (approved && isCurrentUserSelectedUser(eppn, false)) {
+        toolBar.append(replyButton, editButton);
     }
-    else if (approved && !isCurrentUserSelectedUser(eppn, false)){
-      toolBar.append(replyButton);
+    else if (approved && !isCurrentUserSelectedUser(eppn, false)) {
+        toolBar.append(replyButton);
     }
-    else if (!approved && isCurrentUserSelectedUser(eppn, false)){
-      toolBar.append(editButton);
+    else if (!approved && isCurrentUserSelectedUser(eppn, false)) {
+        toolBar.append(editButton);
     }
     createMenuForComment(inText, hash, eppn, hashForReply, approved, public, work, workCreator);
 }
@@ -219,7 +219,7 @@ function createMenuForComment(inText, hash, eppn, hashForReply, approved, public
     //comment is approved and currentUser is the comment creator
     if (approved && isCurrentUserSelectedUser(eppn, false)) {
         $(menu).append(menuDelete);
-        if(isCurrentUserSelectedUser(workCreator, false)){
+        if (isCurrentUserSelectedUser(workCreator, false)) {
             $(menu).append(menuApproveOrUnapprove);
         }
         if (public) {
@@ -232,8 +232,8 @@ function createMenuForComment(inText, hash, eppn, hashForReply, approved, public
     //comment is approved and currentUser is not the comment creator
     else if (approved && !isCurrentUserSelectedUser(eppn, false)) {
         // if the currentUser is the author of the work
-        if(isCurrentUserSelectedUser(workCreator,false)){
-          $(menu).append(menuApproveOrUnapprove);
+        if (isCurrentUserSelectedUser(workCreator, false)) {
+            $(menu).append(menuApproveOrUnapprove);
         }
     }
     // comment is unapproved and currentUser is the comment creator
@@ -245,8 +245,8 @@ function createMenuForComment(inText, hash, eppn, hashForReply, approved, public
             $(menu).append(menuDelete);
         }
     }
-    var functionPlane = $(".toolBar" + "[commentId = '"+hash+"']");
-    var textSpan = $("#r"+hash);
+    var functionPlane = $(".toolBar" + "[commentId = '" + hash + "']");
+    var textSpan = $("#r" + hash);
     if (textSpan.text() != 'deleted' && $(menu).has("li").length != 0) {
         functionPlane.append(commentMenuButton, menu);
     }
@@ -260,25 +260,28 @@ function commentMenuOnClick(rid) {
     $("#commentExit").text("Exit");
     $(".commentMenu").children("li").hide();
     $(".commentMenu").children("li" + "[commentid = '" + rid + "']").show();
-    CKEDITOR.instances.textForm.setReadOnly(false);
+    // CKEDITOR.instances.textForm.setReadOnly(false);
+    TMP_STATE.quill.enable();
 }
 
 function replyButtonOnClick(evt, hash) {
     var replyToEppn = $(".replies" + "[commentid = '" + hash + "']").attr('name');
-    $("#commentBox").attr("data-replyToEppn", replyToEppn);
-    $("#commentBox").attr("data-replyToHash", hash);
-    CKEDITOR.instances.textForm.setData("");
+    $("#comment-box").attr("data-replyToEppn", replyToEppn);
+    $("#comment-box").attr("data-replyToHash", hash);
+    TMP_STATE.quill.setText("");
+    // CKEDITOR.instances.textForm.setData("");
     $('.commentTypeDropdown').attr('disabled', true);
     var firstCommentId = $('#replies').attr('data-firstCommentId');
     $('.commentTypeDropdown').val($(".commented-selection" + "[commentId = '" + firstCommentId + "']").attr("typeof"));
-    $("#commentBox").attr("data-editCommentID", "-1");
+    $("#comment-box").attr("data-editCommentID", "-1");
     displayCommentBox(evt);
 }
 
 function editButtonOnClick(evt, inText, hash) {
-    $("#commentBox").attr("data-editCommentID", hash);
+    $("#comment-box").attr("data-editCommentID", hash);
     displayCommentBox(evt);
-    CKEDITOR.instances.textForm.setData(inText);
+    TMP_STATE.quill.setText(inText);
+    // CKEDITOR.instances.textForm.setData(inText);
     $('.commentTypeDropdown').attr('disabled', true);
     if ($(".replies" + "[commentid = '" + hash + "']").attr('type') != undefined) {
         $('.commentTypeDropdown').removeAttr('disabled');
@@ -322,18 +325,18 @@ function commentPrivateButtonOnClick(evt, work, workCreator, setPublic) {
 
 function commentApprovedOrUnapprovedButtonOnClick(hash, commenterEppn, work, workCreator, approved) {
     console.log(hash)
-    var data ={
+    var data = {
         creator: workCreator,
         work: work,
         commenterEppn: commenterEppn,
         comment_hash: hash
     };
     let endpoint;
-    if(approved){
-      endpoint = "unapprove_comment"
+    if (approved) {
+        endpoint = "unapprove_comment"
     }
-    else{
-      endpoint = "approve_comment"
+    else {
+        endpoint = "approve_comment"
     }
     API.request({
         endpoint: endpoint,
@@ -349,7 +352,7 @@ function commentApprovedOrUnapprovedButtonOnClick(hash, commenterEppn, work, wor
             commenter: firstCommenter,
             hash: firstCommentHash
         }
-        getUnapprovedComments(workCreator,work);
+        getUnapprovedComments(workCreator, work);
         refreshReplyBox(workCreator, work, firstCommenter, firstCommentHash);
     });
 }
@@ -380,7 +383,7 @@ function hideReplyBox() {
 function refreshReplyBox(creator, work, commenter, hash, type) {
     console.log(creator, work, commenter, hash, type);
     $("#replies").empty();
-    if(type != undefined){
+    if (type != undefined) {
         $("#ui-id-2").html(type);
     }
     let comment_data = {

@@ -40,13 +40,12 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/rangy/1.3.0/rangy-textrange.min.js"></script>
 
     <!-- CKEditor Library-->
-    <script src="ckeditor/ckeditor.js"></script>
-    <script src="ckeditor/adapters/jquery.js"></script>
+    <!-- <script src="ckeditor/ckeditor.js"></script>
+    <script src="ckeditor/adapters/jquery.js"></script> -->
 
     <!-- Quill Library -->
-    <!-- <script src="//cdn.quilljs.com/1.3.6/quill.js"></script>
-    <link href="//cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet" /> -->
-
+    <script src="//cdn.quilljs.com/1.3.6/quill.js"></script>
+    <link href="//cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet" />
 
     <!-- Our init function entry point -->
     <script defer type="module" src="./js/Marginalia.js" crossorigin="use-credentials"></script>
@@ -64,16 +63,6 @@
 
     <!-- Custom Site Styling -->
     <link rel="stylesheet" type="text/css" media="only screen" href="css/style.css" />
-
-    <!-- TODO: find a place for this in a js file -->
-    <script defer type="text/javascript">
-        $(document).on("DOMNodeInserted", e => {
-            const classes = $(e.target).attr("class");
-            if (classes && classes.match(/^hl_/)) {
-                $(e.target).addClass("commented-selection");
-            }
-        });
-    </script>
 </head>
 
 <body>
@@ -302,33 +291,33 @@
                         </div>
                         <!-- end firstPage -->
 
-                        <div id="commentBox"></div>
+                        <!-- Custom container for the Quill Editor -->
+                        <div id="comment-box">
+                            <!-- TODO: hardcoded for now - minimizing deprecated js -->
+                            <select class="commentTypeDropdown">
+                                <option name="Historical">Historical</option>
+                                <option name="Analytical">Analytical</option>
+                                <option name="Comment">Comment</option>
+                                <option name="Definition">Definition</option>
+                                <option name="Question">Question</option>
+                            </select>
+
+                            <!-- Quill Editor -->
+                            <div id="quill-editor">
+                                <p><br></p>
+                            </div>
+                        </div>
+
                         <div id="replies"></div>
                         <div id="comApproval"></div>
                         <div id="deleteFileChoice"></div>
                         <div id="moderateFileChoice"></div>
                         <div id="userPrivateList"></div>
 
-                        <div class="selector">
-                            <div class="typeSelector" id="typeSelector"></div>
-                            <div class="commenterSelector" id="commenterSelector"></div>
-                        </div>
-
                         <!-- The area where the work text gets populated -->
                         <div id="text-wrapper">
                             <div id="text" visible="false"></div>
                         </div>
-
-                        <!-- page footer -->
-                        <!-- <footer class="mdl-mini-footer">
-                            <div class="mdl-mini-footer__left-section">
-                                <div class="mdl-logo">Title</div>
-                                <ul class="mdl-mini-footer__link-list">
-                                    <li><a href="#">Help</a></li>
-                                    <li><a href="#">Privacy & Terms</a></li>
-                                </ul>
-                            </div>
-                        </footer> -->
 
                         <!-- Toast notification -->
                         <div id="toast-notification1" class="mdl-js-snackbar mdl-snackbar">
