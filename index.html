@@ -25,6 +25,10 @@
         src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css" />
 
+    <!-- IntroJs Library-->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/intro.js/2.9.3/intro.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intro.js/2.9.3/introjs.min.css" />
+
     <!-- JS Scripts -->
     <!--[if lt IE 9]>
 		<script src="https://cdn.jsdelivr.net/html5shiv/3.7.3/html5shiv.min.js"></script>
@@ -35,7 +39,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/rangy/1.3.0/rangy-textrange.min.js"></script>
     <script src="ckeditor/ckeditor.js"></script>
     <script src="ckeditor/adapters/jquery.js"></script>
-    <script src="js/intro.js-2.9.3/intro.js"></script>
     <script src="js/lightRangy/LightRange.min.js"></script>
 
     <!-- Our init function entry point -->
@@ -61,7 +64,6 @@
     </script>
 
     <link rel="stylesheet" type="text/css" media="only screen" href="css/style.css" />
-    <link rel="stylesheet" type="text/css" href="js/intro.js-2.9.3/introjs.css" />
 </head>
 
 <body>
@@ -158,22 +160,24 @@
                         <div id="add-course-modal" class="modal">
                             <div id="addCourseBase">
                                 <center>
-                                  <span class="addCourseTitle modal-header">Add Course</span>
-                                  <br/>
-                                  <span style="font-size:10px">options with * are required to fill in</span>
+                                    <span class="addCourseTitle modal-header">Add Course</span>
+                                    <br />
+                                    <span style="font-size:10px">options with * are required to fill in</span>
                                 </center>
 
                                 <div class="courseName">
                                     <span>Course code: *</span>
                                     <div class="mdl-textfield mdl-js-textfield is-upgraded">
-                                        <input id="courseNameInput" class="mdl-textfield__input" type="text" maxlength="100">
+                                        <input id="courseNameInput" class="mdl-textfield__input" type="text"
+                                            maxlength="100">
                                         <label class="mdl-textfield__label" for="courseNameInput"></label>
                                     </div>
                                 </div>
                                 <div class="section">
                                     <span>Course section:</span>
                                     <div class="mdl-textfield mdl-js-textfield is-upgraded">
-                                        <input id="courseSectionInput" class="mdl-textfield__input" type="text" maxlength="100">
+                                        <input id="courseSectionInput" class="mdl-textfield__input" type="text"
+                                            maxlength="100">
                                         <label class="mdl-textfield__label" for="courseSectionInput"></label>
                                     </div>
                                 </div>
@@ -184,7 +188,8 @@
                                         class="smaller-upload-buttons mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored">
                                         Pick term
                                     </button>
-                                    <ul class="termsListForAddCourse mdl-menu mdl-menu--bottom-left mdl-js-menu" for="termMenuButton"></ul>
+                                    <ul class="termsListForAddCourse mdl-menu mdl-menu--bottom-left mdl-js-menu"
+                                        for="termMenuButton"></ul>
                                     <span id="selectedTerm"></span>
                                 </div>
                                 <br />
