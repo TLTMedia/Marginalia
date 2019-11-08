@@ -100,6 +100,10 @@ init = async ({ state = state, ui = ui, api = api }) => {
             $(e.target).addClass("commented-selection");
         }
     });
+
+    $(document).ready(() => {
+        $(".js-example-basic-single").select2();
+    });
 }
 
 // Creates a visual list of all users which gives access to their folders

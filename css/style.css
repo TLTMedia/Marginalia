@@ -15,6 +15,10 @@ body {
     background-color: #333333;
 }
 
+.select2 {
+    width: 100% !important;
+}
+
 .selected-filter {
     font-weight: bold;
     /**
@@ -45,6 +49,7 @@ body {
 #replies {
     border-bottom-left-radius: 10px;
     border-bottom-right-radius: 10px;
+    padding-bottom: 10px;
 }
 
 #helpForAddLit {
@@ -1010,14 +1015,22 @@ input[type="file"] {
 
 .mdl-textfield__input {
     width: 150px;
+    font-size: 12px;
 }
 
 .mdl-textfield {
     max-width: 150px;
+    padding-top: 10px;
+    padding-bottom: 10px;
 }
 
 .privateContainer {
     padding-top: 3%;
+}
+
+#addCourseBase > .mdl-textfield {
+    padding-top: 5px;
+    padding-bottom: 10px;
 }
 
 @-webkit-keyframes spin {
@@ -1062,16 +1075,32 @@ input[type="file"] {
     background-color: #d7d3d1;
 }
 
+/* .is-focused {
+   margin-bottom: -10px;
+} */
+
 /*-----------------repliesToolBar----------------*/
 
 .toolBar {
     display: block;
-    height: 40px;
+    height: 20px;
 }
 
-.toolBar>button {
-    margin-right: 10px;
+.toolBar > button {
+    /* margin-right: 10px; */
     float: left;
+}
+
+.mdl-button > label {
+    cursor: pointer;
+}
+
+.toolBar > .mdl-button {
+    line-height: 18px;
+    font-size: 9px;
+    text-transform: none;
+    height: 20px;
+    overflow: visible;
 }
 
 /*-----------------commentSizeIndicator----------------*/
@@ -1335,10 +1364,6 @@ input[type="file"] {
 }
 
 /*---------------------icon colors-----------------*/
-
-.material-icons {
-    color: #009688;
-}
 
 .material-icons.lock {
     color: blue;
@@ -1774,4 +1799,8 @@ input[type="file"] {
     background-color: var(--bg-main-marginalia);
     position: absolute;
     top: 108px;
+}
+
+.introjs-skipbutton {
+    color: #000;
 }
