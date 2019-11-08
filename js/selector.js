@@ -69,8 +69,4 @@ function updateCommenterSelectors() {
             }
         }
     }
-    //makeCommentersSelector(newCommenters);
-    if (!$("#typeSelector").find("ul").is(":visible")) {
-        hideAllSelector();
-    }
 }

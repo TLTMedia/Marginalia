@@ -10,7 +10,7 @@ import { InterfaceController, APIHandler, Data, Toast, Address } from './Modules
      * Address object must be created before any awaits.
      * Otherwise its event listeners do not fire off.
      */
-    const address = new Address({ state: state });
+    state.address = new Address({ state: state });
 
     /**
      * Create the Quill editor

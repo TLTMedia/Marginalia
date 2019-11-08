@@ -63,50 +63,47 @@ function createCloseCommentBoxButton() {
 }
 
 function saveButtonOnClick(workCreator, work) {
-    var commentText = TMP_STATE.quill.getHTML();
-    // var commentText = CKEDITOR.instances.textForm.getData();
-    var isTextAreaEmpty = commentText.replace(/<p>(.*)<\/p>/g, `$1`).replace(/\s/g, "").replace(/&nbsp;/g, "").length;
-    if (!isTextAreaEmpty) {
-        launchToastNotifcation("Please put in some comment before you save");
+    let commentText = TMP_STATE.quill.getHTML();
+
+    if (commentText == "<p><br></p>") {
+        launchToastNotifcation("You cannot save an empty comment");
+        return;
     }
-    else {
-        var literatureName = work;
-        var creator = workCreator;
-        var commentType = $(".commentTypeDropdown").val();
-        var span = $("." + escapeSpecialChar(remSpan));
-        var replyTo = $("#comment-box").attr("data-replytoeppn");
-        var replyHash = $('#comment-box').attr("data-replytohash");
-        var dataForSave = getDataForSave(creator, literatureName, commentText, commentType, span, replyTo, replyHash);
-        //console.log(dataForSave);
-        var editCommentID = $("#comment-box").attr("data-editCommentID");
-        //if editCommentId is not -1 it is an edit action
-        if (editCommentID != "-1") {
-            var commentCreatorEppn = $(".replies" + "[commentid = '" + editCommentID + "']").attr('name');
-            var commentType;
-            //check if this is a coment or reply (reply will not have a type)
-            if ($(".replies" + "[commentid = '" + editCommentID + "']").attr('type')) {
-                commentType = $('.commentTypeDropdown').children("option:selected").val();
-            }
-            else {
-                commentType = null;
-            }
-            var dataForEdit = getDataForEditOrDelete(creator, literatureName, editCommentID, commentCreatorEppn, commentType, commentText, true);
-            //console.log(dataForEdit);
-            editOrDelete(dataForEdit, true);
-            $("#comment-box").attr('data-editCommentID', '-1');
-            $("#comment-box").parent().fadeOut();
-        }
-        //check if the replyToEppn is undefined to see if this is a reply or not
-        else if ($("#comment-box").attr("data-replyToEppn")) {
-            saveCommentOrReply(dataForSave, false);
-            $("#comment-box").parent().fadeOut();
+
+    var literatureName = work;
+    var creator = workCreator;
+    var commentType = $(".commentTypeDropdown").val();
+    var span = $("." + escapeSpecialChar(remSpan));
+    var replyTo = $("#comment-box").attr("data-replytoeppn");
+    var replyHash = $('#comment-box').attr("data-replytohash");
+    var dataForSave = getDataForSave(creator, literatureName, commentText, commentType, span, replyTo, replyHash);
+    //console.log(dataForSave);
+    var editCommentID = $("#comment-box").attr("data-editCommentID");
+    //if editCommentId is not -1 it is an edit action
+    if (editCommentID != "-1") {
+        var commentCreatorEppn = $(".replies" + "[commentid = '" + editCommentID + "']").attr('name');
+        var commentType;
+        //check if this is a coment or reply (reply will not have a type)
+        if ($(".replies" + "[commentid = '" + editCommentID + "']").attr('type')) {
+            commentType = $('.commentTypeDropdown').children("option:selected").val();
         }
         else {
-            console.log("Saved As Comment");
-            saveCommentOrReply(dataForSave, true);
-            $("#comment-box").parent().fadeOut();
+            commentType = null;
         }
+        var dataForEdit = getDataForEditOrDelete(creator, literatureName, editCommentID, commentCreatorEppn, commentType, commentText, true);
+        //console.log(dataForEdit);
+        editOrDelete(dataForEdit, true);
+        $("#comment-box").attr('data-editCommentID', '-1');
+        $("#comment-box").parent().fadeOut();
+    } else if ($("#comment-box").attr("data-replyToEppn")) {
+        saveCommentOrReply(dataForSave, false);
+        $("#comment-box").parent().fadeOut();
+    } else {
+        console.log("Saved As Comment");
+        saveCommentOrReply(dataForSave, true);
+        $("#comment-box").parent().fadeOut();
     }
+
 }
 
 //return a dictionary with the data we need to save
@@ -139,6 +136,7 @@ function saveCommentOrReply(dataForSave, isFirstComment) {
         commentType: isFirstComment ? dataForSave["commentType"] : null, // if this is saving reply type will be null
         visibility: dataForSave["visibility"]
     };
+
     API.request({
         method: "POST",
         endpoint: "save_comments",

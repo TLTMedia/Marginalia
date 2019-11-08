@@ -653,6 +653,7 @@ function launchToastNotifcation(data) {
     }
     var snackbarContainer = document.querySelector('.mdl-js-snackbar');
     snackbarContainer.MaterialSnackbar.showSnackbar(message);
+    snackbarContainer.MaterialSnackbar.showSnackbar(message);
 }
 
 //Make sure the dialog don't exceed the window

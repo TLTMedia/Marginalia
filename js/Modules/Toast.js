@@ -6,7 +6,28 @@ export class Toast {
         console.log("Toast Module Loaded");
     }
 
-    create_toast(message) {
-        launchToastNotifcation(message);
+    /**
+     * Can be type: [info, error, warning, success]
+     */
+    create_toast(message, type = "info") {
+        toastr.options = {
+            "closeButton": true,
+            "debug": false,
+            "newestOnTop": false,
+            "progressBar": false,
+            "positionClass": "toast-bottom-center",
+            // "preventDuplicates": true,
+            "onclick": null,
+            "showDuration": "300",
+            "hideDuration": "1000",
+            "timeOut": "4000",
+            "extendedTimeOut": "1000",
+            "showEasing": "swing",
+            "hideEasing": "linear",
+            "showMethod": "fadeIn",
+            "hideMethod": "fadeOut"
+        };
+
+        toastr[type](message);
     }
 }
