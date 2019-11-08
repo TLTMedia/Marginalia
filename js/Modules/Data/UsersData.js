@@ -1,19 +1,10 @@
 export class UsersData {
-    constructor({ state, api, grouping = '' } = {}) {
-        console.log("UsersData Module Loaded");
+    constructor({ state = state, api = api, grouping = '' } = {}) {
+        console.log("Data/UsersData Module Loaded");
 
         this.state = state;
         this.api = api;
         this.grouping = grouping;
-
-        /**
-         * Must be called at end of constructor
-         */
-        return (async () => {
-            this.creator_list = await this.get_creators();
-
-            return this;
-        })();
     }
 
     async get_selected_course_users(course) {

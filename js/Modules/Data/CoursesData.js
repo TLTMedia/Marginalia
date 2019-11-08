@@ -1,6 +1,6 @@
 export class CoursesData {
     constructor({ state = state, api = api }) {
-        console.log("CoursesData Module Loaded");
+        console.log("Data/CoursesData Module Loaded");
 
         this.state = state;
         this.api = api;
@@ -23,17 +23,17 @@ export class CoursesData {
         return await creators_list;
     }
 
-    async is_user_course_admin(){
+    async is_user_course_admin() {
         let is_admin = this.api.request({
             endpoint: 'is_courses_admin',
         });
         return await is_admin;
     }
 
-    async add_course(courseName){
+    async add_course(courseName) {
         let respond = this.api.request({
             endpoint: "add_course",
-            data:{
+            data: {
                 course: courseName
             },
             method: "POST"

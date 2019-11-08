@@ -1,7 +1,7 @@
 /**
  * Initialization of Marginalia scripts begin here
  */
-import { InterfaceController, APIHandler, CoursesData, UsersData, WorksData, CommentsData, Toast, Address } from './Modules/_ModuleLoader.js';
+import { InterfaceController, APIHandler, Data, Toast, Address } from './Modules/_ModuleLoader.js';
 
 (async () => {
     const state = {};
@@ -17,7 +17,7 @@ import { InterfaceController, APIHandler, CoursesData, UsersData, WorksData, Com
      */
     state.quill = new Quill("#quill-editor", {
         theme: "snow",
-        placehold: "Type here",
+        placeholder: "type your text here...",
         modules: {
             toolbar: [
                 ["bold", "italic", "underline", "strike"],
@@ -34,41 +34,22 @@ import { InterfaceController, APIHandler, CoursesData, UsersData, WorksData, Com
         return this.container.querySelector('.ql-editor').innerHTML;
     };
 
-    const toast = new Toast();
-    const api = new APIHandler();
-
-    /** 
-     * Since we're using multiple await's in a single async - 
-     * we must first declare each, then we can await them all 
+    /**
+     * Toast module
      */
-    const courses_init = new CoursesData({
-        state: state,
-        api: api,
-    });
-    const users_init = new UsersData({
-        state: state,
-        api: api,
-    });
-    const works_init = new WorksData({
-        state: state,
-        api: api,
-    });
-    const comments_init = new CommentsData({
-        state: state,
-        api: api,
-    });
+    const toast = new Toast();
 
     /**
-     * These must be await, 
-     * & must be declared separately from their declarations
-     * 
-     * Cannot have inline await declarations e.g.) const courses = await new Courses(api);
-     * You can if you have only 1 await in an async block, but not in this case where there's multiple. 
+     * Creates the API handler object which is responsible for dealing with all of Marginalia's API calls;
+     * This object should only be used in "Data" Class/Objects
      */
-    const courses_data = await courses_init;
-    const users_data = await users_init;
-    const works_data = await works_init;
-    const comments_data = await comments_init;
+    const api = new APIHandler();
+
+    /**
+     * The data class creates all the other data classes which contain methods for API requests
+     */
+    const data = new Data({ state: state, api: api });
+    state.api_data = data;
 
     /**
      * Classes that need awaited objects
@@ -76,17 +57,14 @@ import { InterfaceController, APIHandler, CoursesData, UsersData, WorksData, Com
     const ui = new InterfaceController({
         state: state,
         toast: toast,
-        users_data: users_data,
-        works_data: works_data,
-        courses_data: courses_data,
-        comments_data: comments_data,
     });
 
+    /**
+     * Call the init() script of Marginalia
+     */
     init({
         state: state,
         ui: ui,
-        api: api,
-        courses: courses_data,
-        users: users_data,
+        api: api, // remove eventually
     });
 })();

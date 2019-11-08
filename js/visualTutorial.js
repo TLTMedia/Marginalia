@@ -16,14 +16,12 @@ function showTutorialPage(ui) {
         console.log("doing tutorial #", tutorialNum);
         console.log(ui)
         $.modal.close();
-        tutorial(tutorialNum,interfaceController);
+        tutorial(tutorialNum, interfaceController);
         evt.stopPropagation();
         //open or make an example page first
         //then add the tutorials and run it
         //after complete direct it back to the tutorial page
     });
-
-
 }
 
 function startTutorial(tutorialData, specialStepData, ui) {
@@ -93,7 +91,7 @@ function waitTutorialCreation(tutorialData, specialStepData, ui) {
     }, 100);
 }
 
-async function tutorial(tutorialNum,ui) {
+async function tutorial(tutorialNum, ui) {
     console.log("call tutorial")
     let allData = await preTutorial(tutorialNum, ui);
     //TODO see if anything needs special steps
@@ -101,7 +99,7 @@ async function tutorial(tutorialNum,ui) {
     waitTutorialCreation(allData[0], allData[1], ui);
 }
 
-async function preTutorial(tutorialNum,ui) {
+async function preTutorial(tutorialNum, ui) {
     console.log("preTutoiral called")
     if (tutorialNum == 1) {
         $("#litadd").click();
@@ -119,7 +117,7 @@ async function preTutorial(tutorialNum,ui) {
         //TODO make a example page for tutorial
         ui.state.selected_creator = "shihclin@stonybrook.edu";
         console.log(ui.state)
-        ui.ui_events.click_work_option("","Example");
+        ui.ui_events.click_work_option("", "Example");
 
         // TODO open the example page (if there is an api for this, it will be nice)
         var tutorialData = [
@@ -137,16 +135,16 @@ async function preTutorial(tutorialNum,ui) {
     else if (tutorialNum == 3) {
         //TODO make a example page for tutorial temporary HARD CODED
         ui.state.selected_creator = "shihclin@stonybrook.edu";
-        ui.ui_events.click_work_option("","Example");
+        ui.ui_events.click_work_option("", "Example");
         let data = {
-            "work" : "Example",
-            "author" : "shihclin@stonybrook.edu",
-            "commentCreator" : "shihclin@stonybrook.edu",
-            "commentId" : 1572021529,
-            "commentType" : "Historical",
-            "evtPageX" : 100,
-            "evtPageY" : 100,
-            "evtClientY" : 100
+            "work": "Example",
+            "author": "shihclin@stonybrook.edu",
+            "commentCreator": "shihclin@stonybrook.edu",
+            "commentId": 1572021529,
+            "commentType": "Historical",
+            "evtPageX": 100,
+            "evtPageY": 100,
+            "evtClientY": 100
         }
         clickOnComment(data);
         // also open the first discussion
@@ -159,18 +157,18 @@ async function preTutorial(tutorialNum,ui) {
         var specialStepData = {};
         return data = [tutorialData, specialStepData];
     }
-    else if (tutorialNum == 4){
+    else if (tutorialNum == 4) {
         //TODO  HARDED CODED
         ui.state.selected_course = "WRT 102 - Fall 2019";
         ui.state.selected_creator = "shihclin@stonybrook.edu";
         ui.state.selected_work = "Example";
         ui.show_settings();
         var tutorialData = [
-          [".litWhiteListButton", 1, "Click on this to manage the white list (People that are able to approve other people's comments)"],
-          [".settingDataButton", 2, "Click on this to check the data about the current work"],
-          [".deleteWorkButton", 3, "Click on this to delete the current work"],
-          [".privacySwitch", 4, "Toggle the switch to set the privacy for current work"],
-          [".commentsNeedApprovalSwitch", 5, "Toggle the switch to make all the comments in the current work require approval"]
+            [".litWhiteListButton", 1, "Click on this to manage the white list (People that are able to approve other people's comments)"],
+            [".settingDataButton", 2, "Click on this to check the data about the current work"],
+            [".deleteWorkButton", 3, "Click on this to delete the current work"],
+            [".privacySwitch", 4, "Toggle the switch to set the privacy for current work"],
+            [".commentsNeedApprovalSwitch", 5, "Toggle the switch to make all the comments in the current work require approval"]
         ];
         var specialStepData = {};
         return data = [tutorialData, specialStepData];

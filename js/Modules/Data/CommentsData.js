@@ -1,6 +1,6 @@
 export class CommentsData {
     constructor({ state = state, api = api }) {
-        console.log("CommentsData Module Loaded");
+        console.log("Data/CommentsData Module Loaded");
 
         this.state = state;
         this.api = api;

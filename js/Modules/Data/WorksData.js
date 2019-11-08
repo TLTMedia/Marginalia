@@ -1,6 +1,6 @@
 export class WorksData {
-    constructor({ state, api } = {}) {
-        console.log("WorksData Module Loaded");
+    constructor({ state = state, api = api }) {
+        console.log("Data/WorksData Module Loaded");
 
         this.state = state;
         this.api = api;

@@ -1,14 +1,11 @@
-import { MainMenuEvents, UploadEvents, SettingsEvents, HomeEvents, FiltersEvents ,AddCourseEvents } from './BaseEventBinds/_ModuleLoader.js';
+import { MainMenuEvents, UploadEvents, SettingsEvents, HomeEvents, FiltersEvents, AddCourseEvents } from './BaseEventBinds/_ModuleLoader.js';
 
 export class BaseEventBinds {
-    constructor({ state = state, ui = ui, courses_data = courses_data, works_data = works_data, comments_data = comments_data }) {
+    constructor({ state = state, ui = ui }) {
         console.log("BaseEventBinds Module Loaded");
 
         this.state = state;
         this.ui = ui;
-        this.courses_data = courses_data;
-        this.works_data = works_data;
-        this.comments_data = this.comments_data;
 
         /**
          * Events binded on the whole page
@@ -17,26 +14,30 @@ export class BaseEventBinds {
             state: state,
             base_events: this,
             ui: ui,
-            courses_data: courses_data,
+            courses_data: state.api_data.courses_data,
         });
+
         this.main_menu_events = new MainMenuEvents({
             state: state,
             base_events: this,
             ui: ui,
         });
+
         this.upload_events = new UploadEvents({
             state: state,
             ui: ui,
-            courses_data: courses_data,
-            works_data: works_data,
+            courses_data: state.api_data.courses_data,
+            works_data: state.api_data.works_data,
         });
+
         this.settings_events = new SettingsEvents({
             state: state,
             ui: ui,
-            courses_data: courses_data,
-            works_data: works_data,
-            comments_data: comments_data,
+            courses_data: state.api_data.courses_data,
+            works_data: state.api_data.works_data,
+            comments_data: state.api_data.comments_data,
         });
+
         this.filters_events = new FiltersEvents({
             state: state,
             ui: ui,
@@ -44,9 +45,9 @@ export class BaseEventBinds {
         });
 
         this.addCourse_events = new AddCourseEvents({
-           state: state,
-           ui: ui,
-           courses_data: courses_data
+            state: state,
+            ui: ui,
+            courses_data: state.api_data.courses_data
         });
     }
 
@@ -80,6 +81,6 @@ export class BaseEventBinds {
         /**
          * Events for the add Course modal
          */
-         this.addCourse_events.preload();
+        this.addCourse_events.preload();
     }
 }

@@ -1,7 +1,7 @@
 import { BaseEventBinds, InterfaceEvents } from './_ModuleLoader.js';
 
 export class InterfaceController {
-    constructor({ state = state, toast = toast, users_data = users_data, works_data = works_data, courses_data = courses_data, comments_data = comments_data }) {
+    constructor({ state = state, toast = toast }) {
         console.log("InterfaceController Module Loaded");
 
         /**
@@ -37,26 +37,20 @@ export class InterfaceController {
         this.state = state;
         this.toast = toast;
 
+        this.base_events = new BaseEventBinds({
+            state: state,
+            ui: this,
+        });
+
+        this.ui_events = new InterfaceEvents({
+            state: state,
+            ui: this,
+        });
+
         /**
          * TODO:
          * I kind of want to avoid having data classes be used here (rather the data should be passed in...)
          */
-        this.works_data = works_data;
-        this.comments_data = comments_data;
-
-        this.base_events = new BaseEventBinds({
-            state: state,
-            ui: this,
-            courses_data: courses_data,
-            works_data: works_data,
-            comments_data: comments_data,
-        });
-        this.ui_events = new InterfaceEvents({
-            state: state,
-            ui: this,
-            users_data: users_data,
-            works_data: works_data,
-        });
     }
 
     /**
@@ -375,7 +369,7 @@ export class InterfaceController {
     /**
      * Show add course page
      */
-    show_addCourse_page() {
+    show_add_course_page() {
         $("#add-course-modal").modal({
             closeClass: 'icon-remove',
             closeText: '!'
@@ -454,7 +448,7 @@ export class InterfaceController {
         render_area.empty();
 
         // get the work data
-        let data = await this.works_data.get_work_data();
+        let data = await this.state.api_data.works_data.get_work_data();
         if (data.status == "ok") {
             // set the deep link
             $.address.value("get_work/" + this.state.selected_course + "/" + this.state.selected_creator + "/" + this.state.selected_work);
@@ -467,7 +461,7 @@ export class InterfaceController {
 
             // NOTE: / TODO: we are getting the comment data here & in buildHTMLFile... When I recode buildHTMLFile,
             // take note of it already being called here. (should be able to use it?)
-            let work_comment_data = await this.comments_data.get_work_highlights();
+            let work_comment_data = await this.state.api_data.comments_data.get_work_highlights();
 
             // reset the filters - this happens here b.c. filters menu persists changes unless work is changed
             this.base_events.filters_events.reset(work_comment_data);
@@ -482,12 +476,13 @@ export class InterfaceController {
         }
     }
 
-    async populate_addCourse_termList() {
+    populate_add_course_term_list() {
         let today = new Date();
         let year = today.getFullYear();
         let month = today.getMonth();
         let season = ["Spring", "Summer", "Fall", "Winter"];
         let years = [year, year + 1];
+
         if ($(".termsListForAddCourse").children("li").length == 0) {
             for (let i in years) {
                 for (let j in season) {
@@ -504,5 +499,9 @@ export class InterfaceController {
                 }
             }
         }
+    }
+
+    show_tutorial() {
+        showTutorialPage(this);
     }
 }

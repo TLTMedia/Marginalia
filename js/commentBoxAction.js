@@ -172,7 +172,7 @@ function saveCommentOrReply(dataForSave, isFirstComment) {
             }
             $('.' + escapeSpecialChar(remSpan)).attr({
                 'commentId': data['commentHash'],
-                'creator': currentUser.eppn,
+                'creator': TMP_STATE.current_user.eppn,
                 'typeof': dataForSave['commentType'],
                 'approved': approved
             });
@@ -386,7 +386,7 @@ function displayCommentBox(evt, selectedType) {
         'top': newPosition["newTop"],
         'left': newPosition["newLeft"]
     })
-    $("#comment-box").parent().find("#ui-id-1").contents().filter(function () { return this.nodeType == 3; }).first().replaceWith("Annotation by: " + currentUser['firstname'] + " " + currentUser['lastname']);
+    $("#comment-box").parent().find("#ui-id-1").contents().filter(function () { return this.nodeType == 3; }).first().replaceWith("Annotation by: " + TMP_STATE.current_user['firstname'] + " " + TMP_STATE.current_user['lastname']);
     $("#comment-box").parent().fadeIn();
     if (selectedType != "All" && selectedType != undefined) {
         console.log(selectedType);

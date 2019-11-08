@@ -1,17 +1,17 @@
 export class InterfaceEvents {
-    constructor({ state = state, users_data = users_data, works_data = works_data, ui = ui }) {
+    constructor({ state = state, ui = ui }) {
         console.log("InterfaceEvents Module Loaded");
 
         this.state = state;
-        this.users_data = users_data;
-        this.works_data = works_data;
         this.ui = ui;
+
+        this.data = state.api_data;
     }
 
     async click_course_option(event, course) {
         this.state.selected_course = course;
 
-        let users = await this.users_data.get_selected_course_users(course);
+        let users = await this.data.users_data.get_selected_course_users(course);
 
         if (!this.ui.populate_users_dropdown(users)) {
             console.error("error while attempting to populate courses dropdown");
@@ -23,7 +23,7 @@ export class InterfaceEvents {
     async click_user_option(event, creator) {
         this.state.selected_creator = creator;
 
-        let works = await this.works_data.get_selected_course_works(this.state.selected_course, creator);
+        let works = await this.data.works_data.get_selected_course_works(this.state.selected_course, creator);
 
         if (!this.ui.populate_works_dropdown(works)) {
             console.error("error while attempting to populate works dropdown");
@@ -58,9 +58,9 @@ export class InterfaceEvents {
          */
         let res;
         if ($("#wl_" + escapeSpecialChar(eppn_modify)).is(":checked")) {
-            res = await this.works_data.add_work_permission(this.state.selected_work, eppn_modify);
+            res = await this.data.works_data.add_work_permission(this.state.selected_work, eppn_modify);
         } else {
-            res = await this.works_data.remove_work_permission(this.state.selected_work, eppn_modify);
+            res = await this.data.works_data.remove_work_permission(this.state.selected_work, eppn_modify);
         }
 
         this.ui.toast.create_toast(res);
@@ -69,7 +69,7 @@ export class InterfaceEvents {
     bind_redirect_confirmation(specificElement) {
         $(specificElement).on("click", function (event) {
             //was called without element having .attr("href")
-            var elHref=$(specificElement).attr("href")||window.location.host;
+            var elHref = $(specificElement).attr("href") || window.location.host;
 
 
             if (elHref.indexOf(window.location.host) !== -1) {

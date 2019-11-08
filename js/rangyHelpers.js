@@ -27,7 +27,7 @@ function highlightCurrentSelection(evt, selectedType) {
 }
 
 function unhighlight() {
-    remSpan = "hl_" + currentUser.eppn;
+    remSpan = "hl_" + TMP_STATE.current_user.eppn;
     console.log(remSpan);
     var text = $("." + escapeSpecialChar(remSpan)).text();
     $("." + escapeSpecialChar(remSpan)).contents().unwrap();
@@ -35,7 +35,7 @@ function unhighlight() {
 }
 
 function hlRange(selectedRange, range) {
-    remSpan = ("hl_" + currentUser.eppn);
+    remSpan = ("hl_" + TMP_STATE.current_user.eppn);
     let applierCount = rangy.createClassApplier(remSpan, {
         useExistingElements: false,
         elementAttributes: {

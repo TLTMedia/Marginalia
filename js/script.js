@@ -2,8 +2,6 @@
  * These globals are temporary until javascript is refactored into modules
  * TODO: I need to check to see where these are used... I don't even know if they still are.
  */
-var TEXTSPACE = "textSpace";
-var currentUser = {};
 var remSpan; // holds the name of made and clicked spans
 
 /**
@@ -17,23 +15,22 @@ var TMP_STATE;
   Loads the userdata obtained by the netID login
   Loads the users folder and creates a button for each user
 */
-init = async ({ state = state, ui = ui, api = api, courses = courses, users = users }) => {
+init = async ({ state = state, ui = ui, api = api }) => {
     /**
      * TODO: For legacy purposes...
      */
     TMP_STATE = state;
     API = api;
 
-    $(".loader").hide();
+    /**
+     * API Data object which has references to other Data objects for making API requests
+     */
+    let api_data = state.api_data;
 
     /**
      * Set the current user in the state
      */
-    state.current_user = await users.get_current_user();
-    /**
-     * TODO: here for legacy purposes...
-     */
-    currentUser = state.current_user;
+    state.current_user = await api_data.users_data.get_current_user();
 
     /**
      * Load & bind initial base events
@@ -67,12 +64,12 @@ init = async ({ state = state, ui = ui, api = api, courses = courses, users = us
         }
     }
 
-    $("#tutorial").off().on("click", function () {
-        showTutorialPage(ui);
+    $("#tutorial").off().on("click", () => {
+        ui.show_tutorial();
     })
 
     /**
-     * Leave these functions at the bottom of init()
+     * Temporarily leave these functions at the bottom of init()
      */
     $(window).on("resize", function () {
         let stageWidth = $(window).width();
@@ -92,6 +89,16 @@ init = async ({ state = state, ui = ui, api = api, courses = courses, users = us
                 ui.ui_events.bind_redirect_confirmation(currentElement);
             }
         });
+    });
+
+    /**
+     * Global event necessary to facilitate highlighting, probably should be in its own events file...
+     */
+    $(document).on("DOMNodeInserted", e => {
+        const classes = $(e.target).attr("class");
+        if (classes && classes.match(/^hl_/)) {
+            $(e.target).addClass("commented-selection");
+        }
     });
 }
 
@@ -178,27 +185,6 @@ function createTips() {
     //workTitle.prepend(tips);
 }
 
-// function createPageFooter() {
-//     let footer = $("<footer/>", {
-//         class: "mdl-mini-footer",
-//     });
-//     let leftSection = $("<div/>", {
-//         class: "mdl-mini-footer__left-section"
-//     });
-//     let list = $("<ul/>", {
-//         class: "mdl-mini-footer__link-list"
-//     });
-//     let help = $("<li/>");
-//     help.html("Help");
-//     let contact = $("<li/>");
-//     contact.html("Contact Us");
-//     list.append(help, contact);
-//     leftSection.append(list);
-//     footer.append(leftSection);
-//     return footer;
-// }
-
-
 
 
 function makeDropDown() {
@@ -284,7 +270,7 @@ loadUserComments = (selected_eppn, textChosen, selectedType, selectedCommenter) 
 renderComments = (commentData, selected_eppn, textChosen, callback) => {
     $("#text-wrapper").fadeIn();
     $("#textSpace").fadeIn();
-    let temp;
+
     for (let i = 0; i < commentData.length; i++) {
         highlightText({
             startIndex: commentData[i].startIndex,
@@ -292,27 +278,35 @@ renderComments = (commentData, selected_eppn, textChosen, callback) => {
             commentType: commentData[i].commentType,
             eppn: commentData[i].eppn,
             hash: commentData[i].hash,
-            approved: commentData[i].approved
+            approved: commentData[i].approved,
         });
     }
     handleStartEndDiv(commentData);
     // $("#text").css("height", $("#litDiv").height() + "px");
     //highlight to post comments
 
+    $("#litDiv").off().on("mousedown", () => {
+        TMP_STATE.select_valid = true;
+    });
 
-    $("#litDiv").off().on("mouseup", function (evt) {
-        //TODO this is triggered everytime when we click on a comment need to fix this
-        console.log(evt)
-        if (evt["target"]["classList"][0] == "commented-selection") {
-            // launchToastNotifcation("You are not allowed to highlight inside someone's comment.");
-            // launchToastNotifcation("If you want to start another kind of discussion, please use the filter first.");
-        }
-        else {
-            let selectedType = $("#typeSelector").attr("currentTarget");
-            console.log(selectedType)
-            highlightCurrentSelection(evt, selectedType);
+    $("#litDiv").on("mouseup", function (evt) {
+        if (TMP_STATE.select_valid == true) {
+            // the next time they highlight it must start with a mousedown in #litDiv
+            TMP_STATE.select_valid = false;
+
+            //TODO this is triggered everytime when we click on a comment need to fix this
+            console.log(evt)
+            if (evt["target"]["classList"][0] == "commented-selection") {
+                // launchToastNotifcation("You are not allowed to highlight inside someone's comment.");
+                // launchToastNotifcation("If you want to start another kind of discussion, please use the filter first.");
+            } else {
+                let selectedType = $("#typeSelector").attr("currentTarget");
+                console.log(selectedType)
+                highlightCurrentSelection(evt, selectedType);
+            }
         }
     });
+
     allowClickOnComment(textChosen, selected_eppn);
     callback(selected_eppn, textChosen);
 }
@@ -344,7 +338,7 @@ function highlightText({
     approved
 }) {
     let range = rangy.createRange();
-    range.selectCharacters(document.getElementById(TEXTSPACE), startIndex, endIndex);
+    range.selectCharacters(document.getElementById("textSpace"), startIndex, endIndex);
     let area = rangy.createClassApplier("commented-selection", {
         useExistingElements: false,
         elementAttributes: {
@@ -611,7 +605,7 @@ function createListOfCommenter(data) {
 
 // this function only check if the selected_eppn is same as the current user or not
 function isCurrentUserSelectedUser(selected_eppn, needNotification) {
-    if (selected_eppn == currentUser.eppn) {
+    if (selected_eppn == TMP_STATE.current_user.eppn) {
         return true;
     } else {
         if (needNotification) {
@@ -636,9 +630,9 @@ function checkworkAdminList(selected_eppn, litId, mode) {
     }).then((data) => {
         let isInWhiteList = false
         for (var i = 0; i < data["admins"].length; i++) {
-            if (currentUser.eppn == data["admins"][i]) {
+            if (TMP_STATE.current_user.eppn == data["admins"][i]) {
                 isInWhiteList = true;
-                console.log(currentUser.eppn, " in admins");
+                console.log(TMP_STATE.current_user.eppn, " in admins");
             }
         }
         if (!isInWhiteList) {
