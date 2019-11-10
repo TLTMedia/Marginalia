@@ -265,20 +265,32 @@ function commentMenuOnClick(rid) {
 }
 
 function replyButtonOnClick(evt, hash) {
+    console.log(TMP_STATE)
     var replyToEppn = $(".replies" + "[commentid = '" + hash + "']").attr('name');
-    $("#comment-box").attr("data-replyToEppn", replyToEppn);
-    $("#comment-box").attr("data-replyToHash", hash);
+
+    TMP_STATE.commentBox_data = {
+      "eppn_to_reply_to" : replyToEppn,
+      "hash_to_reply_to" : hash
+    };
+    delete TMP_STATE.commentBox_data.edit_comment_id;
+
+    // $("#comment-box").attr("data-replyToEppn", replyToEppn);
+    // $("#comment-box").attr("data-replyToHash", hash);
+    // $("#comment-box").attr("data-editCommentID", "-1");
+
     TMP_STATE.quill.setText("");
     // CKEDITOR.instances.textForm.setData("");
     $('.commentTypeDropdown').attr('disabled', true);
-    var firstCommentId = $('#replies').attr('data-firstCommentId');
+    var firstCommentId = TMP_STATE.replyBox_data.first_comment_id;
     $('.commentTypeDropdown').val($(".commented-selection" + "[commentId = '" + firstCommentId + "']").attr("typeof"));
-    $("#comment-box").attr("data-editCommentID", "-1");
     displayCommentBox(evt);
 }
 
 function editButtonOnClick(evt, inText, hash) {
-    $("#comment-box").attr("data-editCommentID", hash);
+    //$("#comment-box").attr("data-editCommentID", hash);
+    TMP_STATE.commentBox_data = {
+      "edit_comment_id" : hash
+    };
     displayCommentBox(evt);
     TMP_STATE.quill.setText(inText);
     // CKEDITOR.instances.textForm.setData(inText);
@@ -286,13 +298,14 @@ function editButtonOnClick(evt, inText, hash) {
     if ($(".replies" + "[commentid = '" + hash + "']").attr('type') != undefined) {
         $('.commentTypeDropdown').removeAttr('disabled');
     }
-    var firstCommentId = $('#replies').attr('data-firstCommentId');
+    let firstCommentId = TMP_STATE.replyBox_data.first_comment_id;
     $('.commentTypeDropdown').val($(".commented-selection" + "[commentId = '" + firstCommentId + "']").attr("typeof"));
 }
 
 function deleteButtonOnClick(hash, eppn, hashForReply, work, workCreator) {
-    var deletedId = hash;
-    $("#replies").attr("deletedId", deletedId);
+    console.log(TMP_STATE);
+    TMP_STATE.replyBox_data["delete_comment_id"] = hash;
+    //$("#replies").attr("deletedId", hash);
     var data = getDataForEditOrDelete(workCreator, work, hash, eppn, null, null);
     editOrDelete(data, false);
 }
@@ -360,6 +373,7 @@ function commentApprovedOrUnapprovedButtonOnClick(hash, commenterEppn, work, wor
 // This displays the replies for the current comment box
 //TODO find a way to get the height of the replyBox
 function displayReplyBox(data) {
+    console.log(data);
     var marginX = 10;
     var marginY = 50;
     var newPosition = adjustDialogPosition(data, 500, 177, marginX, marginY);
@@ -370,8 +384,13 @@ function displayReplyBox(data) {
     });
     // ui-id-2 is the id for the title of the reply box
     $("#ui-id-2").empty().html(data["commentType"]);
+    TMP_STATE.replyBox_data = {
+      "first_comment_id":data["commentId"],
+      "first_comment_author":data["commentCreator"]
+    };
     $("#replies").attr("data-firstCommentId", data["commentId"]);
     $("#replies").parent().fadeIn();
+    console.log(TMP_STATE.replyBox_data);
 }
 
 function hideReplyBox() {

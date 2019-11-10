@@ -1,7 +1,7 @@
 var remSpan;
 
 //applies the hl to the area selected by the user
-function highlightCurrentSelection(evt, selectedType) {
+function highlightCurrentSelection(evt, selected_filter) {
     var selectedRange = rangy.getSelection().getRangeAt(0);
     var lightRange = lightrange.saveSelection();
     selectedRange["nativeRange"] = lightRange;
@@ -21,7 +21,7 @@ function highlightCurrentSelection(evt, selectedType) {
         if ($("." + escapeSpecialChar(remSpan)).parent().attr("class") != "commented-selection") {
             $("#replies").parent().hide();
             $(".loader").hide();
-            displayCommentBox(evt, selectedType);
+            displayCommentBox(evt, selected_filter);
         }
     }
 }

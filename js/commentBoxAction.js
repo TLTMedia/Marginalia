@@ -63,6 +63,7 @@ function createCloseCommentBoxButton() {
 }
 
 function saveButtonOnClick(workCreator, work) {
+    console.log(TMP_STATE)
     let commentText = TMP_STATE.quill.getHTML();
 
     if (commentText == "<p><br></p>") {
@@ -72,15 +73,21 @@ function saveButtonOnClick(workCreator, work) {
 
     var literatureName = work;
     var creator = workCreator;
+    //TODO this return undefined or null when I disabled the dropdown
     var commentType = $(".commentTypeDropdown").val();
+
     var span = $("." + escapeSpecialChar(remSpan));
-    var replyTo = $("#comment-box").attr("data-replytoeppn");
-    var replyHash = $('#comment-box').attr("data-replytohash");
-    var dataForSave = getDataForSave(creator, literatureName, commentText, commentType, span, replyTo, replyHash);
+    // var replyTo = $("#comment-box").attr("data-replytoeppn");
+    // var replyHash = $('#comment-box').attr("data-replytohash");
+
+    let replyEppn = TMP_STATE.commentBox_data?TMP_STATE.commentBox_data.eppn_to_reply_to:undefined;
+    let replyHash = TMP_STATE.commentBox_data?TMP_STATE.commentBox_data.hash_to_reply_to:undefined;
+    var editCommentID = TMP_STATE.commentBox_data?TMP_STATE.commentBox_data.edit_comment_id:undefined;
+
+    var dataForSave = getDataForSave(creator, literatureName, commentText, commentType, span, replyEppn, replyHash);
     //console.log(dataForSave);
-    var editCommentID = $("#comment-box").attr("data-editCommentID");
-    //if editCommentId is not -1 it is an edit action
-    if (editCommentID != "-1") {
+
+    if (editCommentID != undefined) {
         var commentCreatorEppn = $(".replies" + "[commentid = '" + editCommentID + "']").attr('name');
         var commentType;
         //check if this is a coment or reply (reply will not have a type)
@@ -91,19 +98,14 @@ function saveButtonOnClick(workCreator, work) {
             commentType = null;
         }
         var dataForEdit = getDataForEditOrDelete(creator, literatureName, editCommentID, commentCreatorEppn, commentType, commentText, true);
-        //console.log(dataForEdit);
-        editOrDelete(dataForEdit, true);
+        editOrDelete(dataForEdit, TMP_STATE.commentBox_data.edit_comment_id);
         $("#comment-box").attr('data-editCommentID', '-1');
         $("#comment-box").parent().fadeOut();
-    } else if ($("#comment-box").attr("data-replyToEppn")) {
-        saveCommentOrReply(dataForSave, false);
-        $("#comment-box").parent().fadeOut();
-    } else {
-        console.log("Saved As Comment");
-        saveCommentOrReply(dataForSave, true);
+    }
+    else{
+        saveCommentOrReply(dataForSave, replyEppn);
         $("#comment-box").parent().fadeOut();
     }
-
 }
 
 //return a dictionary with the data we need to save
@@ -122,9 +124,8 @@ function getDataForSave(creator, literatureName, commentText, commentType, span,
     return dataForSave;
 }
 
-// isComment is true then this is the first comment
-// isComment is false mean this is a reply to some other people's comment
-function saveCommentOrReply(dataForSave, isFirstComment) {
+//replyEppn is the eppn we are going to reply to. replyEppn = undefined if this is the first comment
+function saveCommentOrReply(dataForSave, replyEppn) {
     let savedData = {
         author: dataForSave["author"],
         work: dataForSave["work"],
@@ -133,7 +134,7 @@ function saveCommentOrReply(dataForSave, isFirstComment) {
         startIndex: dataForSave["startIndex"],
         endIndex: dataForSave["endIndex"],
         commentText: dataForSave["commentText"],
-        commentType: isFirstComment ? dataForSave["commentType"] : null, // if this is saving reply type will be null
+        commentType: replyEppn ? dataForSave["commentType"] : null, // if this is saving reply type will be null
         visibility: dataForSave["visibility"]
     };
 
@@ -143,17 +144,18 @@ function saveCommentOrReply(dataForSave, isFirstComment) {
         data: savedData,
         callback: null
     }).then((data) => {
+        console.log(replyEppn)
         launchToastNotifcation(data['message']);
         let firstCommentData, type;
         //reply to other user's comment
-        if (!isFirstComment) {
+        if (replyEppn) {
             console.log("hu")
-            var firstCommentId = $("#replies").attr("data-firstCommentId");
-            refreshReplyBox(dataForSave["author"], dataForSave["work"], $(".commented-selection" + "[commentId = '" + firstCommentId + "']").attr("creator"), firstCommentId);
+            let firstCommentId = TMP_STATE.replyBox_data.first_comment_id;
+            let firstCommentCreator = TMP_STATE.replyBox_data.first_comment_author;
+            refreshReplyBox(dataForSave["author"], dataForSave["work"], firstCommentCreator, firstCommentId);
         }
         // the first comment
         else {
-            console.log("yo")
             let approved;
             let index = {
                 'start': $('.' + escapeSpecialChar(remSpan)).attr("startIndex"),
@@ -206,7 +208,8 @@ function getDataForEditOrDelete(creator, literatureName, hash, commentCreatorEpp
     return dataForEditOrDelete;
 }
 
-function editOrDelete(dataForEditOrDelete, isEdit) {
+//edit_comment_id is the comment id that we are going to edit. If this is a delete action edit_comment_id is undefined
+function editOrDelete(dataForEditOrDelete, edit_comment_id) {
     var endPoint;
     var commonData = {
         creator: dataForEditOrDelete["creator"],
@@ -214,7 +217,7 @@ function editOrDelete(dataForEditOrDelete, isEdit) {
         commenter: dataForEditOrDelete["commenter"],
         hash: dataForEditOrDelete["hash"]
     };
-    if (isEdit) {
+    if (edit_comment_id) {
         endPoint = "edit_comment";
         var editData = {
             type: dataForEditOrDelete["type"],
@@ -222,7 +225,8 @@ function editOrDelete(dataForEditOrDelete, isEdit) {
             public: dataForEditOrDelete["public"]
         };
         $.extend(commonData, editData);
-    } else {
+    }
+    else {
         endPoint = "delete_comment";
     }
     API.request({
@@ -232,9 +236,10 @@ function editOrDelete(dataForEditOrDelete, isEdit) {
         callback: null
     }).then((data) => {
         launchToastNotifcation(data);
-        var firstCommentId = $("#replies").attr("data-firstCommentId");
-        refreshReplyBox(dataForEditOrDelete["creator"], dataForEditOrDelete["work"], $(".commented-selection" + "[commentId = '" + firstCommentId + "']").attr("creator"), firstCommentId, editData["type"]);
-        if (isEdit) {
+        let firstCommentId = TMP_STATE.replyBox_data.first_comment_id;
+        let firstCommentCreator = TMP_STATE.replyBox_data.first_comment_author;
+        refreshReplyBox(dataForEditOrDelete["creator"], dataForEditOrDelete["work"], firstCommentCreator, firstCommentId, editData!= undefined?editData["type"]:undefined);
+        if (edit_comment_id) {
             if (dataForEditOrDelete["type"]) {
                 $(".commented-selection" + "[commentId = '" + dataForEditOrDelete["hash"] + "']").attr("typeof", dataForEditOrDelete["type"]);
                 colorNotUsedTypeSelector(dataForEditOrDelete["creator"], dataForEditOrDelete["work"]);
@@ -243,7 +248,8 @@ function editOrDelete(dataForEditOrDelete, isEdit) {
         else {
             //unhighlight the deleted comment
             //update the commenterSelector and the typeSelector
-            if (firstCommentId == $("#replies").attr("deletedid")) {
+            console.log(firstCommentId, TMP_STATE.replyBox_data.delete_comment_id);
+            if(firstCommentId == TMP_STATE.replyBox_data.delete_comment_id){
                 checkSpansNeedRecover(firstCommentId, removeDeletedSpan);
                 updateCommenterSelectors(firstCommentId);
                 colorNotUsedTypeSelector(dataForEditOrDelete["creator"], dataForEditOrDelete["work"]);
@@ -261,6 +267,7 @@ function editOrDelete(dataForEditOrDelete, isEdit) {
             }
             allowClickOnComment(dataForEditOrDelete["work"], dataForEditOrDelete["creator"])
             getUnapprovedComments(dataForEditOrDelete["creator"], dataForEditOrDelete["work"]);
+            delete TMP_STATE.replyBox_data.delete_comment_id;
             $("#replies").removeAttr("deletedid");
         }
     });
@@ -376,7 +383,7 @@ function exitButtonOnClick() {
 // }
 
 //commentBox width: 500 px ,height: 331px , marginX : 10, marginY : 50
-function displayCommentBox(evt, selectedType) {
+function displayCommentBox(evt, selected_filter) {
     var marginX = 10;
     var marginY = 50;
     var newPosition = adjustDialogPosition(evt, 500, 331, 10, 50);
@@ -386,9 +393,9 @@ function displayCommentBox(evt, selectedType) {
     })
     $("#comment-box").parent().find("#ui-id-1").contents().filter(function () { return this.nodeType == 3; }).first().replaceWith("Annotation by: " + TMP_STATE.current_user['firstname'] + " " + TMP_STATE.current_user['lastname']);
     $("#comment-box").parent().fadeIn();
-    if (selectedType != "All" && selectedType != undefined) {
-        console.log(selectedType);
-        $(".commentTypeDropdown").val(selectedType);
+    console.log(selected_filter);
+    if (selected_filter != "show-all-types") {
+        $(".commentTypeDropdown").val(selected_filter);
         $('.commentTypeDropdown').attr('disabled', true);
     }
 }

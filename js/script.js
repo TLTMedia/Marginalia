@@ -289,24 +289,20 @@ renderComments = (commentData, selected_eppn, textChosen, callback) => {
     // $("#text").css("height", $("#litDiv").height() + "px");
     //highlight to post comments
 
-    $("#litDiv").off().on("mousedown", () => {
+    $("#litDiv").off().on("mousedown", (evt) => {
         TMP_STATE.select_valid = true;
     });
-
+    
     $("#litDiv").on("mouseup", function (evt) {
         if (TMP_STATE.select_valid == true) {
-            // the next time they highlight it must start with a mousedown in #litDiv
+            var selectedRange = rangy.getSelection().getRangeAt(0);
             TMP_STATE.select_valid = false;
-
-            //TODO this is triggered everytime when we click on a comment need to fix this
-            console.log(evt)
             if (evt["target"]["classList"][0] == "commented-selection") {
-                // launchToastNotifcation("You are not allowed to highlight inside someone's comment.");
-                // launchToastNotifcation("If you want to start another kind of discussion, please use the filter first.");
+                launchToastNotifcation("You are not allowed to highlight inside someone's comment.");
+                launchToastNotifcation("If you want to start another kind of discussion, please use the filter first.");
             } else {
-                let selectedType = $("#typeSelector").attr("currentTarget");
-                console.log(selectedType)
-                highlightCurrentSelection(evt, selectedType);
+                let selected_filter = TMP_STATE.filters.selected_comment_filter;
+                highlightCurrentSelection(evt, selected_filter);
             }
         }
     });
