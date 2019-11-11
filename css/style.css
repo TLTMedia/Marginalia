@@ -1694,10 +1694,6 @@ input[type="file"] {
         background-size: 33% 100%;
         width: auto;
     } */
-    .introBoxes {
-        margin: 5% auto;
-        padding: 5%;
-    }
     #box {
         width: auto;
         height: auto;
@@ -1754,24 +1750,27 @@ input[type="file"] {
 
 #cardbox {
     display: none;
+
     border-radius: .75rem;
+
+    margin-top: 40px;
+    /* margin: 5% 0 5% 0; */
+    background-color: var(--bg-main-marginalia);
+    box-shadow: 2px 2px 8px #222222;
+    overflow: visible;
+    align-self: start;
+    width: 21rem;
+    /* max-width: 350px; */
+    /* padding: 4%; */
+    padding: 40px 40px 40px 40px;
+    /* height: 100px; */
+
+
     -moz-user-select: -moz-none;
     -khtml-user-select: none;
     -webkit-user-select: none;
     -ms-user-select: none;
     transition: all 200ms linear !important;
-}
-
-.introBoxes {
-    margin: 5% 0 5% 0;
-    background-color: var(--bg-main-marginalia);
-    box-shadow: 2px 2px 8px #222222;
-    overflow: visible;
-    align-self: center;
-    width: 21rem;
-    /* max-width: 350px; */
-    /* padding: 4%; */
-    padding: 40px 40px 40px 40px;
 }
 
 #firstPage {

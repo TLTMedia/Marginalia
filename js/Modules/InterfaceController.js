@@ -1,4 +1,5 @@
 import { BaseEventBinds, InterfaceEvents } from './_ModuleLoader.js';
+import { CommentsController } from './Controllers/_ModuleLoader.js';
 
 export class InterfaceController {
     constructor({ state = state, toast = toast }) {
@@ -36,6 +37,11 @@ export class InterfaceController {
 
         this.state = state;
         this.toast = toast;
+
+        this.comments_controller = new CommentsController({
+            state: state,
+            ui: this,
+        });
 
         this.base_events = new BaseEventBinds({
             state: state,
@@ -455,7 +461,7 @@ export class InterfaceController {
             $.address.value("get_work/" + this.state.selected_course + "/" + this.state.selected_creator + "/" + this.state.selected_work);
 
             // TODO:
-            buildHTMLFile(data.data, this.state.selected_creator, this.state.selected_work);
+            await this.build_html_file(data.data);
 
             // update the settings page
             await this.base_events.settings_events.postload();
@@ -475,6 +481,61 @@ export class InterfaceController {
             // work doesn't exist so load home
             $("#home").click();
         }
+    }
+
+    /**
+     * TODO:
+     * Loads the user's works folder and creates a button for each work they have
+     * When the button is clicked the variable userFolderSelected is the work's name
+     * The cooresponding work then has it's text and comment/reply data loaded
+     */
+    async build_html_file(lit_data) {
+        /**
+         * Make the comment box,
+         * TODO: this stuff breaks if it was already made, so find a way to only make these boxes once.
+         */
+        makeDraggableCommentBox(this.state.selected_creator, this.state.selected_work);
+        makeDraggableReplyBox();
+        hideAllBoxes();
+
+        let footer;
+        let titleAndTip = createWorkTitle(this.state.selected_work);
+
+        let litDiv = $("<div/>", {
+            "id": "litDiv"
+        });
+
+        let metaChar = $("<meta/>", {
+            "charset": "utf-8"
+        });
+
+        let metaName = $("<meta/>", {
+            "name": "viewport",
+            "content": 'width=device-width, initial-scale=1.0'
+        });
+
+        let link = $("<link/>", {
+            rel: "stylesheet",
+            type: "text/css",
+            media: "only screen",
+            href: "css/style.css"
+        });
+
+        let preText = $("<div/>", {
+            "id": "textSpace"
+        });
+
+        preText.html(lit_data);
+        litDiv.append(metaChar, metaName, link, preText);
+        titleAndTip[0].prepend(titleAndTip[1]);
+        $("#text").append(titleAndTip[0], litDiv);
+        $("#text").append(footer);
+
+
+        /**
+         * TODO: Get the comment data/highlights for the currently selected work
+         */
+        await this.comments_controller.load_user_comments();
     }
 
     populate_add_course_term_list() {

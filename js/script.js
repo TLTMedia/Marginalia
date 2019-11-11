@@ -123,58 +123,6 @@ init = async ({ state = state, ui = ui, api = api }) => {
     });
 }
 
-// Creates a visual list of all users which gives access to their folders
-/*
-  Loads the user's works folder and creates a button for each work they have
-  When the button is clicked the variable userFolderSelected is the work's name
-  The cooresponding work then has it's text and comment/reply data loaded
-*/
-function buildHTMLFile(litContents, selected_eppn, textChosen) {
-    console.log(selected_eppn, textChosen)
-
-    /**
-     * Make the comment box,
-     * TODO: this stuff breaks if it was already made, so find a way to only make these boxes once.
-     */
-    makeDraggableCommentBox(selected_eppn, textChosen);
-    makeDraggableReplyBox();
-    hideAllBoxes();
-
-    loadUserComments(selected_eppn, textChosen);
-    let footer;
-    let titleAndTip = createWorkTitle(textChosen);
-
-    var litDiv = $("<div/>", {
-        "id": "litDiv"
-    });
-
-    var metaChar = $("<meta/>", {
-        "charset": "utf-8"
-    });
-
-    var metaName = $("<meta/>", {
-        "name": "viewport",
-        "content": 'width=device-width, initial-scale=1.0'
-    });
-
-    var link = $("<link/>", {
-        rel: "stylesheet",
-        type: "text/css",
-        media: "only screen",
-        href: "css/style.css"
-    });
-
-
-    var preText = $("<div/>", {
-        "id": "textSpace"
-    });
-    preText.html(litContents);
-    litDiv.append(metaChar, metaName, link, preText);
-    titleAndTip[0].prepend(titleAndTip[1]);
-    $("#text").append(titleAndTip[0], litDiv);
-    $("#text").append(footer);
-}
-
 function createWorkTitle(textChosen) {
     let workTitle = $("<div/>", {
         id: "workTitle"
@@ -223,110 +171,47 @@ function makeDropDown() {
     });
 }
 
-// Load the user's comments after a work button is clicked
-/*
-  Fills the 3 comment variables with the comment/reply data
-  Each is mapped with its cooresponding Hex-Encoded UNIX timestamp
-  The student selection menu is filled with each student's netid
-*/
-
-loadUserComments = (selected_eppn, textChosen, selectedType, selectedCommenter) => {
-    if (selectedCommenter !== undefined) {
-        if (selectedCommenter.indexOf("@") == -1 && selectedCommenter != "show-all-eppns") {
-            selectedCommenter += "@stonybrook.edu"
-        }
-    }
-
-
-    let endpoint, data;
-    let isTypeAndCommenterUndefiend = (selectedType == undefined && selectedCommenter == undefined);
-
-    if (isTypeAndCommenterUndefiend) {
-        $("#text-wrapper").hide();
-        $("#textSpace").hide();
-        endpoint = "get_highlights";
-        data = {
-            creator: selected_eppn,
-            work: textChosen
-        }
-    }
-    // only reach here when selectorOnSelect() is called
-    else {
-        console.log(selectedType, selectedCommenter)
-        endpoint = "get_highlights_filtered";
-        data = {
-            creator: selected_eppn,
-            work: textChosen,
-            filterEppn: selectedCommenter == "show-all-eppns" ? "" : selectedCommenter,
-            filterType: selectedType == "show-all-types" ? "" : selectedType
-        }
-    }
-
-    API.request({
-        endpoint: endpoint,
-        data: data
-    }).then((data) => {
-        let sortedCommentData = [];
-
-        for (var i = 0; i < data.length; i++) {
-            let comment = data[i];
-            sortedCommentData = sortCommentsByStartIndex(sortedCommentData, comment);
-        }
-
-        // reverse the list so the comments are created by the order of the startIndex. (bigger startIndex get created first)
-        reverseSortedCommentData = reverseList(sortedCommentData);
-        console.log(reverseSortedCommentData);
-
-        renderComments(reverseSortedCommentData, selected_eppn, textChosen, getUnapprovedComments);
-
-        if (isTypeAndCommenterUndefiend) {
-            // TODO: READ IT ALL. pass in the highlights and parse out the comment authors & the comment types (disable those not available)
-            //makeSelector(selected_eppn, textChosen, reverseSortedCommentData, colorNotUsedTypeSelector);
-        }
-    });
-}
-
 //selected_eppn : work creator
 //textChosen : work Name
-renderComments = (commentData, selected_eppn, textChosen, callback) => {
-    $("#text-wrapper").fadeIn();
-    $("#textSpace").fadeIn();
+// renderComments = (commentData, selected_eppn, textChosen, callback) => {
+//     $("#text-wrapper").fadeIn();
+//     $("#textSpace").fadeIn();
 
-    for (let i = 0; i < commentData.length; i++) {
-        highlightText({
-            startIndex: commentData[i].startIndex,
-            endIndex: commentData[i].endIndex,
-            commentType: commentData[i].commentType,
-            eppn: commentData[i].eppn,
-            hash: commentData[i].hash,
-            approved: commentData[i].approved,
-        });
-    }
-    handleStartEndDiv(commentData);
-    // $("#text").css("height", $("#litDiv").height() + "px");
-    //highlight to post comments
+//     for (let i = 0; i < commentData.length; i++) {
+//         highlightText({
+//             startIndex: commentData[i].startIndex,
+//             endIndex: commentData[i].endIndex,
+//             commentType: commentData[i].commentType,
+//             eppn: commentData[i].eppn,
+//             hash: commentData[i].hash,
+//             approved: commentData[i].approved,
+//         });
+//     }
+//     handleStartEndDiv(commentData);
+//     // $("#text").css("height", $("#litDiv").height() + "px");
+//     //highlight to post comments
 
-    $("#litDiv").off().on("mousedown", (evt) => {
-        TMP_STATE.select_valid = true;
-    });
+//     $("#litDiv").off().on("mousedown", (evt) => {
+//         TMP_STATE.select_valid = true;
+//     });
 
-    $("#litDiv").on("mouseup", function (evt) {
-        if (TMP_STATE.select_valid == true) {
-            var selectedRange = rangy.getSelection().getRangeAt(0);
-            TMP_STATE.select_valid = false;
-            if (evt["target"]["classList"][0] == "commented-selection") {
-                launchToastNotifcation("You are not allowed to highlight inside someone's comment.");
-                launchToastNotifcation("If you want to start another kind of discussion, please use the filter first.");
-            } else {
-                let selected_filter = TMP_STATE.filters.selected_comment_filter;
-                highlightCurrentSelection(evt, selected_filter);
-            }
-        }
-    });
+//     $("#litDiv").on("mouseup", function (evt) {
+//         if (TMP_STATE.select_valid == true) {
+//             var selectedRange = rangy.getSelection().getRangeAt(0);
+//             TMP_STATE.select_valid = false;
+//             if (evt["target"]["classList"][0] == "commented-selection") {
+//                 launchToastNotifcation("You are not allowed to highlight inside someone's comment.");
+//                 launchToastNotifcation("If you want to start another kind of discussion, please use the filter first.");
+//             } else {
+//                 let selected_filter = TMP_STATE.filters.selected_comment_filter;
+//                 highlightCurrentSelection(evt, selected_filter);
+//             }
+//         }
+//     });
 
-    allowClickOnComment(textChosen, selected_eppn);
-    callback(selected_eppn, textChosen);
-}
+//     allowClickOnComment(textChosen, selected_eppn);
+//     callback(selected_eppn, textChosen);
+// }
 //call this function to enable the clickEvent on .commented-selection
 function allowClickOnComment(textChosen, selected_eppn) {
     //highlight on top of other's comment will bring them to the reply box
@@ -504,8 +389,8 @@ function clickOnComment(data) {
     $("#comment-box").removeAttr("data-replyToHash");
     $("#comment-box").attr("data-editCommentId", "-1");
     let comment_data = {
-        creator: data["author"],
-        work: data["work"],
+        creator: TMP_STATE.selected_creator,
+        work: TMP_STATE.selected_work,
         commenter: data["commentCreator"],
         hash: data["commentId"]
     };

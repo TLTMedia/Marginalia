@@ -55,12 +55,10 @@ export class FiltersEvents {
         this.state.filters.selected_comment_filter = "show-all-types";
         this.state.filters.selected_author_filter = "show-all-eppns";
 
-
         /**
          * Remove all the eppn filters
          */
         $("#menu-filters-authors").empty();
-
 
         /**
          * Remove the selected highlighting from any of the other items that may already be highlighted
@@ -137,7 +135,7 @@ export class FiltersEvents {
         /**
          * Clicking on the types-filters button in the sub-menu
          */
-        $(".menu-filters-types").on("click", event => {
+        $(".menu-filters-types").on("click", async event => {
             let selected_filter = event.currentTarget.id;
             /**
              * If it has the class of "selected-filter", don't let the user press on it
@@ -167,22 +165,23 @@ export class FiltersEvents {
              */
             $("#" + selected_filter).addClass("selected-filter");
 
-            /**
-             * TODO:
-             * Now do the rangy selecting on the work for those types
-             */
-            let work_data = {
-                author: this.state.selected_creator,
-                work: this.state.selected_work,
-            };
+            // /**
+            //  * TODO:
+            //  * Now do the rangy selecting on the work for those types
+            //  */
+            // let work_data = {
+            //     author: this.state.selected_creator,
+            //     work: this.state.selected_work,
+            // };
 
-            selectorOnSelect(this.state.filters.selected_comment_filter, this.state.filters.selected_author_filter, work_data);
+            // selectorOnSelect(this.state.filters.selected_comment_filter, this.state.filters.selected_author_filter, work_data);
+            await this.ui.comments_controller.filter_render_comments();
         });
 
         /**
          * Clicking on the authors filters button in the sub-menu
          */
-        $("#menu-filters-authors").on("click", ".menu-filters-authors", event => {
+        $("#menu-filters-authors").on("click", ".menu-filters-authors", async event => {
             let selected_filter = event.currentTarget.id;
 
             /**
@@ -202,7 +201,6 @@ export class FiltersEvents {
              * Set the currently selected filter (id) in the state
              */
             this.state.filters.selected_author_filter = (selected_filter.replace("filter-", ""));
-            console.log(this.state.filters.selected_author_filter);
 
             /**
              * Remove the selected highlighting from any of the other items that may already be highlighted
@@ -214,16 +212,17 @@ export class FiltersEvents {
              */
             $("#" + selected_filter).addClass("selected-filter");
 
-            /**
-             * TODO:
-             * Now do the rangy selecting on the work for those types
-             */
-            let work_data = {
-                author: this.state.selected_creator,
-                work: this.state.selected_work,
-            };
+            // /**
+            //  * TODO:
+            //  * Now do the rangy selecting on the work for those types
+            //  */
+            // let work_data = {
+            //     author: this.state.selected_creator,
+            //     work: this.state.selected_work,
+            // };
 
-            selectorOnSelect(this.state.filters.selected_comment_filter, this.state.filters.selected_author_filter, work_data);
+            // selectorOnSelect(this.state.filters.selected_comment_filter, this.state.filters.selected_author_filter, work_data);
+            await this.ui.comments_controller.filter_render_comments();
         });
     }
 

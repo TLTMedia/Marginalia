@@ -269,8 +269,8 @@ function replyButtonOnClick(evt, hash) {
     var replyToEppn = $(".replies" + "[commentid = '" + hash + "']").attr('name');
 
     TMP_STATE.commentBox_data = {
-      "eppn_to_reply_to" : replyToEppn,
-      "hash_to_reply_to" : hash
+        "eppn_to_reply_to": replyToEppn,
+        "hash_to_reply_to": hash
     };
     delete TMP_STATE.commentBox_data.edit_comment_id;
 
@@ -289,7 +289,7 @@ function replyButtonOnClick(evt, hash) {
 function editButtonOnClick(evt, inText, hash) {
     //$("#comment-box").attr("data-editCommentID", hash);
     TMP_STATE.commentBox_data = {
-      "edit_comment_id" : hash
+        "edit_comment_id": hash
     };
     displayCommentBox(evt);
     TMP_STATE.quill.setText(inText);
@@ -385,8 +385,8 @@ function displayReplyBox(data) {
     // ui-id-2 is the id for the title of the reply box
     $("#ui-id-2").empty().html(data["commentType"]);
     TMP_STATE.replyBox_data = {
-      "first_comment_id":data["commentId"],
-      "first_comment_author":data["commentCreator"]
+        "first_comment_id": data["commentId"],
+        "first_comment_author": data["commentCreator"]
     };
     $("#replies").attr("data-firstCommentId", data["commentId"]);
     $("#replies").parent().fadeIn();
@@ -411,5 +411,5 @@ function refreshReplyBox(creator, work, commenter, hash, type) {
         commenter: commenter,
         hash: hash
     };
-    get_comment_chain_API_request(comment_data, hash);
+    get_comment_chain_API_request(comment_data);
 }

@@ -22,16 +22,7 @@ function makeDraggableCommentBox(workCreator, work) {
         ],
         title: "Annotation by: "
     });
-    // Making the actual commentForm system
-    // var comForm = $('<form/>');
-    // var textForm = $('<textarea/>', {
-    //     id: "textForm",
-    //     rows: "10",
-    //     cols: "80"
-    // });
-    // $(comForm).append(textForm);
-    // $('#comment-box').append(comForm);
-    // CKEDITOR.replace('textForm');
+
     let closeCommentBox = createCloseCommentBoxButton();
     // TODO find a better way to add it
     $("#comment-box").parent().find(".ui-dialog-titlebar").prepend(closeCommentBox);
