@@ -83,6 +83,9 @@ export class FiltersEvents {
          * Remove disabled attribute for menu filter types that exist in this work
          */
         work_filter_data.types.forEach(type => {
+            if (type == null) {
+                type = "historical";
+            }
             $("#filter-" + type.toLowerCase()).removeAttr("disabled");
         });
 

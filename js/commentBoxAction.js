@@ -80,9 +80,9 @@ function saveButtonOnClick(workCreator, work) {
     // var replyTo = $("#comment-box").attr("data-replytoeppn");
     // var replyHash = $('#comment-box').attr("data-replytohash");
 
-    let replyEppn = TMP_STATE.commentBox_data?TMP_STATE.commentBox_data.eppn_to_reply_to:undefined;
-    let replyHash = TMP_STATE.commentBox_data?TMP_STATE.commentBox_data.hash_to_reply_to:undefined;
-    var editCommentID = TMP_STATE.commentBox_data?TMP_STATE.commentBox_data.edit_comment_id:undefined;
+    let replyEppn = TMP_STATE.commentBox_data ? TMP_STATE.commentBox_data.eppn_to_reply_to : undefined;
+    let replyHash = TMP_STATE.commentBox_data ? TMP_STATE.commentBox_data.hash_to_reply_to : undefined;
+    var editCommentID = TMP_STATE.commentBox_data ? TMP_STATE.commentBox_data.edit_comment_id : undefined;
 
     var dataForSave = getDataForSave(creator, literatureName, commentText, commentType, span, replyEppn, replyHash);
     //console.log(dataForSave);
@@ -102,7 +102,7 @@ function saveButtonOnClick(workCreator, work) {
         $("#comment-box").attr('data-editCommentID', '-1');
         $("#comment-box").parent().fadeOut();
     }
-    else{
+    else {
         saveCommentOrReply(dataForSave, replyEppn);
         $("#comment-box").parent().fadeOut();
     }
@@ -134,7 +134,7 @@ function saveCommentOrReply(dataForSave, replyEppn) {
         startIndex: dataForSave["startIndex"],
         endIndex: dataForSave["endIndex"],
         commentText: dataForSave["commentText"],
-        commentType: replyEppn ? dataForSave["commentType"] : null, // if this is saving reply type will be null
+        commentType: dataForSave["commentType"],
         visibility: dataForSave["visibility"]
     };
 
@@ -238,7 +238,7 @@ function editOrDelete(dataForEditOrDelete, edit_comment_id) {
         launchToastNotifcation(data);
         let firstCommentId = TMP_STATE.replyBox_data.first_comment_id;
         let firstCommentCreator = TMP_STATE.replyBox_data.first_comment_author;
-        refreshReplyBox(dataForEditOrDelete["creator"], dataForEditOrDelete["work"], firstCommentCreator, firstCommentId, editData!= undefined?editData["type"]:undefined);
+        refreshReplyBox(dataForEditOrDelete["creator"], dataForEditOrDelete["work"], firstCommentCreator, firstCommentId, editData != undefined ? editData["type"] : undefined);
         if (edit_comment_id) {
             if (dataForEditOrDelete["type"]) {
                 $(".commented-selection" + "[commentId = '" + dataForEditOrDelete["hash"] + "']").attr("typeof", dataForEditOrDelete["type"]);
@@ -249,7 +249,7 @@ function editOrDelete(dataForEditOrDelete, edit_comment_id) {
             //unhighlight the deleted comment
             //update the commenterSelector and the typeSelector
             console.log(firstCommentId, TMP_STATE.replyBox_data.delete_comment_id);
-            if(firstCommentId == TMP_STATE.replyBox_data.delete_comment_id){
+            if (firstCommentId == TMP_STATE.replyBox_data.delete_comment_id) {
                 checkSpansNeedRecover(firstCommentId, removeDeletedSpan);
                 updateCommenterSelectors(firstCommentId);
                 colorNotUsedTypeSelector(dataForEditOrDelete["creator"], dataForEditOrDelete["work"]);

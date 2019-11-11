@@ -102,7 +102,24 @@ init = async ({ state = state, ui = ui, api = api }) => {
     });
 
     $(document).ready(() => {
-        $(".js-example-basic-single").select2();
+        $(".select2-single").select2();
+
+        /**
+         * Course selection
+         */
+        $(".select2-course-select").select2({
+            placeholder: "Select a course",
+        });
+
+        /**
+         * User selection
+         */
+        $(".select2-user-select").select2();
+
+        /**
+         * Work selection
+         */
+        $(".select2-work-select").select2();
     });
 }
 
@@ -292,7 +309,7 @@ renderComments = (commentData, selected_eppn, textChosen, callback) => {
     $("#litDiv").off().on("mousedown", (evt) => {
         TMP_STATE.select_valid = true;
     });
-    
+
     $("#litDiv").on("mouseup", function (evt) {
         if (TMP_STATE.select_valid == true) {
             var selectedRange = rangy.getSelection().getRangeAt(0);

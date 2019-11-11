@@ -1028,7 +1028,7 @@ input[type="file"] {
     padding-top: 3%;
 }
 
-#addCourseBase > .mdl-textfield {
+#addCourseBase>.mdl-textfield {
     padding-top: 5px;
     padding-bottom: 10px;
 }
@@ -1086,16 +1086,16 @@ input[type="file"] {
     height: 20px;
 }
 
-.toolBar > button {
+.toolBar>button {
     /* margin-right: 10px; */
     float: left;
 }
 
-.mdl-button > label {
+.mdl-button>label {
     cursor: pointer;
 }
 
-.toolBar > .mdl-button {
+.toolBar>.mdl-button {
     line-height: 18px;
     font-size: 9px;
     text-transform: none;
@@ -1753,6 +1753,7 @@ input[type="file"] {
 /*--------------cardbox--------------------*/
 
 #cardbox {
+    display: none;
     border-radius: .75rem;
     -moz-user-select: -moz-none;
     -khtml-user-select: none;

@@ -8,19 +8,21 @@ export class InterfaceEvents {
         this.data = state.api_data;
     }
 
-    async click_course_option(event, course) {
+    async click_course_option(course) {
         this.state.selected_course = course;
 
         let users = await this.data.users_data.get_selected_course_users(course);
 
         if (!this.ui.populate_users_dropdown(users)) {
-            console.error("error while attempting to populate courses dropdown");
+            console.error("error while attempting to populate users dropdown");
         }
 
         this.ui.clear_work_selection();
+
+        $(".select2-user-select").val("").trigger("change");
     }
 
-    async click_user_option(event, creator) {
+    async click_user_option(creator) {
         this.state.selected_creator = creator;
 
         let works = await this.data.works_data.get_selected_course_works(this.state.selected_course, creator);
@@ -28,9 +30,11 @@ export class InterfaceEvents {
         if (!this.ui.populate_works_dropdown(works)) {
             console.error("error while attempting to populate works dropdown");
         }
+
+        $(".select2-work-select").val("").trigger("change");
     }
 
-    async click_work_option(event, work) {
+    async click_work_option(work) {
         this.state.selected_work = work;
 
         /**
@@ -86,20 +90,6 @@ export class InterfaceEvents {
                 } else {
                     return;
                 }
-            }
-        });
-    }
-
-    do_course_search() {
-        let list = $(".coursesMenu").find("li");
-        let search_key = $(".searchCourse").val();
-
-        list.each((_, element) => {
-            let course_name = $(element).html();
-            if (course_name.toUpperCase().indexOf(search_key.toUpperCase()) != -1) {
-                $(element).show();
-            } else {
-                $(element).hide();
             }
         });
     }

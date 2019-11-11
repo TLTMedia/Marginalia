@@ -67,6 +67,8 @@ export class InterfaceController {
         /** Empty out the menu if there's any existing choices */
         menu.empty();
 
+        // $(menu).parent().next().children(".selection").children().children()[0].innerHTML = "Select a course...";
+
         if (courses_list.length == 0) {
             return true;
         }
@@ -98,12 +100,9 @@ export class InterfaceController {
     append_course_dropdown(course_name) {
         const menu = $(this.class_constants.courses_dropdown_menu);
 
-        const course_item = $("<li/>", {
-            class: "mdl-list__item " + this.string_constants.dropdown_menu_options_class,
+        const course_item = $("<option/>", {
+            value: course_name,
             text: course_name,
-            click: () => {
-                this.ui_events.click_course_option(event, course_name);
-            }
         });
 
         menu.append(course_item);
@@ -129,6 +128,10 @@ export class InterfaceController {
 
         /** Empty out the menu if there's any existing choices */
         menu.empty();
+        $(".select2-user-select").select2("destroy");
+        $(".select2-user-select").select2({
+            placeholder: "Select a user",
+        });
 
         if (users_list.length == 0) {
             menu_section_users.hide("slide", {
@@ -168,12 +171,9 @@ export class InterfaceController {
     append_user_dropdown(user_name) {
         const menu = $(this.class_constants.users_dropdown_menu);
 
-        const user_item = $("<li/>", {
-            class: "mdl-list__item " + this.string_constants.dropdown_menu_options_class,
+        const user_item = $("<option/>", {
+            value: user_name.eppn,
             text: user_name.firstName + " " + user_name.lastName,
-            click: () => {
-                this.ui_events.click_user_option(event, user_name.eppn);
-            }
         });
 
         menu.append(user_item);
@@ -193,6 +193,10 @@ export class InterfaceController {
 
         /** Empty out the menu if there's any existing choices */
         menu.empty();
+        $(".select2-work-select").select2("destroy");
+        $(".select2-work-select").select2({
+            placeholder: "Select a document",
+        });
 
         if (works_list.length == 0) {
             menu_section.hide("slide", {
@@ -232,12 +236,9 @@ export class InterfaceController {
     append_work_dropdown(work) {
         const menu = $(this.class_constants.works_dropdown_menu);
 
-        const work_item = $("<li/>", {
-            class: "mdl-list__item " + this.string_constants.dropdown_menu_options_class,
+        const work_item = $("<option/>", {
+            value: work,
             text: work,
-            click: () => {
-                this.ui_events.click_work_option(event, work);
-            }
         });
 
         menu.append(work_item);

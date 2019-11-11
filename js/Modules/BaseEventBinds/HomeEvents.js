@@ -38,24 +38,44 @@ export class HomeEvents {
      */
     postload() {
         /**
-         * Searching for a course
+         * Show the menu
          */
-        $(".searchCourse").on("keyup", () => {
-            this.ui.ui_events.do_course_search();
+        $("#cardbox").show();
+
+        /**
+         * Sets the default/currently selected dropdown choice to nothing...
+         * Must do this - otherwise can't select the first item (bug with Select2)
+         */
+        $(".select2-course-select").val("").trigger("change");
+
+        /**
+         * Clicking on a course
+         */
+        $(".select2-course-select").on("select2:select", e => {
+            /**
+             * Click course option maybe move to here in the future?
+             */
+            this.ui.ui_events.click_course_option(e.currentTarget.value);
         });
 
         /**
-         * Searching for a user
+         * Clicking on a user
          */
-        $(".searchUser").on("keyup", () => {
-            this.ui.ui_events.do_user_search();
+        $(".select2-user-select").on("select2:select", e => {
+            /**
+             * Click course option maybe move to here in the future?
+             */
+            this.ui.ui_events.click_user_option(e.currentTarget.value);
         });
 
         /**
-         * Searching for a work
+         * Clicking on a document/work
          */
-        $(".searchLit").on("keyup", () => {
-            this.ui.ui_events.do_work_search();
+        $(".select2-work-select").on("select2:select", e => {
+            /**
+             * Click course option maybe move to here in the future?
+             */
+            this.ui.ui_events.click_work_option(e.currentTarget.value);
         });
     }
 }

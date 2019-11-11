@@ -8,8 +8,9 @@ export class CoursesData {
 
     async get_course_list() {
         let course_list = this.api.request({
-            endpoint: 'courses'
+            endpoint: 'courses',
         });
+
         return await course_list;
     }
 
@@ -18,8 +19,9 @@ export class CoursesData {
             endpoint: 'get_creators_of_course',
             data: {
                 course: course,
-            }
+            },
         });
+
         return await creators_list;
     }
 
@@ -27,6 +29,7 @@ export class CoursesData {
         let is_admin = this.api.request({
             endpoint: 'is_courses_admin',
         });
+
         return await is_admin;
     }
 
@@ -34,10 +37,11 @@ export class CoursesData {
         let respond = this.api.request({
             endpoint: "add_course",
             data: {
-                course: courseName
+                course: courseName,
             },
-            method: "POST"
+            method: "POST",
         });
+
         return await respond;
     }
 }
