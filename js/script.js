@@ -171,47 +171,6 @@ function makeDropDown() {
     });
 }
 
-//selected_eppn : work creator
-//textChosen : work Name
-// renderComments = (commentData, selected_eppn, textChosen, callback) => {
-//     $("#text-wrapper").fadeIn();
-//     $("#textSpace").fadeIn();
-
-//     for (let i = 0; i < commentData.length; i++) {
-//         highlightText({
-//             startIndex: commentData[i].startIndex,
-//             endIndex: commentData[i].endIndex,
-//             commentType: commentData[i].commentType,
-//             eppn: commentData[i].eppn,
-//             hash: commentData[i].hash,
-//             approved: commentData[i].approved,
-//         });
-//     }
-//     handleStartEndDiv(commentData);
-//     // $("#text").css("height", $("#litDiv").height() + "px");
-//     //highlight to post comments
-
-//     $("#litDiv").off().on("mousedown", (evt) => {
-//         TMP_STATE.select_valid = true;
-//     });
-
-//     $("#litDiv").on("mouseup", function (evt) {
-//         if (TMP_STATE.select_valid == true) {
-//             var selectedRange = rangy.getSelection().getRangeAt(0);
-//             TMP_STATE.select_valid = false;
-//             if (evt["target"]["classList"][0] == "commented-selection") {
-//                 launchToastNotifcation("You are not allowed to highlight inside someone's comment.");
-//                 launchToastNotifcation("If you want to start another kind of discussion, please use the filter first.");
-//             } else {
-//                 let selected_filter = TMP_STATE.filters.selected_comment_filter;
-//                 highlightCurrentSelection(evt, selected_filter);
-//             }
-//         }
-//     });
-
-//     allowClickOnComment(textChosen, selected_eppn);
-//     callback(selected_eppn, textChosen);
-// }
 //call this function to enable the clickEvent on .commented-selection
 function allowClickOnComment(textChosen, selected_eppn) {
     //highlight on top of other's comment will bring them to the reply box

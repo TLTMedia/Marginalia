@@ -1,17 +1,3 @@
-// function updateSettingPage(selected_eppn, textChosen, course) {
-//     if (course == undefined) {
-//         $("#setting").removeClass("disabledHeaderTab");
-//         $("#setting").attr({
-//             "author": selected_eppn,
-//             "work": textChosen
-//         });
-//     }
-//     else {
-//         $("#setting").attr("course", course)
-//     }
-//     // $("#settingBase").hide();
-// }
-
 function disableSettingPage() {
     $("#setting").addClass("disabledHeaderTab")
     $("#setting").removeAttr("author work course");

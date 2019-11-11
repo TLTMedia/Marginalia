@@ -1,15 +1,3 @@
-//TODO need the author and the work name to enable the click event for the comments
-//TODO use a better way to store the work and author instead of getting it from DOM
-// function selectorOnSelect(currentSelectedType, currentSelectedCommenter, workData) {
-//     unwrapEveryComments();
-//     let currentWork = workData["work"];
-//     let currentCreator = workData["author"];
-//     loadUserComments(currentCreator, currentWork, currentSelectedType, currentSelectedCommenter);
-//     console.log("loadUserComments finished");
-//     handleStartEndDiv(createCommentData());
-//     allowClickOnComment($("#setting").attr("work"), $("#setting").attr("author"));
-// }
-
 function unwrapEveryComments() {
     let comments = $(".commented-selection");
     let startDivs = $(".startDiv");

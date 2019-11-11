@@ -367,12 +367,6 @@ function exitButtonOnClick() {
     $("#comment-box").parent().fadeOut();
 }
 
-// function updateCommentBoxSaveButton(selected_eppn, litId) {
-//     $("#commentSave").off().on("click", () => {
-//         saveButtonOnClick(selected_eppn, litId);
-//     });
-// }
-
 //commentBox width: 500 px ,height: 331px , marginX : 10, marginY : 50
 function displayCommentBox(evt, selected_filter) {
     var marginX = 10;

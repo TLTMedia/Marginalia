@@ -20,6 +20,11 @@ export class Address {
             },
         };
 
+        /**
+         * TODO: this whole thing is a mess... need to fix.
+         * allows going back and direct linking of a page.
+         */
+
         // on load & change
         this.address.externalChange(() => {
             if (location.hash) {
@@ -51,11 +56,4 @@ export class Address {
             };
         }
     }
-
-    // process_non_deep_link() {
-    //     this.state.deep_link = {
-    //         function: "show_home",
-    //         parameters: [],
-    //     };
-    // }
 }
