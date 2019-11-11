@@ -20,8 +20,8 @@ export class CommentBoxController {
                 {
                     text: "Save",
                     id: "commentSave",
-                    click: () => {
-                        this.save_comment();
+                    click: async () => {
+                        await this.save_comment();
                     },
                 },
                 {
