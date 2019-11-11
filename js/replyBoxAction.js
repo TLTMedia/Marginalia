@@ -302,6 +302,24 @@ function editButtonOnClick(evt, inText, hash) {
     $('.commentTypeDropdown').val($(".commented-selection" + "[commentId = '" + firstCommentId + "']").attr("typeof"));
 }
 
+function getDataForEditOrDelete(creator, literatureName, hash, commentCreatorEppn, commentType, commentText) {
+    var common = {
+        creator: creator,
+        work: literatureName,
+        commenter: commentCreatorEppn,
+        hash: hash
+    }
+    var editData = {
+        creator: creator,
+        work: literatureName,
+        type: commentType,
+        text: commentText,
+        public: true
+    }
+    var dataForEditOrDelete = Object.assign({}, common, editData);
+    return dataForEditOrDelete;
+}
+
 function deleteButtonOnClick(hash, eppn, hashForReply, work, workCreator) {
     console.log(TMP_STATE);
     TMP_STATE.replyBox_data["delete_comment_id"] = hash;

@@ -1,204 +1,3 @@
-function makeDraggableCommentBox(workCreator, work) {
-    $("#comment-box").dialog({
-        dialogClass: "no-close",
-        modal: true,
-        width: 500,
-        use: 'comments',
-        buttons: [
-            {
-                text: "Save",
-                id: "commentSave",
-                click: function () {
-                    saveButtonOnClick(workCreator, work);
-                }
-            },
-            {
-                text: "Exit",
-                id: "commentExit",
-                click: function () {
-                    exitButtonOnClick();
-                }
-            },
-        ],
-        title: "Annotation by: "
-    });
-
-    let closeCommentBox = createCloseCommentBoxButton();
-    // TODO find a better way to add it
-    $("#comment-box").parent().find(".ui-dialog-titlebar").prepend(closeCommentBox);
-    $(".closeCommentBox").parent().css({ position: 'relative' });
-    $(".closeCommentBox").css({ top: 0, left: 0, position: 'absolute' });
-
-}
-
-function createCloseCommentBoxButton() {
-    var closeCommentBoxDiv = $("<div>", {
-        class: "closeCommentBoxDiv"
-    });
-    //close button
-    var closeCommentBox = $("<button/>", {
-        class: "closeCommentBox",
-        click: function () {
-            exitButtonOnClick();
-            // $("#replies").parent().css("z-index","1");
-            // $("#comment-box").parent().css("z-index","0");
-        }
-    });
-    var closeCommentBoxIcon = $("<i/>", {
-        class: "material-icons closeCommentBoxIcon",
-        text: "highlight_off"
-    });
-    closeCommentBox.append(closeCommentBoxIcon);
-    closeCommentBoxDiv.append(closeCommentBox);
-    return closeCommentBoxDiv;
-}
-
-function saveButtonOnClick(workCreator, work) {
-    console.log(TMP_STATE)
-    let commentText = TMP_STATE.quill.getHTML();
-
-    if (commentText == "<p><br></p>") {
-        launchToastNotifcation("You cannot save an empty comment");
-        return;
-    }
-
-    var literatureName = work;
-    var creator = workCreator;
-    //TODO this return undefined or null when I disabled the dropdown
-    var commentType = $(".commentTypeDropdown").val();
-
-    var span = $("." + escapeSpecialChar(remSpan));
-    // var replyTo = $("#comment-box").attr("data-replytoeppn");
-    // var replyHash = $('#comment-box').attr("data-replytohash");
-
-    let replyEppn = TMP_STATE.commentBox_data ? TMP_STATE.commentBox_data.eppn_to_reply_to : undefined;
-    let replyHash = TMP_STATE.commentBox_data ? TMP_STATE.commentBox_data.hash_to_reply_to : undefined;
-    var editCommentID = TMP_STATE.commentBox_data ? TMP_STATE.commentBox_data.edit_comment_id : undefined;
-
-    var dataForSave = getDataForSave(creator, literatureName, commentText, commentType, span, replyEppn, replyHash);
-    //console.log(dataForSave);
-
-    if (editCommentID != undefined) {
-        var commentCreatorEppn = $(".replies" + "[commentid = '" + editCommentID + "']").attr('name');
-        var commentType;
-        //check if this is a coment or reply (reply will not have a type)
-        if ($(".replies" + "[commentid = '" + editCommentID + "']").attr('type')) {
-            commentType = $('.commentTypeDropdown').children("option:selected").val();
-        }
-        else {
-            commentType = null;
-        }
-        var dataForEdit = getDataForEditOrDelete(creator, literatureName, editCommentID, commentCreatorEppn, commentType, commentText, true);
-        editOrDelete(dataForEdit, TMP_STATE.commentBox_data.edit_comment_id);
-        $("#comment-box").attr('data-editCommentID', '-1');
-        $("#comment-box").parent().fadeOut();
-    }
-    else {
-        saveCommentOrReply(dataForSave, replyEppn);
-        $("#comment-box").parent().fadeOut();
-    }
-}
-
-//return a dictionary with the data we need to save
-function getDataForSave(creator, literatureName, commentText, commentType, span, replyTo, replyHash) {
-    var dataForSave = {
-        author: creator,
-        work: literatureName,
-        commentText: commentText,
-        commentType: commentType,
-        startIndex: (span.attr("startIndex") ? span.attr("startIndex") : null),
-        endIndex: (span.attr("endIndex") ? span.attr("endIndex") : null),
-        replyTo: (replyTo ? replyTo : null),
-        replyHash: (replyHash ? replyHash : null),
-        visibility: true
-    }
-    return dataForSave;
-}
-
-//replyEppn is the eppn we are going to reply to. replyEppn = undefined if this is the first comment
-function saveCommentOrReply(dataForSave, replyEppn) {
-    let savedData = {
-        author: dataForSave["author"],
-        work: dataForSave["work"],
-        replyTo: dataForSave["replyTo"], // if it's a comment to a comment...
-        replyHash: dataForSave["replyHash"], // ^ (no backend exists for this yet)
-        startIndex: dataForSave["startIndex"],
-        endIndex: dataForSave["endIndex"],
-        commentText: dataForSave["commentText"],
-        commentType: dataForSave["commentType"],
-        visibility: dataForSave["visibility"]
-    };
-
-    API.request({
-        method: "POST",
-        endpoint: "save_comments",
-        data: savedData,
-        callback: null
-    }).then((data) => {
-        console.log(replyEppn)
-        launchToastNotifcation(data['message']);
-        let firstCommentData, type;
-        //reply to other user's comment
-        if (replyEppn) {
-            console.log("hu")
-            let firstCommentId = TMP_STATE.replyBox_data.first_comment_id;
-            let firstCommentCreator = TMP_STATE.replyBox_data.first_comment_author;
-            refreshReplyBox(dataForSave["author"], dataForSave["work"], firstCommentCreator, firstCommentId);
-        }
-        // the first comment
-        else {
-            let approved;
-            let index = {
-                'start': $('.' + escapeSpecialChar(remSpan)).attr("startIndex"),
-                'end': $('.' + escapeSpecialChar(remSpan)).attr("endIndex")
-            }
-            $('.' + escapeSpecialChar(remSpan)).removeAttr('startindex endIndex');
-            console.log(data);
-            if (data["approval"] == true) {
-                approved = true;
-            }
-            else {
-                approved = false;
-                $('.' + escapeSpecialChar(remSpan)).addClass("unapprovedComments");
-            }
-            $('.' + escapeSpecialChar(remSpan)).attr({
-                'commentId': data['commentHash'],
-                'creator': TMP_STATE.current_user.eppn,
-                'typeof': dataForSave['commentType'],
-                'approved': approved
-            });
-            $("<param/>", { class: 'startDiv', commentId: data['commentHash'], startIndex: index["start"], colorId: 0 }).insertBefore('.' + escapeSpecialChar(remSpan));
-            $("<param/>", { class: 'endDiv', commentId: data['commentHash'], endIndex: index["end"], colorId: 0 }).insertAfter('.' + escapeSpecialChar(remSpan));
-            $('.' + escapeSpecialChar(remSpan)).removeClass(remSpan);
-            let allComments = createCommentData();
-            handleStartEndDiv(allComments);
-            colorNotUsedTypeSelector(dataForSave["author"], dataForSave["work"]);
-            updateCommenterSelectors();
-            //update the click event on this new added comment
-            allowClickOnComment(dataForSave["work"], dataForSave["author"]);
-        }
-        getUnapprovedComments(dataForSave["author"], dataForSave["work"]);
-    });
-}
-
-function getDataForEditOrDelete(creator, literatureName, hash, commentCreatorEppn, commentType, commentText) {
-    var common = {
-        creator: creator,
-        work: literatureName,
-        commenter: commentCreatorEppn,
-        hash: hash
-    }
-    var editData = {
-        creator: creator,
-        work: literatureName,
-        type: commentType,
-        text: commentText,
-        public: true
-    }
-    var dataForEditOrDelete = Object.assign({}, common, editData);
-    return dataForEditOrDelete;
-}
-
 //edit_comment_id is the comment id that we are going to edit. If this is a delete action edit_comment_id is undefined
 function editOrDelete(dataForEditOrDelete, edit_comment_id) {
     var endPoint;
@@ -372,16 +171,20 @@ function displayCommentBox(evt, selected_filter) {
     var marginX = 10;
     var marginY = 50;
     var newPosition = adjustDialogPosition(evt, 500, 331, 10, 50);
+
     $("#comment-box").parent().css({
         'top': newPosition["newTop"],
         'left': newPosition["newLeft"]
     })
+
     $("#comment-box").parent().find("#ui-id-1").contents().filter(function () { return this.nodeType == 3; }).first().replaceWith("Annotation by: " + TMP_STATE.current_user['firstname'] + " " + TMP_STATE.current_user['lastname']);
     $("#comment-box").parent().fadeIn();
-    console.log(selected_filter);
-    if (selected_filter != "show-all-types") {
-        $(".commentTypeDropdown").val(selected_filter);
-        $('.commentTypeDropdown').attr('disabled', true);
+
+    if (selected_filter != "show-all-types" && selected_filter !== undefined) {
+        let val_selected = selected_filter.charAt(0).toUpperCase() + selected_filter.slice(1);
+
+        $(".select2-save-comment-select").val(val_selected).trigger("change");
+        $(".select2-save-comment-select").prop("disabled", true);
     }
 }
 

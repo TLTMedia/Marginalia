@@ -1,9 +1,12 @@
 import { BaseEventBinds, InterfaceEvents } from './_ModuleLoader.js';
-import { CommentsController } from './Controllers/_ModuleLoader.js';
+import { CommentsController, RangyController, CommentBoxController } from './Controllers/_ModuleLoader.js';
 
 export class InterfaceController {
     constructor({ state = state, toast = toast }) {
         console.log("InterfaceController Module Loaded");
+
+        this.state = state;
+        this.toast = toast;
 
         /**
          * String Constants of Ids
@@ -35,19 +38,41 @@ export class InterfaceController {
             dropdown_menu_options_class: "menuOptions",
         };
 
-        this.state = state;
-        this.toast = toast;
-
+        /**
+         * Comments Controller
+         */
         this.comments_controller = new CommentsController({
             state: state,
             ui: this,
         });
 
+        /**
+         * CommentBox Controller
+         */
+        this.commentbox_controller = new CommentBoxController({
+            state: state,
+            ui: this,
+        });
+
+        /**
+         * Rangy Controller
+         */
+        this.rangy_controller = new RangyController({
+            state: state,
+            ui: this,
+        });
+
+        /**
+         * Events for whole pages
+         */
         this.base_events = new BaseEventBinds({
             state: state,
             ui: this,
         });
 
+        /**
+         * Events for particular parts of the interface... TODO: deprecate.
+         */
         this.ui_events = new InterfaceEvents({
             state: state,
             ui: this,
@@ -56,6 +81,7 @@ export class InterfaceController {
         /**
          * TODO:
          * I kind of want to avoid having data classes be used here (rather the data should be passed in...)
+         * this.state.api_data usage deprecate...
          */
     }
 
@@ -494,7 +520,8 @@ export class InterfaceController {
          * Make the comment box,
          * TODO: this stuff breaks if it was already made, so find a way to only make these boxes once.
          */
-        makeDraggableCommentBox(this.state.selected_creator, this.state.selected_work);
+        this.commentbox_controller.create_commentbox();
+
         makeDraggableReplyBox();
         hideAllBoxes();
 

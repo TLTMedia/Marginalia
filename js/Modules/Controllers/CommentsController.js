@@ -15,7 +15,6 @@ export class CommentsController {
          * Get all the highlights, or filtered ones
          */
         let comment_data;
-        console.log(this.state.filters);
         if (this.state.filters !== undefined) {
             if (this.state.filters.selected_comment_filter == "show-all-types" && this.state.filters.selected_author_filter == "show-all-eppns") {
                 comment_data = await this.state.api_data.comments_data.get_work_highlights();
@@ -39,7 +38,6 @@ export class CommentsController {
         // TODO:
         let reverse_sorted_comments = reverseList(sorted_comments);
 
-        // TODO:
         this.render_comments(reverse_sorted_comments, getUnapprovedComments);
 
         return comment_data;
@@ -49,7 +47,7 @@ export class CommentsController {
      * TODO: was renderComments()
      * Render the page comments on a page load, 
      */
-    async render_comments(comment_data, callback) {
+    render_comments(comment_data, callback) {
         $("#text-wrapper").fadeIn();
 
         for (let i = 0; i < comment_data.length; i++) {
@@ -93,7 +91,7 @@ export class CommentsController {
                         if (event.target.classList[0] == "commented-selection") {
                             this.ui.toast.create_toast("You cannot create a comment that ends within another comment.");
                         } else {
-                            highlightCurrentSelection(event, this.state.filters.selected_comment_filter);
+                            this.highlight_selected_area(event);
                         }
                     }
                 }
@@ -121,5 +119,44 @@ export class CommentsController {
         // TODO:
         handleStartEndDiv(createCommentData());
         allowClickOnComment($("#setting").attr("work"), $("#setting").attr("author"));
+    }
+
+    /**
+     * TODO: was highlightCurrentSelection()
+     * Applies Rangy library highlighting to a specified area.
+     * 
+     * TODO: use lightRange library for getting the selection (at least on mobile)
+     */
+    highlight_selected_area(evt) {
+        let selectedRange = rangy.getSelection().getRangeAt(0);
+        let lightRange = lightrange.saveSelection();
+        selectedRange.nativeRange = lightRange;
+
+        $("#comment-box").removeAttr("data-replyToEppn data-replyToHash");
+        $("#comment-box").attr("data-editcommentid", "-1");
+
+        if (selectedRange.endOffset != selectedRange.startOffset) {
+            unhighlight();
+
+            // set the quill editor to empty and enabled
+            this.state.quill.setText("");
+            this.state.quill.enable();
+
+            // change the close button to unselect
+            $("#commentExit").text("Unselect");
+
+            // enable the dropdown type for any type
+            $(".commentTypeDropdown").removeAttr("disabled");
+
+            // get the range via rangy
+            let range = selectedRange.toCharacterRange(document.getElementById("textSpace"));
+            hlRange(selectedRange, range);
+
+            if ($("." + escapeSpecialChar(this.state.rem_span)).parent().attr("class") != "commented-selection") {
+                $("#replies").parent().hide();
+
+                displayCommentBox(evt, this.state.filters.selected_comment_filter);
+            }
+        }
     }
 }

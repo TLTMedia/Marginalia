@@ -1,10 +1,4 @@
 /**
- * These globals are temporary until javascript is refactored into modules
- * TODO: I need to check to see where these are used... I don't even know if they still are.
- */
-var remSpan; // holds the name of made and clicked spans
-
-/**
  * TODO: temporary global to hold our state in non-modularized deprecated functions that can't access state info.
  */
 var API;
@@ -102,7 +96,7 @@ init = async ({ state = state, ui = ui, api = api }) => {
     });
 
     $(document).ready(() => {
-        $(".select2-single").select2();
+        $(".select2-save-comment-select").select2();
 
         /**
          * Course selection

@@ -88,4 +88,17 @@ export class CommentsData {
 
         return await response;
     }
+
+    /**
+     * Save a comment.
+     */
+    async save_comment(data) {
+        let response = this.api.request({
+            endpoint: 'save_comments',
+            method: 'POST',
+            data: data,
+        });
+
+        return await response;
+    }
 }
