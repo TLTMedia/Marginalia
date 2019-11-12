@@ -2,7 +2,8 @@ export class APIHandler {
     constructor() {
         console.log("APIHandler Module Loaded");
 
-        this.base_url = location.pathname + "api/public/";
+        console.log(window.location.hostname);
+        this.base_url = "https://" + window.location.hostname + "/marginalia/api/public/";
     }
 
     parseGetData(data) {

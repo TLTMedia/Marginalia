@@ -1,21 +1,13 @@
 RewriteEngine on
 RewriteBase /
+
+DirectoryIndex index.html
+Redirect /marginalia/index.html https://apps.tlt.stonybrook.edu/marginalia/shibboleth/index.html
+
 RewriteCond $0#%{REQUEST_URI} ([^#]*)#(.*)\1$
 RewriteRule ^.*$ - [E=CWD:%2]
 
 RewriteRule ^works/(.*)$ %{ENV:CWD}?work=$1 [R=301,NC,L]
-
-
-#<Files "page.html">
-AuthType shibboleth
-ShibRequestSetting requireSession 1
-require valid-user
-#</Files>
-#For now, we comment out that we require our visitor be a student of stony brook university.
-# require affiliation student@stonybrook.edu
- DirectoryIndex index.html
-# RewriteCond %{HTTPS} !=on [NC]
-
 
 # Uncomment to display php errors in the log
 php_flag display_startup_errors on
@@ -25,15 +17,16 @@ php_flag log_errors on
 php_value error_log PHP_errors.log
 
 <filesMatch "\.(html|htm|js|css|json)$">
-  FileETag None
-  <ifModule mod_headers.c>
-     Header unset ETag
-     Header set Cache-Control "max-age=0, no-cache, no-store, must-revalidate"
-     Header set Pragma "no-cache"
-     Header set Expires "Wed, 11 Jan 1984 05:00:00 GMT"
-  </ifModule>
+    FileETag None
+    <ifModule mod_headers.c>
+        Header unset ETag
+        Header set Cache-Control "max-age=0, no-cache, no-store, must-revalidate"
+        Header set Pragma "no-cache"
+        Header set Expires "Wed, 11 Jan 1984 05:00:00 GMT"
+    </ifModule>
 </filesMatch>
+
 <Files .git_secret.txt>
-Order allow,deny
-Deny from all
+    Order allow,deny
+    Deny from all
 </Files>
