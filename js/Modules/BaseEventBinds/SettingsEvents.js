@@ -19,7 +19,7 @@ export class SettingsEvents {
         $("#setting").off().on("click", async () => {
             let work_admins = await this.works_data.get_admins_of_work();
 
-            if (!work_admins.admins.includes(this.state.selected_creator)) {
+            if (!work_admins.admins.includes(this.state.current_user.eppn)) {
                 this.ui.toast.create_toast("You don't have permission to do this action.");
             } else {
                 /**
