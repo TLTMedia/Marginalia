@@ -1,5 +1,5 @@
 import { BaseEventBinds, InterfaceEvents } from './_ModuleLoader.js';
-import { CommentsController, RangyController, CommentBoxController } from './Controllers/_ModuleLoader.js';
+import { CommentsController, RangyController, CommentBoxController, TutorialController } from './Controllers/_ModuleLoader.js';
 
 export class InterfaceController {
     constructor({ state = state, toast = toast }) {
@@ -58,6 +58,14 @@ export class InterfaceController {
          * Rangy Controller
          */
         this.rangy_controller = new RangyController({
+            state: state,
+            ui: this,
+        });
+
+        /**
+         * Tutorial Controller
+         */
+        this.tutorial_controller = new TutorialController({
             state: state,
             ui: this,
         });
@@ -547,9 +555,5 @@ export class InterfaceController {
                 }
             }
         }
-    }
-
-    show_tutorial() {
-        showTutorialPage(this);
     }
 }

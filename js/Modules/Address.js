@@ -15,9 +15,6 @@ export class Address {
             "addlit": {
                 "name": null
             },
-            "tutorial": {
-                "name": showTutorialPage
-            },
         };
 
         /**

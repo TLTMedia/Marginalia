@@ -58,10 +58,6 @@ init = async ({ state = state, ui = ui, api = api }) => {
         }
     }
 
-    $("#tutorial").off().on("click", () => {
-        ui.show_tutorial();
-    })
-
     /**
      * Temporarily leave these functions at the bottom of init()
      */

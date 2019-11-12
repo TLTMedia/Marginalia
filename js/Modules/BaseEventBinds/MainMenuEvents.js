@@ -44,6 +44,13 @@ export class MainMenuEvents {
              */
             this.base_events.upload_events.preload();
         });
+
+        /**
+         * Show tutorial button
+         */
+        $("#tutorial").off().on("click", () => {
+            this.ui.tutorial_controller.show_tutorial_page();
+        })
     }
 
     /**
