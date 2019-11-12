@@ -39,7 +39,8 @@ export class WorksData {
             method: 'POST',
             data: {
                 work: decodeURI(this.state.selected_work),
-                eppn: eppn_to_add,
+                creator: this.state.selected_creator,
+                newEppn: eppn_to_add,
             },
         });
 
@@ -55,7 +56,8 @@ export class WorksData {
             method: 'POST',
             data: {
                 work: decodeURI(this.state.selected_work),
-                eppn: eppn_to_remove,
+                creator: this.state.selected_creator,
+                newEppn: eppn_to_remove,
             },
         });
 
