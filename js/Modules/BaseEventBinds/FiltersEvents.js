@@ -165,17 +165,11 @@ export class FiltersEvents {
              */
             $("#" + selected_filter).addClass("selected-filter");
 
-            // /**
-            //  * TODO:
-            //  * Now do the rangy selecting on the work for those types
-            //  */
-            // let work_data = {
-            //     author: this.state.selected_creator,
-            //     work: this.state.selected_work,
-            // };
-
-            // selectorOnSelect(this.state.filters.selected_comment_filter, this.state.filters.selected_author_filter, work_data);
             await this.ui.comments_controller.filter_render_comments();
+
+            if ($(".commented-selection").offset().top > $(window).height()) {
+                $(".commented-selection")[0].scrollIntoView();
+            }
         });
 
         /**
@@ -212,17 +206,11 @@ export class FiltersEvents {
              */
             $("#" + selected_filter).addClass("selected-filter");
 
-            // /**
-            //  * TODO:
-            //  * Now do the rangy selecting on the work for those types
-            //  */
-            // let work_data = {
-            //     author: this.state.selected_creator,
-            //     work: this.state.selected_work,
-            // };
-
-            // selectorOnSelect(this.state.filters.selected_comment_filter, this.state.filters.selected_author_filter, work_data);
             await this.ui.comments_controller.filter_render_comments();
+
+            if ($(".commented-selection").offset().top > $(window).height()) {
+                $(".commented-selection")[0].scrollIntoView();
+            }
         });
     }
 

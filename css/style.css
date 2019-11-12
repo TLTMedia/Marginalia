@@ -38,7 +38,7 @@ body {
 }
 
 .modal {
-    vertical-align: initial;
+    vertical-align: middle;
     background-color: var(--bg-main-marginalia);
     z-index: 5;
 }
@@ -1483,11 +1483,6 @@ input[type="file"] {
     display: flex;
     align-items: center;
 }
-
-/* 
-.whiteListSettingBase ul {
-    overflow-y: scroll;
-} */
 
 .settingUsers, .settingLit {
     background-color: var(--bg-main-marginalia);
