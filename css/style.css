@@ -1786,6 +1786,7 @@ input[type="file"] {
 .blocker {
     /** the size of the header */
     top: 64px !important;
+    overflow: hidden;
 }
 
 #text-wrapper {
