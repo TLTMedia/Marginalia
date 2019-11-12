@@ -111,8 +111,7 @@ export class CommentsController {
      * It's responsible for re-rendering the comments on a page.
      */
     async filter_render_comments() {
-        // TODO: what's this do even
-        unwrapEveryComments();
+        this.unwrap_all_comments();
 
         /**
          * Load the user comments
@@ -163,5 +162,11 @@ export class CommentsController {
                 displayCommentBox(event, this.state.filters.selected_comment_filter);
             }
         }
+    }
+
+    unwrap_all_comments() {
+        $(".commented-selection").contents().unwrap();
+        $(".startDiv").remove();
+        $(".endDiv").remove();
     }
 }

@@ -1,12 +1,3 @@
-function unwrapEveryComments() {
-    let comments = $(".commented-selection");
-    let startDivs = $(".startDiv");
-    let endDivs = $(".endDiv");
-    comments.contents().unwrap();
-    startDivs.remove();
-    endDivs.remove();
-}
-
 function colorNotUsedTypeSelector(selected_eppn, textChosen) {
     API.request({
         endpoint: "get_highlights",
