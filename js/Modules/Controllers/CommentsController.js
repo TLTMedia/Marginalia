@@ -130,7 +130,7 @@ export class CommentsController {
      * 
      * TODO: use lightRange library for getting the selection (at least on mobile)
      */
-    highlight_selected_area(evt) {
+    highlight_selected_area(event) {
         let selectedRange = rangy.getSelection().getRangeAt(0);
         let lightRange = lightrange.saveSelection();
         selectedRange.nativeRange = lightRange;
@@ -139,7 +139,7 @@ export class CommentsController {
         $("#comment-box").attr("data-editcommentid", "-1");
 
         if (selectedRange.endOffset != selectedRange.startOffset) {
-            unhighlight();
+            this.ui.rangy_controller.unhighlight();
 
             // set the quill editor to empty and enabled
             this.state.quill.setText("");
@@ -153,12 +153,14 @@ export class CommentsController {
 
             // get the range via rangy
             let range = selectedRange.toCharacterRange(document.getElementById("textSpace"));
-            hlRange(selectedRange, range);
+
+            // TODO: some how make this synchronous?
+            this.ui.rangy_controller.highlight(selectedRange, range);
 
             if ($("." + escapeSpecialChar(this.state.rem_span)).parent().attr("class") != "commented-selection") {
                 $("#replies").parent().hide();
 
-                displayCommentBox(evt, this.state.filters.selected_comment_filter);
+                displayCommentBox(event, this.state.filters.selected_comment_filter);
             }
         }
     }

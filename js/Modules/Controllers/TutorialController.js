@@ -26,7 +26,7 @@ export class TutorialController {
             console.log("doing tutorial #", tutorialNum);
             console.log(this.ui)
             $.modal.close();
-            this.tutorial(tutorialNum, this.ui);
+            this.tutorial(tutorialNum);
             event.stopPropagation();
             //open or make an example page first
             //then add the tutorials and run it
@@ -114,6 +114,8 @@ export class TutorialController {
      * TODO: was waitTutorialCreation()
      */
     wait_for_creation(tutorialData, specialStepData) {
+        console.log("wait_for_creation()", tutorialData, specialStepData);
+
         let intervalID = setInterval(() => {
             console.log(tutorialData, $(".dynamicTutorial").length);
 

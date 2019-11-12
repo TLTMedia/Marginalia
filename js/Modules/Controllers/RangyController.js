@@ -7,7 +7,6 @@ export class RangyController {
     }
 
     /**
-     * TODO: not yet used. still using old.
      * Unhighlight an area via Rangy.
      */
     unhighlight() {
@@ -20,7 +19,22 @@ export class RangyController {
         return text;
     }
 
-    highlight() {
+    /**
+     * Highlight a particular section via rangy.
+     */
+    highlight(selected_range, range) {
+        this.state.rem_span = "hl_" + this.state.current_user.eppn;
 
+        let applier_count = rangy.createClassApplier(this.state.rem_span, {
+            useExistingElements: false,
+            elementAttributes: {
+                "startIndex": range.start,
+                "endIndex": range.end,
+            },
+        });
+
+        applier_count.applyToRange(selected_range);
+
+        return this.state.rem_span;
     }
 }

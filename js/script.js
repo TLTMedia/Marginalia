@@ -533,6 +533,13 @@ function adjustDialogPosition(data, width, height, marginX, marginY) {
     }
 }
 
+function escapeSpecialChar(id) {
+    if (id == null) {
+        return null;
+    }
+    return id.replace(/([\s!"#$%&'()\*+,\.\/:;<=>?@\[\]^`{|}~])/g, "\\$1");
+}
+
 //fucntions that were made by ppl before
 //------------------------------------------------------------------------------
 

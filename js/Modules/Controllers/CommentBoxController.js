@@ -28,7 +28,7 @@ export class CommentBoxController {
                     text: "Exit",
                     id: "commentExit",
                     click: () => {
-                        exitButtonOnClick();
+                        this.exit_comment_box();
                     },
                 },
             ],
@@ -43,7 +43,7 @@ export class CommentBoxController {
                 $("<button/>", {
                     class: "closeCommentBox",
                     click: () => {
-                        exitButtonOnClick();
+                        this.exit_comment_box();
                     }
                 }).append(
                     $("<i/>", {
@@ -200,5 +200,15 @@ export class CommentBoxController {
             // TODO: what's this do.
             getUnapprovedComments(data_save["author"], data_save["work"]);
         }
+    }
+
+    exit_comment_box() {
+        this.state.quill.setText("");
+
+        $("#commentExit").text("Exit");
+
+        this.ui.rangy_controller.unhighlight();
+
+        $("#comment-box").parent().fadeOut();
     }
 }

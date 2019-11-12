@@ -158,14 +158,6 @@ function checkSpansNeedRecover(id, callback) {
     handleStartEndDiv(createCommentData());
 }
 
-function exitButtonOnClick() {
-    TMP_STATE.quill.setText("");
-    //CKEDITOR.instances.textForm.setData("");
-    $("#commentExit").text("Exit");
-    unhighlight();
-    $("#comment-box").parent().fadeOut();
-}
-
 //commentBox width: 500 px ,height: 331px , marginX : 10, marginY : 50
 function displayCommentBox(evt, selected_filter) {
     var marginX = 10;
