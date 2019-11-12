@@ -51,8 +51,6 @@ export class FiltersEvents {
      * This is called everytime a new work is loaded
      */
     reset(comment_data) {
-        console.log(comment_data);
-
         this.state.filters = {};
         this.state.filters.selected_comment_filter = "show-all-types";
         this.state.filters.selected_author_filter = "show-all-eppns";
