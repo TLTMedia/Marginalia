@@ -95,6 +95,9 @@ init = async ({ state = state, ui = ui, api = api }) => {
         }
     });
 
+    /**
+     * Initialize all the dropdowns that are from the Select2 library.
+     */
     $(document).ready(() => {
         $(".select2-save-comment-select").select2();
 
@@ -114,6 +117,13 @@ init = async ({ state = state, ui = ui, api = api }) => {
          * Work selection
          */
         $(".select2-work-select").select2();
+
+        /**
+         * Whitelist selection
+         */
+        $(".select2-whitelist-select").select2({
+            multiple: true,
+        });
     });
 }
 

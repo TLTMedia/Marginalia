@@ -14,11 +14,14 @@ export class CoursesData {
         return await course_list;
     }
 
-    async get_course_creators(course) {
+    /**
+     * Gets list of users that have works in a specified course.
+     */
+    async get_course_creators() {
         let creators_list = this.api.request({
             endpoint: 'get_creators_of_course',
             data: {
-                course: course,
+                course: this.state.selected_course,
             },
         });
 
@@ -33,15 +36,15 @@ export class CoursesData {
         return await is_admin;
     }
 
-    async add_course(courseName) {
-        let respond = this.api.request({
-            endpoint: "add_course",
+    async add_course(course) {
+        let response = this.api.request({
+            endpoint: 'add_course',
+            method: 'POST',
             data: {
-                course: courseName,
+                course: course,
             },
-            method: "POST",
         });
 
-        return await respond;
+        return await response;
     }
 }

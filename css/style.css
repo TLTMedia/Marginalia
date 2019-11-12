@@ -1453,9 +1453,9 @@ input[type="file"] {
     text-decoration: underline;
 }
 
-#whitelist-modal {
-    height: 400px;
-}
+/* #whitelist-modal {
+    height: 300px;
+} */
 
 .settingOptions label {
     /* font-weight: bold; */
@@ -1474,7 +1474,7 @@ input[type="file"] {
     font-weight: bold;
 }
 
-.litWhiteListButton, .deleteWorkButton, .settingDataButton {
+.deleteWorkButton, .settingDataButton {
     margin-top: 4px;
     margin-bottom: 4px;
     margin-left: 5px;
@@ -1484,16 +1484,17 @@ input[type="file"] {
     align-items: center;
 }
 
+/* 
 .whiteListSettingBase ul {
     overflow-y: scroll;
-}
+} */
 
 .settingUsers, .settingLit {
     background-color: var(--bg-main-marginalia);
     font-weight: bold;
 }
 
-.settingUsers:hover, .settingLit:hover, .litEditButton:hover, .litWhiteListButton:hover, .deleteWorkButton:hover, .settingDataButton:hover {
+.settingUsers:hover, .settingLit:hover, .litEditButton:hover, .deleteWorkButton:hover, .settingDataButton:hover {
     background-color: #d7d3d1;
     cursor: pointer;
 }

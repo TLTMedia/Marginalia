@@ -28,7 +28,7 @@ export class InterfaceController {
             users_dropdown_menu: ".usersMenu",
             works_menu_section: ".workSelectMenu",
             works_dropdown_menu: ".worksMenu",
-            whitelist_list: ".whiteList",
+            whitelist_list: ".select2-whitelist-select",
         };
 
         /**
@@ -410,64 +410,23 @@ export class InterfaceController {
     }
 
     /**
-     * Populate Whitelist
+     * Populate Whitelist & selects the admins
      * TODO: string constants
      */
-    populate_whitelist(user_list) {
+    populate_whitelist(user_list, admin_list) {
         $(this.class_constants.whitelist_list).empty();
 
-        for (let i in user_list) {
-            let user = $("<li/>", {
-                text: user_list[i]["firstName"] + " " + user_list[i]["lastName"],
-                class: 'mdl-list__item whiteListOption',
-                commenterId: user_list[i]["eppn"]
+        user_list.forEach(user => {
+            let user_option = $("<option/>", {
+                value: user.eppn,
+                text: user.firstName + " " + user.lastName,
             });
 
-            let span = $("<span/>", {
-                class: "mdl-list__item-secondary-action whiteListCheckBoxSpan"
-            });
-
-            let label = $("<label/>", {
-                class: "mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect",
-                for: "wl_" + user_list[i]["eppn"]
-            });
-
-            let input = $("<input/>", {
-                class: "mdl-checkbox__input whiteListCheckBox",
-                type: "checkbox",
-                id: "wl_" + user_list[i]["eppn"]
-            });
-
-            $(label).append(input);
-            $(span).append(label);
-            $(user).append(span);
-            $(this.class_constants.whitelist_list).append(user);
-        }
-
-        componentHandler.upgradeAllRegistered();
-    }
-
-    /**
-     * Highlight whitelist admins
-     * TODO: string constants
-     */
-    highlight_whitelist_admins(admin_list) {
-        for (let i = 0; i < admin_list.length; i++) {
-            let whiteListUser = admin_list[i];
-            let inputs = $(".whiteList").find("input");
-
-            for (let j = 0; j < inputs.length; j++) {
-                if (inputs[j]["id"].split("_")[1] == whiteListUser) {
-                    $("#" + escapeSpecialChar(inputs[j]["id"])).off().click();
-                }
+            if (admin_list.includes(user.eppn)) {
+                user_option.prop("selected", "selected");
             }
-        }
 
-        // disable the creator from the whitelist
-        $("#" + escapeSpecialChar("wl_" + this.state.selected_creator)).attr("disabled", true);
-
-        $(".whiteListCheckBox").off().on("change", async event => {
-            await this.ui_events.click_user_on_whitelist(event);
+            $(this.class_constants.whitelist_list).append(user_option);
         });
     }
 

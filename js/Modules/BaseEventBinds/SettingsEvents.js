@@ -16,41 +16,62 @@ export class SettingsEvents {
         /**
          * Settings button in the sub-menu
          */
-        $("#setting").off().on("click", () => {
-            /**
-             * TODO: this means that only the work creator can access the settings.
-             * Maybe it should be anyone on the permissions list of the work?
-             * (David :I thought we already discuss this before that only the creator is allow to do the settings)
-             */
-            if (this.state.selected_creator != this.state.current_user.eppn) {
-                this.ui.toast.create_toast("You don't have the permission to do this action");
+        $("#setting").off().on("click", async () => {
+            let work_admins = await this.works_data.get_admins_of_work();
+
+            if (!work_admins.admins.includes(this.state.selected_creator)) {
+                this.ui.toast.create_toast("You don't have permission to do this action.");
             } else {
+                /**
+                 * Get the course creators
+                 * This gets the admins of a course
+                 */
+                let course_creators = await this.courses_data.get_course_creators();
+                this.ui.populate_whitelist(course_creators, work_admins.admins);
+
+                /**
+                 * Show the settings modal.
+                 */
                 this.ui.show_settings();
             }
         });
 
         /**
-         * Whitelist button in the settings screen
+         * Event handler for adding to the whitelist
          */
-        $(".litWhiteListButton").off().on("click", async () => {
-            $("#whitelist-modal").modal({
-                closeClass: 'icon-remove',
-                closeText: '!',
-                closeExisting: false,
-            });
+        $(".select2-whitelist-select").on("select2:select", async event => {
+            let response = await this.state.api_data.works_data.add_work_permission(event.params.data.id);
+            this.ui.toast.create_toast(response);
+        });
 
-            $(".whiteListCheckBox").removeAttr("disabled");
-            $(".whiteListCheckBoxSpan").children("label").removeClass("is-checked");
+        /**
+         * Event handler for removing from the whitelist
+         */
+        $(".select2-whitelist-select").on("select2:unselecting", async event => {
+            /**
+             * Prevent de-selecting of the creator of the work
+             */
+            if (event.params.args.data.id == this.state.selected_creator) {
+                this.ui.toast.create_toast("You cannot remove the creator of the document.", "warning");
 
-            // populate the whitelist with creators of the specified course
-            let course_creators = this.courses_data.get_course_creators(this.state.selected_course);
-            let course_creators_data = await course_creators;
-            this.ui.populate_whitelist(course_creators_data);
+                event.preventDefault();
+                return;
+            }
 
-            // check off the admins that are in the course
-            let work_admins = this.works_data.get_admins_of_work(this.state.selected_creator, this.state.selected_work);
-            let work_admins_data = await work_admins;
-            this.ui.highlight_whitelist_admins(work_admins_data.admins);
+            /**
+             * TODO: Keep below? 
+             * Should they be allowed to remove themselves from the admin list - if they aren't the course owned
+             * Prevent de-selecting of yourself
+             */
+            if (event.params.args.data.id == this.state.current_user.eppn) {
+                this.ui.toast.create_toast("You cannot remove yourself.", "warning");
+
+                event.preventDefault();
+                return;
+            }
+
+            let response = await this.state.api_data.works_data.remove_work_permission(event.params.args.data.id);
+            this.ui.toast.create_toast(response);
         });
 
         /**

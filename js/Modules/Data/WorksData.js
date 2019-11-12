@@ -18,12 +18,12 @@ export class WorksData {
         return await works_list;
     }
 
-    async get_admins_of_work(selected_eppn, selected_work) {
+    async get_admins_of_work() {
         let admin_list = this.api.request({
             endpoint: 'get_permissions_list',
             data: {
-                eppn: selected_eppn,
-                work: selected_work,
+                eppn: this.state.selected_creator,
+                work: this.state.selected_work,
             },
         });
 
@@ -33,12 +33,12 @@ export class WorksData {
     /**
      * Add a specified users eppn to the currently logged in users specified work
      */
-    async add_work_permission(selected_work, eppn_to_add) {
+    async add_work_permission(eppn_to_add) {
         let response = this.api.request({
             endpoint: 'add_permission',
             method: 'POST',
             data: {
-                work: decodeURI(selected_work),
+                work: decodeURI(this.state.selected_work),
                 eppn: eppn_to_add,
             },
         });
@@ -49,12 +49,12 @@ export class WorksData {
     /**
      * Remove a specified users eppn from the currently logged in users specified work
      */
-    async remove_work_permission(selected_work, eppn_to_remove) {
+    async remove_work_permission(eppn_to_remove) {
         let response = this.api.request({
             endpoint: 'remove_permission',
             method: 'POST',
             data: {
-                work: decodeURI(selected_work),
+                work: decodeURI(this.state.selected_work),
                 eppn: eppn_to_remove,
             },
         });

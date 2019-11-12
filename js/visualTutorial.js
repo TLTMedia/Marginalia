@@ -164,7 +164,7 @@ async function preTutorial(tutorialNum, ui) {
         ui.state.selected_work = "Example";
         ui.show_settings();
         var tutorialData = [
-            [".litWhiteListButton", 1, "Click on this to manage the white list (People that are able to approve other people's comments)"],
+            [".select2-whitelist-select", 1, "Click on this to manage the white list (People that are able to approve other people's comments)"],
             [".settingDataButton", 2, "Click on this to check the data about the current work"],
             [".deleteWorkButton", 3, "Click on this to delete the current work"],
             [".privacySwitch", 4, "Toggle the switch to set the privacy for current work"],
