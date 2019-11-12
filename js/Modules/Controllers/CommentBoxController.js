@@ -144,6 +144,12 @@ export class CommentBoxController {
 
                 refreshReplyBox(data_save["author"], data_save["work"], firstCommentCreator, firstCommentId);
             } else {
+                /**
+                 * Since it's a new highlight, dynamically reset the filters for it.
+                 */
+                let work_comment_data = await this.state.api_data.comments_data.get_work_highlights();
+                this.ui.base_events.filters_events.reset(work_comment_data);
+
                 let approved;
                 let index = {
                     'start': $('.' + escapeSpecialChar(this.state.rem_span)).attr("startIndex"),

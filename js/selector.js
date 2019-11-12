@@ -14,8 +14,7 @@ function colorNotUsedTypeSelector(selected_eppn, textChosen) {
             creator: selected_eppn,
             work: textChosen
         }
-    }).then((data) => {
-        console.log(data)
+    }).then(data => {
         let key = ["Historical", "Analytical", "Comment", "Definition", "Question"];
         let buttonTypes = {
             "Historical": 0,
@@ -24,15 +23,16 @@ function colorNotUsedTypeSelector(selected_eppn, textChosen) {
             "Definition": 0,
             "Question": 0
         };
-        for (var i = 0; i < data.length; i++) {
+
+        for (let i = 0; i < data.length; i++) {
             let type = data[i]["commentType"];
             buttonTypes[type] += 1;
         }
+
         key.forEach((element) => {
             if (buttonTypes[element] == 0) {
                 $("#button" + element).addClass("notUsedType");
-            }
-            else {
+            } else {
                 $("#button" + element).removeClass("notUsedType");
             }
         });

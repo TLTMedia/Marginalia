@@ -27,6 +27,9 @@ export class CommentsController {
             comment_data = await this.state.api_data.comments_data.get_work_highlights();
         }
 
+        /**
+         * Sort the comments of start index
+         */
         let sorted_comments = [];
         for (let i = 0; i < comment_data.length; i++) {
             let comment = comment_data[i];
