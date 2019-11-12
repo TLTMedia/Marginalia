@@ -38,13 +38,25 @@ class Permissions
     /**
      * Add a user's eppn to a specified works'...
      */
-    public function addPermission($pathOfWork, $eppn)
+    public function addPermission($pathOfWork, $currentUserEppn, $newAdminEppn)
     {
+        /**
+         * Check if the currentUserEppn is on the permissions list already.
+         * Does the user have permission to add people.
+         */
+        $hasPermissions = $this->userOnPermissionsList($pathOfWork, $currentUserEppn);
+        if (!$hasPermissions) {
+            return json_encode(array(
+                "status"  => "error",
+                "message" => "invalid permissions to add new admin",
+            ));
+        }
+
         $filePath = $pathOfWork . "/permissions.json";
         if (!file_exists($filePath)) {
             // the permissions file doesn't exist for the specified work... need to create it.
             $permissionTemplate               = new DefaultPermissions;
-            $permissionTemplate->{'admins'}[] = $eppn;
+            $permissionTemplate->{'admins'}[] = $newAdminEppn;
 
             file_put_contents($filePath, json_encode($permissionTemplate));
 
@@ -55,9 +67,9 @@ class Permissions
         } else {
             // the permissions file already exists for the work... add the eppn to it...
             $permissionsData = json_decode($this->__getRawPermissionsList($pathOfWork));
-            if (!in_array($eppn, $permissionsData->{'admins'})) {
+            if (!in_array($newAdminEppn, $permissionsData->{'admins'})) {
                 // add the new eppn to the file
-                $permissionsData->{'admins'}[] = $eppn;
+                $permissionsData->{'admins'}[] = $newAdminEppn;
                 file_put_contents($filePath, json_encode($permissionsData));
                 return json_encode(array(
                     "status"  => "ok",
@@ -76,8 +88,20 @@ class Permissions
     /**
      * Remove a user from the permissions file of a work
      */
-    public function removePermission($pathOfWork, $eppn)
+    public function removePermission($pathOfWork, $currentUserEppn, $newAdminEppn)
     {
+        /**
+         * Check if the currentUserEppn is on the permissions list already.
+         * Does the user have permission to add people.
+         */
+        $hasPermissions = $this->userOnPermissionsList($pathOfWork, $currentUserEppn);
+        if (!$hasPermissions) {
+            return json_encode(array(
+                "status"  => "error",
+                "message" => "invalid permissions to remove admin",
+            ));
+        }
+
         $filePath = $pathOfWork . "/permissions.json";
         if (!file_exists($filePath)) {
             return json_encode(array(
@@ -86,13 +110,13 @@ class Permissions
             ));
         } else {
             $permissionsData = json_decode($this->__getRawPermissionsList($pathOfWork));
-            if (!in_array($eppn, $permissionsData->{'admins'})) {
+            if (!in_array($newAdminEppn, $permissionsData->{'admins'})) {
                 return json_encode(array(
                     "status"  => "error",
                     "message" => "user not found in permission list",
                 ));
             } else {
-                $keyToRemove = array_search($eppn, $permissionsData->{'admins'});
+                $keyToRemove = array_search($newAdminEppn, $permissionsData->{'admins'});
                 array_splice($permissionsData->{'admins'}, $keyToRemove, 1);
                 file_put_contents($filePath, json_encode($permissionsData));
                 return json_encode(array(

@@ -133,16 +133,17 @@ $app->get("/get_permissions_list", function () use ($app, $PATH, $parameters) {
 $app->post("/add_permission", function () use ($app, $PATH, $parameters, $authUniqueId) {
     $data = json_decode($app->request->getBody(), true);
     $parameters->paramCheck($data, array(
-        "eppn", "work",
+        "creator", "work", "newEppn",
     ));
 
     require "../Actions/Permissions.php";
     $permissions  = new Permissions($PATH);
-    $workFullPath = $PATH . $authUniqueId . "/works/" . $data["work"];
+    $workFullPath = $PATH . $data["creator"] . "/works/" . $data["work"];
 
     echo $permissions->addPermission(
         $workFullPath,
-        $data["eppn"]
+        $authUniqueId,
+        $data["newEppn"]
     );
 });
 
@@ -154,16 +155,17 @@ $app->post("/add_permission", function () use ($app, $PATH, $parameters, $authUn
 $app->post("/remove_permission", function () use ($app, $PATH, $parameters, $authUniqueId) {
     $data = json_decode($app->request->getBody(), true);
     $parameters->paramCheck($data, array(
-        "eppn", "work",
+        "creator", "work", "newEppn",
     ));
 
     require "../Actions/Permissions.php";
     $permissions  = new Permissions($PATH);
-    $workFullPath = $PATH . $authUniqueId . "/works/" . $data["work"];
+    $workFullPath = $PATH . $data["creator"] . "/works/" . $data["work"];
 
     echo $permissions->removePermission(
         $workFullPath,
-        $data["eppn"]
+        $authUniqueId,
+        $data["newEppn"]
     );
 });
 
