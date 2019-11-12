@@ -1,9 +1,19 @@
 /**
  * Initialization of Marginalia scripts begin here
  */
-import { InterfaceController, APIHandler, Data, Toast, Address } from './Modules/_ModuleLoader.js';
+import { InterfaceController, APIHandler, Data, Toast, Address, Shibboleth } from './Modules/_ModuleLoader.js';
 
 (async () => {
+    /**
+     * Shibboleth Ping,
+     * It's blocking - nothing else happens until the request resolves.
+     */
+    const shibboleth = new Shibboleth();
+    await shibboleth.ping();
+
+    /**
+     * Our main state for Marginalia.
+     */
     const state = {};
 
     /**
