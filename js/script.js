@@ -342,19 +342,23 @@ function colorAdjacentComments(commentHash) {
 //if current user is admin for the current work, they are able to approve the unapproved comments
 //if current user is creator of the comment, they are able to edit and delete the unapproved comment
 //approved comments don't need to check anyPermission stuff
-function clickOnComment(data) {
+async function clickOnComment(data) {
+    console.log("should click")
+    console.log(TMP_STATE);
     $("#replies").empty();
-    $("#comment-box").removeAttr("data-replyToEppn");
-    $("#comment-box").removeAttr("data-replyToHash");
-    $("#comment-box").attr("data-editCommentId", "-1");
+    TMP_STATE.commentBox_data;
+    TMP_STATE.replyBox_data;
+    // $("#comment-box").removeAttr("data-replyToEppn");
+    // $("#comment-box").removeAttr("data-replyToHash");
+    // $("#comment-box").attr("data-editCommentId", "-1");
     let comment_data = {
-        creator: TMP_STATE.selected_creator,
-        work: TMP_STATE.selected_work,
+        creator: data["author"],
+        work: data["work"],
         commenter: data["commentCreator"],
         hash: data["commentId"]
     };
-    get_comment_chain_API_request(comment_data);
-    displayReplyBox(data);
+    await get_comment_chain_API_request(comment_data);
+    await displayReplyBox(data);
 }
 
 function getUnapprovedComments(workCreator, work) {

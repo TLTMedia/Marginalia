@@ -1,4 +1,5 @@
 function colorNotUsedTypeSelector(selected_eppn, textChosen) {
+    console.log("call this shit")
     API.request({
         endpoint: "get_highlights",
         data: {
@@ -6,6 +7,7 @@ function colorNotUsedTypeSelector(selected_eppn, textChosen) {
             work: textChosen
         }
     }).then(data => {
+        console.log(data);
         let key = ["Historical", "Analytical", "Comment", "Definition", "Question"];
         let buttonTypes = {
             "Historical": 0,
@@ -27,6 +29,30 @@ function colorNotUsedTypeSelector(selected_eppn, textChosen) {
                 $("#button" + element).removeClass("notUsedType");
             }
         });
+    });
+}
+
+function colorNotUsedTypeSelector(work_comment_data){
+    let key = ["Historical", "Analytical", "Comment", "Definition", "Question"];
+    let buttonTypes = {
+        "Historical": 0,
+        "Analytical": 0,
+        "Comment": 0,
+        "Definition": 0,
+        "Question": 0
+    };
+
+    for (let i = 0; i < work_comment_data.length; i++) {
+        let type = work_comment_data[i]["commentType"];
+        buttonTypes[type] += 1;
+    }
+
+    key.forEach((element) => {
+        if (buttonTypes[element] == 0) {
+            $("#button" + element).addClass("notUsedType");
+        } else {
+            $("#button" + element).removeClass("notUsedType");
+        }
     });
 }
 

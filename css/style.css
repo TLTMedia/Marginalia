@@ -1046,6 +1046,12 @@ input[type="file"] {
     }
 }
 
+/*----------------commentBox_dropDown-----------*/
+
+.disabled_dropDown{
+    background-color: rgba(205,205,205,0.8) !important;
+}
+
 /*----------------footer------------------------*/
 
 /* .mdl-mini-footer{

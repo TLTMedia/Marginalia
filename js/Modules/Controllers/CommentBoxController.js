@@ -7,7 +7,8 @@ export class CommentBoxController {
     }
 
     /**
-     * Create the comment box jQuery dialog.
+     * Create the comment box jQuery dialog.   (PLEASE CHECK HOW EVERYTHING WORKS BEFORE SWITCHING, SO WE CAN SWITCH WITHOUT BREAKING TOO MANY THING)
+     * (I found a lot of minor bugs and it's really hard to find where is the problem bcuz we changed the structure)
      * TODO:
      */
     create_commentbox() {
@@ -64,6 +65,8 @@ export class CommentBoxController {
      * TODO:
      */
     async save_comment() {
+        console.log(this.state.commentBox_data);
+        console.log(TMP_STATE.commentBox_data);
         let commentText = this.state.quill.getHTML();
 
         if (commentText == "<p><br></p>") {
@@ -105,7 +108,21 @@ export class CommentBoxController {
                 public: true,
             };
 
-            editOrDelete(data_edit, this.state.commentBox_data.edit_comment_id);
+            //editOrDelete(data_edit, this.state.commentBox_data.edit_comment_id);
+
+            let edit_comment_response = await this.state.api_data.comments_data.edit_comment(data_edit);
+            this.ui.toast.create_toast(edit_comment_response);
+
+            let firstCommentId = this.state.replyBox_data.first_comment_id;
+            let firstCommentCreator = this.state.replyBox_data.first_comment_author;
+
+            refreshReplyBox(data_edit["creator"], data_edit["work"], firstCommentCreator, firstCommentId, data_edit["type"]);
+
+            if (data_edit["type"]) {
+                $(".commented-selection" + "[commentId = '" + this.state.commentBox_data.edit_comment_id + "']").attr("typeof", data_edit["type"]);
+                let work_comment_data = this.state.api_data.comments_data.get_work_highlights();
+                colorNotUsedTypeSelector(work_comment_data);
+            }
 
             $("#comment-box").attr('data-editCommentID', '-1');
             $("#comment-box").parent().fadeOut();
@@ -126,10 +143,10 @@ export class CommentBoxController {
             /**
              * Save the comment via API request
              */
-            let response = await this.state.api_data.comments_data.save_comment(data_save);
+            let save_comment_response = await this.state.api_data.comments_data.save_comment(data_save);
 
             // create a toast showing the response of saving the comment
-            this.ui.toast.create_toast(response.message);
+            this.ui.toast.create_toast(save_comment_response.message);
 
             // hide the textarea comment box
             $("#comment-box").parent().fadeOut();
@@ -190,7 +207,7 @@ export class CommentBoxController {
 
                 let allComments = createCommentData();
                 handleStartEndDiv(allComments);
-                colorNotUsedTypeSelector(data_save["author"], data_save["work"]);
+                colorNotUsedTypeSelector(work_comment_data);
                 updateCommenterSelectors();
 
                 //update the click event on this new added comment
@@ -198,11 +215,16 @@ export class CommentBoxController {
             }
 
             // TODO: what's this do.
+            // NOTE: This function colors the comment if this comment is a unapporved comment
             getUnapprovedComments(data_save["author"], data_save["work"]);
         }
     }
 
     exit_comment_box() {
+        //ADDED to clean the data when user exit comment box
+        delete this.state.commentBox_data;
+        delete TMP_STATE.commentBox_data;
+
         this.state.quill.setText("");
 
         $("#commentExit").text("Exit");

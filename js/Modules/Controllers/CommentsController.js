@@ -48,7 +48,7 @@ export class CommentsController {
 
     /**
      * TODO: was renderComments()
-     * Render the page comments on a page load, 
+     * Render the page comments on a page load,
      */
     render_comments(comment_data, callback) {
         $("#text-wrapper").fadeIn();
@@ -87,21 +87,23 @@ export class CommentsController {
                     /**
                      * Only events that are greate than +- 2px (should test this num) are processed.
                      * That is; +/- 2px from the original mousedown event.
-                     * 
+                     *
                      * Why? So that a simple "click" on a comment isn't processed here.
                      */
                     if (Math.abs(this.state.selection.start_pos_x - event.originalEvent.pageX) >= 2 || Math.abs(this.state.selection.start_pos_y - event.originalEvent.pageY) >= 2) {
                         if (event.target.classList[0] == "commented-selection") {
                             this.ui.toast.create_toast("You cannot create a comment that ends within another comment.");
                         } else {
+                            delete this.state.commentBox_data;
+                            delete TMP_STATE.commentBox_data;
+                            $(".select2-selection").removeClass("disabled_dropDown");
                             this.highlight_selected_area(event);
                         }
                     }
                 }
             }
         });
-
-        allowClickOnComment(this.state.selected_work, this.state.selected_author);
+        allowClickOnComment(this.state.selected_work, this.state.selected_creator);
         callback(this.state.selected_author, this.state.selected_work);
     }
 
@@ -120,13 +122,13 @@ export class CommentsController {
 
         // TODO:
         handleStartEndDiv(createCommentData());
-        allowClickOnComment($("#setting").attr("work"), $("#setting").attr("author"));
+        allowClickOnComment(this.state.selected_work, this.state.selected_creator);
     }
 
     /**
      * TODO: was highlightCurrentSelection()
      * Applies Rangy library highlighting to a specified area.
-     * 
+     *
      * TODO: use lightRange library for getting the selection (at least on mobile)
      */
     highlight_selected_area(event) {

@@ -60,7 +60,7 @@ export class CommentsData {
         /**
          * TODO: this appends @stonybrook.edu onto the author filter; b/c the stored author filter
          * doesn't contain the @stonybrook.edu... but the api expects it to be there...
-         * Make the state store that info (@stonybrook.edu) 
+         * Make the state store that info (@stonybrook.edu)
          */
         let selected_commenter = this.state.filters.selected_author_filter;
         if (selected_commenter.indexOf("@") == -1 && selected_commenter != "show-all-eppns") {
@@ -94,9 +94,29 @@ export class CommentsData {
      */
     async save_comment(data) {
         let response = this.api.request({
-            endpoint: 'save_comments',
-            method: 'POST',
-            data: data,
+            endpoint : 'save_comments',
+            method : 'POST',
+            data : data,
+        });
+
+        return await response;
+    }
+
+    async edit_comment(data){
+        let response = this.api.request({
+            endpoint : 'edit_comment',
+            method : 'POST',
+            data : data
+        });
+
+        return await response;
+    }
+
+    async delete_comment(data){
+        let response = this.api.request({
+            endpoint : 'delete_comment',
+            method : 'POST',
+            data : data
         });
 
         return await response;

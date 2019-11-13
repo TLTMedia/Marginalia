@@ -169,7 +169,6 @@ export class TutorialController {
                 [".tipsIcon", 5, "Hover to the question mark to see what the colored text indicates"]
             ];
             var specialStepData = {
-                3: '$(".mdl-menu" + "[for = filters]").show();'
             };
             return [tutorialData, specialStepData];
         } else if (tutorialNum == 3) {
@@ -180,8 +179,8 @@ export class TutorialController {
                 "work": "Example",
                 "author": "shihclin@stonybrook.edu",
                 "commentCreator": "shihclin@stonybrook.edu",
-                "commentId": 1572021529,
-                "commentType": "Historical",
+                "commentId": 1573666037,
+                "commentType": "Comment",
                 "evtPageX": 100,
                 "evtPageY": 100,
                 "evtClientY": 100
@@ -194,7 +193,9 @@ export class TutorialController {
                 ["#ui-id-2", 3, "The type of this discussion is shown here"],
                 [".toolBar:first", 4, "All the action you can do with the discussions is in toolbar"]
             ];
-            var specialStepData = {};
+            var specialStepData = {
+                2:" $('#replies').parent().show();"
+            };
             return [tutorialData, specialStepData];
         } else if (tutorialNum == 4) {
             //TODO  HARDED CODED

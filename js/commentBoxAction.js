@@ -1,67 +1,69 @@
 //edit_comment_id is the comment id that we are going to edit. If this is a delete action edit_comment_id is undefined
-function editOrDelete(dataForEditOrDelete, edit_comment_id) {
-    var endPoint;
-    var commonData = {
-        creator: dataForEditOrDelete["creator"],
-        work: dataForEditOrDelete["work"],
-        commenter: dataForEditOrDelete["commenter"],
-        hash: dataForEditOrDelete["hash"]
-    };
-    if (edit_comment_id) {
-        endPoint = "edit_comment";
-        var editData = {
-            type: dataForEditOrDelete["type"],
-            text: dataForEditOrDelete["text"],
-            public: dataForEditOrDelete["public"]
-        };
-        $.extend(commonData, editData);
-    }
-    else {
-        endPoint = "delete_comment";
-    }
-    API.request({
-        endpoint: endPoint,
-        method: "POST",
-        data: commonData,
-        callback: null
-    }).then((data) => {
-        launchToastNotifcation(data);
-        let firstCommentId = TMP_STATE.replyBox_data.first_comment_id;
-        let firstCommentCreator = TMP_STATE.replyBox_data.first_comment_author;
-        refreshReplyBox(dataForEditOrDelete["creator"], dataForEditOrDelete["work"], firstCommentCreator, firstCommentId, editData != undefined ? editData["type"] : undefined);
-        if (edit_comment_id) {
-            if (dataForEditOrDelete["type"]) {
-                $(".commented-selection" + "[commentId = '" + dataForEditOrDelete["hash"] + "']").attr("typeof", dataForEditOrDelete["type"]);
-                colorNotUsedTypeSelector(dataForEditOrDelete["creator"], dataForEditOrDelete["work"]);
-            }
-        }
-        else {
-            //unhighlight the deleted comment
-            //update the commenterSelector and the typeSelector
-            console.log(firstCommentId, TMP_STATE.replyBox_data.delete_comment_id);
-            if (firstCommentId == TMP_STATE.replyBox_data.delete_comment_id) {
-                checkSpansNeedRecover(firstCommentId, removeDeletedSpan);
-                updateCommenterSelectors(firstCommentId);
-                colorNotUsedTypeSelector(dataForEditOrDelete["creator"], dataForEditOrDelete["work"]);
-                $("#replies").parent().hide();
-            }
-            else {
-                // if the first comment is deleted, no checking required
-                // update and mark the unapproved comments
-                let firstCommentData = {
-                    creator: dataForEditOrDelete["creator"],
-                    work: dataForEditOrDelete["work"],
-                    commenter: $(".commented-selection" + "[commentId = '" + firstCommentId + "']").attr("creator"),
-                    hash: firstCommentId
-                }
-            }
-            allowClickOnComment(dataForEditOrDelete["work"], dataForEditOrDelete["creator"])
-            getUnapprovedComments(dataForEditOrDelete["creator"], dataForEditOrDelete["work"]);
-            delete TMP_STATE.replyBox_data.delete_comment_id;
-            $("#replies").removeAttr("deletedid");
-        }
-    });
-}
+// function editOrDelete(dataForEditOrDelete, edit_comment_id) {
+//     var endPoint;
+//     var commonData = {
+//         creator: dataForEditOrDelete["creator"],
+//         work: dataForEditOrDelete["work"],
+//         commenter: dataForEditOrDelete["commenter"],
+//         hash: dataForEditOrDelete["hash"]
+//     };
+//     if (edit_comment_id) {
+//         endPoint = "edit_comment";
+//         var editData = {
+//             type: dataForEditOrDelete["type"],
+//             text: dataForEditOrDelete["text"],
+//             public: dataForEditOrDelete["public"]
+//         };
+//         $.extend(commonData, editData);
+//     }
+//     else {
+//         endPoint = "delete_comment";
+//     }
+//     API.request({
+//         endpoint: endPoint,
+//         method: "POST",
+//         data: commonData,
+//         callback: null
+//     }).then((data) => {
+//         launchToastNotifcation(data);
+//         let firstCommentId = TMP_STATE.replyBox_data.first_comment_id;
+//         let firstCommentCreator = TMP_STATE.replyBox_data.first_comment_author;
+//         refreshReplyBox(dataForEditOrDelete["creator"], dataForEditOrDelete["work"], firstCommentCreator, firstCommentId, editData != undefined ? editData["type"] : undefined);
+//         if (edit_comment_id) {
+//             if (dataForEditOrDelete["type"]) {
+//                 $(".commented-selection" + "[commentId = '" + dataForEditOrDelete["hash"] + "']").attr("typeof", dataForEditOrDelete["type"]);
+//                 let work_comment_data = TMP_STATE.api_data.comments_data.get_work_highlights();
+//                 console.log(work_comment_data)
+//                 colorNotUsedTypeSelector(dataForEditOrDelete["creator"], dataForEditOrDelete["work"]);
+//             }
+//         }
+//         else {
+//             //unhighlight the deleted comment
+//             //update the commenterSelector and the typeSelector
+//             console.log(firstCommentId, TMP_STATE.replyBox_data.delete_comment_id);
+//             if (firstCommentId == TMP_STATE.replyBox_data.delete_comment_id) {
+//                 checkSpansNeedRecover(firstCommentId, removeDeletedSpan);
+//                 updateCommenterSelectors(firstCommentId);
+//                 colorNotUsedTypeSelector(dataForEditOrDelete["creator"], dataForEditOrDelete["work"]);
+//                 $("#replies").parent().hide();
+//             }
+//             else {
+//                 // if the first comment is deleted, no checking required
+//                 // update and mark the unapproved comments
+//                 let firstCommentData = {
+//                     creator: dataForEditOrDelete["creator"],
+//                     work: dataForEditOrDelete["work"],
+//                     commenter: $(".commented-selection" + "[commentId = '" + firstCommentId + "']").attr("creator"),
+//                     hash: firstCommentId
+//                 }
+//             }
+//             allowClickOnComment(dataForEditOrDelete["work"], dataForEditOrDelete["creator"])
+//             getUnapprovedComments(dataForEditOrDelete["creator"], dataForEditOrDelete["work"]);
+//             delete TMP_STATE.replyBox_data.delete_comment_id;
+//             $("#replies").removeAttr("deletedid");
+//         }
+//     });
+// }
 
 //TODO the id should change
 function removeDeletedSpan(id) {
@@ -110,7 +112,7 @@ function checkSpansNeedRecover(id, callback) {
             "typeOf": pCommentType,
             "approved": pCommentApproved
         });
-        allowClickOnComment($("#setting").attr("work"), $("#setting").attr("author"));
+        allowClickOnComment(TMP_STATE.selected_work, TMP_STATE.selected_creator);
         getUnapprovedComments($("#setting").attr("author"), $("#setting").attr("work"))
     }
     // unwrap the next comment and recreate it with the highlightText()
