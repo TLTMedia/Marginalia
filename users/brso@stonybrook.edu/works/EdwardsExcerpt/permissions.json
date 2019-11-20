@@ -1,9 +1,1 @@
-{
-    "admins": [
-        "brso@stonybrook.edu"
-    ],
-    "comments_require_approval": false,
-    "public": true,
-    "creator_first_name": "Brandi",
-    "creator_last_name": "So"
-}
+{"admins":["brso@stonybrook.edu","ikleiman@stonybrook.edu"],"comments_require_approval":false,"public":true,"creator_first_name":"Brandi","creator_last_name":"So"}

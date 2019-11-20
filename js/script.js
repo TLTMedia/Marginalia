@@ -186,7 +186,14 @@ function allowClickOnComment(textChosen, selected_eppn) {
             "evtPageY": evt.pageY,
             "evtClientY": evt.clientY
         }
+        console.log(evt)
+        let selectedRange = rangy.getSelection().getRangeAt(0).nativeRange;
+        let startIndex = $(".startDiv" + "[commentId = '"+data["commentId"]+"']").attr("startIndex");
+        let textIndex = parseInt(selectedRange.endOffset) + parseInt(startIndex);
+        console.log(textIndex)
         clickOnComment(data);
+
+        //clickOnCommentByIndex(textIndex,evt);
     });
 }
 
@@ -343,14 +350,12 @@ function colorAdjacentComments(commentHash) {
 //if current user is creator of the comment, they are able to edit and delete the unapproved comment
 //approved comments don't need to check anyPermission stuff
 async function clickOnComment(data) {
-    console.log("should click")
-    console.log(TMP_STATE);
-    $("#replies").empty();
-    TMP_STATE.commentBox_data;
-    TMP_STATE.replyBox_data;
     // $("#comment-box").removeAttr("data-replyToEppn");
     // $("#comment-box").removeAttr("data-replyToHash");
     // $("#comment-box").attr("data-editCommentId", "-1");
+    $("#replies").empty();
+    TMP_STATE.commentBox_data;
+    TMP_STATE.replyBox_data;
     let comment_data = {
         creator: data["author"],
         work: data["work"],
@@ -360,6 +365,62 @@ async function clickOnComment(data) {
     await get_comment_chain_API_request(comment_data);
     await displayReplyBox(data);
 }
+
+/** TODO this function assumes there is an API that returns all the comments data from the index user clicked
+  * if there are more than two comments exist at that index, create a menu of comments (with type and creator)
+  *  if (comment.startIndex < textIndex <= comment.endIndex) return this comment
+  */
+function clickOnCommentByIndex(textIndex,evt){
+    /*NEED TO CHANGE THIS*/
+    data = {
+      "work":TMP_STATE.selected_work,
+      "author": TMP_STATE.selected_author,
+      "textIndex": textIndex
+    }
+    API.request({
+      endpoint: /*NEED TO CHANGE THIS*/"get_comment_by_index",
+      method: "GET",
+      data: data
+    }).then((data)=>{
+        // more than one comment exist
+        if(data.length > 1){
+            // create the a menu of all comments returned
+            let commentMenu = $("<ul/>",{
+                "id" : "commentMenu"
+            });
+
+            for(var i in data){
+                let comment = $("<li/>",{
+                    "commentId" : data[i]["hash"],
+                    "commentCreator" : data[i]["commentCreator"],
+                    "type" : data[i]["commentType"],
+                    "click": (evt)=>{
+                        console.log(evt, $(this).attr("commentId"))
+                    }
+                });
+                commentMenu.append(comment);
+            }
+            let menuDestination = evt.currentTarget.attributes.commentId;
+            $(".commented-selection"+"[commentId = '"+menuDestination+"']").append(commentMenu);
+        }
+        // only one comment exist
+        else{
+            $("#replies").empty();
+            TMP_STATE.commentBox_data;
+            TMP_STATE.replyBox_data;
+            let comment_data = {
+                creator: data[0]["author"],
+                work: data[0]["work"],
+                commenter: data[0]["commentCreator"],
+                hash: data[0]["commentId"]
+            };
+            get_comment_chain_API_request(comment_data);
+            displayReplyBox(data[0]);
+        }
+    });
+}
+
+
 
 function getUnapprovedComments(workCreator, work) {
     //remove the unapproved classes

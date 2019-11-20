@@ -41,7 +41,7 @@ export class CommentsController {
         // TODO:
         let reverse_sorted_comments = reverseList(sorted_comments);
 
-        this.render_comments(reverse_sorted_comments, getUnapprovedComments);
+        this.render_comments(reverse_sorted_comments);
 
         return comment_data;
     }
@@ -50,7 +50,7 @@ export class CommentsController {
      * TODO: was renderComments()
      * Render the page comments on a page load,
      */
-    render_comments(comment_data, callback) {
+    async render_comments(comment_data) {
         $("#text-wrapper").fadeIn();
 
         for (let i = 0; i < comment_data.length; i++) {
@@ -103,8 +103,8 @@ export class CommentsController {
                 }
             }
         });
+        await getUnapprovedComments(this.state.selected_creator, this.state.selected_work);
         allowClickOnComment(this.state.selected_work, this.state.selected_creator);
-        callback(this.state.selected_author, this.state.selected_work);
     }
 
     /**
@@ -134,6 +134,7 @@ export class CommentsController {
     highlight_selected_area(event) {
         let selectedRange = rangy.getSelection().getRangeAt(0);
         let lightRange = lightrange.saveSelection();
+        console.log(selectedRange.nativeRange,lightRange)
         selectedRange.nativeRange = lightRange;
 
         $("#comment-box").removeAttr("data-replyToEppn data-replyToHash");

@@ -11,6 +11,7 @@ export class FiltersEvents {
      * Parse out the unique commenter eppns and the comment types from the raw work_comment_data
      */
     parse_filter_data(comment_data) {
+        console.log(comment_data);
         let all_types = Array();
         let all_eppns = Array();
 
@@ -120,8 +121,32 @@ export class FiltersEvents {
              */
             document.getElementById("filter-" + eppn).addEventListener('click', document.getElementById("menu-filters-authors").MaterialMenu.handleForClick_.bind(document.getElementById("menu-filters-authors").MaterialMenu));
         });
-
+        this.update_filter_status();
         componentHandler.upgradeAllRegistered();
+    }
+
+    //NOTE: added by David
+    update_filter_status(){
+        let current_type = this.state.filters.selected_comment_filter;
+        let current_commenter = this.state.filters.selected_author_filter;
+        console.log(current_type,current_commenter);
+        let regex = /show-all/g;
+        if(current_type.match(regex)!= null){
+            console.log("all");
+            $("#type_filter_status").html("Selected type: ALL");
+        }
+        else{
+            console.log(current_type);
+            $("#type_filter_status").html("Selected type: " + current_type[0].toUpperCase()+ current_type.slice(1));
+        }
+        if(current_commenter.match(regex) != null ){
+            console.log("all1");
+            $("#commenter_filter_status").html("Selected commenter: ALL");
+        }
+        else{
+            console.log(current_commenter);
+            $("#commenter_filter_status").html("Selected commenter: " + current_commenter[0].toUpperCase() + current_commenter.slice(1));
+        }
     }
 
     /**
@@ -167,9 +192,13 @@ export class FiltersEvents {
 
             await this.ui.comments_controller.filter_render_comments();
 
-            if ($(".commented-selection").offset().top > $(window).height()) {
-                $(".commented-selection")[0].scrollIntoView();
+            //CHANGED when there is no comments, this it returns error : cannot read "top" of type undefined
+            if($(".commented-selection").length != 0){
+                if ($(".commented-selection").offset().top > $(window).height()) {
+                    $(".commented-selection")[0].scrollIntoView();
+                }
             }
+            this.update_filter_status();
         });
 
         /**
@@ -208,10 +237,17 @@ export class FiltersEvents {
 
             await this.ui.comments_controller.filter_render_comments();
 
-            if ($(".commented-selection").offset().top > $(window).height()) {
-                $(".commented-selection")[0].scrollIntoView();
+            //CHANGED same as the type filter problem
+            if($(".commented_selection").length != 0){
+                if ($(".commented-selection").offset().top > $(window).height()) {
+                    $(".commented-selection")[0].scrollIntoView();
+                  }
             }
+            let work_comment_data = await this.state.api_data.comments_data.get_work_highlights()
+            colorNotUsedTypeSelector(work_comment_data);
+            this.update_filter_status();
         });
+
     }
 
     /**

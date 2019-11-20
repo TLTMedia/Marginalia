@@ -463,6 +463,8 @@ export class InterfaceController {
             // take note of it already being called here. (should be able to use it?)
             let work_comment_data = await this.state.api_data.comments_data.get_work_highlights();
 
+            console.log("work_comment_data",work_comment_data)
+
             // reset the filters - this happens here b.c. filters menu persists changes unless work is changed
             this.base_events.filters_events.reset(work_comment_data);
 

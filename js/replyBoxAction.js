@@ -324,21 +324,20 @@ async function deleteButtonOnClick(hash, eppn, work, workCreator) {
     let first_comment_id = TMP_STATE.replyBox_data.first_comment_id;
     let first_comment_author = TMP_STATE.replyBox_data.first_comment_author;
 
-    //$("#replies").attr("deletedId", hash);
-
     var delete_data = {
         creator: workCreator,
         work: work,
         commenter: eppn,
         hash: hash
     }
-    //getDataForEditOrDelete(workCreator, work, hash, eppn, null, null);
     await TMP_STATE.api_data.comments_data.delete_comment(delete_data);
+
+
 
     if (first_comment_id == TMP_STATE.replyBox_data.delete_comment_id) {
         checkSpansNeedRecover(first_comment_id, removeDeletedSpan);
-        updateCommenterSelectors(first_comment_id);
-        let work_comment_data = TMP_STATE.api_data.comments_data.get_work_highlights();
+        let work_comment_data = await TMP_STATE.api_data.comments_data.get_work_highlights();
+        //TODO NEED TO ADD RESET FILTER HERE, BUT CAN't ACCESS UI SO WAIT UNTIL THIS IS MODULAIZED.
         colorNotUsedTypeSelector(work_comment_data);
         $("#replies").parent().fadeOut();
     }
@@ -371,8 +370,8 @@ function commentPrivateButtonOnClick(evt, work, workCreator, setPublic) {
         else {
             launchToastNotifcation("successfully set comment to private");
         }
-        let firstCommentId = $("#replies").attr("data-firstCommentId");
-        let firstCommentCommenter = $(".commented-selection" + "[commentId = '" + firstCommentId + "']").attr("creator");
+        let firstCommentId = TMP_STATE.replyBox_data.first_comment_id;
+        let firstCommentCommenter = TMP_STATE.replyBox_data.first_comment_author;
         refreshReplyBox(workCreator, work, firstCommentCommenter, firstCommentId);
     });
 }
@@ -398,8 +397,8 @@ function commentApprovedOrUnapprovedButtonOnClick(hash, commenterEppn, work, wor
         data: data
     }).then((data) => {
         launchToastNotifcation(data);
-        let firstCommentHash = $("#replies").attr("data-firstCommentId");
-        let firstCommenter = $(".replies" + "[commentId = '" + firstCommentHash + "']").attr("name");
+        let firstCommentHash = TMP_STATE.replyBox_data.first_comment_id;
+        let firstCommenter = TMP_STATE.replyBox_data.first_comment_author;
         let firstCommentData = {
             creator: workCreator,
             work: work,

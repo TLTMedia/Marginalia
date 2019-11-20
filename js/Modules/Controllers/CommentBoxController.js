@@ -120,10 +120,13 @@ export class CommentBoxController {
 
             if (data_edit["type"]) {
                 $(".commented-selection" + "[commentId = '" + this.state.commentBox_data.edit_comment_id + "']").attr("typeof", data_edit["type"]);
-                let work_comment_data = this.state.api_data.comments_data.get_work_highlights();
+                let work_comment_data = await this.state.api_data.comments_data.get_work_highlights();
                 colorNotUsedTypeSelector(work_comment_data);
+                if(data_edit["type"] != this.state.filters.selected_comment_filter){
+                    checkSpansNeedRecover(this.state.commentBox_data.edit_comment_id, removeDeletedSpan);
+                    hideReplyBox();
+                }
             }
-
             $("#comment-box").attr('data-editCommentID', '-1');
             $("#comment-box").parent().fadeOut();
         } else {
@@ -175,7 +178,7 @@ export class CommentBoxController {
 
                 $('.' + escapeSpecialChar(this.state.rem_span)).removeAttr('startindex endIndex');
 
-                if (response["approval"] == true) {
+                if (save_comment_response["approval"] == true) {
                     approved = true;
                 } else {
                     approved = false;
@@ -183,7 +186,7 @@ export class CommentBoxController {
                 }
 
                 $('.' + escapeSpecialChar(this.state.rem_span)).attr({
-                    'commentId': response['commentHash'],
+                    'commentId': save_comment_response['commentHash'],
                     'creator': this.state.current_user.eppn,
                     'typeof': data_save['commentType'],
                     'approved': approved
@@ -191,14 +194,14 @@ export class CommentBoxController {
 
                 $("<param/>", {
                     class: 'startDiv',
-                    commentId: response['commentHash'],
+                    commentId: save_comment_response['commentHash'],
                     startIndex: index["start"],
                     colorId: 0
                 }).insertBefore('.' + escapeSpecialChar(this.state.rem_span));
 
                 $("<param/>", {
                     class: 'endDiv',
-                    commentId: response['commentHash'],
+                    commentId: save_comment_response['commentHash'],
                     endIndex: index["end"],
                     colorId: 0
                 }).insertAfter('.' + escapeSpecialChar(this.state.rem_span));
@@ -208,7 +211,7 @@ export class CommentBoxController {
                 let allComments = createCommentData();
                 handleStartEndDiv(allComments);
                 colorNotUsedTypeSelector(work_comment_data);
-                updateCommenterSelectors();
+                //updateCommenterSelectors();
 
                 //update the click event on this new added comment
                 allowClickOnComment(data_save["work"], data_save["author"]);
@@ -230,7 +233,7 @@ export class CommentBoxController {
         $("#commentExit").text("Exit");
 
         this.ui.rangy_controller.unhighlight();
-
+        $("#comment-box").parent().css('z-index',0);
         $("#comment-box").parent().fadeOut();
     }
 }

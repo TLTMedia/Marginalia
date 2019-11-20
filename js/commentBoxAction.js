@@ -168,7 +168,8 @@ function displayCommentBox(evt, selected_filter) {
 
     $("#comment-box").parent().css({
         'top': newPosition["newTop"],
-        'left': newPosition["newLeft"]
+        'left': newPosition["newLeft"],
+        'z-index': 5
     })
 
     $("#comment-box").parent().find("#ui-id-1").contents().filter(function () { return this.nodeType == 3; }).first().replaceWith("Annotation by: " + TMP_STATE.current_user['firstname'] + " " + TMP_STATE.current_user['lastname']);
