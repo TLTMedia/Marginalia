@@ -384,7 +384,7 @@ function clickOnCommentByIndex(textIndex,evt){
     }).then((data)=>{
         // more than one comment exist
         if(data.length > 1){
-            // create the a menu of all comments returned
+            // create a menu of all comments returned
             let commentMenu = $("<ul/>",{
                 "id" : "commentMenu"
             });
@@ -395,7 +395,18 @@ function clickOnCommentByIndex(textIndex,evt){
                     "commentCreator" : data[i]["commentCreator"],
                     "type" : data[i]["commentType"],
                     "click": (evt)=>{
-                        console.log(evt, $(this).attr("commentId"))
+                        console.log(evt, $(this).attr("commentId"));
+                        $("#replies").empty();
+                        TMP_STATE.commentBox_data;
+                        TMP_STATE.replyBox_data;
+                        let comment_data = {
+                            creator: data[i]["author"],
+                            work: data[i]["work"],
+                            commenter: data[i]["commentCreator"],
+                            hash: data[i]["hash"]
+                        };
+                        get_comment_chain_API_request(comment_data);
+                        displayReplyBox(data[i]);
                     }
                 });
                 commentMenu.append(comment);
@@ -412,7 +423,7 @@ function clickOnCommentByIndex(textIndex,evt){
                 creator: data[0]["author"],
                 work: data[0]["work"],
                 commenter: data[0]["commentCreator"],
-                hash: data[0]["commentId"]
+                hash: data[0]["hash"]
             };
             get_comment_chain_API_request(comment_data);
             displayReplyBox(data[0]);

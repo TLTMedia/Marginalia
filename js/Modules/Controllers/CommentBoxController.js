@@ -122,7 +122,8 @@ export class CommentBoxController {
                 $(".commented-selection" + "[commentId = '" + this.state.commentBox_data.edit_comment_id + "']").attr("typeof", data_edit["type"]);
                 let work_comment_data = await this.state.api_data.comments_data.get_work_highlights();
                 colorNotUsedTypeSelector(work_comment_data);
-                if(data_edit["type"] != this.state.filters.selected_comment_filter){
+                console.log(this.state.filters.selected_comment_filter, data_edit["type"]);
+                if(data_edit["type"] != this.state.filters.selected_comment_filter && this.state.filters.selected_comment_filter != "show-all-types"){
                     checkSpansNeedRecover(this.state.commentBox_data.edit_comment_id, removeDeletedSpan);
                     hideReplyBox();
                 }

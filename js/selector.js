@@ -37,7 +37,7 @@
 function colorNotUsedTypeSelector(work_comment_data){
     console.log(work_comment_data);
     //TODO HARD CODED FOR STONYBROOK STUDENT
-    let commenter = TMP_STATE.filters.selected_author_filter + "@stonybrook.edu";
+    let commenter = TMP_STATE.filters.selected_author_filter;
     let key = ["Historical", "Analytical", "Comment", "Definition", "Question"];
     let buttonTypes = {
         "Historical": 0,
@@ -49,9 +49,10 @@ function colorNotUsedTypeSelector(work_comment_data){
 
     for (let i = 0; i < work_comment_data.length; i++) {
         let type = work_comment_data[i]["commentType"];
-        if(commenter != "show-all-eppn"){
+        if(commenter != "show-all-eppns"){
+          console.log("not show all eppn")
             let data_commenter = work_comment_data[i]["eppn"];
-            if(commenter == data_commenter){
+            if(commenter+"@stonybrook.edu" == data_commenter){
                 buttonTypes[type] += 1;
             }
         }
