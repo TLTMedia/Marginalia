@@ -17,6 +17,17 @@ class APIResponse
     }
 
     /**
+     * Print out/return an array data contents
+     */
+    public function dataArray($data, $status = "ok")
+    {
+        return json_encode(array(
+            "status" => $status,
+            "data"   => $data,
+        ));
+    }
+
+    /**
      * Formats and returns the api data format which can be printed out directly
      */
     public function message($message, $status = "ok")

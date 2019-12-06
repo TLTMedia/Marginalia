@@ -208,29 +208,16 @@ class Comments
     /**
      * Returns the meta data for first level comments
      */
-    public function getHighlights($creator, $work, $readerEppn)
+    public function getHighlights($readerEppn)
     {
-        try {
-            $commentFilePaths = $this->__getCommentFiles($creator, $work, false);
-        } catch (Exception $e) {
-            return json_encode(array(
-                "status"        => "error",
-                "message"       => "unable to get comments",
-                "raw_exception" => $e->getMessage(),
-            ));
-        }
-
-        return json_encode(array(
-            "status" => "ok",
-            "data"   => $this->__getFileMetaData($commentFilePaths, $readerEppn),
-        ));
+        return $this->__getCommentDataHighlights($readerEppn);
     }
 
     /**
      * Returns the meta data for first level comments
      * Akin to getHighlights() except that this function applies filtering
      */
-    public function getHighlightsFiltered($creator, $work, $readerEppn, $filterEppn, $filterType)
+    public function getHighlightsFiltered($readerEppn, $filterEppn, $filterType)
     {
         /**
          * Frontend no longer sends the filter with the first letter being uppercased
@@ -240,23 +227,16 @@ class Comments
         /**
          * TODO: This can be improved by creating or adding filter functionality to getCommentFiles
          */
-        $result = json_decode($this->getHighlights($creator, $work, $readerEppn));
-        if ($result->status != "ok") {
-            return json_encode($result);
-        }
+        $result = $this->__getCommentDataHighlights($readerEppn);
 
         $filtered = array();
-        foreach ($result->data as $commentData) {
-            if (($commentData->commentType == $filterType || $filterType == "") && ($commentData->eppn == $filterEppn || $filterEppn == "")) {
+        foreach ($result as $commentData) {
+            if (($commentData["commentType"] == $filterType || $filterType == "") && ($commentData["eppn"] == $filterEppn || $filterEppn == "")) {
                 $filtered[] = $commentData;
             }
         }
 
-        return json_encode(array(
-            "status" => "ok",
-            "data"   => $filtered,
-            "other"  => "filtered highlights",
-        ));
+        return $filtered;
     }
 
     /**
@@ -620,6 +600,38 @@ class Comments
                 "message" => "unable to unapprove comment, no permission",
             ));
         }
+    }
+
+    /**
+     * Gets comments that cover the specified index in their span range
+     */
+    public function getCommentsWithinIndex($readerEppn, $index)
+    {
+        $data = $this->__getCommentDataHighlights($readerEppn);
+
+        $filteredContents = array();
+        foreach ($data as $comment) {
+            if ($index >= (int)$comment["startIndex"] && $index <= (int)$comment["endIndex"]) {
+                $filteredContents[] = $comment;
+            }
+        }
+
+        return $filteredContents;
+    }
+
+    /**
+     * Get all the comment highlights
+     */
+    private function __getCommentDataHighlights($readerEppn)
+    {
+        try {
+            $commentFilePaths = $this->__getCommentFiles($this->creator, $this->work, false);
+        } catch (Exception $e) {
+            $this->logger->error(sprintf("error: unable to get comments; message: %s", $e->getMessage()));
+            return array();
+        }
+
+        return $this->__getFileMetaData($commentFilePaths, $readerEppn);
     }
 
     /**

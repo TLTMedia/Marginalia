@@ -261,7 +261,7 @@ $app->post("/edit_comment", function () use ($app, $PATH, $parameters, $authUniq
 /**
  * Get highlights/first level comment meta data (not the text of the comment)
  */
-$app->get("/get_highlights", function () use ($app, $PATH, $parameters, $authUniqueId) {
+$app->get("/get_highlights", function () use ($app, $PATH, $parameters, $responseFmt, $authUniqueId) {
     $data = $app->request->get();
     $parameters->paramCheck($data, array(
         "creator", "work",
@@ -270,17 +270,17 @@ $app->get("/get_highlights", function () use ($app, $PATH, $parameters, $authUni
     require "../Actions/Comments.php";
     $comments = new Comments($app->log, $PATH, $data["creator"], $data["work"]);
 
-    echo $comments->getHighlights(
-        $data["creator"],
-        $data["work"],
-        $authUniqueId
+    echo $responseFmt->dataArray(
+        $comments->getHighlights(
+            $authUniqueId
+        )
     );
 });
 
 /**
  * Get highlights/first level comment meta data (not the text of the comment)
  */
-$app->get("/get_highlights_filtered", function () use ($app, $PATH, $parameters, $authUniqueId) {
+$app->get("/get_highlights_filtered", function () use ($app, $PATH, $parameters, $responseFmt, $authUniqueId) {
     $data = $app->request->get();
     $parameters->paramCheck($data, array(
         "creator", "work", "filterEppn", "filterType",
@@ -289,12 +289,12 @@ $app->get("/get_highlights_filtered", function () use ($app, $PATH, $parameters,
     require "../Actions/Comments.php";
     $comments = new Comments($app->log, $PATH, $data["creator"], $data["work"]);
 
-    echo $comments->getHighlightsFiltered(
-        $data["creator"],
-        $data["work"],
-        $authUniqueId,
-        $data["filterEppn"],
-        $data["filterType"]
+    echo $responseFmt->dataArray(
+        $comments->getHighlightsFiltered(
+            $authUniqueId,
+            $data["filterEppn"],
+            $data["filterType"]
+        )
     );
 });
 
@@ -622,6 +622,9 @@ $app->post("/add_course", function () use ($app, $PATH, $PATH_COURSES, $paramete
     );
 });
 
+/**
+ * Gets the works of a course creator
+ */
 $app->get("/get_works_of_course_creator", function () use ($app, $PATH, $PATH_COURSES, $parameters, $authUniqueId) {
     $data = $app->request->get();
     $parameters->paramCheck($data, array(
@@ -639,6 +642,9 @@ $app->get("/get_works_of_course_creator", function () use ($app, $PATH, $PATH_CO
     );
 });
 
+/**
+ * Checks whether the currently logged in person is a courses admin
+ */
 $app->get("/is_courses_admin", function () use ($app, $PATH, $PATH_COURSES, $parameters, $authUniqueId, $responseFmt) {
     require "../Actions/Courses.php";
     $courses = new Courses($app->log, $PATH_COURSES, $authUniqueId);
@@ -652,7 +658,29 @@ $app->get("/is_courses_admin", function () use ($app, $PATH, $PATH_COURSES, $par
 
 /**
  * Adds a course admin; pre-existing course-admin's can create courses... They can also add other users as course-admins
+ * TODO:
  */
+
+/**
+ * Get Comments that include this index in their spanning range
+ * (ones that are visible to the currently logged in user)
+ */
+$app->get("/comments_within_index", function () use ($app, $PATH, $parameters, $responseFmt, $authUniqueId) {
+    $data = $app->request->get();
+    $parameters->paramCheck($data, array(
+        "creator", "work", "index",
+    ));
+
+    require "../Actions/Comments.php";
+    $comments = new Comments($app->log, $PATH, $data["creator"], $data["work"]);
+
+    echo $responseFmt->dataArray(
+        $comments->getCommentsWithinIndex(
+            $authUniqueId,
+            $data["index"]
+        )
+    );
+});
 
 /**
  * Temp function to create the unapproved directory for a work
@@ -683,14 +711,17 @@ $app->get("/unapproved_init", function () use ($app, $PATH, $parameters) {
 $app->get("/git/pull/:code", function ($code) use ($app, $responseFmt) {
     $real = file_get_contents("../../.git_secret.txt");
     $real = trim(preg_replace("/\s\s+/", "", $real));
+
     if ($real != $code) {
         $app->log->info("git pull was called but did not authenticate");
         $responseFmt->printMessage(
             "invalid code",
             "error"
         );
+
         exit;
     }
+
     $app->log->warn("git pull was called successfully");
     system("git pull --all");
 });
