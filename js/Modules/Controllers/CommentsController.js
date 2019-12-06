@@ -121,8 +121,8 @@ export class CommentsController {
         await this.load_user_comments();
 
         // TODO:
-        handleStartEndDiv(createCommentData());
-        allowClickOnComment(this.state.selected_work, this.state.selected_creator);
+        //handleStartEndDiv(createCommentData());
+        //allowClickOnComment(this.state.selected_work, this.state.selected_creator);
     }
 
     /**

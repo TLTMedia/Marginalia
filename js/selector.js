@@ -50,7 +50,6 @@ function colorNotUsedTypeSelector(work_comment_data){
     for (let i = 0; i < work_comment_data.length; i++) {
         let type = work_comment_data[i]["commentType"];
         if(commenter != "show-all-eppns"){
-          console.log("not show all eppn")
             let data_commenter = work_comment_data[i]["eppn"];
             if(commenter+"@stonybrook.edu" == data_commenter){
                 buttonTypes[type] += 1;
@@ -61,11 +60,9 @@ function colorNotUsedTypeSelector(work_comment_data){
         }
 
     }
-    console.log(buttonTypes)
     key.forEach((element) => {
         $("#filter-"+ element.toLowerCase()).removeAttr("disabled");
         if (buttonTypes[element] == 0) {
-            console.log("#filter-", element.toLowerCase());
             $("#filter-"+ element.toLowerCase()).attr("disabled","disabled");
         }
     });

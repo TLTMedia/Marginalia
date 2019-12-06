@@ -129,22 +129,17 @@ export class FiltersEvents {
     update_filter_status(){
         let current_type = this.state.filters.selected_comment_filter;
         let current_commenter = this.state.filters.selected_author_filter;
-        console.log(current_type,current_commenter);
         let regex = /show-all/g;
         if(current_type.match(regex)!= null){
-            console.log("all");
             $("#type_filter_status").html("Selected type: ALL");
         }
         else{
-            console.log(current_type);
             $("#type_filter_status").html("Selected type: " + current_type[0].toUpperCase()+ current_type.slice(1));
         }
         if(current_commenter.match(regex) != null ){
-            console.log("all1");
             $("#commenter_filter_status").html("Selected commenter: ALL");
         }
         else{
-            console.log(current_commenter);
             $("#commenter_filter_status").html("Selected commenter: " + current_commenter[0].toUpperCase() + current_commenter.slice(1));
         }
     }
