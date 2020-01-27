@@ -34,39 +34,39 @@
 
 // work_comment_data is the return value of the get_highlight function
 // commenter is the current selected commenter
-function colorNotUsedTypeSelector(work_comment_data){
-    console.log(work_comment_data);
-    //TODO HARD CODED FOR STONYBROOK STUDENT
-    let commenter = TMP_STATE.filters.selected_author_filter;
-    let key = ["Historical", "Analytical", "Comment", "Definition", "Question"];
-    let buttonTypes = {
-        "Historical": 0,
-        "Analytical": 0,
-        "Comment": 0,
-        "Definition": 0,
-        "Question": 0
-    };
-
-    for (let i = 0; i < work_comment_data.length; i++) {
-        let type = work_comment_data[i]["commentType"];
-        if(commenter != "show-all-eppns"){
-            let data_commenter = work_comment_data[i]["eppn"];
-            if(commenter+"@stonybrook.edu" == data_commenter){
-                buttonTypes[type] += 1;
-            }
-        }
-        else{
-            buttonTypes[type] += 1;
-        }
-
-    }
-    key.forEach((element) => {
-        $("#filter-"+ element.toLowerCase()).removeAttr("disabled");
-        if (buttonTypes[element] == 0) {
-            $("#filter-"+ element.toLowerCase()).attr("disabled","disabled");
-        }
-    });
-}
+// function colorNotUsedTypeSelector(work_comment_data){
+//     console.log(work_comment_data);
+//     //TODO HARD CODED FOR STONYBROOK STUDENT
+//     let commenter = TMP_STATE.filters.selected_author_filter;
+//     let key = ["Historical", "Analytical", "Comment", "Definition", "Question"];
+//     let buttonTypes = {
+//         "Historical": 0,
+//         "Analytical": 0,
+//         "Comment": 0,
+//         "Definition": 0,
+//         "Question": 0
+//     };
+//
+//     for (let i = 0; i < work_comment_data.length; i++) {
+//         let type = work_comment_data[i]["commentType"];
+//         if(commenter != "show-all-eppns"){
+//             let data_commenter = work_comment_data[i]["eppn"];
+//             if(commenter+"@stonybrook.edu" == data_commenter){
+//                 buttonTypes[type] += 1;
+//             }
+//         }
+//         else{
+//             buttonTypes[type] += 1;
+//         }
+//
+//     }
+//     key.forEach((element) => {
+//         $("#filter-"+ element.toLowerCase()).removeAttr("disabled");
+//         if (buttonTypes[element] == 0) {
+//             $("#filter-"+ element.toLowerCase()).attr("disabled","disabled");
+//         }
+//     });
+// }
 
 // function updateCommenterSelectors() {
 //     var newCommenters = [];
