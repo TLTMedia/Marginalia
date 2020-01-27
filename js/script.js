@@ -3,6 +3,8 @@
  */
 var API;
 var TMP_STATE;
+//TODO TMP_UI will only be used for the filter update
+var TMP_UI;
 
 /*
   Hides the loading symbol
@@ -15,6 +17,7 @@ init = async ({ state = state, ui = ui, api = api }) => {
      */
     TMP_STATE = state;
     API = api;
+    TMP_UI = ui;
 
     /**
      * API Data object which has references to other Data objects for making API requests
@@ -186,14 +189,39 @@ function allowClickOnComment(textChosen, selected_eppn) {
             "evtPageY": evt.pageY,
             "evtClientY": evt.clientY
         }
-        console.log(evt)
-        let selectedRange = rangy.getSelection().getRangeAt(0).nativeRange;
-        let startIndex = $(".startDiv" + "[commentId = '"+data["commentId"]+"']").attr("startIndex");
-        let textIndex = parseInt(selectedRange.endOffset) + parseInt(startIndex);
-        console.log(textIndex)
-        clickOnComment(data);
 
-        //clickOnCommentByIndex(textIndex,evt);
+        let selectedRange = rangy.getSelection().getRangeAt(0).nativeRange;
+        let prevElementClass = evt.target.previousElementSibling.attributes.class.value;
+        let prevElementCommentId = evt.target.previousElementSibling.attributes.commentId.value;
+        let prevElement = $("." + prevElementClass + "[commentId = '"+prevElementCommentId+"']");
+
+        let prev_curr_divs = {
+          "curr_startDiv": undefined,
+          "prev_endDiv" : undefined,
+          "prev_startDiv" : undefined
+        };
+        //prevElement is a startDiv (this will be curr_startDiv)
+        if(prevElement.hasClass("startDiv")){
+            prev_curr_divs["curr_startDiv"] = prevElement;
+            prev_curr_divs["prev_endDiv"] = prevElement.prev();
+            prev_curr_divs["prev_startDiv"] = $(".startDiv" + "[commentId = '"+prev_curr_divs["prev_endDiv"].attr("commentId")+"']");
+        }
+        //prevElement is a endDiv (this will be prev_endDiv)
+        else{
+            prev_curr_divs["prev_endDiv"] = prevElement;
+            prev_curr_divs["prev_startDiv"] = $(".startDiv" + "[commentId = '"+ prev_curr_divs["prev_endDiv"].attr("commentId")+"']");
+        }
+        console.log(prev_curr_divs)
+        let newTextIndex;
+        if(prev_curr_divs["curr_startDiv"] == undefined){
+            newTextIndex =  parseInt(selectedRange.endOffset) + parseInt(prev_curr_divs["prev_endDiv"].attr("endIndex"));
+        }
+        else{
+            newTextIndex = parseInt(selectedRange.endOffset) + parseInt(prev_curr_divs["curr_startDiv"].attr("startIndex"));
+        }
+        //clickOnComment(data);
+        console.log(newTextIndex)
+        clickOnCommentByIndex(newTextIndex,evt);
     });
 }
 
@@ -371,48 +399,49 @@ async function clickOnComment(data) {
   *  if (comment.startIndex < textIndex <= comment.endIndex) return this comment
   */
 function clickOnCommentByIndex(textIndex,evt){
-    /*NEED TO CHANGE THIS*/
     data = {
       "work":TMP_STATE.selected_work,
-      "author": TMP_STATE.selected_author,
-      "textIndex": textIndex
+      "creator": TMP_STATE.selected_creator,
+      "index": textIndex
     }
     API.request({
-      endpoint: /*NEED TO CHANGE THIS*/"get_comment_by_index",
+      endpoint: "comments_within_index",
       method: "GET",
       data: data
-    }).then((data)=>{
+    }).then((api_returned_data)=>{
+        console.log(api_returned_data)
         // more than one comment exist
-        if(data.length > 1){
+        if(api_returned_data.length > 1){
             // create a menu of all comments returned
-            let commentMenu = $("<ul/>",{
-                "id" : "commentMenu"
-            });
-
-            for(var i in data){
-                let comment = $("<li/>",{
-                    "commentId" : data[i]["hash"],
-                    "commentCreator" : data[i]["commentCreator"],
-                    "type" : data[i]["commentType"],
-                    "click": (evt)=>{
-                        console.log(evt, $(this).attr("commentId"));
-                        $("#replies").empty();
-                        TMP_STATE.commentBox_data;
-                        TMP_STATE.replyBox_data;
-                        let comment_data = {
-                            creator: data[i]["author"],
-                            work: data[i]["work"],
-                            commenter: data[i]["commentCreator"],
-                            hash: data[i]["hash"]
-                        };
-                        get_comment_chain_API_request(comment_data);
-                        displayReplyBox(data[i]);
-                    }
-                });
-                commentMenu.append(comment);
-            }
-            let menuDestination = evt.currentTarget.attributes.commentId;
-            $(".commented-selection"+"[commentId = '"+menuDestination+"']").append(commentMenu);
+            // let commentMenu = $("<ul/>",{
+            //     "id" : "commentMenu",
+            // });
+            //
+            // for(var i in api_returned_data){
+            //     let comment = $("<li/>",{
+            //         "commentId" : api_returned_data[i]["hash"],
+            //         "commentCreator" : api_returned_data[i]["eppn"],
+            //         "type" : api_returned_data[i]["commentType"],
+            //         "text" : api_returned_data[i]["eppn"] + "'s "+ api_returned_data[i]["commentType"] + " comment",
+            //         "click": (evt)=>{
+            //             console.log(evt, $(this).attr("commentId"));
+            //             $("#replies").empty();
+            //             TMP_STATE.commentBox_data;
+            //             TMP_STATE.replyBox_data;
+            //             let comment_data = {
+            //                 creator: api_returned_data[i]["author"],
+            //                 work: api_returned_data[i]["work"],
+            //                 commenter: api_returned_data[i]["commentCreator"],
+            //                 hash: api_returned_data[i]["hash"]
+            //             };
+            //             get_comment_chain_API_request(comment_data);
+            //             //displayReplyBox(api_returned_data[i]);
+            //         }
+            //     });
+            //     commentMenu.append(comment);
+            // }
+            // let menuDestination = evt.currentTarget.attributes.commentId.value;
+            // $(".commented-selection"+"[commentId = '"+menuDestination+"']").append(commentMenu);
         }
         // only one comment exist
         else{
@@ -420,13 +449,25 @@ function clickOnCommentByIndex(textIndex,evt){
             TMP_STATE.commentBox_data;
             TMP_STATE.replyBox_data;
             let comment_data = {
-                creator: data[0]["author"],
-                work: data[0]["work"],
-                commenter: data[0]["commentCreator"],
-                hash: data[0]["hash"]
+                creator: TMP_STATE.selected_creator, // this is the work author/creator
+                work: TMP_STATE.selected_work,
+                commenter: api_returned_data[0]["eppn"],
+                hash: api_returned_data[0]["hash"]
             };
+            let data = {
+                "work": TMP_STATE.selected_work,
+                "author": TMP_STATE.selected_creator,
+                "commentCreator": api_returned_data[0]["eppn"],
+                "commentId": api_returned_data[0]["hash"],
+                "commentType": api_returned_data[0]["commentType"],
+                "evtPageX": evt.pageX,
+                "evtPageY": evt.pageY,
+                "evtClientY": evt.clientY
+            }
+            console.log(comment_data);
+            console.log(data);
             get_comment_chain_API_request(comment_data);
-            displayReplyBox(data[0]);
+            displayReplyBox(data);
         }
     });
 }

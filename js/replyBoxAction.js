@@ -338,7 +338,9 @@ async function deleteButtonOnClick(hash, eppn, work, workCreator) {
         checkSpansNeedRecover(first_comment_id, removeDeletedSpan);
         let work_comment_data = await TMP_STATE.api_data.comments_data.get_work_highlights();
         //TODO NEED TO ADD RESET FILTER HERE, BUT CAN't ACCESS UI SO WAIT UNTIL THIS IS MODULAIZED.
-        colorNotUsedTypeSelector(work_comment_data);
+        //TODO TMP_UI is a temporary solution
+        TMP_UI.base_events.filters_events.reset(work_comment_data);
+        TMP_UI.base_events.filters_events.colorNotUsedTypeSelector(work_comment_data, "@stonybrook.edu");
         $("#replies").parent().fadeOut();
     }
     else {

@@ -8,7 +8,6 @@ export class CommentBoxController {
 
     /**
      * Create the comment box jQuery dialog.   (PLEASE CHECK HOW EVERYTHING WORKS BEFORE SWITCHING, SO WE CAN SWITCH WITHOUT BREAKING TOO MANY THING)
-     * (I found a lot of minor bugs and it's really hard to find where is the problem bcuz we changed the structure)
      * TODO:
      */
     create_commentbox() {
@@ -121,7 +120,7 @@ export class CommentBoxController {
             if (data_edit["type"]) {
                 $(".commented-selection" + "[commentId = '" + this.state.commentBox_data.edit_comment_id + "']").attr("typeof", data_edit["type"]);
                 let work_comment_data = await this.state.api_data.comments_data.get_work_highlights();
-                colorNotUsedTypeSelector(work_comment_data);
+                this.ui.base_events.filters_events.colorNotUsedTypeSelector(work_comment_data,"@stonybrook.edu");
                 console.log(this.state.filters.selected_comment_filter, data_edit["type"]);
                 if(data_edit["type"] != this.state.filters.selected_comment_filter && this.state.filters.selected_comment_filter != "show-all-types"){
                     checkSpansNeedRecover(this.state.commentBox_data.edit_comment_id, removeDeletedSpan);
@@ -211,7 +210,7 @@ export class CommentBoxController {
 
                 let allComments = createCommentData();
                 handleStartEndDiv(allComments);
-                colorNotUsedTypeSelector(work_comment_data);
+                this.ui.base_events.filters_events.colorNotUsedTypeSelector(work_comment_data);
                 //updateCommenterSelectors();
 
                 //update the click event on this new added comment
@@ -220,6 +219,7 @@ export class CommentBoxController {
 
             // TODO: what's this do.
             // NOTE: This function colors the comment if this comment is a unapporved comment
+
             getUnapprovedComments(data_save["author"], data_save["work"]);
         }
     }

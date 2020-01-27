@@ -15,7 +15,7 @@ export class FiltersEvents {
         let all_types = Array();
         let all_eppns = Array();
 
-        comment_data.forEach(comment => {
+        comment_data.forEach((comment) => {
             all_types.push(comment.commentType);
             all_eppns.push(comment.eppn);
         });
@@ -144,6 +144,45 @@ export class FiltersEvents {
         }
     }
 
+    /** NOTE: added by David
+     *  work_comment_data : comment data for the current work
+     *  eppn_format : eppn for stony brook student will be "@stonybrook.edu"
+     */
+    colorNotUsedTypeSelector(work_comment_data, eppn_format){
+        console.log(work_comment_data);
+        //TODO HARD CODED FOR STONYBROOK STUDENT
+        let commenter = this.state.filters.selected_author_filter;
+        //let commenter = TMP_STATE.filters.selected_author_filter;
+        let key = ["Historical", "Analytical", "Comment", "Definition", "Question"];
+        let buttonTypes = {
+            "Historical": 0,
+            "Analytical": 0,
+            "Comment": 0,
+            "Definition": 0,
+            "Question": 0
+        };
+
+        for (let i = 0; i < work_comment_data.length; i++) {
+            let type = work_comment_data[i]["commentType"];
+            if(commenter != "show-all-eppns"){
+                let data_commenter = work_comment_data[i]["eppn"];
+                if(commenter+ eppn_format == data_commenter){
+                    buttonTypes[type] += 1;
+                }
+            }
+            else{
+                buttonTypes[type] += 1;
+            }
+
+        }
+        key.forEach((element) => {
+            $("#filter-"+ element.toLowerCase()).removeAttr("disabled");
+            if (buttonTypes[element] == 0) {
+                $("#filter-"+ element.toLowerCase()).attr("disabled","disabled");
+            }
+        });
+    }
+
     /**
      * NOTE: can pick user and comment type combination to filter.
      */
@@ -239,7 +278,7 @@ export class FiltersEvents {
                   }
             }
             let work_comment_data = await this.state.api_data.comments_data.get_work_highlights()
-            colorNotUsedTypeSelector(work_comment_data);
+            colorNotUsedTypeSelector(work_comment_data, "@stonybrook.edu");
             this.update_filter_status();
         });
 
