@@ -120,9 +120,9 @@ export class CommentBoxController {
             if (data_edit["type"]) {
                 $(".commented-selection" + "[commentId = '" + this.state.commentBox_data.edit_comment_id + "']").attr("typeof", data_edit["type"]);
                 let work_comment_data = await this.state.api_data.comments_data.get_work_highlights();
-                this.ui.base_events.filters_events.colorNotUsedTypeSelector(work_comment_data,"@stonybrook.edu");
+                this.ui.base_events.filters_events.color_not_used_type_selector(work_comment_data, "@stonybrook.edu");
                 console.log(this.state.filters.selected_comment_filter, data_edit["type"]);
-                if(data_edit["type"] != this.state.filters.selected_comment_filter && this.state.filters.selected_comment_filter != "show-all-types"){
+                if (data_edit["type"] != this.state.filters.selected_comment_filter && this.state.filters.selected_comment_filter != "show-all-types") {
                     checkSpansNeedRecover(this.state.commentBox_data.edit_comment_id, removeDeletedSpan);
                     hideReplyBox();
                 }
@@ -234,7 +234,7 @@ export class CommentBoxController {
         $("#commentExit").text("Exit");
 
         this.ui.rangy_controller.unhighlight();
-        $("#comment-box").parent().css('z-index',0);
+        $("#comment-box").parent().css('z-index', 0);
         $("#comment-box").parent().fadeOut();
     }
 }

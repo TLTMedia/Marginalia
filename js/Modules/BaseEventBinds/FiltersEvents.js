@@ -125,32 +125,35 @@ export class FiltersEvents {
         componentHandler.upgradeAllRegistered();
     }
 
-    //NOTE: added by David
-    update_filter_status(){
+    // NOTE: added by David
+    update_filter_status() {
         let current_type = this.state.filters.selected_comment_filter;
         let current_commenter = this.state.filters.selected_author_filter;
         let regex = /show-all/g;
-        if(current_type.match(regex)!= null){
+
+        if (current_type.match(regex) != null) {
             $("#type_filter_status").html("Selected type: ALL");
+        } else {
+            $("#type_filter_status").html("Selected type: " + current_type[0].toUpperCase() + current_type.slice(1));
         }
-        else{
-            $("#type_filter_status").html("Selected type: " + current_type[0].toUpperCase()+ current_type.slice(1));
-        }
-        if(current_commenter.match(regex) != null ){
+
+        if (current_commenter.match(regex) != null) {
             $("#commenter_filter_status").html("Selected commenter: ALL");
-        }
-        else{
+        } else {
             $("#commenter_filter_status").html("Selected commenter: " + current_commenter[0].toUpperCase() + current_commenter.slice(1));
         }
     }
 
-    /** NOTE: added by David
-     *  work_comment_data : comment data for the current work
-     *  eppn_format : eppn for stony brook student will be "@stonybrook.edu"
+    /** 
+     * NOTE: added by David
+     * work_comment_data : comment data for the current work
+     * eppn_format : eppn for stony brook student will be "@stonybrook.edu"
+     * 
+     * Disables filter buttons in the menu if they have no comments of the particular type.
      */
-    colorNotUsedTypeSelector(work_comment_data, eppn_format){
+    color_not_used_type_selector(work_comment_data, eppn_format) {
         console.log(work_comment_data);
-        //TODO HARD CODED FOR STONYBROOK STUDENT
+        // TODO: HARD CODED FOR STONYBROOK STUDENT
         let commenter = this.state.filters.selected_author_filter;
         //let commenter = TMP_STATE.filters.selected_author_filter;
         let key = ["Historical", "Analytical", "Comment", "Definition", "Question"];
@@ -159,26 +162,28 @@ export class FiltersEvents {
             "Analytical": 0,
             "Comment": 0,
             "Definition": 0,
-            "Question": 0
+            "Question": 0,
         };
 
         for (let i = 0; i < work_comment_data.length; i++) {
             let type = work_comment_data[i]["commentType"];
-            if(commenter != "show-all-eppns"){
+
+            if (commenter != "show-all-eppns") {
                 let data_commenter = work_comment_data[i]["eppn"];
-                if(commenter+ eppn_format == data_commenter){
+                if (commenter + eppn_format == data_commenter) {
                     buttonTypes[type] += 1;
                 }
-            }
-            else{
+            } else {
                 buttonTypes[type] += 1;
             }
 
         }
-        key.forEach((element) => {
-            $("#filter-"+ element.toLowerCase()).removeAttr("disabled");
+
+        key.forEach(element => {
+            $("#filter-" + element.toLowerCase()).removeAttr("disabled");
+
             if (buttonTypes[element] == 0) {
-                $("#filter-"+ element.toLowerCase()).attr("disabled","disabled");
+                $("#filter-" + element.toLowerCase()).attr("disabled", "disabled");
             }
         });
     }
@@ -227,7 +232,7 @@ export class FiltersEvents {
             await this.ui.comments_controller.filter_render_comments();
 
             //CHANGED when there is no comments, this it returns error : cannot read "top" of type undefined
-            if($(".commented-selection").length != 0){
+            if ($(".commented-selection").length != 0) {
                 if ($(".commented-selection").offset().top > $(window).height()) {
                     $(".commented-selection")[0].scrollIntoView();
                 }
@@ -272,13 +277,14 @@ export class FiltersEvents {
             await this.ui.comments_controller.filter_render_comments();
 
             //CHANGED same as the type filter problem
-            if($(".commented_selection").length != 0){
+            if ($(".commented_selection").length != 0) {
                 if ($(".commented-selection").offset().top > $(window).height()) {
                     $(".commented-selection")[0].scrollIntoView();
-                  }
+                }
             }
-            let work_comment_data = await this.state.api_data.comments_data.get_work_highlights()
-            colorNotUsedTypeSelector(work_comment_data, "@stonybrook.edu");
+
+            let work_comment_data = await this.state.api_data.comments_data.get_work_highlights();
+            this.color_not_used_type_selector(work_comment_data, "@stonybrook.edu");
             this.update_filter_status();
         });
 

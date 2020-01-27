@@ -152,15 +152,15 @@ function createToolBar(inText, hash, eppn, hashForReply, approved, public, work,
     });
     editButton.html("<i class = 'material-icons'> edit </i> <label>Edit</label>");
     if (inText != "deleted") {
-      if (approved && isCurrentUserSelectedUser(eppn, false)) {
-          toolBar.append(replyButton, editButton);
-      }
-      else if (approved && !isCurrentUserSelectedUser(eppn, false)) {
-          toolBar.append(replyButton);
-      }
-      else if (!approved && isCurrentUserSelectedUser(eppn, false)) {
-          toolBar.append(editButton);
-      }
+        if (approved && isCurrentUserSelectedUser(eppn, false)) {
+            toolBar.append(replyButton, editButton);
+        }
+        else if (approved && !isCurrentUserSelectedUser(eppn, false)) {
+            toolBar.append(replyButton);
+        }
+        else if (!approved && isCurrentUserSelectedUser(eppn, false)) {
+            toolBar.append(editButton);
+        }
     }
     createMenuForComment(inText, hash, eppn, hashForReply, approved, public, work, workCreator);
 }
@@ -279,7 +279,7 @@ function replyButtonOnClick(evt, hash) {
 
     TMP_STATE.quill.setText("");
     var first_comment_id = TMP_STATE.replyBox_data.first_comment_id;
-    displayCommentBox(evt,$(".commented-selection" + "[commentId = '"+first_comment_id+"']").attr("typeof"));
+    displayCommentBox(evt, $(".commented-selection" + "[commentId = '" + first_comment_id + "']").attr("typeof"));
 }
 
 function editButtonOnClick(evt, inText, hash) {
@@ -287,14 +287,14 @@ function editButtonOnClick(evt, inText, hash) {
         "edit_comment_id": hash
     };
     let first_comment_id = TMP_STATE.replyBox_data.first_comment_id;
-    displayCommentBox(evt, $(".commented-selection" + "[commentId = '"+first_comment_id+"']").attr("typeof"));
+    displayCommentBox(evt, $(".commented-selection" + "[commentId = '" + first_comment_id + "']").attr("typeof"));
     TMP_STATE.quill.setText(inText);
-    if(hash != TMP_STATE.replyBox_data.first_comment_id){
+    if (hash != TMP_STATE.replyBox_data.first_comment_id) {
         console.log("not editting the first comment");
         $(".select2-save-comment-select").prop("disabled", true);
         $(".select2-selection").addClass("disabled_dropDown");
     }
-    else{
+    else {
         $(".select2-save-comment-select").prop("disabled", false);
         $(".select2-selection").removeClass("disabled_dropDown");
     }
@@ -340,7 +340,7 @@ async function deleteButtonOnClick(hash, eppn, work, workCreator) {
         //TODO NEED TO ADD RESET FILTER HERE, BUT CAN't ACCESS UI SO WAIT UNTIL THIS IS MODULAIZED.
         //TODO TMP_UI is a temporary solution
         TMP_UI.base_events.filters_events.reset(work_comment_data);
-        TMP_UI.base_events.filters_events.colorNotUsedTypeSelector(work_comment_data, "@stonybrook.edu");
+        TMP_UI.base_events.filters_events.color_not_used_type_selector(work_comment_data, "@stonybrook.edu");
         $("#replies").parent().fadeOut();
     }
     else {
@@ -412,9 +412,9 @@ function commentApprovedOrUnapprovedButtonOnClick(hash, commenterEppn, work, wor
     });
 }
 
-  /** This displays the replies for the current comment box
-   *  update replyBox_Data => first_comment_id and first_comment_author
-   **/
+/** This displays the replies for the current comment box
+ *  update replyBox_Data => first_comment_id and first_comment_author
+ **/
 function displayReplyBox(data) {
     console.log(data);
     var marginX = 10;
