@@ -94,29 +94,71 @@ export class CommentsData {
      */
     async save_comment(data) {
         let response = this.api.request({
-            endpoint : 'save_comments',
-            method : 'POST',
-            data : data,
+            endpoint: 'save_comments',
+            method: 'POST',
+            data: data,
         });
 
         return await response;
     }
 
-    async edit_comment(data){
+    async edit_comment(data) {
         let response = this.api.request({
-            endpoint : 'edit_comment',
-            method : 'POST',
-            data : data
+            endpoint: 'edit_comment',
+            method: 'POST',
+            data: data
         });
 
         return await response;
     }
 
-    async delete_comment(data){
+    async delete_comment(data) {
         let response = this.api.request({
-            endpoint : 'delete_comment',
-            method : 'POST',
-            data : data
+            endpoint: 'delete_comment',
+            method: 'POST',
+            data: data
+        });
+
+        return await response;
+    }
+
+    async change_comment_approval(data, endpoint) {
+        let response = this.api.request({
+            endpoint: endpoint,
+            method: "POST",
+            data: data
+        });
+
+        return await response;
+    }
+
+    async change_comment_privacy(data) {
+        let response = this.api.request({
+            endpoint: "set_comment_public",
+            method: "POST",
+            data: data
+        });
+
+        return await response;
+    }
+
+    async get_comment_chain(data) {
+        let response = this.api.request({
+            endpoint: "get_comment_chain",
+            method: "GET",
+            data: data
+        });
+
+        return await response;
+    }
+
+    async get_unapprove_comments(data){
+        //TODO might want to move this away
+        $(".commented-selection").removeClass("unapprovedComments threadNotApproved");
+        let response = this.api.request({
+            endpoint: "unapproved_comments",
+            method: "GET",
+            data: data
         });
 
         return await response;

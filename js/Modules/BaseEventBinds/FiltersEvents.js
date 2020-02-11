@@ -85,6 +85,7 @@ export class FiltersEvents {
             if (type == null) {
                 type = "historical";
             }
+
             $("#filter-" + type.toLowerCase()).removeAttr("disabled");
         });
 
@@ -92,7 +93,12 @@ export class FiltersEvents {
          * Create filters for eppns that exist.
          * TODO: text is their eppn, we should get their firstname-lastname instead of showing by eppn
          */
-        work_filter_data.eppns.forEach(eppn => {
+        work_filter_data.eppns.forEach(async eppn => {
+            /**
+             * Convert eppn to firstname-lastname combo.
+             */
+            let author_name = await this.state.api_data.users_data.get_eppn_to_name(eppn);
+
             /**
              * Remove everything after (including) the '@' character in the eppn
              */
@@ -100,11 +106,10 @@ export class FiltersEvents {
                 eppn = eppn.substring(0, eppn.indexOf("@"));
             }
 
-            let text = eppn;
             let is_selected = "";
 
             if (eppn == "show-all-eppns") {
-                text = "Show All";
+                author_name = "Show All";
                 is_selected = "selected-filter";
             }
 
@@ -112,7 +117,7 @@ export class FiltersEvents {
                 $("<li/>", {
                     class: "menu-filters-authors mdl-menu__item " + is_selected,
                     id: "filter-" + eppn,
-                    text: text,
+                    text: author_name,
                 })
             );
 
@@ -121,6 +126,7 @@ export class FiltersEvents {
              */
             document.getElementById("filter-" + eppn).addEventListener('click', document.getElementById("menu-filters-authors").MaterialMenu.handleForClick_.bind(document.getElementById("menu-filters-authors").MaterialMenu));
         });
+
         this.update_filter_status();
         componentHandler.upgradeAllRegistered();
     }
@@ -144,18 +150,17 @@ export class FiltersEvents {
         }
     }
 
-    /** 
+    /**
      * NOTE: added by David
      * work_comment_data : comment data for the current work
      * eppn_format : eppn for stony brook student will be "@stonybrook.edu"
-     * 
+     *
      * Disables filter buttons in the menu if they have no comments of the particular type.
      */
     color_not_used_type_selector(work_comment_data, eppn_format) {
         console.log(work_comment_data);
         // TODO: HARD CODED FOR STONYBROOK STUDENT
         let commenter = this.state.filters.selected_author_filter;
-        //let commenter = TMP_STATE.filters.selected_author_filter;
         let key = ["Historical", "Analytical", "Comment", "Definition", "Question"];
         let buttonTypes = {
             "Historical": 0,
@@ -284,6 +289,7 @@ export class FiltersEvents {
             }
 
             let work_comment_data = await this.state.api_data.comments_data.get_work_highlights();
+            //TODO: Hard coded for @stonybrook.edu
             this.color_not_used_type_selector(work_comment_data, "@stonybrook.edu");
             this.update_filter_status();
         });

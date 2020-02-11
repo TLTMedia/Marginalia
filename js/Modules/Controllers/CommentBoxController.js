@@ -78,6 +78,8 @@ export class CommentBoxController {
 
         let span = $("." + escapeSpecialChar(this.state.rem_span));
 
+
+        // if state.commentBox_data don't exist, the current comment to be saved is the starting comment of the thread
         let replyEppn = this.state.commentBox_data ? this.state.commentBox_data.eppn_to_reply_to : undefined;
         let replyHash = this.state.commentBox_data ? this.state.commentBox_data.hash_to_reply_to : undefined;
         let editCommentID = this.state.commentBox_data ? this.state.commentBox_data.edit_comment_id : undefined;
@@ -115,7 +117,7 @@ export class CommentBoxController {
             let firstCommentId = this.state.replyBox_data.first_comment_id;
             let firstCommentCreator = this.state.replyBox_data.first_comment_author;
 
-            refreshReplyBox(data_edit["creator"], data_edit["work"], firstCommentCreator, firstCommentId, data_edit["type"]);
+            this.ui.replybox_controller.refreshReplyBox(data_edit["creator"], data_edit["work"], firstCommentCreator, firstCommentId, data_edit["type"]);
 
             if (data_edit["type"]) {
                 $(".commented-selection" + "[commentId = '" + this.state.commentBox_data.edit_comment_id + "']").attr("typeof", data_edit["type"]);
@@ -124,13 +126,14 @@ export class CommentBoxController {
                 console.log(this.state.filters.selected_comment_filter, data_edit["type"]);
                 if (data_edit["type"] != this.state.filters.selected_comment_filter && this.state.filters.selected_comment_filter != "show-all-types") {
                     checkSpansNeedRecover(this.state.commentBox_data.edit_comment_id, removeDeletedSpan);
-                    hideReplyBox();
+                    $("#replies").parent().fadeOut();
                 }
             }
             $("#comment-box").attr('data-editCommentID', '-1');
             $("#comment-box").parent().fadeOut();
-        } else {
-            // save new comment
+        }
+        // save new comment
+        else {
             let data_save = {
                 author: this.state.selected_creator,
                 work: this.state.selected_work,
@@ -162,7 +165,7 @@ export class CommentBoxController {
                 let firstCommentId = this.state.replyBox_data.first_comment_id;
                 let firstCommentCreator = this.state.replyBox_data.first_comment_author;
 
-                refreshReplyBox(data_save["author"], data_save["work"], firstCommentCreator, firstCommentId);
+                this.ui.replybox_controller.refreshReplyBox(data_save["author"], data_save["work"], firstCommentCreator, firstCommentId);
             } else {
                 /**
                  * Since it's a new highlight, dynamically reset the filters for it.
@@ -210,7 +213,9 @@ export class CommentBoxController {
 
                 let allComments = createCommentData();
                 handleStartEndDiv(allComments);
-                this.ui.base_events.filters_events.colorNotUsedTypeSelector(work_comment_data);
+
+                this.ui.base_events.filters_events.color_not_used_type_selector(work_comment_data, "@stonybrook.edu");
+
                 //updateCommenterSelectors();
 
                 //update the click event on this new added comment
@@ -220,7 +225,42 @@ export class CommentBoxController {
             // TODO: what's this do.
             // NOTE: This function colors the comment if this comment is a unapporved comment
 
-            getUnapprovedComments(data_save["author"], data_save["work"]);
+            //getUnapprovedComments(data_save["author"], data_save["work"]);
+            let response = await this.state.api_data.comments_data.get_unapprove_comments({creator: this.state.selected_creator, work: this.state.selected_work});
+            console.log(response);
+            response.forEach((data) => {
+                let ancesHash = data["AncestorHash"];
+                let hash = data["CommentHash"];
+                //the first Level is unapproved
+                if (ancesHash == hash) {
+                    $(".commented-selection" + "[commentId = '" + hash + "']").addClass("unapprovedComments");
+                } else {
+                    $(".commented-selection" + "[commentId = '" + ancesHash + "']").addClass("threadNotApproved");
+                }
+            });
+        }
+    }
+
+    displayCommentBox(evt, selected_filter) {
+        console.log(selected_filter);
+        var marginX = 10;
+        var marginY = 50;
+        var newPosition = adjustDialogPosition(evt, 500, 331, 10, 50);
+
+        $("#comment-box").parent().css({
+            'top': newPosition["newTop"],
+            'left': newPosition["newLeft"],
+            'z-index': 5
+        })
+
+        $("#comment-box").parent().find("#ui-id-1").contents().filter(function () { return this.nodeType == 3; }).first().replaceWith("Annotation by: " + TMP_STATE.current_user['firstname'] + " " + TMP_STATE.current_user['lastname']);
+        $("#comment-box").parent().fadeIn();
+
+        if (selected_filter != "show-all-types" && selected_filter !== undefined) {
+            let val_selected = selected_filter.charAt(0).toUpperCase() + selected_filter.slice(1);
+
+            $(".select2-save-comment-select").val(val_selected).trigger("change");
+            $(".select2-save-comment-select").prop("disabled", true);
         }
     }
 

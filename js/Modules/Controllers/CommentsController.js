@@ -103,7 +103,19 @@ export class CommentsController {
                 }
             }
         });
-        await getUnapprovedComments(this.state.selected_creator, this.state.selected_work);
+        let response = await this.state.api_data.comments_data.get_unapprove_comments({creator: this.state.selected_creator, work: this.state.selected_work});
+        console.log(response);
+        response.forEach((data) => {
+            let ancesHash = data["AncestorHash"];
+            let hash = data["CommentHash"];
+            //the first Level is unapproved
+            if (ancesHash == hash) {
+                $(".commented-selection" + "[commentId = '" + hash + "']").addClass("unapprovedComments");
+            } else {
+                $(".commented-selection" + "[commentId = '" + ancesHash + "']").addClass("threadNotApproved");
+            }
+        });
+        //getUnapprovedComments(this.state.selected_creator, this.state.selected_work);
         allowClickOnComment(this.state.selected_work, this.state.selected_creator);
     }
 
@@ -162,7 +174,9 @@ export class CommentsController {
             if ($("." + escapeSpecialChar(this.state.rem_span)).parent().attr("class") != "commented-selection") {
                 $("#replies").parent().hide();
 
-                displayCommentBox(event, this.state.filters.selected_comment_filter);
+                this.ui.commentbox_controller.displayCommentBox(event, this.state.filters.selected_comment_filter);
+                //displayCommentBox(event, this.state.filters.selected_comment_filter);
+
             }
         }
     }

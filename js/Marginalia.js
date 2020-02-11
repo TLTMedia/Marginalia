@@ -15,7 +15,6 @@ import { InterfaceController, APIHandler, Data, Toast, Address, Shibboleth } fro
      * Our main state for Marginalia.
      */
     const state = {};
-
     /**
      * Address object must be created before any awaits.
      * Otherwise its event listeners do not fire off.

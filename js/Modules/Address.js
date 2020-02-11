@@ -6,7 +6,6 @@
 export class Address {
     constructor({ state = state }) {
         this.state = state;
-
         this.address = $.address.init(() => {
             console.log("jQuery.Address Library/Module Loaded");
         });

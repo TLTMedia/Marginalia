@@ -59,7 +59,6 @@ export class SettingsEvents {
             }
 
             /**
-             * TODO: Keep below? 
              * Should they be allowed to remove themselves from the admin list - if they aren't the course owned
              * Prevent de-selecting of yourself
              */
@@ -76,7 +75,6 @@ export class SettingsEvents {
 
         /**
          * Work Data button in the settings screen
-         * TODO:
          */
         $(".settingDataButton").off().on("click", () => {
             $("#workdata-modal").modal({
@@ -90,10 +88,10 @@ export class SettingsEvents {
 
             let isHeadCreated = $("#settingDataTable").find("thead").children().length;
             if (isHeadCreated) {
-                createDataTableBody(this.state.selected_creator, this.state.selected_work);
+                this.ui.settings_controller.create_data_table_body();
             } else {
-                createDataTableHeader();
-                createDataTableBody(this.state.selected_creator, this.state.selected_work);
+                this.ui.settings_controller.create_data_table_header();
+                this.ui.settings_controller.create_data_table_body();
             }
         });
 

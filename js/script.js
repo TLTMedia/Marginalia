@@ -157,27 +157,11 @@ function createTips() {
     //workTitle.prepend(tips);
 }
 
-
-
-function makeDropDown() {
-    let buttonTypes = ['Historical', 'Analytical', 'Comment', 'Definition', 'Question'];
-    dropdown = $("<select>", {
-        class: "commentTypeDropdown",
-    });
-    buttonTypes.forEach((type) => {
-        var option = $("<option>", {
-            name: type,
-            text: type
-        });
-        dropdown.append(option);
-        $("#commentTypeDropdown").val(option);
-    });
-}
-
 //call this function to enable the clickEvent on .commented-selection
 function allowClickOnComment(textChosen, selected_eppn) {
     //highlight on top of other's comment will bring them to the reply box
     $(".commented-selection").off().on("click", function (evt) {
+        console.log(evt)
         evt.stopPropagation();
         data = {
             "work": textChosen,
@@ -193,35 +177,35 @@ function allowClickOnComment(textChosen, selected_eppn) {
         let selectedRange = rangy.getSelection().getRangeAt(0).nativeRange;
         let prevElementClass = evt.target.previousElementSibling.attributes.class.value;
         let prevElementCommentId = evt.target.previousElementSibling.attributes.commentId.value;
-        let prevElement = $("." + prevElementClass + "[commentId = '"+prevElementCommentId+"']");
+        let prevElement = $("." + prevElementClass + "[commentId = '" + prevElementCommentId + "']");
 
         let prev_curr_divs = {
-          "curr_startDiv": undefined,
-          "prev_endDiv" : undefined,
-          "prev_startDiv" : undefined
+            "curr_startDiv": undefined,
+            "prev_endDiv": undefined,
+            "prev_startDiv": undefined
         };
         //prevElement is a startDiv (this will be curr_startDiv)
-        if(prevElement.hasClass("startDiv")){
+        if (prevElement.hasClass("startDiv")) {
             prev_curr_divs["curr_startDiv"] = prevElement;
             prev_curr_divs["prev_endDiv"] = prevElement.prev();
-            prev_curr_divs["prev_startDiv"] = $(".startDiv" + "[commentId = '"+prev_curr_divs["prev_endDiv"].attr("commentId")+"']");
+            prev_curr_divs["prev_startDiv"] = $(".startDiv" + "[commentId = '" + prev_curr_divs["prev_endDiv"].attr("commentId") + "']");
         }
         //prevElement is a endDiv (this will be prev_endDiv)
-        else{
+        else {
             prev_curr_divs["prev_endDiv"] = prevElement;
-            prev_curr_divs["prev_startDiv"] = $(".startDiv" + "[commentId = '"+ prev_curr_divs["prev_endDiv"].attr("commentId")+"']");
+            prev_curr_divs["prev_startDiv"] = $(".startDiv" + "[commentId = '" + prev_curr_divs["prev_endDiv"].attr("commentId") + "']");
         }
         console.log(prev_curr_divs)
         let newTextIndex;
-        if(prev_curr_divs["curr_startDiv"] == undefined){
-            newTextIndex =  parseInt(selectedRange.endOffset) + parseInt(prev_curr_divs["prev_endDiv"].attr("endIndex"));
+        if (prev_curr_divs["curr_startDiv"] == undefined) {
+            newTextIndex = parseInt(selectedRange.endOffset) + parseInt(prev_curr_divs["prev_endDiv"].attr("endIndex"));
         }
-        else{
+        else {
             newTextIndex = parseInt(selectedRange.endOffset) + parseInt(prev_curr_divs["curr_startDiv"].attr("startIndex"));
         }
         //clickOnComment(data);
         console.log(newTextIndex)
-        clickOnCommentByIndex(newTextIndex,evt);
+        clickOnCommentByIndex(newTextIndex, evt);
     });
 }
 
@@ -323,7 +307,6 @@ function handleIncorrectTemplate() {
     });
 }
 
-
 function colorOverLappedComments(commentHash) {
     let prevStartDiv = $(".startDiv" + "[commentId = '" + commentHash + "']").prevAll(".startDiv:first");
     let nextEndDiv = $(".endDiv" + "[commentId = '" + commentHash + "']").nextAll(".endDiv:first");
@@ -374,151 +357,189 @@ function colorAdjacentComments(commentHash) {
     }
 }
 
-//if current user is admin for the current work, they are able to approve the unapproved comments
-//if current user is creator of the comment, they are able to edit and delete the unapproved comment
-//approved comments don't need to check anyPermission stuff
-async function clickOnComment(data) {
-    // $("#comment-box").removeAttr("data-replyToEppn");
-    // $("#comment-box").removeAttr("data-replyToHash");
-    // $("#comment-box").attr("data-editCommentId", "-1");
-    $("#replies").empty();
-    TMP_STATE.commentBox_data;
-    TMP_STATE.replyBox_data;
-    let comment_data = {
-        creator: data["author"],
-        work: data["work"],
-        commenter: data["commentCreator"],
-        hash: data["commentId"]
-    };
-    await get_comment_chain_API_request(comment_data);
-    await displayReplyBox(data);
+function filterMultipleComment(api_returned_data, type, commenter) {
+    let returned_data = [];
+    for (i in api_returned_data) {
+        let targetType = 0, targetCommenter = 0;
+        if (type != "show-all-types") {
+            if (api_returned_data[i]["commentType"].toLowerCase() == type) {
+                targetType = true;
+            }
+        }
+        else {
+            targetType = true;
+        }
+        if (commenter != "show-all-eppns") {
+            if (api_returned_data[i]["eppn"].split("@")[0] == commenter) {
+                targetCommenter = true;
+            }
+        }
+        else {
+            targetCommenter = true;
+        }
+        if (targetType && targetCommenter) {
+            returned_data.push(api_returned_data[i]);
+        }
+    }
+    return returned_data;
 }
+
 
 /** TODO this function assumes there is an API that returns all the comments data from the index user clicked
   * if there are more than two comments exist at that index, create a menu of comments (with type and creator)
   *  if (comment.startIndex < textIndex <= comment.endIndex) return this comment
   */
-function clickOnCommentByIndex(textIndex,evt){
+function clickOnCommentByIndex(textIndex, evt) {
+    $(".clicked_span").removeClass("clicked_span btn btn-neutral");
+    $("#context_container").remove()
+    $("#replies").parent().hide();
     data = {
-      "work":TMP_STATE.selected_work,
-      "creator": TMP_STATE.selected_creator,
-      "index": textIndex
-    }
+        "work": TMP_STATE.selected_work,
+        "creator": TMP_STATE.selected_creator,
+        "index": textIndex
+    };
+
     API.request({
-      endpoint: "comments_within_index",
-      method: "GET",
-      data: data
-    }).then((api_returned_data)=>{
+        endpoint: "comments_within_index",
+        method: "GET",
+        data: data
+    }).then((api_returned_data) => {
         console.log(api_returned_data)
+        let targetComments = [];
+        if (TMP_STATE.filters != undefined) {
+            let targetType = TMP_STATE.filters.selected_comment_filter, targetCommenter = TMP_STATE.filters.selected_author_filter;
+            targetComments = filterMultipleComment(api_returned_data, targetType, targetCommenter);
+            console.log(targetComments)
+        }
+        else {
+            targetComments = api_returned_data;
+        }
         // more than one comment exist
-        if(api_returned_data.length > 1){
-            // create a menu of all comments returned
-            // let commentMenu = $("<ul/>",{
-            //     "id" : "commentMenu",
-            // });
-            //
-            // for(var i in api_returned_data){
-            //     let comment = $("<li/>",{
-            //         "commentId" : api_returned_data[i]["hash"],
-            //         "commentCreator" : api_returned_data[i]["eppn"],
-            //         "type" : api_returned_data[i]["commentType"],
-            //         "text" : api_returned_data[i]["eppn"] + "'s "+ api_returned_data[i]["commentType"] + " comment",
-            //         "click": (evt)=>{
-            //             console.log(evt, $(this).attr("commentId"));
-            //             $("#replies").empty();
-            //             TMP_STATE.commentBox_data;
-            //             TMP_STATE.replyBox_data;
-            //             let comment_data = {
-            //                 creator: api_returned_data[i]["author"],
-            //                 work: api_returned_data[i]["work"],
-            //                 commenter: api_returned_data[i]["commentCreator"],
-            //                 hash: api_returned_data[i]["hash"]
-            //             };
-            //             get_comment_chain_API_request(comment_data);
-            //             //displayReplyBox(api_returned_data[i]);
-            //         }
-            //     });
-            //     commentMenu.append(comment);
-            // }
-            // let menuDestination = evt.currentTarget.attributes.commentId.value;
-            // $(".commented-selection"+"[commentId = '"+menuDestination+"']").append(commentMenu);
+        if (targetComments.length > 1) {
+
+            let selectedCommentId = evt.currentTarget.attributes.commentId.value;
+            let comments = {};
+            for (i in targetComments) {
+                name = targetComments[i]["eppn"] + " " + targetComments[i]["commentType"];
+                let colorId = $(".startDiv" + "[ commentId = " + targetComments[i]["hash"] + "]").attr("colorId");
+                let colorClass = { 0: "defaultColorComments", 1: "colorOneComments", 2: "colorTwoComments", 3: "colorThreeComments", 4: "colorFourComments" }
+                comments[targetComments[i]["hash"]] = { name: name, className: colorClass[colorId] }
+            }
+            // add class to the clicked comment
+            $(".commented-selection" + "[commentId = " + selectedCommentId + "]").addClass("clicked_span btn btn-neutral");
+            $(".clicked_span").append("<span id = 'context_container'><span>");
+            let contextMenu = $("#textSpace > p").contextMenu({
+                selector: ".clicked_span",
+                trigger: "left",
+                zIndex: 5,
+                appendTo: "#context_container",
+                callback: (key, options, e) => {
+                    let optionName = e.currentTarget.textContent;
+                    let commenter = optionName.split(" ")[0];
+                    let id = key;
+                    let type = optionName.split(" ")[1];
+                    console.log(id, commenter, type);
+                    //declare TMP_STATE data first for later use
+                    TMP_STATE.commentBox_data;
+                    TMP_STATE.replyBox_data;
+                    //TOCHECK old codes has this in it
+                    $("#replies").empty();
+                    //comment_data for get_comment_chain_API_request {creator, work, commenter, hash}
+                    let comment_data = {
+                        creator: TMP_STATE.selected_creator, // this is the work author/creator
+                        work: TMP_STATE.selected_work,
+                        commenter: commenter,
+                        hash: key
+                    };
+                    // data_for_replybox {work, author, commentCreator: eppn, commentId: hash, commentType: type, evtPagex, evtPagey, evtCliemtY}
+                    let data_for_replybox = {
+                        "work": TMP_STATE.selected_work,
+                        "author": TMP_STATE.selected_creator,
+                        "commentCreator": commenter,
+                        "commentId": id,
+                        "commentType": type,
+                        "evtPageX": evt.pageX,
+                        "evtPageY": evt.pageY,
+                        "evtClientY": evt.clientY
+                    }
+                    console.log(comment_data, data_for_replybox);
+
+                    (async () => {
+                        let resp = await TMP_STATE.api_data.comments_data.get_comment_chain(comment_data);
+                        readThreads(resp);
+                    })();
+
+                    TMP_UI.replybox_controller.displayReplyBox(data_for_replybox);
+                },
+                items: comments,
+            });
+            $("#context_container > *").show();
         }
         // only one comment exist
-        else{
+        else {
             $("#replies").empty();
             TMP_STATE.commentBox_data;
             TMP_STATE.replyBox_data;
             let comment_data = {
                 creator: TMP_STATE.selected_creator, // this is the work author/creator
                 work: TMP_STATE.selected_work,
-                commenter: api_returned_data[0]["eppn"],
-                hash: api_returned_data[0]["hash"]
+                commenter: targetComments[0]["eppn"],
+                hash: targetComments[0]["hash"]
             };
-            let data = {
+            let data_for_replybox = {
                 "work": TMP_STATE.selected_work,
                 "author": TMP_STATE.selected_creator,
-                "commentCreator": api_returned_data[0]["eppn"],
-                "commentId": api_returned_data[0]["hash"],
-                "commentType": api_returned_data[0]["commentType"],
+                "commentCreator": targetComments[0]["eppn"],
+                "commentId": targetComments[0]["hash"],
+                "commentType": targetComments[0]["commentType"],
                 "evtPageX": evt.pageX,
                 "evtPageY": evt.pageY,
                 "evtClientY": evt.clientY
-            }
-            console.log(comment_data);
-            console.log(data);
-            get_comment_chain_API_request(comment_data);
-            displayReplyBox(data);
+            };
+
+            (async () => {
+                let resp = await TMP_STATE.api_data.comments_data.get_comment_chain(comment_data);
+                readThreads(resp);
+            })();
+
+            TMP_UI.replybox_controller.displayReplyBox(data_for_replybox);
         }
     });
 }
 
 
-
-function getUnapprovedComments(workCreator, work) {
-    //remove the unapproved classes
-    $(".commented-selection").removeClass("unapprovedComments threadNotApproved");
-    API.request({
-        endpoint: "unapproved_comments",
-        method: "GET",
-        data: {
-            creator: workCreator,
-            work: work,
-        },
-    }).then((data) => {
-        console.log(data);
-        data.forEach((data) => {
-            let ancesHash = data["AncestorHash"];
-            let hash = data["CommentHash"];
-            //console.log("for unaproved ",ancesHash,hash);
-            //the first Level is unapproved
-            if (ancesHash == hash) {
-                $(".commented-selection" + "[commentId = '" + hash + "']").addClass("unapprovedComments");
-            } else {
-                $(".commented-selection" + "[commentId = '" + ancesHash + "']").addClass("threadNotApproved");
-            }
-        });
-    });
-}
-
-function get_comment_chain_API_request(jsonData) {
-    let work = jsonData.work;
-    let workCreator = jsonData.creator;
-    API.request({
-        endpoint: "get_comment_chain",
-        data: jsonData,
-        method: "GET"
-    }).then((data) => {
-        console.log(data);
-        readThreads(data, work, workCreator);
-    });
-}
+// function getUnapprovedComments(workCreator = TMP_STATE.selected_creator, work = TMP_STATE.selected_work) {
+//     //remove the unapproved classes
+//     $(".commented-selection").removeClass("unapprovedComments threadNotApproved");
+//     API.request({
+//         endpoint: "unapproved_comments",
+//         method: "GET",
+//         data: {
+//             creator: workCreator,
+//             work: work,
+//         },
+//     }).then((data) => {
+//         console.log(data);
+//         data.forEach((data) => {
+//             let ancesHash = data["AncestorHash"];
+//             let hash = data["CommentHash"];
+//             //console.log("for unaproved ",ancesHash,hash);
+//             //the first Level is unapproved
+//             if (ancesHash == hash) {
+//                 $(".commented-selection" + "[commentId = '" + hash + "']").addClass("unapprovedComments");
+//             } else {
+//                 $(".commented-selection" + "[commentId = '" + ancesHash + "']").addClass("threadNotApproved");
+//             }
+//         });
+//     });
+// }
 
 //read the thread (threads is the reply array, parentId is the hash, parentReplyBox is the replyBox returned by the showReply())
-function readThreads(threads, work, workCreator, parentId = null) {
+function readThreads(threads, work = TMP_STATE.selected_work, workCreator = TMP_STATE.selected_creator, parentId = null) {
     if (threads.length == 0) {
         return;
     } else {
-        for (var i = 0; i < threads.length; i++) {
+        for (let i = 0; i < threads.length; i++) {
             //TODO make it pass a object instead of every thing
             let dataForReplies = {
                 eppn: threads[i].eppn,
@@ -532,8 +553,9 @@ function readThreads(threads, work, workCreator, parentId = null) {
                 parentId: parentId,
                 work: work,
                 workCreator: workCreator
-            }
-            createReplies(dataForReplies);
+            };
+
+            TMP_UI.replybox_controller.createReplies(dataForReplies);
             readThreads(threads[i].threads, work, workCreator, threads[i].hash);
         }
     }
@@ -562,25 +584,6 @@ function createCommentData() {
     return commentData;
 }
 
-function createListOfCommenter(data) {
-    var commenters = [];
-    if (data.length) {
-        commenters.push(data[0].eppn);
-        for (var i = 1; i < data.length; i++) {
-            var eppn = data[i].eppn;
-            var eppnExist = false;
-            for (var j = 0; j < commenters.length; j++) {
-                if (commenters[j] == eppn) {
-                    eppnExist = true;
-                }
-            }
-            if (!eppnExist)
-                commenters.push(eppn);
-        }
-    }
-    return commenters;
-}
-
 // this function only check if the selected_eppn is same as the current user or not
 function isCurrentUserSelectedUser(selected_eppn, needNotification) {
     if (selected_eppn == TMP_STATE.current_user.eppn) {
@@ -593,72 +596,45 @@ function isCurrentUserSelectedUser(selected_eppn, needNotification) {
     }
 }
 
-//TODO this only blocks the Setting button:    mode = setting, mode = approvedComments
-//need to update this function with other things that need to check if user is in whiteList
-//ex: approve comments
-function checkworkAdminList(selected_eppn, litId, mode) {
-    var endPoint = "get_permissions_list";
-    API.request({
-        endpoint: endPoint,
-        method: "GET",
-        data: {
-            eppn: selected_eppn,
-            work: litId,
-        }
-    }).then((data) => {
-        let isInWhiteList = false
-        for (var i = 0; i < data["admins"].length; i++) {
-            if (TMP_STATE.current_user.eppn == data["admins"][i]) {
-                isInWhiteList = true;
-                console.log(TMP_STATE.current_user.eppn, " in admins");
-            }
-        }
-        if (!isInWhiteList) {
-            if (mode == "approvedComments") {
-                $("#replies").attr("isCurrentUserAdmin", false);
-            }
-        } else {
-            if (mode == "approvedComments") {
-                $("#replies").attr("isCurrentUserAdmin", true);
-            }
-        }
-    });
-}
-
 function launchToastNotifcation(data) {
-    var message = {
-        message: data
-    }
-    var snackbarContainer = document.querySelector('.mdl-js-snackbar');
+    let message = {
+        message: data,
+    };
+
+    let snackbarContainer = document.querySelector('.mdl-js-snackbar');
     snackbarContainer.MaterialSnackbar.showSnackbar(message);
     snackbarContainer.MaterialSnackbar.showSnackbar(message);
 }
 
-//Make sure the dialog don't exceed the window
+// Make sure the dialog don't exceed the window
 function adjustDialogPosition(data, width, height, marginX, marginY) {
     let newLeft = (data["evtPageX"] - marginX) + "px";
     let newTop = (data["evtPageY"] + marginY) + "px";
     if (data["evtClientY"] + (marginY + height) > $(window).height()) {
         newTop = (data["evtPageY"] - (marginY + height)) + "px";
     }
+
     if (data["evtPageX"] + width > $(window).width()) {
         newLeft = $(window).width() - (width + marginX) + "px";
     }
+
     return {
         newTop,
-        newLeft
-    }
+        newLeft,
+    };
 }
 
 function escapeSpecialChar(id) {
     if (id == null) {
         return null;
     }
+
     return id.replace(/([\s!"#$%&'()\*+,\.\/:;<=>?@\[\]^`{|}~])/g, "\\$1");
 }
 
-//fucntions that were made by ppl before
-//------------------------------------------------------------------------------
+function escapeHTMLPtag(text) {
+    return text.replace(/<p>(.*)<\/p>/, ` $1\n`);
+}
 
 // Hides all movable and visable boxes on the screen
 function hideAllBoxes() {

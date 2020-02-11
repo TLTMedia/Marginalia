@@ -53,4 +53,14 @@ export class UsersData {
         return this.selected_user_works;
     }
 
+    async get_eppn_to_name(eppn) {
+        let name_data = await this.api.request({
+            endpoint: 'eppn_to_name',
+            data: {
+                eppn: eppn,
+            },
+        });
+
+        return name_data;
+    }
 }

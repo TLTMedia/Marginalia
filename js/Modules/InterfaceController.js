@@ -1,5 +1,5 @@
 import { BaseEventBinds, InterfaceEvents } from './_ModuleLoader.js';
-import { CommentsController, RangyController, CommentBoxController, TutorialController } from './Controllers/_ModuleLoader.js';
+import { CommentsController, RangyController, CommentBoxController, TutorialController, ReplyBoxController, SettingsController } from './Controllers/_ModuleLoader.js';
 
 export class InterfaceController {
     constructor({ state = state, toast = toast }) {
@@ -66,6 +66,22 @@ export class InterfaceController {
          * Tutorial Controller
          */
         this.tutorial_controller = new TutorialController({
+            state: state,
+            ui: this,
+        });
+
+        /**
+         * ReplyBox Controller
+         */
+        this.replybox_controller = new ReplyBoxController({
+            state: state,
+            ui: this,
+        });
+
+        /**
+         * Settings Controller
+         */
+        this.settings_controller = new SettingsController({
             state: state,
             ui: this,
         });
@@ -463,15 +479,20 @@ export class InterfaceController {
             // take note of it already being called here. (should be able to use it?)
             let work_comment_data = await this.state.api_data.comments_data.get_work_highlights();
 
-            console.log("work_comment_data",work_comment_data)
-
             // reset the filters - this happens here b.c. filters menu persists changes unless work is changed
             this.base_events.filters_events.reset(work_comment_data);
 
-            // TODO:
-            checkworkAdminList(this.state.selected_creator, this.state.selected_work, "approvedComments");
+            // check whether the current user is in the admin list or not (can approve replies?)
+            let permissions_list = await this.state.api_data.works_data.get_admins_of_work();
+            $("#replies").attr("isCurrentUserAdmin", false); // initially, reset to false
+            for (let i = 0; i < permissions_list["admins"].length; i++) {
+                if (this.state.current_user.eppn == permissions_list["admins"][i]) {
+                    $("#replies").attr("isCurrentUserAdmin", true);
+                    break;
+                }
+            }
         } else {
-            this.toast.create_toast("Error loading work. \n" + data.data);
+            this.toast.create_toast("Error loading work. \n" + permissions_list.data);
 
             // work doesn't exist so load home
             $("#home").click();
@@ -490,8 +511,8 @@ export class InterfaceController {
          * TODO: this stuff breaks if it was already made, so find a way to only make these boxes once.
          */
         this.commentbox_controller.create_commentbox();
-
-        makeDraggableReplyBox();
+        this.replybox_controller.create_replybox();
+        //makeDraggableReplyBox();
         hideAllBoxes();
 
         let footer;

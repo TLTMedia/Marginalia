@@ -161,28 +161,26 @@ function checkSpansNeedRecover(id, callback) {
 }
 
 //commentBox width: 500 px ,height: 331px , marginX : 10, marginY : 50
-function displayCommentBox(evt, selected_filter) {
-    var marginX = 10;
-    var marginY = 50;
-    var newPosition = adjustDialogPosition(evt, 500, 331, 10, 50);
-
-    $("#comment-box").parent().css({
-        'top': newPosition["newTop"],
-        'left': newPosition["newLeft"],
-        'z-index': 5
-    })
-
-    $("#comment-box").parent().find("#ui-id-1").contents().filter(function () { return this.nodeType == 3; }).first().replaceWith("Annotation by: " + TMP_STATE.current_user['firstname'] + " " + TMP_STATE.current_user['lastname']);
-    $("#comment-box").parent().fadeIn();
-
-    if (selected_filter != "show-all-types" && selected_filter !== undefined) {
-        let val_selected = selected_filter.charAt(0).toUpperCase() + selected_filter.slice(1);
-
-        $(".select2-save-comment-select").val(val_selected).trigger("change");
-        $(".select2-save-comment-select").prop("disabled", true);
-    }
-}
-
-function hideCommentBox() {
-    $("#comment-box").parent().hide();
-}
+// function displayCommentBox(evt, selected_filter) {
+//     var marginX = 10;
+//     var marginY = 50;
+//     var newPosition = adjustDialogPosition(evt, 500, 331, 10, 50);
+//
+//     $("#comment-box").parent().css({
+//         'top': newPosition["newTop"],
+//         'left': newPosition["newLeft"],
+//         'z-index': 5
+//     })
+//
+//     $("#comment-box").parent().find("#ui-id-1").contents().filter(function () { return this.nodeType == 3; }).first().replaceWith("Annotation by: " + TMP_STATE.current_user['firstname'] + " " + TMP_STATE.current_user['lastname']);
+//     $("#comment-box").parent().fadeIn();
+//
+//     if (selected_filter != "show-all-types" && selected_filter !== undefined) {
+//         let val_selected = selected_filter.charAt(0).toUpperCase() + selected_filter.slice(1);
+//
+//         $(".select2-save-comment-select").val(val_selected).trigger("change");
+//         $(".select2-save-comment-select").prop("disabled", true);
+//     }
+//     TMP_STATE.commentBox_data;
+//     console.log(TMP_STATE)
+// }
