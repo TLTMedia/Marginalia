@@ -260,17 +260,17 @@ function handleStartEndDiv(commentData) {
         let isStartDivExist = $(".startDiv" + "[commentId = '" + commentData[i].hash + "']").length;
         let comment = {
             "hash": commentData[i].hash,
-            // "startIndex":  isStartDivExist!=0 ? $(".startDiv"+"[commentId = '"+commentData[i].hash+"']").attr("startIndex") : $(".hiddenDiv"+"[commentId = '"+commentData[i].hash+"']").attr("startIndex")'
-            "startIndex": $(".startDiv" + "[commentId = '" + commentData[i].hash + "']").attr("startIndex")
+            "startIndex": $(".startDiv" + "[commentId = '" + commentData[i].hash + "']").attr("startIndex"),
+            "endIndex": $(".endDiv" + "[commentId = '"+commentData[i].hash + "']").attr("endIndex")
         }
         sortedCommentData = sortCommentsByStartIndex(sortedCommentData, comment);
     }
-    console.log(sortedCommentData)
-    //assign parent hash
-    for (let i = 0; i < sortedCommentData.length; i++) {
-        colorOverLappedComments(sortedCommentData[i].hash);
-        colorAdjacentComments(sortedCommentData[i].hash);
-    }
+    //CHANGE New function added for coloring the comments
+    set_comments_color(sortedCommentData);
+    // for (let i = 0; i < sortedCommentData.length; i++) {
+    //     colorOverLappedComments(sortedCommentData[i].hash);
+    //     colorAdjacentComments(sortedCommentData[i].hash);
+    // }
 }
 
 function sortCommentsByStartIndex(sortedCommentData, comment) {
@@ -307,55 +307,134 @@ function handleIncorrectTemplate() {
     });
 }
 
-function colorOverLappedComments(commentHash) {
-    let prevStartDiv = $(".startDiv" + "[commentId = '" + commentHash + "']").prevAll(".startDiv:first");
-    let nextEndDiv = $(".endDiv" + "[commentId = '" + commentHash + "']").nextAll(".endDiv:first");
-    let prevStartColorId = parseInt(prevStartDiv.attr("colorId"), 10);
-    //colorId 0:normal, 1:colorOneComments, 2:colorTwoComments, 3:colorThreeComments,4: colorFourComments
-    if ((prevStartDiv.attr('commentId') == nextEndDiv.attr("commentId")) && (prevStartDiv.attr('commentId') != undefined)) {
-        if ($(".commented-selection" + "[commentId = '" + prevStartDiv.attr('commentId') + "']").length != 0) {
-            let startDiv = $(".startDiv" + "[commentId = '" + commentHash + "']");
-            let endDiv = $(".endDiv" + "[commentId = '" + commentHash + "']");
-            startDiv.attr("parentHash", nextEndDiv.attr("commentId"));
-            endDiv.attr("parentHash", nextEndDiv.attr("commentId"));
-            let commentsColorClass = ["", "colorOneComments", "colorTwoComments", "colorThreeComments", "colorFourComments"];
-            if (prevStartColorId < 3) {
-                $(".commented-selection" + "[commentId = '" + commentHash + "']").addClass(commentsColorClass[(prevStartColorId + 1)]);
-                startDiv.attr("colorId", prevStartColorId + 1);
-                endDiv.attr("colorId", prevStartColorId + 1);
-            } else if (prevStartColorId == 3) {
-                $(".commented-selection" + "[commentId = '" + commentHash + "']").addClass(commentsColorClass[0]);
-                startDiv.attr("colorId", 0);
-                endDiv.attr("colorId", 0);
+//This function do colors the overlapped and adjacent comments
+function set_comments_color(sortedCommentData){
+    let data = sortedCommentData.slice(0);
+    for (let i in data){
+        let id = data[i]["hash"];
+        let si = data[i]["startIndex"];
+        let ei = data[i]["endIndex"];
+        // comments are already sorted so we don't have to check comments that we already processed
+        for (let j = parseInt(i)+1; j < data.length; j++){
+            let jid = data[j]["hash"];
+            let jsi = data[j]["startIndex"];
+            let jei = data[j]["endIndex"];
+            // j comment is totally inside i comment
+            if (parseInt(si) <= parseInt(jsi) && parseInt(ei) >= parseInt(jei)){
+                data[j]["parentId"] = id;
+            }
+            // j comment's start index is before i's comments end index, but j's end index is after i's end index
+            else if (parseInt(jsi) <= parseInt(ei) && parseInt(jei) > parseInt(ei)){
+                data[j]["coverId"] = id;
             }
         }
+    }
+    console.log(data);
+    //colorId 0:normal, 1:colorOneComments, 2:colorTwoComments, 3:colorThreeComments,4: colorFourComments
+    let commentsColorClass = ["", "colorOneComments", "colorTwoComments", "colorThreeComments", "colorFourComments"];
+    for (let i in data){
+        let id = data[i]["hash"];
+        let parentId = data[i]["parentId"];
+        let coverId = data[i]["coverId"];
+        let goal_color_id;
+        if(coverId && parentId){
+            let parent_colorId = parseInt($(".startDiv" + "[commentId ='" + parentId + "']").attr("colorId"));
+            let cover_colorId = parseInt($(".startDiv" + "[commentId ='" + coverId + "']").attr("colorId"));
+            let bigColorId = Math.max(parent_colorId,cover_colorId);
+            let smallColorId = Math.min(parent_colorId,cover_colorId);
+            if (bigColorId < 3) {
+                goal_color_id = bigColorId + 1;
+            }
+            else if (bigColorId == 3 && smallColorId != 1) {
+                goal_color_id = 1;
+            }
+            else{
+                console.log("special case: \n big:", bigColorId, " small:",smallColorId);
+                goal_color_id = 0;
+            }
+        }
+        else if(coverId){
+            let cover_colorId = parseInt($(".startDiv" + "[commentId ='" + coverId + "']").attr("colorId"));
+            if (parseInt(cover_colorId) < 3) {
+                goal_color_id = cover_colorId + 1;
+            }
+            else if (parseInt(cover_colorId) == 3) {
+                goal_color_id = 1;
+            }
+        }
+        else if(parentId){
+            let parent_colorId = parseInt($(".startDiv" + "[commentId ='" + parentId + "']").attr("colorId"));
+            if (parseInt(parent_colorId) < 3) {
+                goal_color_id = parent_colorId + 1;
+            }
+            else if (parseInt(parent_colorId) == 3) {
+                goal_color_id = 1;
+            }
+        }
+        else{
+            goal_color_id = 0;
+        }
+        $(".commented-selection" + "[commentId = '" + id + "']").addClass(commentsColorClass[goal_color_id]);
+        $(".startDiv" + "[commentId ='" + id + "']").attr({"parentHash": parentId, "coverId": coverId, "colorId" : goal_color_id});
+        $(".endDiv" + "[commentId ='" + id + "']").attr({"parentHash": parentId, "coverId": coverId, "colorId" : goal_color_id});
     }
 }
 
-function colorAdjacentComments(commentHash) {
-    let prevEndDiv = $(".startDiv" + "[commentId = '" + commentHash + "']").prevAll(".endDiv:first");
-    let prevEndDivData = {
-        "id": prevEndDiv.attr("commentId"),
-        "index": prevEndDiv.attr("endIndex"),
-        "colorId": parseInt(prevEndDiv.attr("colorId"), 10)
-    }
-    let currentStartDivIndex = $(".startDiv" + "[commentId = '" + commentHash + "']").attr("startIndex");
-    let currentEndDivIndex = $(".endDiv" + "[commentId = '" + commentHash + "']").attr("endIndex");
-    if (currentStartDivIndex <= parseInt(prevEndDivData["index"], 10)) {
-        if ($(".commented-selection" + "[commentId = '" + prevEndDivData["id"] + "']").length != 0) {
-            let commentsColorClass = ["", "colorOneComments", "colorTwoComments", "colorThreeComments", "colorFourComments"];
-            if (prevEndDivData["colorId"] < 3) {
-                $(".commented-selection" + "[commentId = '" + commentHash + "']").addClass(commentsColorClass[prevEndDivData["colorId"] + 1]);
-                $(".startDiv" + "[commentId = '" + commentHash + "']").attr("colorId", prevEndDivData["colorId"] + 1);
-                $(".endDiv" + "[commentId = '" + commentHash + "']").attr("colorId", prevEndDivData["colorId"] + 1);
-            } else if (prevEndDivData["colorId"] == 3) {
-                $(".commented-selection" + "[commentId = '" + commentHash + "']").addClass(commentsColorClass[0]);
-                $(".startDiv" + "[commentId = '" + commentHash + "']").attr("colorId", 0);
-                $(".endDiv" + "[commentId = '" + commentHash + "']").attr("colorId", 0);
-            }
-        }
-    }
-}
+
+//TODO logic for checking if comments are overlapped is incorrect
+//NOTE: new logic is to just check their index
+// function colorOverLappedComments(commentHash) {
+//     let prevStartDiv = $(".startDiv" + "[commentId = '" + commentHash + "']").prevAll(".startDiv:first");
+//     let nextEndDiv = $(".endDiv" + "[commentId = '" + commentHash + "']").nextAll(".endDiv:first");
+//     let prevStartColorId = parseInt(prevStartDiv.attr("colorId"), 10);
+//     console.log(commentHash,prevStartDiv.attr("commentId"), nextEndDiv.attr("commentId"), prevStartColorId);
+//     //colorId 0:normal, 1:colorOneComments, 2:colorTwoComments, 3:colorThreeComments,4: colorFourComments
+//     // if prevStartDiv's commentId is same as the nextEndDiv's commentId, then the current Comment is overlapped with other comment
+//     if ((prevStartDiv.attr('commentId') == nextEndDiv.attr("commentId")) && (prevStartDiv.attr('commentId') != undefined)) {
+//         //check if this parentComment exist
+//         if ($(".commented-selection" + "[commentId = '" + prevStartDiv.attr('commentId') + "']").length != 0) {
+//             let startDiv = $(".startDiv" + "[commentId = '" + commentHash + "']");
+//             let endDiv = $(".endDiv" + "[commentId = '" + commentHash + "']");
+//             startDiv.attr("parentHash", nextEndDiv.attr("commentId"));
+//             endDiv.attr("parentHash", nextEndDiv.attr("commentId"));
+//             let commentsColorClass = ["", "colorOneComments", "colorTwoComments", "colorThreeComments", "colorFourComments"];
+//             if (prevStartColorId < 3) {
+//                 $(".commented-selection" + "[commentId = '" + commentHash + "']").addClass(commentsColorClass[(prevStartColorId + 1)]);
+//                 startDiv.attr("colorId", prevStartColorId + 1);
+//                 endDiv.attr("colorId", prevStartColorId + 1);
+//             } else if (prevStartColorId == 3) {
+//                 $(".commented-selection" + "[commentId = '" + commentHash + "']").addClass(commentsColorClass[0]);
+//                 startDiv.attr("colorId", 0);
+//                 endDiv.attr("colorId", 0);
+//             }
+//         }
+//     }
+// }
+//
+// function colorAdjacentComments(commentHash) {
+//     let prevEndDiv = $(".startDiv" + "[commentId = '" + commentHash + "']").prevAll(".endDiv:first");
+//     let prevEndDivData = {
+//         "id": prevEndDiv.attr("commentId"),
+//         "index": prevEndDiv.attr("endIndex"),
+//         "colorId": parseInt(prevEndDiv.attr("colorId"), 10)
+//     }
+//     let currentStartDivIndex = $(".startDiv" + "[commentId = '" + commentHash + "']").attr("startIndex");
+//     let currentEndDivIndex = $(".endDiv" + "[commentId = '" + commentHash + "']").attr("endIndex");
+//     if (parseInt(currentStartDivIndex) <= parseInt(prevEndDivData["index"], 10)) {
+//         if ($(".commented-selection" + "[commentId = '" + prevEndDivData["id"] + "']").length != 0) {
+//             let commentsColorClass = ["", "colorOneComments", "colorTwoComments", "colorThreeComments", "colorFourComments"];
+//             if (prevEndDivData["colorId"] < 3) {
+//                 $(".commented-selection" + "[commentId = '" + commentHash + "']").addClass(commentsColorClass[prevEndDivData["colorId"] + 1]);
+//                 $(".startDiv" + "[commentId = '" + commentHash + "']").attr("colorId", prevEndDivData["colorId"] + 1);
+//                 $(".endDiv" + "[commentId = '" + commentHash + "']").attr("colorId", prevEndDivData["colorId"] + 1);
+//             } else if (prevEndDivData["colorId"] == 3) {
+//                 $(".commented-selection" + "[commentId = '" + commentHash + "']").addClass(commentsColorClass[0]);
+//                 $(".startDiv" + "[commentId = '" + commentHash + "']").attr("colorId", 0);
+//                 $(".endDiv" + "[commentId = '" + commentHash + "']").attr("colorId", 0);
+//             }
+//         }
+//     }
+// }
 
 function filterMultipleComment(api_returned_data, type, commenter) {
     let returned_data = [];
@@ -390,8 +469,7 @@ function filterMultipleComment(api_returned_data, type, commenter) {
   *  if (comment.startIndex < textIndex <= comment.endIndex) return this comment
   */
 function clickOnCommentByIndex(textIndex, evt) {
-    $(".clicked_span").removeClass("clicked_span btn btn-neutral");
-    $("#context_container").remove()
+    removeCommentContextMenu();
     $("#replies").parent().hide();
     data = {
         "work": TMP_STATE.selected_work,
@@ -406,6 +484,7 @@ function clickOnCommentByIndex(textIndex, evt) {
     }).then((api_returned_data) => {
         console.log(api_returned_data)
         let targetComments = [];
+        //api_returned_data include everytype, if the filter is seleceted we remove the different types
         if (TMP_STATE.filters != undefined) {
             let targetType = TMP_STATE.filters.selected_comment_filter, targetCommenter = TMP_STATE.filters.selected_author_filter;
             targetComments = filterMultipleComment(api_returned_data, targetType, targetCommenter);
@@ -416,7 +495,6 @@ function clickOnCommentByIndex(textIndex, evt) {
         }
         // more than one comment exist
         if (targetComments.length > 1) {
-
             let selectedCommentId = evt.currentTarget.attributes.commentId.value;
             let comments = {};
             for (i in targetComments) {
@@ -505,6 +583,11 @@ function clickOnCommentByIndex(textIndex, evt) {
             TMP_UI.replybox_controller.displayReplyBox(data_for_replybox);
         }
     });
+}
+
+function removeCommentContextMenu(){
+    $(".clicked_span").removeClass("clicked_span btn btn-neutral");
+    $("#context_container").remove();
 }
 
 
