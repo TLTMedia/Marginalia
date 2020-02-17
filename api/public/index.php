@@ -116,7 +116,7 @@ $app->get("/get_current_user", function () use ($app, $PATH, $authUniqueId, $aut
  * This does not do any traversal for gathering user info. Instead relies on the new system of generating
  * user data file upon the first time a user visits the site.
  */
-$app->get("/get_all_users", function () use ($app, $PATH, $parameters, $authUniqueId, $authFirstName, $authLastName) {
+$app->get("/get_all_users", function () use ($app, $PATH, $parameters) {
     $data = $app->request->get();
     $parameters->paramCheck($data, array(
         "search",
