@@ -131,7 +131,7 @@ class Users
      */
     public function getCurrentUser($firstName, $lastName, $eppn)
     {
-        $this->__createUserIfNotExists($eppn);
+        $this->__createUserIfNotExists($eppn, $firstName, $lastName);
 
         $user            = json_decode("");
         $user->firstname = $firstName;
@@ -235,10 +235,33 @@ class Users
         }
     }
 
-    private function __createUserIfNotExists($eppn)
+    private function __createUserIfNotExists($eppn, $firstName, $lastName)
     {
+        /**
+         * Create the user dir if not exists directory
+         */
         if (!is_dir($this->path . $eppn)) {
             mkdir($this->path . $eppn, 0777);
         }
+
+        /**
+         * Create the user info file if not exists
+         */
+        $userInfo     = new UserInfo($eppn, $firstName, $lastName);
+        $userInfoJson = json_encode($userInfo);
+
+        if (!is_file($this->path . $eppn . "/info.json")) {
+            file_put_contents($this->path . $eppn . "/info.json", $userInfoJson);
+        }
+    }
+}
+
+class UserInfo
+{
+    public function __construct($eppn, $firstName, $lastName)
+    {
+        $this->eppn      = $eppn;
+        $this->firstName = $firstName;
+        $this->lastName  = $lastName;
     }
 }

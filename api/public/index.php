@@ -95,6 +95,7 @@ $app->get("/get_creators_of_course", function () use ($app, $PATH, $PATH_COURSES
 });
 
 /**
+ * This is the initial ping on the website.
  * Get some data on the currently logged in user...
  *  firstName, lastName, eppn
  */
