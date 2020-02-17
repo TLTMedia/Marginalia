@@ -145,6 +145,42 @@ class Users
     }
 
     /**
+     * Returns list of all the users that match the specified $search string
+     * This is similar to getCreators() - but this will return a matching of $search AND the first & last name,
+     */
+    public function getAllUserMatches($search)
+    {
+        $search = strtolower($search);
+
+        $allUserInfo   = $this->__getAllUserInfo();
+        $specificUsers = array();
+
+        foreach ($allUserInfo as $userInfo) {
+            // check if eppn matches
+            if (strpos(strtolower($userInfo->eppn), $search) !== false) {
+                array_push($specificUsers, $userInfo);
+                continue;
+            }
+
+            // check if first name matches
+            if (strpos(strtolower($userInfo->firstName), $search) !== false) {
+                array_push($specificUsers, $userInfo);
+                continue;
+            }
+
+            // check if last name matches
+            if (strpos(strtolower($userInfo->lastName), $search) !== false) {
+                array_push($specificUsers, $userInfo);
+            }
+        }
+
+        return json_encode(array(
+            "status" => "ok",
+            "data"   => $specificUsers,
+        ));
+    }
+
+    /**
      * Returns a list of the users works
      */
     public function getUserWorks($eppn, $currentEppn)
@@ -253,6 +289,24 @@ class Users
         if (!is_file($this->path . $eppn . "/info.json")) {
             file_put_contents($this->path . $eppn . "/info.json", $userInfoJson);
         }
+    }
+
+    /**
+     * Returns an array with all the users infos (eppn, first, last)
+     */
+    private function __getAllUserInfo()
+    {
+        $userFolders = glob($this->path . "*");
+        $allUserInfo = array();
+
+        foreach ($userFolders as $userFolderPath) {
+            if (file_exists($userFolderPath . "/info.json")) {
+                $userInfo = json_decode(file_get_contents($userFolderPath . "/info.json"));
+                array_push($allUserInfo, $userInfo);
+            }
+        }
+
+        return $allUserInfo;
     }
 }
 

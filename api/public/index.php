@@ -111,6 +111,24 @@ $app->get("/get_current_user", function () use ($app, $PATH, $authUniqueId, $aut
 });
 
 /**
+ * Get all users; eppn, first & last names.
+ * A user must visit the site first inorder for their datafiles to be generated & retrieved via here.
+ * This does not do any traversal for gathering user info. Instead relies on the new system of generating
+ * user data file upon the first time a user visits the site.
+ */
+$app->get("/get_all_users", function () use ($app, $PATH, $parameters, $authUniqueId, $authFirstName, $authLastName) {
+    $data = $app->request->get();
+    $parameters->paramCheck($data, array(
+        "search",
+    ));
+
+    require "../Actions/Users.php";
+    $users = new Users($app->log, $PATH);
+
+    echo $users->getAllUserMatches($data["search"]);
+});
+
+/**
  * Get the permissions list of a specified $work of the current logged in user ($eppn)
  */
 $app->get("/get_permissions_list", function () use ($app, $PATH, $parameters) {
