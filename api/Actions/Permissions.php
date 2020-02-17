@@ -352,6 +352,23 @@ class Permissions
             }
         }
     }
+
+    /**
+     * Add the specified users to the courses permissions list,
+     * expects that you already validated the current user as an admin that can add others
+     */
+    public function addUserToCoursesPermissions($toAddEppn)
+    {
+        $permissionsData           = json_decode(file_get_contents($this->path . "permissions.json"));
+        $permissionsData->admins[] = $toAddEppn;
+        $permissionsData           = json_encode($permissionsData);
+
+        if (!file_put_contents($this->path . "permissions.json", $permissionsData)) {
+            return false;
+        }
+
+        return true;
+    }
 }
 
 class DefaultPermissions

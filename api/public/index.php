@@ -664,7 +664,7 @@ $app->get("/get_works_of_course_creator", function () use ($app, $PATH, $PATH_CO
 /**
  * Checks whether the currently logged in person is a courses admin
  */
-$app->get("/is_courses_admin", function () use ($app, $PATH, $PATH_COURSES, $parameters, $authUniqueId, $responseFmt) {
+$app->get("/is_courses_admin", function () use ($app, $PATH_COURSES, $authUniqueId, $responseFmt) {
     require "../Actions/Courses.php";
     $courses = new Courses($app->log, $PATH_COURSES, $authUniqueId);
 
@@ -679,6 +679,19 @@ $app->get("/is_courses_admin", function () use ($app, $PATH, $PATH_COURSES, $par
  * Adds a course admin; pre-existing course-admin's can create courses... They can also add other users as course-admins
  * TODO:
  */
+$app->post("/add_course_admin", function () use ($app, $PATH_COURSES, $parameters, $authUniqueId, $responseFmt) {
+    $data = json_decode($app->request->getBody(), true);
+    $parameters->paramCheck($data, array(
+        "eppn",
+    ));
+
+    require "../Actions/Courses.php";
+    $courses = new Courses($app->log, $PATH_COURSES, $authUniqueId);
+
+    echo $responseFmt->message(
+        $courses->addCourseAdmin($authUniqueId, $data["eppn"])
+    );
+});
 
 /**
  * Get Comments that include this index in their spanning range

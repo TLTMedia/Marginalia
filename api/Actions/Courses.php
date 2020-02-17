@@ -13,9 +13,11 @@ class Courses
     {
         $courses       = glob($this->path . '*', GLOB_ONLYDIR);
         $prettyCourses = array();
+
         foreach ($courses as $course) {
             $prettyCourses[] = str_replace($this->path, "", $course);
         }
+
         return $prettyCourses;
     }
 
@@ -23,12 +25,15 @@ class Courses
     {
         $filteredWorks = array();
         $rawWorks      = $this->getRawWorksInCourse($course);
+
         foreach ($rawWorks as $rawWork) {
             $creatorWork = explode("###", $rawWork);
+
             if ($creatorWork[0] == $creator) {
                 $filteredWorks[] = $creatorWork[1];
             }
         }
+
         return $filteredWorks;
     }
 
@@ -36,9 +41,11 @@ class Courses
     {
         $works       = glob($this->path . "/" . $course . "/*", GLOB_ONLYDIR);
         $prettyWorks = array();
+
         foreach ($works as $work) {
             $prettyWorks[] = str_replace($this->path . "/" . $course . "/", "", $work);
         }
+
         return $prettyWorks;
     }
 
@@ -73,6 +80,7 @@ class Courses
 
         if (!mkdir($this->path . "/" . $courseName, 0700)) {
             $this->logger->error("unable to create course directory mkdir() operation.");
+
             return array(
                 "status"  => "error",
                 "message" => "unable to create course directory for unknown reason",
@@ -83,5 +91,43 @@ class Courses
             "status"  => "ok",
             "message" => "successfully created course directory " . $courseName,
         );
+    }
+
+    /**
+     * Add a course admin, checks to see if the current user is a valid admin
+     */
+    public function addCourseAdmin($selfEppn, $toAddEppn)
+    {
+        /**
+         * Check if $selfEppn is even on the course admin list themselves
+         */
+        require 'Permissions.php';
+        $permissions = new Permissions($this->path);
+
+        if ($permissions->userOnPermissionsList($this->path, $selfEppn)) {
+            if ($permissions->userOnPermissionsList($this->path, $toAddEppn)) {
+                return array(
+                    "status"  => "ok",
+                    "message" => "user was already an admin",
+                );
+            } else {
+                if ($permissions->addUserToCoursesPermissions($toAddEppn)) {
+                    return array(
+                        "status"  => "ok",
+                        "message" => "successfully added user as admin",
+                    );
+                } else {
+                    return array(
+                        "status"  => "error",
+                        "message" => "unable to add user to permissions file",
+                    );
+                }
+            }
+        } else {
+            return array(
+                "status"  => "error",
+                "message" => "current user is not admin; or other error",
+            );
+        }
     }
 }
