@@ -554,29 +554,4 @@ export class InterfaceController {
          */
         await this.comments_controller.load_user_comments();
     }
-
-    populate_add_course_term_list() {
-        let today = new Date();
-        let year = today.getFullYear();
-        let month = today.getMonth();
-        let season = ["Spring", "Summer", "Fall", "Winter"];
-        let years = [year, year + 1];
-
-        if ($(".termsListForAddCourse").children("li").length == 0) {
-            for (let i in years) {
-                for (let j in season) {
-                    let text = season[j] + "_" + years[i];
-                    let termOption = $("<li/>", {
-                        class: "mdl-menu__item",
-                        text: text,
-                        click: () => {
-                            $("#selectedTerm").val(text).html(text);
-                            $("#termMenuButton").click();
-                        }
-                    });
-                    $(".termsListForAddCourse").append(termOption);
-                }
-            }
-        }
-    }
 }

@@ -88,7 +88,14 @@
                             <a class="mdl-navigation__link headerTab headerUpload" id="litadd"
                                 href="javascript:void(0);">Add
                                 Literature</a>
-                            <a class="mdl-navigation__link headerTab headerUpload" id="courseadd">Add Course</a>
+                            <!-- <a class="mdl-navigation__link headerTab headerUpload" id="courseadd">Add Course</a> -->
+                            <a class="mdl-navigation__link headerTab headerUpload" id="courses-options"
+                                href="javascript:void(0);">Courses</a>
+                            <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect"
+                                for="courses-options">
+                                <li class="mdl-menu__item" id="courseadd">Create new course</li>
+                                <li class="mdl-menu__item">Add course admin</li>
+                            </ul>
                         </nav>
                     </div>
                     <!-- Bottom row -->
@@ -169,13 +176,13 @@
                         <div id="add-course-modal" class="modal">
                             <div id="addCourseBase">
                                 <center>
-                                    <span class="addCourseTitle modal-header">Add Course</span>
+                                    <span class="addCourseTitle modal-header">Create new course</span>
                                     <br />
                                     <!-- <span style="font-size:12px">options with * are required to fill in</span> -->
                                 </center>
 
                                 <div class="courseName">
-                                    <span>Course code: </span>
+                                    <span>Name: </span>
                                     <div class="mdl-textfield mdl-js-textfield is-upgraded">
                                         <input id="courseNameInput" class="mdl-textfield__input" type="text"
                                             maxlength="100" placeholder="WRT 102">
@@ -183,23 +190,35 @@
                                     </div>
                                 </div>
                                 <div class="section">
-                                    <span>Course section:</span>
+                                    <span>Section:</span>
                                     <div class="mdl-textfield mdl-js-textfield is-upgraded">
                                         <input id="courseSectionInput" class="mdl-textfield__input" type="text"
                                             maxlength="100" placeholder="01" value="01">
                                         <label class="mdl-textfield__label" for="courseSectionInput"></label>
                                     </div>
                                 </div>
-                                <br />
                                 <div class="courseTermMenu">
-                                    <span>Course term: </span>
-                                    <button id="termMenuButton"
-                                        class="smaller-upload-buttons mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored">
-                                        Pick term
-                                    </button>
-                                    <ul class="termsListForAddCourse mdl-menu mdl-menu--bottom-left mdl-js-menu"
-                                        for="termMenuButton"></ul>
-                                    <span id="selectedTerm"></span>
+                                    <span>Semester: </span>
+                                    <div class="mdl-textfield mdl-js-textfield getmdl-select">
+                                        <input type="text" value="" placeholder="Semester" class="mdl-textfield__input"
+                                            id="course-create-semester" readonly>
+                                        <input type="hidden" value="" name="course-create-semester">
+                                        <ul for="course-create-semester"
+                                            class="mdl-menu mdl-menu--bottom-left mdl-js-menu course-create-select-semester">
+                                            <li class="mdl-menu__item" data-val="Fall">Fall</li>
+                                            <li class="mdl-menu__item" data-val="Winter">Winter</li>
+                                            <li class="mdl-menu__item" data-val="Spring">Spring</li>
+                                            <li class="mdl-menu__item" data-val="Summer">Summer</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div>
+                                    <span>Year: </span>
+                                    <div class="mdl-textfield mdl-js-textfield is-upgraded">
+                                        <input id="course-create-year" class="mdl-textfield__input" type="text"
+                                            maxlength="4" placeholder="2020">
+                                        <label class="mdl-textfield__label" for="course-create-year"></label>
+                                    </div>
                                 </div>
                                 <br />
                                 <label id="finishAddCourseButton"

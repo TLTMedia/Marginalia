@@ -1048,8 +1048,8 @@ input[type="file"] {
 
 /*----------------commentBox_dropDown-----------*/
 
-.disabled_dropDown{
-    background-color: rgba(205,205,205,0.8) !important;
+.disabled_dropDown {
+    background-color: rgba(205, 205, 205, 0.8) !important;
 }
 
 /*----------------footer------------------------*/
@@ -1211,26 +1211,36 @@ input[type="file"] {
     /* color: orange!important; */
     color: #FF4500 !important;
 }
+
 /*-----------------commentSelectingMenu------------*/
-#commentMenu{
-  width: 200px; /* Set a width if you like */
+
+#commentMenu {
+    width: 200px;
+    /* Set a width if you like */
 }
 
 #commentMenu li {
-  background-color: #eee; /* Grey background color */
-  color: black; /* Black text color */
-  display: block; /* Make the links appear below each other */
-  padding: 12px; /* Add some padding */
-  text-decoration: none; /* Remove underline from links */
+    background-color: #eee;
+    /* Grey background color */
+    color: black;
+    /* Black text color */
+    display: block;
+    /* Make the links appear below each other */
+    padding: 12px;
+    /* Add some padding */
+    text-decoration: none;
+    /* Remove underline from links */
 }
 
 #commentMenu li:hover {
-  background-color: #ccc; /* Dark grey background on mouse-over */
+    background-color: #ccc;
+    /* Dark grey background on mouse-over */
 }
 
 #commentMenu li.active {
-  background-color: #4CAF50; /* Add a green color to the "active/current" link */
-  color: white;
+    background-color: #4CAF50;
+    /* Add a green color to the "active/current" link */
+    color: white;
 }
 
 /*-----------------commentHighlightColor-----------*/
@@ -1252,20 +1262,33 @@ input[type="file"] {
     cursor: context-menu;
 } */
 
+.defaultColorComments {
+    background-color: rgba(255, 210, 63, 0.85);
+    cursor: context-menu;
+}
+
+/* green */
+
 .colorOneComments {
     background-color: #7BDB93;
     cursor: context-menu;
 }
+
+/* blue */
 
 .colorTwoComments {
     background-color: rgba(91, 180, 220, 0.85);
     cursor: context-menu;
 }
 
+/* purple */
+
 .colorThreeComments {
     background-color: #BEA8E9;
     cursor: context-menu;
 }
+
+/* orange red */
 
 .colorFourComments {
     background-color: #EE6055;
