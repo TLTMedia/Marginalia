@@ -11,23 +11,31 @@ export class FiltersEvents {
      * Parse out the unique commenter eppns and the comment types from the raw work_comment_data
      */
     parse_filter_data(comment_data) {
-        console.log(comment_data);
         let all_types = Array();
         let all_eppns = Array();
+        let all_names = Array();
 
         comment_data.forEach((comment) => {
             all_types.push(comment.commentType);
             all_eppns.push(comment.eppn);
+            all_names.push(comment.firstName + " " + comment.lastName);
         });
 
         let unique_types = Array();
         let unique_eppns = Array();
+        let complete_names = Array();
+        let unique_names_eppns = Array();
 
         /**
          * Add the Show All filter
          */
         unique_types.push("show-all-types");
+
+        /**
+         * eppns and names are together, except that names is the visible label, and eppns is the non-visible unique identifier 
+         */
         unique_eppns.push("show-all-eppns");
+        complete_names.push("Show All");
 
         all_types.forEach(comment_type => {
             if (!unique_types.includes(comment_type)) {
@@ -35,15 +43,29 @@ export class FiltersEvents {
             }
         });
 
-        all_eppns.forEach(comment_author => {
-            if (!unique_eppns.includes(comment_author)) {
-                unique_eppns.push(comment_author);
+        all_eppns.forEach(commenter_eppn => {
+            if (!unique_eppns.includes(commenter_eppn)) {
+                unique_eppns.push(commenter_eppn);
             }
         });
+
+        /**
+         * So this is a bit more computationally expensive than the above, since:
+         * You can have 2 people with the same first and last name.
+         * We want to add the name twice to the array. But not add it twice for the same person.
+         * So we check via the eppn if it's the same person...
+         */
+        for (let i = 0; i < all_names.length; ++i) {
+            if (!unique_names_eppns.includes(all_eppns[i])) {
+                unique_names_eppns.push(all_eppns[i]);
+                complete_names.push(all_names[i]);
+            }
+        }
 
         return {
             types: unique_types,
             eppns: unique_eppns,
+            names: complete_names,
         };
     }
 
@@ -93,11 +115,9 @@ export class FiltersEvents {
          * Create filters for eppns that exist.
          * TODO: text is their eppn, we should get their firstname-lastname instead of showing by eppn
          */
-        work_filter_data.eppns.forEach(async eppn => {
-            /**
-             * Convert eppn to firstname-lastname combo.
-             */
-            let author_name = await this.state.api_data.users_data.get_eppn_to_name(eppn);
+        for (let i = 0; i < work_filter_data.eppns.length; ++i) {
+            let author_name = work_filter_data.names[i];
+            let eppn = work_filter_data.eppns[i];
 
             /**
              * Remove everything after (including) the '@' character in the eppn
@@ -109,7 +129,6 @@ export class FiltersEvents {
             let is_selected = "";
 
             if (eppn == "show-all-eppns") {
-                author_name = "Show All";
                 is_selected = "selected-filter";
             }
 
@@ -125,8 +144,9 @@ export class FiltersEvents {
              * Clicking on dynamically added material menu item to close it...
              */
             document.getElementById("filter-" + eppn).addEventListener('click', document.getElementById("menu-filters-authors").MaterialMenu.handleForClick_.bind(document.getElementById("menu-filters-authors").MaterialMenu));
-        });
+        }
 
+        //this.ui.comments_controller.filter_render_comments();
         this.update_filter_status();
         componentHandler.upgradeAllRegistered();
     }

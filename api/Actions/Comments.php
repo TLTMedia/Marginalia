@@ -674,6 +674,8 @@ class Comments
                         "endIndex"           => $jsonData->endIndex,
                         "commentType"        => $jsonData->commentType,
                         "eppn"               => $jsonData->eppn,
+                        "firstName"          => $jsonData->firstName,
+                        "lastName"           => $jsonData->lastName,
                         "hash"               => end(explode("/", $filePath)),
                         "approved"           => $jsonData->approved,
                         "unapprovedChildren" => $this->__doesCommentHaveUnapprovedReplies(
@@ -690,6 +692,8 @@ class Comments
                             "endIndex"           => $jsonData->endIndex,
                             "commentType"        => $jsonData->commentType,
                             "eppn"               => $jsonData->eppn,
+                            "firstName"          => $jsonData->firstName,
+                            "lastName"           => $jsonData->lastName,
                             "hash"               => end(explode("/", $filePath)),
                             "approved"           => $jsonData->approved,
                             "unapprovedChildren" => $this->__doesCommentHaveUnapprovedReplies(
@@ -710,6 +714,8 @@ class Comments
                         "endIndex"           => $jsonData->endIndex,
                         "commentType"        => $jsonData->commentType,
                         "eppn"               => $jsonData->eppn,
+                        "firstName"          => $jsonData->firstName,
+                        "lastName"           => $jsonData->lastName,
                         "hash"               => end(explode("/", $filePath)),
                         "unapprovedChildren" => $this->__doesCommentHaveUnapprovedReplies(
                             $jsonData->eppn, end(explode("/", $filePath))

@@ -683,48 +683,56 @@ $app->get("/comments_within_index", function () use ($app, $PATH, $parameters, $
 });
 
 /**
- * Temp function to create the unapproved directory for a work
  *
- * NOTE: this function is used when there"s a discrepency between work unapproved registry
- * and the individual comment privacy properties of each comment object.
- * Does not check for user authentication - hence it should be commented out after use.
+ * NOTE:
+ * DO NOT DELETE THE COMMENTED OUT CODE BELOW.
+ * ITS COMMENTED OUT FOR SECURITY REASONS, BUT EXISTS FOR GOOD REASONS.
+ *
  */
-$app->get("/unapproved_init", function () use ($app, $PATH, $parameters) {
-    $data = $app->request->get();
-    $parameters->paramCheck($data, array(
-        "creator", "work",
-    ));
 
-    require "../Actions/Comments.php";
-    $comments = new Comments($app->log, $PATH, $data["creator"], $data["work"]);
+// /**
+//  * Temp function to create the unapproved directory for a work
+//  *
+//  * NOTE: this function is used when there"s a discrepency between work unapproved registry
+//  * and the individual comment privacy properties of each comment object.
+//  * Does not check for user authentication - hence it should be commented out after use.
+//  */
+// $app->get("/unapproved_init", function () use ($app, $PATH, $parameters) {
+//     $data = $app->request->get();
+//     $parameters->paramCheck($data, array(
+//         "creator", "work",
+//     ));
 
-    echo $comments->tempFunctionToCreateUnapprovedDirs(
-        $data["creator"],
-        $data["work"]
-    );
-});
+//     require "../Actions/Comments.php";
+//     $comments = new Comments($app->log, $PATH, $data["creator"], $data["work"]);
 
-/**
- * Force the server to git-pull from github develop branch
- * - Because FTP & SSH access to the "http://apps.tlt.stonybrook.edu" is restricted from IPs not on the local network...
- */
-$app->get("/git/pull/:code", function ($code) use ($app, $responseFmt) {
-    $real = file_get_contents("../../.git_secret.txt");
-    $real = trim(preg_replace("/\s\s+/", "", $real));
+//     echo $comments->tempFunctionToCreateUnapprovedDirs(
+//         $data["creator"],
+//         $data["work"]
+//     );
+// });
 
-    if ($real != $code) {
-        $app->log->info("git pull was called but did not authenticate");
-        $responseFmt->printMessage(
-            "invalid code",
-            "error"
-        );
+// /**
+//  * Force the server to git-pull from github develop branch
+//  * - Because FTP & SSH access to the "http://apps.tlt.stonybrook.edu" is restricted from IPs not on the local network...
+//  */
+// $app->get("/git/pull/:code", function ($code) use ($app, $responseFmt) {
+//     $real = file_get_contents("../../.git_secret.txt");
+//     $real = trim(preg_replace("/\s\s+/", "", $real));
 
-        exit;
-    }
+//     if ($real != $code) {
+//         $app->log->info("git pull was called but did not authenticate");
+//         $responseFmt->printMessage(
+//             "invalid code",
+//             "error"
+//         );
 
-    $app->log->warn("git pull was called successfully");
-    system("git pull --all");
-});
+//         exit;
+//     }
+
+//     $app->log->warn("git pull was called successfully");
+//     system("git pull --all");
+// });
 
 // Run app
 $app->run();
