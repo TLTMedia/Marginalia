@@ -94,7 +94,7 @@
                             <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect"
                                 for="courses-options">
                                 <li class="mdl-menu__item" id="courseadd">Create new course</li>
-                                <li class="mdl-menu__item">Add course admin</li>
+                                <li class="mdl-menu__item" id="courses-admin-add">Add course admin</li>
                             </ul>
                         </nav>
                     </div>
@@ -228,6 +228,24 @@
                             </div>
                         </div>
                         <!-- end add-course-modal -->
+
+                        <!-- start add-admin-modal -->
+                        <div id="add-admin-modal" class="modal">
+                            <center>
+                                <div id="settingTitle">Course admins</div>
+                            </center>
+                            <div class="add-courses-admin-base">
+                                <div class="settingOptions">
+                                    <br>
+                                    <p>Course admins are users that can create new courses.</p>
+
+                                    <span>Admins:</span>
+                                    <select class="select2-courses-adminlist-select"></select>
+                                    <br><br>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- end add-admin-modal -->
 
                         <!-- begin settings-modal -->
                         <div id="settings-modal" class="modal">

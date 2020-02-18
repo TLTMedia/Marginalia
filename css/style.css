@@ -1851,3 +1851,7 @@ input[type="file"] {
 .introjs-skipbutton {
     color: #000;
 }
+
+#add-courses-admin-base {
+    padding: 10px;
+}
