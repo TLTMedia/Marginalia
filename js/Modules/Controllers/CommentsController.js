@@ -186,4 +186,89 @@ export class CommentsController {
         $(".startDiv").remove();
         $(".endDiv").remove();
     }
+
+    async new_span_recover(id){
+        // get the list of comments that need to get recovered
+        let startIndex = $(".startDiv" + "[commentId ='" + id + "']").attr("startIndex");
+        let endIndex = $(".endDiv" + "[commentId ='" + id + "']").attr("endIndex");
+        // this.state.recoverDataStart;
+        // this.state.recoverDataEnd;
+        await API.request({
+            endpoint: "comments_within_index",
+            method: "GET",
+            data: {
+                "work": this.state.selected_work,
+                "creator": this.state.selected_creator,
+                "index": startIndex
+            }
+        }).then((data)=>{
+            this.state.recoverDataStart = data;
+        });
+        await API.request({
+            endpoint: "comments_within_index",
+            method: "GET",
+            data: {
+                "work": this.state.selected_work,
+                "creator": this.state.selected_creator,
+                "index": endIndex
+            }
+        }).then((data)=>{
+            this.state.recoverDataEnd= data;
+        });
+        //merge both recover list
+        let recover_comments_start = this.state.recoverDataStart;
+        let recover_comments_end = this.state.recoverDataEnd;
+        let raw = [];
+        for (let i = 0; i < recover_comments_start.length; i ++){
+            raw.push(recover_comments_start[i]);
+        }
+        for (let i = 0; i < recover_comments_end.length; i ++){
+            raw.push(recover_comments_end[i]);
+        }
+        //remove the duplicate data
+        let clean = [];
+        for (let i in raw){
+            let curr = raw[i];
+            let exist = false;
+            for(let j in clean){
+                if(parseInt(clean[j].hash) == parseInt(curr.hash)){
+                    exist = true;
+                }
+            }
+            if(!exist){
+                clean.push(curr);
+            }
+        }
+        let goal = [];
+        for (let i in clean){
+            let curr = clean[i];
+            let currIndex = 0;
+            goal.unshift(curr);
+            for (let j in goal){
+                if (goal[j].startIndex > curr.startIndex){
+                    let temp = goal[j];
+                    goal[j] = goal[currIndex];
+                    goal[currIndex] = temp;
+                    currIndex = j;
+                }
+            }
+        }
+        console.log(goal);
+        removeDeletedSpan(id)
+        for (let i in goal){
+            removeDeletedSpan(goal[i].hash);
+        }
+        for (let i in goal){
+            let recoverData = {
+                startIndex: goal[i].startIndex,
+                endIndex: goal[i].endIndex,
+                commentType: goal[i].commentType,
+                eppn: goal[i].eppn,
+                hash: goal[i].hash,
+                approved: goal[i].approved
+            }
+            highlightText(recoverData);
+        }
+        handleStartEndDiv(createCommentData());
+    }
 }

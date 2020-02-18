@@ -59,4 +59,24 @@ export class CoursesData {
 
         return await response;
     }
+
+    async remove_course_admin(eppn) {
+        let response = this.api.request({
+            endpoint: 'remove_course_admin',
+            method: 'POST',
+            data: {
+                eppn: eppn,
+            },
+        });
+
+        return await response;
+    }
+
+    async get_course_admins() {
+        let response = this.api.request({
+            endpoint: 'get_courses_admins',
+        });
+
+        return await response;
+    }
 }

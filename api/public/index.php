@@ -677,7 +677,6 @@ $app->get("/is_courses_admin", function () use ($app, $PATH_COURSES, $authUnique
 
 /**
  * Adds a course admin; pre-existing course-admin's can create courses... They can also add other users as course-admins
- * TODO:
  */
 $app->post("/add_course_admin", function () use ($app, $PATH_COURSES, $parameters, $authUniqueId, $responseFmt) {
     $data = json_decode($app->request->getBody(), true);
@@ -688,8 +687,39 @@ $app->post("/add_course_admin", function () use ($app, $PATH_COURSES, $parameter
     require "../Actions/Courses.php";
     $courses = new Courses($app->log, $PATH_COURSES, $authUniqueId);
 
-    echo $responseFmt->message(
+    echo $responseFmt->arrayToAPIObject(
         $courses->addCourseAdmin($authUniqueId, $data["eppn"])
+    );
+});
+
+/**
+ *
+ */
+$app->post("/remove_course_admin", function () use ($app, $PATH_COURSES, $parameters, $authUniqueId, $responseFmt) {
+    $data = json_decode($app->request->getBody(), true);
+    $parameters->paramCheck($data, array(
+        "eppn",
+    ));
+
+    require "../Actions/Courses.php";
+    $courses = new Courses($app->log, $PATH_COURSES, $authUniqueId);
+
+    echo $responseFmt->arrayToAPIObject(
+        $courses->removeCourseAdmin($authUniqueId, $data["eppn"])
+    );
+});
+
+/**
+ * Gets the courses admins
+ * Only allow course admins to get data from this.
+ * The public shouldn't be able to view all the course admins
+ */
+$app->get("/get_courses_admins", function () use ($app, $PATH_COURSES, $authUniqueId, $responseFmt) {
+    require "../Actions/Courses.php";
+    $courses = new Courses($app->log, $PATH_COURSES, $authUniqueId);
+
+    echo $responseFmt->arrayToAPIObject(
+        $courses->getAllCoursesAdmins()
     );
 });
 
