@@ -40,6 +40,7 @@ export class CommentsController {
         // reverse the list so the comments are created by the order of the startIndex. (bigger startIndex get created first)
         // TODO:
         let reverse_sorted_comments = reverseList(sorted_comments);
+        console.log(reverse_sorted_comments)
 
         this.render_comments(reverse_sorted_comments);
 
@@ -150,7 +151,6 @@ export class CommentsController {
         selectedRange.nativeRange = lightRange;
 
         $("#comment-box").removeAttr("data-replyToEppn data-replyToHash");
-        $("#comment-box").attr("data-editcommentid", "-1");
 
         if (selectedRange.endOffset != selectedRange.startOffset) {
             this.ui.rangy_controller.unhighlight();

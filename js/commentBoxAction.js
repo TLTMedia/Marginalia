@@ -65,100 +65,102 @@
 //     });
 // }
 
-//TODO the id should change
-function removeDeletedSpan(id) {
-    $(".commented-selection" + "[commentId = '" + id + "']").contents().unwrap();
-    $(".startDiv" + "[commentId = '" + id + "']").remove();
-    $(".endDiv" + "[commentId = '" + id + "']").remove();
-}
 
+
+
+//TODO needs to change this function
 //Check if start end div have parent hash
 //check if next startDiv startIndex is smaller than the given id's EndDiv endIndex, or prevEndIndex is greater than the given id's startIndex
-function checkSpansNeedRecover(id, callback) {
-    let currentStartDiv = $(".startDiv" + "[commentId = '" + id + "']");
-    let currentStartDivIndex = currentStartDiv.attr("startIndex");
-    let currentEndDiv = $(".endDiv" + "[commentId = '" + id + "']");
-    let currentEndDivParentHash = currentEndDiv.attr("parentHash");
-    let currentEndDivIndex = currentEndDiv.attr("endIndex");
-    let prevEndDiv = $(".startDiv" + "[commentId = '" + id + "']").prevAll(".endDiv:first");
-    let prevEndDivIndex = prevEndDiv.attr("endIndex");
-    let nextStartDiv = $(".endDiv" + "[commentId = '" + id + "']").nextAll(".startDiv:first");
-    let nextStartDivIndex = nextStartDiv.attr("startIndex");
-    console.log(currentStartDivIndex, prevEndDivIndex, currentEndDivIndex, nextStartDivIndex);
-    //if parentHash != undefiend, then recover the parent comment
-    if (currentEndDivParentHash != undefined) {
-        let parentComment = $(".commented-selection" + "[commentId = '" + currentEndDivParentHash + "']");
-        $(".startDiv" + "[commentId = '" + currentEndDivParentHash + "']").nextUntil("endDiv" + "[commentId ='" + currentEndDivParentHash + "']", 'span').each(function () {
-            let span = $(this);
-            if (span.attr("commentid") == id) {
-                span.removeClass().addClass("commented-selection");
-                span.attr({
-                    "commentid": currentEndDivParentHash,
-                    "creator": parentComment.attr("creator"),
-                    "typeOf": parentComment.attr("typeOf"),
-                    "approved": parentComment.attr("approved")
-                });
-            }
-        });
-        callback(id);
-        //TODO make the adjacent one to one span
-        let pCommentCreator = parentComment.attr("creator");
-        let pCommentType = parentComment.attr("typeOf");
-        let pCommentApproved = parentComment.attr("approved");
-        $(".commented-selection" + "[commentId = '" + currentEndDivParentHash + "']").wrapAll("<span class = 'tempWrap'/>");
-        $(".tempWrap").removeClass().addClass("commented-selection").attr({
-            "commentid": currentEndDivParentHash,
-            "creator": pCommentCreator,
-            "typeOf": pCommentType,
-            "approved": pCommentApproved
-        });
-        allowClickOnComment(TMP_STATE.selected_work, TMP_STATE.selected_creator);
-        getUnapprovedComments($("#setting").attr("author"), $("#setting").attr("work"))
-    }
-    // unwrap the next comment and recreate it with the highlightText()
-    else if (parseInt(nextStartDivIndex) < parseInt(currentEndDivIndex) && nextStartDivIndex != undefined) {
-        console.log("cover the one after")
-        removeDeletedSpan(id);
-        //console.log($(".commented-selection"+"[commentId = '"+nextStartDiv.attr("commentId")+"']"));
-        let commentNeedRecover = $(".commented-selection" + "[commentId = '" + nextStartDiv.attr("commentId") + "']");
-        let endDivForRecover = $(".endDiv" + "[commentId = '" + nextStartDiv.attr("commentId") + "']");
-        let recoverData = {
-            startIndex: nextStartDivIndex,
-            endIndex: endDivForRecover.attr("endIndex"),
-            commentType: commentNeedRecover.attr("typeOf"),
-            eppn: commentNeedRecover.attr("creator"),
-            hash: commentNeedRecover.attr("commentId"),
-            approved: commentNeedRecover.attr("approved")
-        }
-        console.log(recoverData)
-        callback(nextStartDiv.attr("commentId"));
-        highlightText(recoverData);
-    }
-    //unwrap the previous comment and recreate it with highlightText()
-    else if (parseInt(prevEndDivIndex) > parseInt(currentStartDivIndex) && prevEndDivIndex != undefined) {
-        console.log("cover the one before")
-        removeDeletedSpan(id);
-        //console.log($(".commented-selection"+"[commentId = '"+prevEndDiv.attr("commentId")+"']"));
-        let commentNeedRecover = $(".commented-selection" + "[commentId = '" + prevEndDiv.attr("commentId") + "']");
-        let startDivForRecover = $(".startDiv" + "[commentId = '" + prevEndDiv.attr("commentId") + "']");
-        let recoverData = {
-            startIndex: startDivForRecover.attr("startIndex"),
-            endIndex: prevEndDivIndex,
-            commentType: commentNeedRecover.attr("typeOf"),
-            eppn: commentNeedRecover.attr("creator"),
-            hash: commentNeedRecover.attr("commentId"),
-            approved: commentNeedRecover.attr("approved")
-        }
-        callback(prevEndDiv.attr("commentId"));
-        highlightText(recoverData);
-    }
-    else {
-        $(".startDiv" + "[parentHash = '" + id + "']").removeAttr("parentHash");
-        $(".endDiv" + "[parentHash = '" + id + "']").removeAttr("parentHash");
-        callback(id);
-    }
-    handleStartEndDiv(createCommentData());
-}
+// async function checkSpansNeedRecover(id, callback) {
+//     let currentStartDiv = $(".startDiv" + "[commentId = '" + id + "']");
+//     let currentStartDivIndex = currentStartDiv.attr("startIndex");
+//     let currentEndDiv = $(".endDiv" + "[commentId = '" + id + "']");
+//     let currentEndDivParentHash = currentEndDiv.attr("parentHash");
+//     let currentEndDivIndex = currentEndDiv.attr("endIndex");
+//     let prevEndDiv = $(".startDiv" + "[commentId = '" + id + "']").prevAll(".endDiv:first");
+//     let prevEndDivIndex = prevEndDiv.attr("endIndex");
+//     let nextStartDiv = $(".endDiv" + "[commentId = '" + id + "']").nextAll(".startDiv:first");
+//     let nextStartDivIndex = nextStartDiv.attr("startIndex");
+//     console.log("checkSpansNeedRecover called", id);
+//     console.log(currentStartDivIndex, prevEndDivIndex, currentEndDivIndex, nextStartDivIndex);
+//     //remove the context menu: (haven't include this function in the modules)
+//     //removeCommentContextMenu()
+//     //if parentHash != undefiend, then recover the parent comment
+//     if (currentEndDivParentHash != undefined) {
+//         console.log("there is a parent")
+//         let parentComment = $(".commented-selection" + "[commentId = '" + currentEndDivParentHash + "']");
+//         $(".startDiv" + "[commentId = '" + currentEndDivParentHash + "']").nextUntil("endDiv" + "[commentId ='" + currentEndDivParentHash + "']", 'span').each(function () {
+//             let span = $(this);
+//             if (span.attr("commentid") == id) {
+//                 span.removeClass().addClass("commented-selection");
+//                 span.attr({
+//                     "commentid": currentEndDivParentHash,
+//                     "creator": parentComment.attr("creator"),
+//                     "typeOf": parentComment.attr("typeOf"),
+//                     "approved": parentComment.attr("approved")
+//                 });
+//             }
+//         });
+//         callback(id);
+//         //TODO make the adjacent one to one span
+//         let pCommentCreator = parentComment.attr("creator");
+//         let pCommentType = parentComment.attr("typeOf");
+//         let pCommentApproved = parentComment.attr("approved");
+//         $(".commented-selection" + "[commentId = '" + currentEndDivParentHash + "']").wrapAll("<span class = 'tempWrap'/>");
+//         $(".tempWrap").removeClass().addClass("commented-selection").attr({
+//             "commentid": currentEndDivParentHash,
+//             "creator": pCommentCreator,
+//             "typeOf": pCommentType,
+//             "approved": pCommentApproved
+//         });
+//         allowClickOnComment(TMP_STATE.selected_work, TMP_STATE.selected_creator);
+//         await TMP_STATE.api_data.comments_data.get_unapprove_comments({creator:TMP_STATE.selected_creator, work:TMP_STATE.selected_work});
+//     }
+//     // unwrap the next comment and recreate it with the highlightText()
+//     else if (parseInt(nextStartDivIndex) < parseInt(currentEndDivIndex) && nextStartDivIndex != undefined) {
+//         console.log("cover the one after")
+//         removeDeletedSpan(id);
+//         //console.log($(".commented-selection"+"[commentId = '"+nextStartDiv.attr("commentId")+"']"));
+//         let commentNeedRecover = $(".commented-selection" + "[commentId = '" + nextStartDiv.attr("commentId") + "']");
+//         let endDivForRecover = $(".endDiv" + "[commentId = '" + nextStartDiv.attr("commentId") + "']");
+//         let recoverData = {
+//             startIndex: nextStartDivIndex,
+//             endIndex: endDivForRecover.attr("endIndex"),
+//             commentType: commentNeedRecover.attr("typeOf"),
+//             eppn: commentNeedRecover.attr("creator"),
+//             hash: commentNeedRecover.attr("commentId"),
+//             approved: commentNeedRecover.attr("approved")
+//         }
+//         console.log(recoverData)
+//         callback(nextStartDiv.attr("commentId"));
+//         highlightText(recoverData);
+//     }
+//     //unwrap the previous comment and recreate it with highlightText()
+//     else if (parseInt(prevEndDivIndex) > parseInt(currentStartDivIndex) && prevEndDivIndex != undefined) {
+//         console.log("cover the one before")
+//         removeDeletedSpan(id);
+//         //console.log($(".commented-selection"+"[commentId = '"+prevEndDiv.attr("commentId")+"']"));
+//         let commentNeedRecover = $(".commented-selection" + "[commentId = '" + prevEndDiv.attr("commentId") + "']");
+//         let startDivForRecover = $(".startDiv" + "[commentId = '" + prevEndDiv.attr("commentId") + "']");
+//         let recoverData = {
+//             startIndex: startDivForRecover.attr("startIndex"),
+//             endIndex: prevEndDivIndex,
+//             commentType: commentNeedRecover.attr("typeOf"),
+//             eppn: commentNeedRecover.attr("creator"),
+//             hash: commentNeedRecover.attr("commentId"),
+//             approved: commentNeedRecover.attr("approved")
+//         }
+//         callback(prevEndDiv.attr("commentId"));
+//         highlightText(recoverData);
+//     }
+//     else {
+//         console.log("last")
+//         $(".startDiv" + "[parentHash = '" + id + "']").removeAttr("parentHash");
+//         $(".endDiv" + "[parentHash = '" + id + "']").removeAttr("parentHash");
+//         callback(id);
+//     }
+//     handleStartEndDiv(createCommentData());
+// }
 
 //commentBox width: 500 px ,height: 331px , marginX : 10, marginY : 50
 // function displayCommentBox(evt, selected_filter) {

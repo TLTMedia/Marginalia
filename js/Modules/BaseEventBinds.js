@@ -47,7 +47,8 @@ export class BaseEventBinds {
         this.addCourse_events = new AddCourseEvents({
             state: state,
             ui: ui,
-            courses_data: state.api_data.courses_data
+            courses_data: state.api_data.courses_data,
+            users_data: state.api_data.users_data,
         });
     }
 

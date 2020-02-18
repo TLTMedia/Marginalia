@@ -65,12 +65,10 @@ export class CommentBoxController {
      */
     async save_comment() {
         console.log(this.state.commentBox_data);
-        console.log(TMP_STATE.commentBox_data);
         let commentText = this.state.quill.getHTML();
 
         if (commentText == "<p><br></p>") {
             this.ui.toast.create_toast("You cannot save an empty comment!", "warning");
-
             return;
         }
 
@@ -92,11 +90,11 @@ export class CommentBoxController {
             let commentCreatorEppn = $(".replies" + "[commentid = '" + editCommentID + "']").attr('name');
 
             // Check if this is a comment or reply (reply will not have a type)
-            let commentType;
+            let type;
             if ($(".replies" + "[commentid = '" + editCommentID + "']").attr('type')) {
-                commentType = $('.commentTypeDropdown').children("option:selected").val();
+                type = $('.commentTypeDropdown').children("option:selected").val();
             } else {
-                commentType = null;
+                type = null;
             }
 
             let data_edit = {
@@ -104,7 +102,7 @@ export class CommentBoxController {
                 work: this.state.selected_work,
                 commenter: commentCreatorEppn,
                 hash: editCommentID,
-                type: commentType,
+                type: type,
                 text: commentText,
                 public: true,
             };
@@ -125,11 +123,11 @@ export class CommentBoxController {
                 this.ui.base_events.filters_events.color_not_used_type_selector(work_comment_data, "@stonybrook.edu");
                 console.log(this.state.filters.selected_comment_filter, data_edit["type"]);
                 if (data_edit["type"] != this.state.filters.selected_comment_filter && this.state.filters.selected_comment_filter != "show-all-types") {
-                    checkSpansNeedRecover(this.state.commentBox_data.edit_comment_id, removeDeletedSpan);
+                    await new_span_recover(this.state.commentBox_data.edit_comment_id);
+                    //checkSpansNeedRecover(this.state.commentBox_data.edit_comment_id, removeDeletedSpan);
                     $("#replies").parent().fadeOut();
                 }
             }
-            $("#comment-box").attr('data-editCommentID', '-1');
             $("#comment-box").parent().fadeOut();
         }
         // save new comment
@@ -170,8 +168,11 @@ export class CommentBoxController {
                 /**
                  * Since it's a new highlight, dynamically reset the filters for it.
                  */
+                console.log(this.state.filters);
                 let work_comment_data = await this.state.api_data.comments_data.get_work_highlights();
-                this.ui.base_events.filters_events.reset(work_comment_data);
+                //TOCHECK
+                //this.ui.base_events.filters_events.reset(work_comment_data);
+                //this.ui.render_literature();
 
                 let approved;
                 let index = {

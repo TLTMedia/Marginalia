@@ -185,7 +185,7 @@ export class TutorialController {
                 "evtPageY": 100,
                 "evtClientY": 100
             }
-            clickOnComment(data);
+            clickOnCommentByIndex(data);
             // also open the first discussion
             var tutorialData = [
                 [".commented-selection:first", 1, "Click on the highlights to view the discussion"],

@@ -29,6 +29,7 @@ export class InterfaceController {
             works_menu_section: ".workSelectMenu",
             works_dropdown_menu: ".worksMenu",
             whitelist_list: ".select2-whitelist-select",
+            course_admins_list: ".select2-courses-adminlist-select",
         };
 
         /**
@@ -434,8 +435,17 @@ export class InterfaceController {
     }
 
     /**
+     * Show add admin page
+     */
+    show_add_admin_page() {
+        $("#add-admin-modal").modal({
+            closeClass: 'icon-remove',
+            closeText: '!'
+        });
+    }
+
+    /**
      * Populate Whitelist & selects the admins
-     * TODO: string constants
      */
     populate_whitelist(user_list, admin_list) {
         $(this.class_constants.whitelist_list).empty();
@@ -451,6 +461,26 @@ export class InterfaceController {
             }
 
             $(this.class_constants.whitelist_list).append(user_option);
+        });
+    }
+
+    /**
+     * Populate course admins list & selects the admins
+     */
+    populate_course_admins(user_list, admin_list) {
+        $(this.class_constants.course_admins_list).empty();
+
+        user_list.forEach(user => {
+            let user_option = $("<option/>", {
+                value: user.eppn,
+                text: user.firstName + " " + user.lastName,
+            });
+
+            if (admin_list.includes(user.eppn)) {
+                user_option.prop("selected", "selected");
+            }
+
+            $(this.class_constants.course_admins_list).append(user_option);
         });
     }
 

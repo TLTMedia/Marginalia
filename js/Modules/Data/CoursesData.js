@@ -47,4 +47,16 @@ export class CoursesData {
 
         return await response;
     }
+
+    async add_course_admin(eppn) {
+        let response = this.api.request({
+            endpoint: 'add_course_admin',
+            method: 'POST',
+            data: {
+                eppn: eppn,
+            },
+        });
+
+        return await response;
+    }
 }

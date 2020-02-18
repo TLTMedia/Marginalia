@@ -32,7 +32,7 @@ export class FiltersEvents {
         unique_types.push("show-all-types");
 
         /**
-         * eppns and names are together, except that names is the visible label, and eppns is the non-visible unique identifier 
+         * eppns and names are together, except that names is the visible label, and eppns is the non-visible unique identifier
          */
         unique_eppns.push("show-all-eppns");
         complete_names.push("Show All");
@@ -74,6 +74,7 @@ export class FiltersEvents {
      * This is called everytime a new work is loaded
      */
     reset(comment_data) {
+        console.log(comment_data)
         this.state.filters = {};
         this.state.filters.selected_comment_filter = "show-all-types";
         this.state.filters.selected_author_filter = "show-all-eppns";

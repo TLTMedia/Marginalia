@@ -52,4 +52,15 @@ export class UsersData {
 
         return this.selected_user_works;
     }
+
+    async search_all_users(search) {
+        let user = this.api.request({
+            endpoint: 'get_all_users',
+            data: {
+                search: search,
+            },
+        });
+
+        return await user;
+    }
 }

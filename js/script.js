@@ -118,9 +118,16 @@ init = async ({ state = state, ui = ui, api = api }) => {
         $(".select2-work-select").select2();
 
         /**
-         * Whitelist selection
+         * Work admin whitelist selection
          */
         $(".select2-whitelist-select").select2({
+            multiple: true,
+        });
+
+        /**
+         * Courses admins whitelist selection
+         */
+        $(".select2-courses-adminlist-select").select2({
             multiple: true,
         });
     });
@@ -261,7 +268,7 @@ function handleStartEndDiv(commentData) {
         let comment = {
             "hash": commentData[i].hash,
             "startIndex": $(".startDiv" + "[commentId = '" + commentData[i].hash + "']").attr("startIndex"),
-            "endIndex": $(".endDiv" + "[commentId = '"+commentData[i].hash + "']").attr("endIndex")
+            "endIndex": $(".endDiv" + "[commentId = '" + commentData[i].hash + "']").attr("endIndex")
         }
         sortedCommentData = sortCommentsByStartIndex(sortedCommentData, comment);
     }
@@ -308,23 +315,23 @@ function handleIncorrectTemplate() {
 }
 
 //This function do colors the overlapped and adjacent comments
-function set_comments_color(sortedCommentData){
+function set_comments_color(sortedCommentData) {
     let data = sortedCommentData.slice(0);
-    for (let i in data){
+    for (let i in data) {
         let id = data[i]["hash"];
         let si = data[i]["startIndex"];
         let ei = data[i]["endIndex"];
         // comments are already sorted so we don't have to check comments that we already processed
-        for (let j = parseInt(i)+1; j < data.length; j++){
+        for (let j = parseInt(i) + 1; j < data.length; j++) {
             let jid = data[j]["hash"];
             let jsi = data[j]["startIndex"];
             let jei = data[j]["endIndex"];
             // j comment is totally inside i comment
-            if (parseInt(si) <= parseInt(jsi) && parseInt(ei) >= parseInt(jei)){
+            if (parseInt(si) <= parseInt(jsi) && parseInt(ei) >= parseInt(jei)) {
                 data[j]["parentId"] = id;
             }
             // j comment's start index is before i's comments end index, but j's end index is after i's end index
-            else if (parseInt(jsi) <= parseInt(ei) && parseInt(jei) > parseInt(ei)){
+            else if (parseInt(jsi) <= parseInt(ei) && parseInt(jei) > parseInt(ei)) {
                 data[j]["coverId"] = id;
             }
         }
@@ -332,28 +339,28 @@ function set_comments_color(sortedCommentData){
     console.log(data);
     //colorId 0:normal, 1:colorOneComments, 2:colorTwoComments, 3:colorThreeComments,4: colorFourComments
     let commentsColorClass = ["", "colorOneComments", "colorTwoComments", "colorThreeComments", "colorFourComments"];
-    for (let i in data){
+    for (let i in data) {
         let id = data[i]["hash"];
         let parentId = data[i]["parentId"];
         let coverId = data[i]["coverId"];
         let goal_color_id;
-        if(coverId && parentId){
+        if (coverId && parentId) {
             let parent_colorId = parseInt($(".startDiv" + "[commentId ='" + parentId + "']").attr("colorId"));
             let cover_colorId = parseInt($(".startDiv" + "[commentId ='" + coverId + "']").attr("colorId"));
-            let bigColorId = Math.max(parent_colorId,cover_colorId);
-            let smallColorId = Math.min(parent_colorId,cover_colorId);
+            let bigColorId = Math.max(parent_colorId, cover_colorId);
+            let smallColorId = Math.min(parent_colorId, cover_colorId);
             if (bigColorId < 3) {
                 goal_color_id = bigColorId + 1;
             }
             else if (bigColorId == 3 && smallColorId != 1) {
                 goal_color_id = 1;
             }
-            else{
-                console.log("special case: \n big:", bigColorId, " small:",smallColorId);
+            else {
+                console.log("special case: \n big:", bigColorId, " small:", smallColorId);
                 goal_color_id = 0;
             }
         }
-        else if(coverId){
+        else if (coverId) {
             let cover_colorId = parseInt($(".startDiv" + "[commentId ='" + coverId + "']").attr("colorId"));
             if (parseInt(cover_colorId) < 3) {
                 goal_color_id = cover_colorId + 1;
@@ -362,7 +369,7 @@ function set_comments_color(sortedCommentData){
                 goal_color_id = 1;
             }
         }
-        else if(parentId){
+        else if (parentId) {
             let parent_colorId = parseInt($(".startDiv" + "[commentId ='" + parentId + "']").attr("colorId"));
             if (parseInt(parent_colorId) < 3) {
                 goal_color_id = parent_colorId + 1;
@@ -371,15 +378,112 @@ function set_comments_color(sortedCommentData){
                 goal_color_id = 1;
             }
         }
-        else{
+        else {
             goal_color_id = 0;
         }
         $(".commented-selection" + "[commentId = '" + id + "']").addClass(commentsColorClass[goal_color_id]);
-        $(".startDiv" + "[commentId ='" + id + "']").attr({"parentHash": parentId, "coverId": coverId, "colorId" : goal_color_id});
-        $(".endDiv" + "[commentId ='" + id + "']").attr({"parentHash": parentId, "coverId": coverId, "colorId" : goal_color_id});
+        $(".startDiv" + "[commentId ='" + id + "']").attr({ "parentHash": parentId, "coverId": coverId, "colorId": goal_color_id });
+        $(".endDiv" + "[commentId ='" + id + "']").attr({ "parentHash": parentId, "coverId": coverId, "colorId": goal_color_id });
+        if (coverId) {
+            $(".startDiv" + "[commentId ='" + coverId + "']").attr("backCoverId", id);
+            $(".endDiv" + "[commentId ='" + coverId + "']").attr("backCoverId", id);
+        }
     }
 }
 
+
+//TODO : new function to replace checkSpansNeedRecover
+async function new_span_recover(id){
+    // get the list of comments that need to get recovered
+    let startIndex = $(".startDiv" + "[commentId ='" + id + "']").attr("startIndex");
+    let endIndex = $(".endDiv" + "[commentId ='" + id + "']").attr("endIndex");
+    TMP_STATE.recoverDataStart;
+    TMP_STATE.recoverDataEnd;
+    await API.request({
+        endpoint: "comments_within_index",
+        method: "GET",
+        data: {
+            "work": TMP_STATE.selected_work,
+            "creator": TMP_STATE.selected_creator,
+            "index": startIndex
+        }
+    }).then((data)=>{
+        TMP_STATE.recoverDataStart = data;
+    });
+    await API.request({
+        endpoint: "comments_within_index",
+        method: "GET",
+        data: {
+            "work": TMP_STATE.selected_work,
+            "creator": TMP_STATE.selected_creator,
+            "index": endIndex
+        }
+    }).then((data)=>{
+        TMP_STATE.recoverDataEnd= data;
+    });
+    //merge both recover list
+    let recover_comments_start = TMP_STATE.recoverDataStart;
+    let recover_comments_end = TMP_STATE.recoverDataEnd;
+    let raw = [];
+    for (let i = 0; i < recover_comments_start.length; i ++){
+        raw.push(recover_comments_start[i]);
+    }
+    for (let i = 0; i < recover_comments_end.length; i ++){
+        raw.push(recover_comments_end[i]);
+    }
+    //remove the duplicate data
+    let clean = [];
+    for (let i in raw){
+        let curr = raw[i];
+        let exist = false;
+        for(let j in clean){
+            if(parseInt(clean[j].hash) == parseInt(curr.hash)){
+                exist = true;
+            }
+        }
+        if(!exist){
+            clean.push(curr);
+        }
+    }
+    let goal = [];
+    for (let i in clean){
+        let curr = clean[i];
+        let currIndex = 0;
+        goal.unshift(curr);
+        for (let j in goal){
+            if (goal[j].startIndex > curr.startIndex){
+                let temp = goal[j];
+                goal[j] = goal[currIndex];
+                goal[currIndex] = temp;
+                currIndex = j;
+            }
+        }
+    }
+    console.log(goal);
+    removeDeletedSpan(id)
+    for (let i in goal){
+        removeDeletedSpan(goal[i].hash);
+    }
+    for (let i in goal){
+        let recoverData = {
+            startIndex: goal[i].startIndex,
+            endIndex: goal[i].endIndex,
+            commentType: goal[i].commentType,
+            eppn: goal[i].eppn,
+            hash: goal[i].hash,
+            approved: goal[i].approved
+        }
+        highlightText(recoverData);
+    }
+    handleStartEndDiv(createCommentData());
+}
+
+//TODO the id should change
+function removeDeletedSpan(id) {
+    $(".commented-selection" + "[commentId = '" + id + "']").contents().unwrap();
+    $(".startDiv" + "[commentId = '" + id + "']").remove();
+    $(".endDiv" + "[commentId = '" + id + "']").remove();
+}
 
 //TODO logic for checking if comments are overlapped is incorrect
 //NOTE: new logic is to just check their index
@@ -546,7 +650,7 @@ function clickOnCommentByIndex(textIndex, evt) {
                         let resp = await TMP_STATE.api_data.comments_data.get_comment_chain(comment_data);
                         readThreads(resp);
                     })();
-
+                    removeCommentContextMenu();
                     TMP_UI.replybox_controller.displayReplyBox(data_for_replybox);
                 },
                 items: comments,
@@ -585,7 +689,7 @@ function clickOnCommentByIndex(textIndex, evt) {
     });
 }
 
-function removeCommentContextMenu(){
+function removeCommentContextMenu() {
     $(".clicked_span").removeClass("clicked_span btn btn-neutral");
     $("#context_container").remove();
 }
@@ -679,11 +783,11 @@ function isCurrentUserSelectedUser(selected_eppn, needNotification) {
     }
 }
 
+//TODO remove this function and move it to 
 function launchToastNotifcation(data) {
     let message = {
         message: data,
     };
-
     let snackbarContainer = document.querySelector('.mdl-js-snackbar');
     snackbarContainer.MaterialSnackbar.showSnackbar(message);
     snackbarContainer.MaterialSnackbar.showSnackbar(message);

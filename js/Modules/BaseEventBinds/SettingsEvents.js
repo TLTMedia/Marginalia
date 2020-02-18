@@ -26,7 +26,7 @@ export class SettingsEvents {
                  * Get the course creators
                  * This gets the admins of a course
                  */
-                let course_creators = await this.courses_data.get_course_creators();
+                let course_creators = await this.state.api_data.users_data.search_all_users(".");
                 this.ui.populate_whitelist(course_creators, work_admins.admins);
 
                 /**
@@ -38,6 +38,7 @@ export class SettingsEvents {
 
         /**
          * Event handler for adding to the whitelist
+         * TODO: not working? how do we originally see the whole list of users to begin with
          */
         $(".select2-whitelist-select").on("select2:select", async event => {
             let response = await this.state.api_data.works_data.add_work_permission(event.params.data.id);

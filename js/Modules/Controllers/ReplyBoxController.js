@@ -70,7 +70,7 @@ export class ReplyBoxController {
         //check if this relpy is deleted
         if (firstName == 'deleted' && lastName == 'deleted') {
             repliesSpan = "<span class = 'replyText' id = '" + hashForReply + "'>" + inText + "</span>";
-            repliesClass = "replies";
+            repliesClass = "replies deleted";
         }
         else {
             if (!approved) {
@@ -149,7 +149,7 @@ export class ReplyBoxController {
             }
         });
         editButton.html("<i class = 'material-icons'> edit </i> <label>Edit</label>");
-        if (toolbar_data["hash"] != "deleted") {
+        if (!$(".replies" + "[commentId = "+ toolbar_data["hash"] +"]").hasClass("deleted")) {
             if (toolbar_data["approved"] && isCurrentUserSelectedUser(toolbar_data["eppn"], false)) {
                 toolBar.append(replyButton, editButton);
             }
@@ -231,7 +231,7 @@ export class ReplyBoxController {
         //comment is approved and currentUser is not the comment creator
         else if (toolbar_data["approved"] && !isCurrentUserSelectedUser(toolbar_data["eppn"], false)) {
             // if the currentUser is the author of the work
-            if (isCurrentUserSelectedUser(toolbar_data["workCreator"], false)) {
+            if ($("#replies").attr("isCurrentUserAdmin") == "true") {
                 $(menu).append(menuApproveOrUnapprove);
             }
         }
@@ -370,12 +370,14 @@ export class ReplyBoxController {
         }
         await this.state.api_data.comments_data.delete_comment(delete_data);
 
+        // delete first comment
         if (first_comment_id == this.state.replyBox_data.delete_comment_id) {
-            checkSpansNeedRecover(first_comment_id, removeDeletedSpan);
+            await new_span_recover(first_comment_id);
+            //checkSpansNeedRecover(first_comment_id, removeDeletedSpan);
             let work_comment_data = await this.state.api_data.comments_data.get_work_highlights();
-            //TODO NEED TO ADD RESET FILTER HERE, BUT CAN't ACCESS UI SO WAIT UNTIL THIS IS MODULAIZED.
-            //TODO TMP_UI is a temporary solution
-            this.ui.base_events.filters_events.reset(work_comment_data);
+            console.log("checkSpansNeedRecover",work_comment_data)
+            //TODO Not sure why this is here, itf there is any filter problem check this
+            //this.ui.base_events.filters_events.reset(work_comment_data);
             this.ui.base_events.filters_events.color_not_used_type_selector(work_comment_data, "@stonybrook.edu");
             $("#replies").parent().fadeOut();
         }
@@ -397,7 +399,7 @@ export class ReplyBoxController {
         // });
         //getUnapprovedComments(delete_data["creator"], delete_data["work"]);
         delete this.state.replyBox_data.delete_comment_id;
-        $("#replies").removeAttr("deletedid");
+        //$("#replies").removeAttr("deletedid");
     }
 
     displayReplyBox(data) {
