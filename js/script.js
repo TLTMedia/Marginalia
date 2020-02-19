@@ -216,14 +216,7 @@ function allowClickOnComment(textChosen, selected_eppn) {
     });
 }
 
-function highlightText({
-    startIndex,
-    endIndex,
-    commentType,
-    eppn,
-    hash,
-    approved
-}) {
+function highlightText({startIndex, endIndex, commentType, eppn, hash, approved}){
     let range = rangy.createRange();
     range.selectCharacters(document.getElementById("textSpace"), startIndex, endIndex);
     let area = rangy.createClassApplier("commented-selection", {
@@ -250,36 +243,7 @@ function highlightText({
     }).insertAfter(".commented-selection" + "[commentId = '" + hash + "']");
 }
 
-function handleStartEndDiv(commentData) {
-    handleIncorrectTemplate();
-    let sortedCommentData = [];
-    console.log(commentData)
-    //remove the duplicated startDiv and endDiv
-    for (let i = 0; i < commentData.length; i++) {
-        let startCount = $(".startDiv" + "[commentId = '" + commentData[i].hash + "']").length;
-        if (startCount > 1) {
-            $(".startDiv" + "[commentId = '" + commentData[i].hash + "']").not(":first").remove();
-        }
-        let endCount = $(".endDiv" + "[commentId = '" + commentData[i].hash + "']").length;
-        if (endCount > 1) {
-            $(".endDiv" + "[commentId = '" + commentData[i].hash + "']").not(":last").remove();
-        }
-        let isStartDivExist = $(".startDiv" + "[commentId = '" + commentData[i].hash + "']").length;
-        let comment = {
-            "hash": commentData[i].hash,
-            "startIndex": $(".startDiv" + "[commentId = '" + commentData[i].hash + "']").attr("startIndex"),
-            "endIndex": $(".endDiv" + "[commentId = '" + commentData[i].hash + "']").attr("endIndex")
-        }
-        sortedCommentData = sortCommentsByStartIndex(sortedCommentData, comment);
-    }
-    //CHANGE New function added for coloring the comments
-    set_comments_color(sortedCommentData);
-    // for (let i = 0; i < sortedCommentData.length; i++) {
-    //     colorOverLappedComments(sortedCommentData[i].hash);
-    //     colorAdjacentComments(sortedCommentData[i].hash);
-    // }
-}
-
+//HELPER FUNCTION adds comment to the given list and sort it by startIndex (small->big)
 function sortCommentsByStartIndex(sortedCommentData, comment) {
     sortedCommentData.unshift(comment);
     for (var j = 0; j < sortedCommentData.length - 1; j++) {
@@ -294,6 +258,7 @@ function sortCommentsByStartIndex(sortedCommentData, comment) {
     return sortedCommentData;
 }
 
+//HELPER FUNCTION reverse a given list
 function reverseList(list) {
     let rlist = [];
     for (var i = 0; i < list.length; i++) {
@@ -302,243 +267,60 @@ function reverseList(list) {
     return rlist;
 }
 
-function handleIncorrectTemplate() {
-    console.log($(".commented-selection").has('span'));
-    let incorrectTemplate = $(".commented-selection").has('span');
-    incorrectTemplate.each(function () {
-        let span = $(this);
-        let incorrectTemplateText = span.text();
-        incorrectTemplateText.concat(span.find('span').text());
-        span.empty();
-        span.html(incorrectTemplateText);
-    });
-}
-
-//This function do colors the overlapped and adjacent comments
-function set_comments_color(sortedCommentData) {
-    let data = sortedCommentData.slice(0);
-    for (let i in data) {
-        let id = data[i]["hash"];
-        let si = data[i]["startIndex"];
-        let ei = data[i]["endIndex"];
-        // comments are already sorted so we don't have to check comments that we already processed
-        for (let j = parseInt(i) + 1; j < data.length; j++) {
-            let jid = data[j]["hash"];
-            let jsi = data[j]["startIndex"];
-            let jei = data[j]["endIndex"];
-            // j comment is totally inside i comment
-            if (parseInt(si) <= parseInt(jsi) && parseInt(ei) >= parseInt(jei)) {
-                data[j]["parentId"] = id;
-            }
-            // j comment's start index is before i's comments end index, but j's end index is after i's end index
-            else if (parseInt(jsi) <= parseInt(ei) && parseInt(jei) > parseInt(ei)) {
-                data[j]["coverId"] = id;
-            }
+//HELPER FUNCTION this function only check if the selected_eppn is same as the current user or not
+function isCurrentUserSelectedUser(selected_eppn, needNotification) {
+    if (selected_eppn == TMP_STATE.current_user.eppn) {
+        return true;
+    } else {
+        if (needNotification) {
+            launchToastNotifcation("You don't have permission to do this action");
         }
-    }
-    console.log(data);
-    //colorId 0:normal, 1:colorOneComments, 2:colorTwoComments, 3:colorThreeComments,4: colorFourComments
-    let commentsColorClass = ["", "colorOneComments", "colorTwoComments", "colorThreeComments", "colorFourComments"];
-    for (let i in data) {
-        let id = data[i]["hash"];
-        let parentId = data[i]["parentId"];
-        let coverId = data[i]["coverId"];
-        let goal_color_id;
-        if (coverId && parentId) {
-            let parent_colorId = parseInt($(".startDiv" + "[commentId ='" + parentId + "']").attr("colorId"));
-            let cover_colorId = parseInt($(".startDiv" + "[commentId ='" + coverId + "']").attr("colorId"));
-            let bigColorId = Math.max(parent_colorId, cover_colorId);
-            let smallColorId = Math.min(parent_colorId, cover_colorId);
-            if (bigColorId < 3) {
-                goal_color_id = bigColorId + 1;
-            }
-            else if (bigColorId == 3 && smallColorId != 1) {
-                goal_color_id = 1;
-            }
-            else {
-                console.log("special case: \n big:", bigColorId, " small:", smallColorId);
-                goal_color_id = 0;
-            }
-        }
-        else if (coverId) {
-            let cover_colorId = parseInt($(".startDiv" + "[commentId ='" + coverId + "']").attr("colorId"));
-            if (parseInt(cover_colorId) < 3) {
-                goal_color_id = cover_colorId + 1;
-            }
-            else if (parseInt(cover_colorId) == 3) {
-                goal_color_id = 1;
-            }
-        }
-        else if (parentId) {
-            let parent_colorId = parseInt($(".startDiv" + "[commentId ='" + parentId + "']").attr("colorId"));
-            if (parseInt(parent_colorId) < 3) {
-                goal_color_id = parent_colorId + 1;
-            }
-            else if (parseInt(parent_colorId) == 3) {
-                goal_color_id = 1;
-            }
-        }
-        else {
-            goal_color_id = 0;
-        }
-        $(".commented-selection" + "[commentId = '" + id + "']").addClass(commentsColorClass[goal_color_id]);
-        $(".startDiv" + "[commentId ='" + id + "']").attr({ "parentHash": parentId, "coverId": coverId, "colorId": goal_color_id });
-        $(".endDiv" + "[commentId ='" + id + "']").attr({ "parentHash": parentId, "coverId": coverId, "colorId": goal_color_id });
-        if (coverId) {
-            $(".startDiv" + "[commentId ='" + coverId + "']").attr("backCoverId", id);
-            $(".endDiv" + "[commentId ='" + coverId + "']").attr("backCoverId", id);
-        }
+        return false;
     }
 }
 
+//HELPER FUNCTION: Make sure the dialog don't exceed the window
+function adjustDialogPosition(data, width, height, marginX, marginY) {
+    let newLeft = (data["evtPageX"] - marginX) + "px";
+    let newTop = (data["evtPageY"] + marginY) + "px";
+    if (data["evtClientY"] + (marginY + height) > $(window).height()) {
+        newTop = (data["evtPageY"] - (marginY + height)) + "px";
+    }
 
-//TODO : new function to replace checkSpansNeedRecover
-async function new_span_recover(id){
-    // get the list of comments that need to get recovered
-    let startIndex = $(".startDiv" + "[commentId ='" + id + "']").attr("startIndex");
-    let endIndex = $(".endDiv" + "[commentId ='" + id + "']").attr("endIndex");
-    TMP_STATE.recoverDataStart;
-    TMP_STATE.recoverDataEnd;
-    await API.request({
-        endpoint: "comments_within_index",
-        method: "GET",
-        data: {
-            "work": TMP_STATE.selected_work,
-            "creator": TMP_STATE.selected_creator,
-            "index": startIndex
-        }
-    }).then((data)=>{
-        TMP_STATE.recoverDataStart = data;
-    });
-    await API.request({
-        endpoint: "comments_within_index",
-        method: "GET",
-        data: {
-            "work": TMP_STATE.selected_work,
-            "creator": TMP_STATE.selected_creator,
-            "index": endIndex
-        }
-    }).then((data)=>{
-        TMP_STATE.recoverDataEnd= data;
-    });
-    //merge both recover list
-    let recover_comments_start = TMP_STATE.recoverDataStart;
-    let recover_comments_end = TMP_STATE.recoverDataEnd;
-    let raw = [];
-    for (let i = 0; i < recover_comments_start.length; i ++){
-        raw.push(recover_comments_start[i]);
+    if (data["evtPageX"] + width > $(window).width()) {
+        newLeft = $(window).width() - (width + marginX) + "px";
     }
-    for (let i = 0; i < recover_comments_end.length; i ++){
-        raw.push(recover_comments_end[i]);
-    }
-    //remove the duplicate data
-    let clean = [];
-    for (let i in raw){
-        let curr = raw[i];
-        let exist = false;
-        for(let j in clean){
-            if(parseInt(clean[j].hash) == parseInt(curr.hash)){
-                exist = true;
-            }
-        }
-        if(!exist){
-            clean.push(curr);
-        }
-    }
-    let goal = [];
-    for (let i in clean){
-        let curr = clean[i];
-        let currIndex = 0;
-        goal.unshift(curr);
-        for (let j in goal){
-            if (goal[j].startIndex > curr.startIndex){
-                let temp = goal[j];
-                goal[j] = goal[currIndex];
-                goal[currIndex] = temp;
-                currIndex = j;
-            }
-        }
-    }
-    console.log(goal);
-    removeDeletedSpan(id)
-    for (let i in goal){
-        removeDeletedSpan(goal[i].hash);
-    }
-    for (let i in goal){
-        let recoverData = {
-            startIndex: goal[i].startIndex,
-            endIndex: goal[i].endIndex,
-            commentType: goal[i].commentType,
-            eppn: goal[i].eppn,
-            hash: goal[i].hash,
-            approved: goal[i].approved
-        }
-        highlightText(recoverData);
-    }
-    handleStartEndDiv(createCommentData());
+
+    return {
+        newTop,
+        newLeft,
+    };
 }
 
-//TODO the id should change
-function removeDeletedSpan(id) {
-    $(".commented-selection" + "[commentId = '" + id + "']").contents().unwrap();
-    $(".startDiv" + "[commentId = '" + id + "']").remove();
-    $(".endDiv" + "[commentId = '" + id + "']").remove();
+//HELPER FUNCTION
+function escapeSpecialChar(id) {
+    if (id == null) {
+        return null;
+    }
+    return id.replace(/([\s!"#$%&'()\*+,\.\/:;<=>?@\[\]^`{|}~])/g, "\\$1");
 }
 
-//TODO logic for checking if comments are overlapped is incorrect
-//NOTE: new logic is to just check their index
-// function colorOverLappedComments(commentHash) {
-//     let prevStartDiv = $(".startDiv" + "[commentId = '" + commentHash + "']").prevAll(".startDiv:first");
-//     let nextEndDiv = $(".endDiv" + "[commentId = '" + commentHash + "']").nextAll(".endDiv:first");
-//     let prevStartColorId = parseInt(prevStartDiv.attr("colorId"), 10);
-//     console.log(commentHash,prevStartDiv.attr("commentId"), nextEndDiv.attr("commentId"), prevStartColorId);
-//     //colorId 0:normal, 1:colorOneComments, 2:colorTwoComments, 3:colorThreeComments,4: colorFourComments
-//     // if prevStartDiv's commentId is same as the nextEndDiv's commentId, then the current Comment is overlapped with other comment
-//     if ((prevStartDiv.attr('commentId') == nextEndDiv.attr("commentId")) && (prevStartDiv.attr('commentId') != undefined)) {
-//         //check if this parentComment exist
-//         if ($(".commented-selection" + "[commentId = '" + prevStartDiv.attr('commentId') + "']").length != 0) {
-//             let startDiv = $(".startDiv" + "[commentId = '" + commentHash + "']");
-//             let endDiv = $(".endDiv" + "[commentId = '" + commentHash + "']");
-//             startDiv.attr("parentHash", nextEndDiv.attr("commentId"));
-//             endDiv.attr("parentHash", nextEndDiv.attr("commentId"));
-//             let commentsColorClass = ["", "colorOneComments", "colorTwoComments", "colorThreeComments", "colorFourComments"];
-//             if (prevStartColorId < 3) {
-//                 $(".commented-selection" + "[commentId = '" + commentHash + "']").addClass(commentsColorClass[(prevStartColorId + 1)]);
-//                 startDiv.attr("colorId", prevStartColorId + 1);
-//                 endDiv.attr("colorId", prevStartColorId + 1);
-//             } else if (prevStartColorId == 3) {
-//                 $(".commented-selection" + "[commentId = '" + commentHash + "']").addClass(commentsColorClass[0]);
-//                 startDiv.attr("colorId", 0);
-//                 endDiv.attr("colorId", 0);
-//             }
-//         }
-//     }
-// }
-//
-// function colorAdjacentComments(commentHash) {
-//     let prevEndDiv = $(".startDiv" + "[commentId = '" + commentHash + "']").prevAll(".endDiv:first");
-//     let prevEndDivData = {
-//         "id": prevEndDiv.attr("commentId"),
-//         "index": prevEndDiv.attr("endIndex"),
-//         "colorId": parseInt(prevEndDiv.attr("colorId"), 10)
-//     }
-//     let currentStartDivIndex = $(".startDiv" + "[commentId = '" + commentHash + "']").attr("startIndex");
-//     let currentEndDivIndex = $(".endDiv" + "[commentId = '" + commentHash + "']").attr("endIndex");
-//     if (parseInt(currentStartDivIndex) <= parseInt(prevEndDivData["index"], 10)) {
-//         if ($(".commented-selection" + "[commentId = '" + prevEndDivData["id"] + "']").length != 0) {
-//             let commentsColorClass = ["", "colorOneComments", "colorTwoComments", "colorThreeComments", "colorFourComments"];
-//             if (prevEndDivData["colorId"] < 3) {
-//                 $(".commented-selection" + "[commentId = '" + commentHash + "']").addClass(commentsColorClass[prevEndDivData["colorId"] + 1]);
-//                 $(".startDiv" + "[commentId = '" + commentHash + "']").attr("colorId", prevEndDivData["colorId"] + 1);
-//                 $(".endDiv" + "[commentId = '" + commentHash + "']").attr("colorId", prevEndDivData["colorId"] + 1);
-//             } else if (prevEndDivData["colorId"] == 3) {
-//                 $(".commented-selection" + "[commentId = '" + commentHash + "']").addClass(commentsColorClass[0]);
-//                 $(".startDiv" + "[commentId = '" + commentHash + "']").attr("colorId", 0);
-//                 $(".endDiv" + "[commentId = '" + commentHash + "']").attr("colorId", 0);
-//             }
-//         }
-//     }
-// }
+//HELPER FUNCTION
+function escapeHTMLPtag(text) {
+    return text.replace(/<p>(.*)<\/p>/, ` $1\n`);
+}
+
+//HELPER FUNCTION Hides all movable and visable boxes on the screen
+function hideAllBoxes() {
+    $("[aria-describedby='replies']").hide();
+    $("[aria-describedby='comment-box']").hide();
+}
+
+//HELPER FUNCTION
+function removeCommentContextMenu() {
+    $(".clicked_span").removeClass("clicked_span btn btn-neutral");
+    $("#context_container").remove();
+}
 
 function filterMultipleComment(api_returned_data, type, commenter) {
     let returned_data = [];
@@ -686,40 +468,11 @@ function clickOnCommentByIndex(textIndex, evt) {
 
             TMP_UI.replybox_controller.displayReplyBox(data_for_replybox);
         }
+        $(window).on("click",()=>{
+            removeCommentContextMenu();
+        });
     });
 }
-
-function removeCommentContextMenu() {
-    $(".clicked_span").removeClass("clicked_span btn btn-neutral");
-    $("#context_container").remove();
-}
-
-
-// function getUnapprovedComments(workCreator = TMP_STATE.selected_creator, work = TMP_STATE.selected_work) {
-//     //remove the unapproved classes
-//     $(".commented-selection").removeClass("unapprovedComments threadNotApproved");
-//     API.request({
-//         endpoint: "unapproved_comments",
-//         method: "GET",
-//         data: {
-//             creator: workCreator,
-//             work: work,
-//         },
-//     }).then((data) => {
-//         console.log(data);
-//         data.forEach((data) => {
-//             let ancesHash = data["AncestorHash"];
-//             let hash = data["CommentHash"];
-//             //console.log("for unaproved ",ancesHash,hash);
-//             //the first Level is unapproved
-//             if (ancesHash == hash) {
-//                 $(".commented-selection" + "[commentId = '" + hash + "']").addClass("unapprovedComments");
-//             } else {
-//                 $(".commented-selection" + "[commentId = '" + ancesHash + "']").addClass("threadNotApproved");
-//             }
-//         });
-//     });
-// }
 
 //read the thread (threads is the reply array, parentId is the hash, parentReplyBox is the replyBox returned by the showReply())
 function readThreads(threads, work = TMP_STATE.selected_work, workCreator = TMP_STATE.selected_creator, parentId = null) {
@@ -771,19 +524,7 @@ function createCommentData() {
     return commentData;
 }
 
-// this function only check if the selected_eppn is same as the current user or not
-function isCurrentUserSelectedUser(selected_eppn, needNotification) {
-    if (selected_eppn == TMP_STATE.current_user.eppn) {
-        return true;
-    } else {
-        if (needNotification) {
-            launchToastNotifcation("You don't have permission to do this action");
-        }
-        return false;
-    }
-}
-
-//TODO remove this function and move it to 
+//TODO remove this function and called create toast in toast.js instead
 function launchToastNotifcation(data) {
     let message = {
         message: data,
@@ -791,40 +532,4 @@ function launchToastNotifcation(data) {
     let snackbarContainer = document.querySelector('.mdl-js-snackbar');
     snackbarContainer.MaterialSnackbar.showSnackbar(message);
     snackbarContainer.MaterialSnackbar.showSnackbar(message);
-}
-
-// Make sure the dialog don't exceed the window
-function adjustDialogPosition(data, width, height, marginX, marginY) {
-    let newLeft = (data["evtPageX"] - marginX) + "px";
-    let newTop = (data["evtPageY"] + marginY) + "px";
-    if (data["evtClientY"] + (marginY + height) > $(window).height()) {
-        newTop = (data["evtPageY"] - (marginY + height)) + "px";
-    }
-
-    if (data["evtPageX"] + width > $(window).width()) {
-        newLeft = $(window).width() - (width + marginX) + "px";
-    }
-
-    return {
-        newTop,
-        newLeft,
-    };
-}
-
-function escapeSpecialChar(id) {
-    if (id == null) {
-        return null;
-    }
-
-    return id.replace(/([\s!"#$%&'()\*+,\.\/:;<=>?@\[\]^`{|}~])/g, "\\$1");
-}
-
-function escapeHTMLPtag(text) {
-    return text.replace(/<p>(.*)<\/p>/, ` $1\n`);
-}
-
-// Hides all movable and visable boxes on the screen
-function hideAllBoxes() {
-    $("[aria-describedby='replies']").hide();
-    $("[aria-describedby='comment-box']").hide();
 }
