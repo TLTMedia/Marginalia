@@ -372,7 +372,8 @@ export class ReplyBoxController {
 
         // delete first comment
         if (first_comment_id == this.state.replyBox_data.delete_comment_id) {
-            await new_span_recover(first_comment_id);
+            await this.ui.comments_controller.new_recover_span(first_comment_id);
+            //await this.ui.comments_controller.recover_span(first_comment_id);
             //checkSpansNeedRecover(first_comment_id, removeDeletedSpan);
             let work_comment_data = await this.state.api_data.comments_data.get_work_highlights();
             console.log("checkSpansNeedRecover",work_comment_data)

@@ -163,4 +163,13 @@ export class CommentsData {
 
         return await response;
     }
+
+    async get_comments_by_index(data){
+        let response = this.api.request({
+            endpoint: "comments_within_index",
+            method: "GET",
+            data: data
+        });
+        return response;
+    }
 }

@@ -43,7 +43,6 @@ export class TutorialController {
             this.steps_action(targetElement, specialStepData);
         }).onexit(() => {
             $.modal.close();
-
             hideAllBoxes();
             this.remove_tutorial(tutorialData);
             $("#home").click();

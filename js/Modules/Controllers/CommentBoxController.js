@@ -123,7 +123,8 @@ export class CommentBoxController {
                 this.ui.base_events.filters_events.color_not_used_type_selector(work_comment_data, "@stonybrook.edu");
                 console.log(this.state.filters.selected_comment_filter, data_edit["type"]);
                 if (data_edit["type"] != this.state.filters.selected_comment_filter && this.state.filters.selected_comment_filter != "show-all-types") {
-                    await new_span_recover(this.state.commentBox_data.edit_comment_id);
+                    await this.ui.comments_controller.new_recover_span(this.state.commentBox_data.edit_comment_id);
+                    //await this.ui.comments_controller.recover_span(this.state.commentBox_data.edit_comment_id);
                     //checkSpansNeedRecover(this.state.commentBox_data.edit_comment_id, removeDeletedSpan);
                     $("#replies").parent().fadeOut();
                 }
@@ -213,7 +214,7 @@ export class CommentBoxController {
                 $('.' + escapeSpecialChar(this.state.rem_span)).removeClass(this.state.rem_span);
 
                 let allComments = createCommentData();
-                handleStartEndDiv(allComments);
+                this.ui.comments_controller.handleStartEndDiv(allComments);
 
                 this.ui.base_events.filters_events.color_not_used_type_selector(work_comment_data, "@stonybrook.edu");
 
