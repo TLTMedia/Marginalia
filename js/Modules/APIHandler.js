@@ -1,14 +1,15 @@
 export class APIHandler {
-    constructor() {
-        console.log("APIHandler Module Loaded");
+    constructor({ toast = toast }) {
+        console.log('APIHandler Module Loaded');
 
-        this.base_url = "https://" + window.location.hostname + "/marginalia/api/public/";
+        this.base_url = 'https://' + window.location.hostname + '/marginalia/api/public/';
+        this.toast = toast;
     }
 
     parseGetData(data) {
-        let res = "";
+        let res = '';
         for (let key in data) {
-            res += "&" + key + "=" + data[key];
+            res += '&' + key + '=' + data[key];
         }
 
         return res;
@@ -36,17 +37,18 @@ export class APIHandler {
             contentType: false,
             processData: false,
         }).done(data => {
-            if (response_type == "raw") {
+            if (response_type == 'raw') {
                 return defer.resolve(data);
-            } else if (response_type == "parsed") {
+            } else if (response_type == 'parsed') {
                 if (data['status'] == 'error') {
-                    console.log("ERROR", data);
+                    console.warn('Warning: api response returned with status of error - returning whole object', data);
 
-                    launchToastNotifcation(data.message);
+                    // toast of what the error was
+                    this.toast.api_toast(data);
 
                     return;
                 } else if (data['status'] !== 'ok') {
-                    console.log("NOK", data);
+                    console.error('Error: api response returned with a status of neither "error" nor "ok"', data);
 
                     return;
                 } else {
@@ -75,12 +77,12 @@ export class APIHandler {
                     }
                 }
             } else {
-                console.error("invalid requested response type");
+                console.error('invalid requested response type');
             }
         }).fail((_, __, errorThrown) => {
-            alert("An unexpected error occured. Please try again.");
+            alert('An unexpected error occured. Please try again.');
 
-            console.log("ERROR", errorThrown);
+            console.error('Error:', errorThrown);
         });
 
         return defer.promise();

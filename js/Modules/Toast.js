@@ -6,6 +6,33 @@ export class Toast {
         console.log("Toast Module Loaded");
     }
 
+    TOAST_TYPES = {
+        INFO: "info",
+        ERROR: "error",
+        WARNING: "warning",
+        SUCCESS: "success",
+    };
+
+    /**
+     * Create a toast directly from an API reponse object
+     * Will parse the type of the response - acts as a wrapper for create_toast()
+     */
+    api_toast(api_object) {
+        let type = this.TOAST_TYPES.INFO;
+        let message = api_object.data || api_object.message;
+
+        if (api_object.status == "error") {
+            type = this.TOAST_TYPES.ERROR;
+        } else if (api_object.status == "ok") {
+            type = this.TOAST_TYPES.SUCCESS;
+        } else {
+            type = this.TOAST_TYPES.INFO;
+            console.warn("Warning: Unknown specified api object response status");
+        }
+
+        this.create_toast(message, type);
+    }
+
     /**
      * Can be type: [info, error, warning, success]
      */

@@ -68,11 +68,16 @@ export class AddCourseEvents {
                 launchToastNotifcation("Select a year");
             } else {
                 let section = $("#courseSectionInput").val() == "" ? "" : $("#courseSectionInput").val();
-                let courseName = $("#courseSectionInput").val() != "" ? $("#courseNameInput").val() + "." + section + " - " + $("#course-create-semester").val() + " " + $("#course-create-year").val() : $("#courseNameInput").val() + " - " + $("#course-create-semester").val() + " " + $("#course-create-year").val();
-                let addCourse_respond = await this.courses_data.add_course(courseName);
-                launchToastNotifcation(addCourse_respond);
-                $("#home").click();
-                $.modal.close();
+                let course_name = $("#courseSectionInput").val() != "" ? $("#courseNameInput").val() + "." + section + " - " + $("#course-create-semester").val() + " " + $("#course-create-year").val() : $("#courseNameInput").val() + " - " + $("#course-create-semester").val() + " " + $("#course-create-year").val();
+
+                let add_course_response = await this.courses_data.add_course(course_name);
+                if (add_course_response) {
+                    this.ui.append_course_dropdown(course_name, { select2: true });
+                    this.ui.toast.create_toast(add_course_response);
+                    this.ui.toast.create_toast("Add a literature to the new course to view it!");
+                    $.modal.close();
+                    $("#home").click();
+                }
             }
         });
     }
@@ -81,7 +86,7 @@ export class AddCourseEvents {
         /**
          * Event handler for adding new courses admin
          */
-        $(".select2-courses-adminlist-select").on("select2:select", async event => {
+        $(".select2-courses-adminlist-select").off().on("select2:select", async event => {
             let response = await this.courses_data.add_course_admin(event.params.data.id);
             this.ui.toast.create_toast(response);
         });
@@ -89,7 +94,7 @@ export class AddCourseEvents {
         /**
          * Event handler for removing courses admin
          */
-        $(".select2-courses-adminlist-select").on("select2:unselecting", async event => {
+        $(".select2-courses-adminlist-select").off().on("select2:unselecting", async event => {
             /**
              * Should they be allowed to remove themselves from the admin list - if they aren't the course owned
              * Prevent de-selecting of yourself

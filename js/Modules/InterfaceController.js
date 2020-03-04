@@ -124,8 +124,6 @@ export class InterfaceController {
         /** Empty out the menu if there's any existing choices */
         menu.empty();
 
-        // $(menu).parent().next().children(".selection").children().children()[0].innerHTML = "Select a course...";
-
         if (courses_list.length == 0) {
             return true;
         }
@@ -154,7 +152,7 @@ export class InterfaceController {
      * @param {String} course_name Name of a course
      * @returns {Boolean} true on success, false on error
      */
-    append_course_dropdown(course_name) {
+    append_course_dropdown(course_name, select2 = false) {
         const menu = $(this.class_constants.courses_dropdown_menu);
 
         const course_item = $("<option/>", {
@@ -162,7 +160,12 @@ export class InterfaceController {
             text: course_name,
         });
 
-        menu.append(course_item);
+        if (!select2) {
+            menu.append(course_item);
+        } else {
+            let new_option = new Option(course_name, course_name, true, true);
+            menu.append(new_option).trigger('change');
+        }
 
         return true;
     }

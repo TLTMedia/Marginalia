@@ -51,8 +51,11 @@ import { InterfaceController, APIHandler, Data, Toast, Address, Shibboleth } fro
     /**
      * Creates the API handler object which is responsible for dealing with all of Marginalia's API calls;
      * This object should only be used in "Data" Class/Objects
+     * 
+     * ... now pass in toast so that we don't need to call the global launchToastNotification().
+     * NOTE: this reference to `toast` is unconventional since all other references originate from InterfaceController.toast
      */
-    const api = new APIHandler();
+    const api = new APIHandler({ toast: toast });
 
     /**
      * The data class creates all the other data classes which contain methods for API requests

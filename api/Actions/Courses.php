@@ -74,7 +74,14 @@ class Courses
         if (!$hasPermissions) {
             return array(
                 "status" => "error",
-                "data"   => "invalid permissions to add new course",
+                "data"   => "Error: invalid permissions to add new course",
+            );
+        }
+
+        if (is_dir($this->path . "/" . $courseName)) {
+            return array(
+                "status" => "error",
+                "data"   => "Error: that course already exists",
             );
         }
 
@@ -83,7 +90,7 @@ class Courses
 
             return array(
                 "status" => "error",
-                "data"   => "unable to create course directory for unknown reason",
+                "data"   => "Error: unable to create course directory for unknown reason",
             );
         }
 
