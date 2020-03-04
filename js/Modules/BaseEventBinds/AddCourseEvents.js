@@ -47,7 +47,9 @@ export class AddCourseEvents {
              * TODO: make the search actually work for backend results.
              */
             let all_users = await this.users_data.search_all_users(".");
-            this.ui.populate_course_admins(all_users, [this.state.current_user.eppn]);
+            let course_admins = await this.courses_data.get_course_admins();
+
+            this.ui.populate_course_admins(all_users, course_admins);
             this.postload_courses_admin();
         });
     }
@@ -76,8 +78,30 @@ export class AddCourseEvents {
     }
 
     postload_courses_admin() {
+        /**
+         * Event handler for adding new courses admin
+         */
         $(".select2-courses-adminlist-select").on("select2:select", async event => {
             let response = await this.courses_data.add_course_admin(event.params.data.id);
+            this.ui.toast.create_toast(response);
+        });
+
+        /**
+         * Event handler for removing courses admin
+         */
+        $(".select2-courses-adminlist-select").on("select2:unselecting", async event => {
+            /**
+             * Should they be allowed to remove themselves from the admin list - if they aren't the course owned
+             * Prevent de-selecting of yourself
+             */
+            if (event.params.args.data.id == this.state.current_user.eppn) {
+                this.ui.toast.create_toast("You cannot remove yourself.", "warning");
+
+                event.preventDefault();
+                return;
+            }
+
+            let response = await this.state.api_data.courses_data.remove_course_admin(event.params.args.data.id);
             this.ui.toast.create_toast(response);
         });
     }

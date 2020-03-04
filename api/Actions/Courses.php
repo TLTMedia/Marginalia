@@ -73,8 +73,8 @@ class Courses
         $hasPermissions = $permissions->userOnPermissionsList($this->path, $this->currentUser);
         if (!$hasPermissions) {
             return array(
-                "status"  => "error",
-                "message" => "invalid permissions to add new course",
+                "status" => "error",
+                "data"   => "invalid permissions to add new course",
             );
         }
 
@@ -82,14 +82,14 @@ class Courses
             $this->logger->error("unable to create course directory mkdir() operation.");
 
             return array(
-                "status"  => "error",
-                "message" => "unable to create course directory for unknown reason",
+                "status" => "error",
+                "data"   => "unable to create course directory for unknown reason",
             );
         }
 
         return array(
-            "status"  => "ok",
-            "message" => "successfully created course directory " . $courseName,
+            "status" => "ok",
+            "data"   => "successfully created course directory " . $courseName,
         );
     }
 
@@ -107,27 +107,91 @@ class Courses
         if ($permissions->userOnPermissionsList($this->path, $selfEppn)) {
             if ($permissions->userOnPermissionsList($this->path, $toAddEppn)) {
                 return array(
-                    "status"  => "ok",
-                    "message" => "user was already an admin",
+                    "status" => "ok",
+                    "data"   => "User was already an admin",
                 );
             } else {
                 if ($permissions->addUserToCoursesPermissions($toAddEppn)) {
                     return array(
-                        "status"  => "ok",
-                        "message" => "successfully added user as admin",
+                        "status" => "ok",
+                        "data"   => "Successfully added user as admin",
                     );
                 } else {
                     return array(
-                        "status"  => "error",
-                        "message" => "unable to add user to permissions file",
+                        "status" => "error",
+                        "data"   => "Unable to add user to permissions file",
                     );
                 }
             }
         } else {
             return array(
-                "status"  => "error",
-                "message" => "current user is not admin; or other error",
+                "status" => "error",
+                "data"   => "Current user is not admin; or other error",
             );
         }
+    }
+
+    /**
+     * Removes a course admin, check to see if the current user is a valid admin
+     */
+    public function removeCourseAdmin($selfEppn, $toAddEppn)
+    {
+        /**
+         * Check if $selfEppn is even on the course admin list themselves
+         */
+        require 'Permissions.php';
+        $permissions = new Permissions($this->path);
+
+        if ($permissions->userOnPermissionsList($this->path, $selfEppn)) {
+            if (!$permissions->userOnPermissionsList($this->path, $toAddEppn)) {
+                return array(
+                    "status" => "ok",
+                    "data"   => "That user wasn't on the admin list",
+                );
+            } else {
+                if ($permissions->removeUserFromCoursesPermissions($toAddEppn)) {
+                    return array(
+                        "status" => "ok",
+                        "data"   => "Successfully removed user as admin",
+                    );
+                } else {
+                    return array(
+                        "status" => "error",
+                        "data"   => "Unable to add user to permissions file",
+                    );
+                }
+            }
+        } else {
+            return array(
+                "status" => "error",
+                "data"   => "Current user is not admin; or other error",
+            );
+        }
+    }
+
+    /**
+     * Gets list of all the courses admins
+     * Only a course admin can view this list, so first authenticate.
+     */
+    public function getAllCoursesAdmins()
+    {
+        require 'Permissions.php';
+        $permissions = new Permissions($this->path);
+
+        $hasPermissions = $permissions->userOnPermissionsList($this->path, $this->currentUser);
+        if (!$hasPermissions) {
+            return array(
+                "status" => "error",
+                "data"   => "invalid permissions to view course admins",
+            );
+        }
+
+        $permissionsFile = json_decode($permissions->getPermissionsList($this->path));
+        $adminList       = $permissionsFile->data->admins;
+
+        return array(
+            "status" => "ok",
+            "data"   => $adminList,
+        );
     }
 }

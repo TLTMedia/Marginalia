@@ -355,7 +355,7 @@ class Permissions
 
     /**
      * Add the specified users to the courses permissions list,
-     * expects that you already validated the current user as an admin that can add others
+     * Expects that you already validated the current user as an admin that can add others
      */
     public function addUserToCoursesPermissions($toAddEppn)
     {
@@ -363,6 +363,28 @@ class Permissions
         $permissionsData->admins[] = $toAddEppn;
         $permissionsData           = json_encode($permissionsData);
 
+        if (!file_put_contents($this->path . "permissions.json", $permissionsData)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Remove the specified eppn from the permissions list,
+     * Expects that you have already authenticated the request.
+     */
+    public function removeUserFromCoursesPermissions($toAddEppn)
+    {
+        $permissionsData = json_decode(file_get_contents($this->path . "permissions.json"));
+        if (($key = array_search($toAddEppn, $permissionsData->admins)) !== false) {
+            unset($permissionsData->admins[$key]);
+
+            // unset changes array to an object
+            $permissionsData->admins = array_values($permissionsData->admins);
+        }
+
+        $permissionsData = json_encode($permissionsData);
         if (!file_put_contents($this->path . "permissions.json", $permissionsData)) {
             return false;
         }

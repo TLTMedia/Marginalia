@@ -104,7 +104,7 @@ export class CommentsController {
                 }
             }
         });
-        let response = await this.state.api_data.comments_data.get_unapprove_comments({creator: this.state.selected_creator, work: this.state.selected_work});
+        let response = await this.state.api_data.comments_data.get_unapprove_comments({ creator: this.state.selected_creator, work: this.state.selected_work });
         console.log(response);
         response.forEach((data) => {
             let ancesHash = data["AncestorHash"];
@@ -147,7 +147,7 @@ export class CommentsController {
     highlight_selected_area(event) {
         let selectedRange = rangy.getSelection().getRangeAt(0);
         let lightRange = lightrange.saveSelection();
-        console.log(selectedRange.nativeRange,lightRange)
+        console.log(selectedRange.nativeRange, lightRange)
         selectedRange.nativeRange = lightRange;
 
         $("#comment-box").removeAttr("data-replyToEppn data-replyToHash");
@@ -183,12 +183,12 @@ export class CommentsController {
 
     //remove all spans if parameter is undefined ,else remove the given id comment
     unwrap_comments(id = undefined) {
-        if(id != undefined){
+        if (id != undefined) {
             $(".commented-selection" + "[commentId = '" + id + "']").contents().unwrap();
             $(".startDiv" + "[commentId = '" + id + "']").remove();
             $(".endDiv" + "[commentId = '" + id + "']").remove();
         }
-        else{
+        else {
             $(".commented-selection").contents().unwrap();
             $(".startDiv").remove();
             $(".endDiv").remove();
@@ -234,7 +234,7 @@ export class CommentsController {
         });
     }
 
-    async new_recover_span(id){
+    async new_recover_span(id) {
         let allComments = createCommentData();
         console.log(allComments);
         let startIndex = parseInt($(".startDiv" + "[commentId = " + id + "]").attr("startIndex"));
@@ -244,57 +244,57 @@ export class CommentsController {
         let before_end_index = [];
         // comments that totally covered id
         let totally_covered = [];
-        for (let i in allComments){
+        for (let i in allComments) {
             let currStart = parseInt($(".startDiv" + "[commentId = " + allComments[i].hash + "]").attr("startIndex"));
             let currEnd = parseInt($(".endDiv" + "[commentId = " + allComments[i].hash + "]").attr("endIndex"));
-            if(currStart >= startIndex && currStart <= endIndex && allComments[i].hash != id){
-                after_start_index.push({hash: allComments[i].hash, startIndex: currStart, endIndex: currEnd});
+            if (currStart >= startIndex && currStart <= endIndex && allComments[i].hash != id) {
+                after_start_index.push({ hash: allComments[i].hash, startIndex: currStart, endIndex: currEnd });
             }
-            if(currEnd <= endIndex && currEnd >= startIndex && allComments[i].hash != id){
-                before_end_index.push({hash: allComments[i].hash, startIndex: currStart, endIndex: currEnd});
+            if (currEnd <= endIndex && currEnd >= startIndex && allComments[i].hash != id) {
+                before_end_index.push({ hash: allComments[i].hash, startIndex: currStart, endIndex: currEnd });
             }
-            if(currEnd >= endIndex && currStart <= startIndex && allComments[i].hash != id){
-                totally_covered.push({hash: allComments[i].hash, startIndex: currStart, endIndex: currEnd});
+            if (currEnd >= endIndex && currStart <= startIndex && allComments[i].hash != id) {
+                totally_covered.push({ hash: allComments[i].hash, startIndex: currStart, endIndex: currEnd });
             }
         }
-        console.log("start: ",startIndex,"end: ",endIndex);
-        console.log(after_start_index,before_end_index,totally_covered);
+        console.log("start: ", startIndex, "end: ", endIndex);
+        console.log(after_start_index, before_end_index, totally_covered);
         let raw = []
-        for (let i in after_start_index){
+        for (let i in after_start_index) {
             raw.push(after_start_index[i]);
         }
-        for (let i in before_end_index){
+        for (let i in before_end_index) {
             raw.push(before_end_index[i]);
         }
-        for (let i in totally_covered){
+        for (let i in totally_covered) {
             raw.push(totally_covered[i]);
         }
         let clean = [];
-        for (let i in raw){
+        for (let i in raw) {
             let curr = raw[i];
             let exist = false;
-            for(let j in clean){
-                if(parseInt(clean[j].hash) == parseInt(curr.hash)){
+            for (let j in clean) {
+                if (parseInt(clean[j].hash) == parseInt(curr.hash)) {
                     exist = true;
                 }
             }
-            if(!exist){
-                clean = sortCommentsByStartIndex(clean,curr);
+            if (!exist) {
+                clean = sortCommentsByStartIndex(clean, curr);
             }
         }
         console.log(clean);
         clean = reverseList(clean);
         this.unwrap_comments(id)
-        for (let i in clean){
+        for (let i in clean) {
             let recoverData = {
                 startIndex: clean[i].startIndex,
                 endIndex: clean[i].endIndex,
-                commentType: $(".commented-selection" + "[ commentId = "+clean[i].hash+"]").attr("typeof"),
-                eppn: $(".commented-selection" + "[ commentId = "+clean[i].hash+"]").attr("creator"),
+                commentType: $(".commented-selection" + "[ commentId = " + clean[i].hash + "]").attr("typeof"),
+                eppn: $(".commented-selection" + "[ commentId = " + clean[i].hash + "]").attr("creator"),
                 hash: clean[i].hash,
-                approved: $(".commented-selection" + "[ commentId = "+clean[i].hash+"]").attr("approved")
+                approved: $(".commented-selection" + "[ commentId = " + clean[i].hash + "]").attr("approved")
             }
-            if(!clean[i].hash){
+            if (!clean[i].hash) {
                 this.unwrap_comments(clean[i].hash);
             }
             highlightText(recoverData);
@@ -449,4 +449,88 @@ export class CommentsController {
         }
     }
 
+    async new_span_recover(id) {
+        // get the list of comments that need to get recovered
+        let startIndex = $(".startDiv" + "[commentId ='" + id + "']").attr("startIndex");
+        let endIndex = $(".endDiv" + "[commentId ='" + id + "']").attr("endIndex");
+        // this.state.recoverDataStart;
+        // this.state.recoverDataEnd;
+        await API.request({
+            endpoint: "comments_within_index",
+            method: "GET",
+            data: {
+                "work": this.state.selected_work,
+                "creator": this.state.selected_creator,
+                "index": startIndex
+            }
+        }).then((data) => {
+            this.state.recoverDataStart = data;
+        });
+        await API.request({
+            endpoint: "comments_within_index",
+            method: "GET",
+            data: {
+                "work": this.state.selected_work,
+                "creator": this.state.selected_creator,
+                "index": endIndex
+            }
+        }).then((data) => {
+            this.state.recoverDataEnd = data;
+        });
+        //merge both recover list
+        let recover_comments_start = this.state.recoverDataStart;
+        let recover_comments_end = this.state.recoverDataEnd;
+        let raw = [];
+        for (let i = 0; i < recover_comments_start.length; i++) {
+            raw.push(recover_comments_start[i]);
+        }
+        for (let i = 0; i < recover_comments_end.length; i++) {
+            raw.push(recover_comments_end[i]);
+        }
+        //remove the duplicate data
+        let clean = [];
+        for (let i in raw) {
+            let curr = raw[i];
+            let exist = false;
+            for (let j in clean) {
+                if (parseInt(clean[j].hash) == parseInt(curr.hash)) {
+                    exist = true;
+                }
+            }
+            if (!exist) {
+                clean.push(curr);
+            }
+        }
+        let goal = [];
+        for (let i in clean) {
+            let curr = clean[i];
+            let currIndex = 0;
+            goal.unshift(curr);
+            for (let j in goal) {
+                if (goal[j].startIndex > curr.startIndex) {
+                    let temp = goal[j];
+                    goal[j] = goal[currIndex];
+                    goal[currIndex] = temp;
+                    currIndex = j;
+                }
+            }
+        }
+        console.log(goal);
+        removeDeletedSpan(id)
+        for (let i in goal) {
+            removeDeletedSpan(goal[i].hash);
+        }
+        for (let i in goal) {
+            let recoverData = {
+                startIndex: goal[i].startIndex,
+                endIndex: goal[i].endIndex,
+                commentType: goal[i].commentType,
+                eppn: goal[i].eppn,
+                hash: goal[i].hash,
+                approved: goal[i].approved
+            }
+            highlightText(recoverData);
+        }
+        handleStartEndDiv(createCommentData());
+    }
 }
