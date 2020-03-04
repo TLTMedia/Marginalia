@@ -310,6 +310,15 @@ function escapeHTMLPtag(text) {
     return text.replace(/<p>(.*)<\/p>/, ` $1\n`);
 }
 
+//HELPER FUNCTION
+function escape_all_HTML_tag(text){
+    let removePTag = text.replace(/<p>(.*)<\/p>/, ` $1\n`);
+    let removePairTag = removePTag.replace(/<(\w+)>(.*)<\/\1>/, `$2`);
+    let removeSingleTag = removePairTag.replace(/<\w+>/, ``);
+    console.log(removePTag,removePairTag,removeSingleTag)
+    return removeSingleTag;
+}
+
 //HELPER FUNCTION Hides all movable and visable boxes on the screen
 function hideAllBoxes() {
     $("[aria-describedby='replies']").hide();
@@ -487,7 +496,7 @@ function readThreads(threads, work = TMP_STATE.selected_work, workCreator = TMP_
                 lastName: threads[i].lastName,
                 public: threads[i].public,
                 type: threads[i].commentType,
-                commentText: btoa(threads[i].commentText),
+                commentText: btoa(unescape(encodeURIComponent(threads[i].commentText))),
                 hash: threads[i].hash,
                 approved: threads[i].approved,
                 parentId: parentId,

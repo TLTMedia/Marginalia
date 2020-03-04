@@ -37,10 +37,17 @@ import { InterfaceController, APIHandler, Data, Toast, Address, Shibboleth } fro
     });
 
     /**
-     * Add a function to quill - to get the raw HTML of the textarea.
+     * Add a function to Quill - to get the raw HTML of the textarea.
      */
     Quill.prototype.getHTML = function () {
         return this.container.querySelector('.ql-editor').innerHTML;
+    };
+
+    /**
+     * Adds a function to Quill - to set the raw HTML of the textarea.
+     */
+    Quill.prototype.setHTML = function (html) {
+        this.container.querySelector('.ql-editor').innerHTML = html;
     };
 
     /**

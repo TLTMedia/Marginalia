@@ -63,8 +63,7 @@ export class ReplyBoxController {
         let workCreator = data_for_replies["workCreator"];
         var userName = firstName + " " + lastName;
         var hashForReply = 'r' + hash;
-        var inText = atob(commentText);
-        inText = escapeHTMLPtag(inText);
+        var inText = atob(unescape(decodeURIComponent(commentText)));
         var repliesClass;
         var repliesSpan;
         //check if this relpy is deleted
@@ -149,7 +148,7 @@ export class ReplyBoxController {
             }
         });
         editButton.html("<i class = 'material-icons'> edit </i> <label>Edit</label>");
-        if (!$(".replies" + "[commentId = "+ toolbar_data["hash"] +"]").hasClass("deleted")) {
+        if (!$(".replies" + "[commentId = " + toolbar_data["hash"] + "]").hasClass("deleted")) {
             if (toolbar_data["approved"] && isCurrentUserSelectedUser(toolbar_data["eppn"], false)) {
                 toolBar.append(replyButton, editButton);
             }
@@ -283,7 +282,7 @@ export class ReplyBoxController {
         };
         let first_comment_id = this.state.replyBox_data.first_comment_id;
         this.ui.commentbox_controller.displayCommentBox(evt, $(".commented-selection" + "[commentId = '" + first_comment_id + "']").attr("typeof"));
-        this.state.quill.setText(inText);
+        this.state.quill.setHTML(inText);
         if (hash != this.state.replyBox_data.first_comment_id) {
             console.log("not editting the first comment");
             $(".select2-save-comment-select").prop("disabled", true);
@@ -321,7 +320,7 @@ export class ReplyBoxController {
             hash: firstCommentHash
         }
         //getUnapprovedComments(workCreator, work);
-        response = await this.state.api_data.comments_data.get_unapprove_comments({creator: this.state.selected_creator, work: this.state.selected_work});
+        response = await this.state.api_data.comments_data.get_unapprove_comments({ creator: this.state.selected_creator, work: this.state.selected_work });
         response.forEach((data) => {
             let ancesHash = data["AncestorHash"];
             let hash = data["CommentHash"];
@@ -372,11 +371,11 @@ export class ReplyBoxController {
 
         // delete first comment
         if (first_comment_id == this.state.replyBox_data.delete_comment_id) {
-            await this.ui.comments_controller.new_recover_span(first_comment_id);
+            await this.ui.comments_controller.recover_span(first_comment_id);
             //await this.ui.comments_controller.recover_span(first_comment_id);
             //checkSpansNeedRecover(first_comment_id, removeDeletedSpan);
             let work_comment_data = await this.state.api_data.comments_data.get_work_highlights();
-            console.log("checkSpansNeedRecover",work_comment_data)
+            console.log("checkSpansNeedRecover", work_comment_data)
             //TODO Not sure why this is here, itf there is any filter problem check this
             //this.ui.base_events.filters_events.reset(work_comment_data);
             this.ui.base_events.filters_events.color_not_used_type_selector(work_comment_data, "@stonybrook.edu");
