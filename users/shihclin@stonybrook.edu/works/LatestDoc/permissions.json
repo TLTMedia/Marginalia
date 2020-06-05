@@ -1,1 +1,10 @@
-{"admins":["shihclin@stonybrook.edu"],"comments_require_approval":false,"creator_first_name":"Shih-Chuan","creator_last_name":"Lin","public":true}
+{
+    "admins": [
+        "shihclin@stonybrook.edu",
+        "ikleiman@stonybrook.edu"
+    ],
+    "comments_require_approval": true,
+    "creator_first_name": "Shih-Chuan",
+    "creator_last_name": "Lin",
+    "public": true
+}
