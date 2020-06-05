@@ -45,9 +45,12 @@ $MAMMOTH_STYLE = "../../mammoth_style.txt";
  * so that we can use other auth types in the future...
  * Relocates hard coded $_SERVER[...] vars in the code below to up top here.
  */
-$authUniqueId  = $_SERVER["eppn"];
-$authFirstName = $_SERVER["nickname"];
-$authLastName  = $_SERVER["sn"];
+// $authUniqueId  = $_SERVER["eppn"];
+// $authFirstName = $_SERVER["nickname"];
+// $authLastName  = $_SERVER["sn"];
+$authUniqueId  = "ikleiman@stonybrook.edu";
+$authFirstName = "Ilan";
+$authLastName  = "Kleiman";
 
 /**
  * Prepare App

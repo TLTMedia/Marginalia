@@ -133,7 +133,7 @@ class Users
     {
         $this->__createUserIfNotExists($eppn, $firstName, $lastName);
 
-        $user            = json_decode("");
+        $user            = json_decode("{}");
         $user->firstname = $firstName;
         $user->lastname  = $lastName;
         $user->eppn      = $eppn;

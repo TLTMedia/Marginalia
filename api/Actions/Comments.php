@@ -662,6 +662,12 @@ class Comments
         foreach ($arrayOfFullCommentPath as $filePath) {
             $jsonData = json_decode(file_get_contents($filePath . "/comment.json"));
 
+            $fileArr = explode("/", $filePath);
+            $hash    = end($fileArr);
+
+            $unparsedStr = explode("/", $filePath);
+            $parsedPath  = end($unparsedStr);
+
             /**
              * Below logic taken from $this->buildCommentJsonFromPaths()
              */
@@ -669,6 +675,7 @@ class Comments
                 // comment is public
                 if ($jsonData->approved) {
                     // comment is approved
+
                     array_push($data, array(
                         "startIndex"         => $jsonData->startIndex,
                         "endIndex"           => $jsonData->endIndex,
@@ -676,10 +683,10 @@ class Comments
                         "eppn"               => $jsonData->eppn,
                         "firstName"          => $jsonData->firstName,
                         "lastName"           => $jsonData->lastName,
-                        "hash"               => end(explode("/", $filePath)),
+                        "hash"               => $hash,
                         "approved"           => $jsonData->approved,
                         "unapprovedChildren" => $this->__doesCommentHaveUnapprovedReplies(
-                            $jsonData->eppn, end(explode("/", $filePath))
+                            $jsonData->eppn, $parsedPath
                         ),
                     ));
                 } else {
@@ -694,10 +701,10 @@ class Comments
                             "eppn"               => $jsonData->eppn,
                             "firstName"          => $jsonData->firstName,
                             "lastName"           => $jsonData->lastName,
-                            "hash"               => end(explode("/", $filePath)),
+                            "hash"               => $hash,
                             "approved"           => $jsonData->approved,
                             "unapprovedChildren" => $this->__doesCommentHaveUnapprovedReplies(
-                                $jsonData->eppn, end(explode("/", $filePath))
+                                $jsonData->eppn, $parsedPath
                             ),
                         ));
                     } else {
@@ -716,9 +723,9 @@ class Comments
                         "eppn"               => $jsonData->eppn,
                         "firstName"          => $jsonData->firstName,
                         "lastName"           => $jsonData->lastName,
-                        "hash"               => end(explode("/", $filePath)),
+                        "hash"               => $hash,
                         "unapprovedChildren" => $this->__doesCommentHaveUnapprovedReplies(
-                            $jsonData->eppn, end(explode("/", $filePath))
+                            $jsonData->eppn, $parsedPath
                         ),
                     ));
                 } else {
