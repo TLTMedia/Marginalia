@@ -7,4 +7,5 @@ composer.phar
 vendor/
 users/
 courses/
+!courses/permissions.json
 .DS_Store

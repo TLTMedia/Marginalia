@@ -526,17 +526,41 @@ text[inputtype='inputFile'] {
 .choiceBox {
     width: 200px;
     height: 100px;
-    text background-color: #DEDEDE;
+    background-color: #DEDEDE;
     position: fixed;
 }
 
 #textSpace {
+    /* Width of a word document is approximately 595px */
+    /* width: 595px; */
     white-space: pre-line;
     /* width: 60%; */
     padding-top: 1%;
     padding-left: 1%;
     font-family: monospace;
     font-size: auto;
+}
+
+#textSpace p {
+    line-height: 16px;
+}
+
+#textSpace table {
+    width: 100%;
+    border: 1px solid black;
+}
+
+#textSpace tr, #textSpace td {
+    border: 1px solid black;
+    min-height: 10px;
+}
+
+#textSpace th {
+    vertical-align: top;
+}
+
+#textSpace td {
+    vertical-align: top;
 }
 
 /*-----------------Commenters/Type Selector----------------*/
@@ -1373,6 +1397,7 @@ input[type="file"] {
 #workTitle {
     display: flex;
     flex-direction: row;
+    margin-bottom: 10px;
 }
 
 #workTitleSpan {
@@ -1842,10 +1867,11 @@ input[type="file"] {
 #text-wrapper {
     display: none;
     height: calc(100% - 108px);
-    width: 100%;
     background-color: var(--bg-main-marginalia);
     position: absolute;
     top: 108px;
+    width: 595px;
+    left: calc(calc(100% / 2) - calc(595px / 2));
 }
 
 .introjs-skipbutton {

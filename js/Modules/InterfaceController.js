@@ -1,5 +1,12 @@
-import { BaseEventBinds, InterfaceEvents } from './_ModuleLoader.js';
-import { CommentsController, RangyController, CommentBoxController, TutorialController, ReplyBoxController, SettingsController } from './Controllers/_ModuleLoader.js';
+import { BaseEventBinds, InterfaceEvents } from "./_ModuleLoader.js";
+import {
+    CommentsController,
+    RangyController,
+    CommentBoxController,
+    TutorialController,
+    ReplyBoxController,
+    SettingsController,
+} from "./Controllers/_ModuleLoader.js";
 
 export class InterfaceController {
     constructor({ state = state, toast = toast }) {
@@ -132,7 +139,9 @@ export class InterfaceController {
             if (this.append_course_dropdown(courses_list[course])) {
                 continue;
             } else {
-                console.error("An error occured while appending to the course dropdown menu");
+                console.error(
+                    "An error occured while appending to the course dropdown menu"
+                );
 
                 return false;
             }
@@ -164,7 +173,7 @@ export class InterfaceController {
             menu.append(course_item);
         } else {
             let new_option = new Option(course_name, course_name, true, true);
-            menu.append(new_option).trigger('change');
+            menu.append(new_option).trigger("change");
         }
 
         return true;
@@ -177,14 +186,17 @@ export class InterfaceController {
      * @returns {Boolean} true if success, false on error
      */
     populate_users_dropdown(users_list) {
-
         const menu_section_users = $(this.class_constants.users_menu_section);
         const menu_section_works = $(this.class_constants.works_menu_section);
         const menu = $(this.class_constants.users_dropdown_menu);
 
-        menu_section_works.hide("slide", {
-            direction: "up"
-        }, 300);
+        menu_section_works.hide(
+            "slide",
+            {
+                direction: "up",
+            },
+            300
+        );
 
         /** Empty out the menu if there's any existing choices */
         menu.empty();
@@ -194,11 +206,15 @@ export class InterfaceController {
         });
 
         if (users_list.length == 0) {
-            menu_section_users.hide("slide", {
-                direction: "up"
-            }, 300);
+            menu_section_users.hide(
+                "slide",
+                {
+                    direction: "up",
+                },
+                300
+            );
 
-            this.toast.create_toast("There are no users in this course");
+            this.toast.create_toast("There are no works in this course yet.");
 
             return true;
         }
@@ -207,15 +223,21 @@ export class InterfaceController {
             if (this.append_user_dropdown(users_list[user])) {
                 continue;
             } else {
-                console.error("An error occured while appending to the user dropdown menu");
+                console.error(
+                    "An error occured while appending to the user dropdown menu"
+                );
 
                 return false;
             }
         }
 
-        menu_section_users.finish().show("slide", {
-            direction: "up"
-        }, 300);
+        menu_section_users.finish().show(
+            "slide",
+            {
+                direction: "up",
+            },
+            300
+        );
 
         return true;
     }
@@ -259,11 +281,17 @@ export class InterfaceController {
         });
 
         if (works_list.length == 0) {
-            menu_section.hide("slide", {
-                direction: "up"
-            }, 300);
+            menu_section.hide(
+                "slide",
+                {
+                    direction: "up",
+                },
+                300
+            );
 
-            this.toast.create_toast("There are no works in this for this user in this course");
+            this.toast.create_toast(
+                "There are no works in this for this user in this course"
+            );
 
             return true;
         }
@@ -272,15 +300,21 @@ export class InterfaceController {
             if (this.append_work_dropdown(works_list[work])) {
                 continue;
             } else {
-                console.error("An error occured while appending to the work dropdown menu");
+                console.error(
+                    "An error occured while appending to the work dropdown menu"
+                );
 
                 return false;
             }
         }
 
-        menu_section.finish().show("slide", {
-            direction: "up"
-        }, 300);
+        menu_section.finish().show(
+            "slide",
+            {
+                direction: "up",
+            },
+            300
+        );
 
         return true;
     }
@@ -330,7 +364,7 @@ export class InterfaceController {
     show_sub_menu() {
         const menu = $(this.id_constants.main_sub_menu);
         menu.css({
-            "top": 64,
+            top: 64,
         });
 
         menu.show();
@@ -342,7 +376,7 @@ export class InterfaceController {
     hide_sub_menu() {
         const menu = $(this.id_constants.main_sub_menu);
         menu.css({
-            "top": -64,
+            top: -64,
         });
 
         menu.show();
@@ -383,7 +417,7 @@ export class InterfaceController {
      */
     show_home_page() {
         // removes the hash from the url
-        history.pushState(null, null, ' ');
+        history.pushState(null, null, " ");
 
         // show the main cardbox again
         this.show_main_cardbox();
@@ -393,7 +427,9 @@ export class InterfaceController {
         // $("#settingsBase").hide();
         $("#nonTitleContent").show();
         $(".userSelectMenu, .workSelectMenu").hide();
-        $(".chosenUser, .chosenFile, .typeSelector, .commenterSelector").empty();
+        $(
+            ".chosenUser, .chosenFile, .typeSelector, .commenterSelector"
+        ).empty();
         // $("#setting").addClass("disabledHeaderTab");
         $(".headerTab").removeClass("active");
         $("#home").addClass("active");
@@ -410,11 +446,13 @@ export class InterfaceController {
         let selected_eppn = this.state.selected_creator;
 
         $("#settings-modal").modal({
-            closeClass: 'icon-remove',
-            closeText: '!'
+            closeClass: "icon-remove",
+            closeText: "!",
         });
 
-        $("#settingTitle").text("Settings:" + " " + selected_eppn + " - " + decodeURI(selectedLitId));
+        $("#settingTitle").text(
+            "Settings:" + " " + selected_eppn + " - " + decodeURI(selectedLitId)
+        );
     }
 
     /**
@@ -422,8 +460,8 @@ export class InterfaceController {
      */
     show_filters() {
         $("#filters-modal").modal({
-            closeClass: 'icon-remove',
-            closeText: '!'
+            closeClass: "icon-remove",
+            closeText: "!",
         });
     }
 
@@ -432,8 +470,8 @@ export class InterfaceController {
      */
     show_add_course_page() {
         $("#add-course-modal").modal({
-            closeClass: 'icon-remove',
-            closeText: '!'
+            closeClass: "icon-remove",
+            closeText: "!",
         });
     }
 
@@ -442,8 +480,8 @@ export class InterfaceController {
      */
     show_add_admin_page() {
         $("#add-admin-modal").modal({
-            closeClass: 'icon-remove',
-            closeText: '!'
+            closeClass: "icon-remove",
+            closeText: "!",
         });
     }
 
@@ -453,7 +491,7 @@ export class InterfaceController {
     populate_whitelist(user_list, admin_list) {
         $(this.class_constants.whitelist_list).empty();
 
-        user_list.forEach(user => {
+        user_list.forEach((user) => {
             let user_option = $("<option/>", {
                 value: user.eppn,
                 text: user.firstName + " " + user.lastName,
@@ -473,7 +511,7 @@ export class InterfaceController {
     populate_course_admins(user_list, admin_list) {
         $(this.class_constants.course_admins_list).empty();
 
-        user_list.forEach(user => {
+        user_list.forEach((user) => {
             let user_option = $("<option/>", {
                 value: user.eppn,
                 text: user.firstName + " " + user.lastName,
@@ -500,7 +538,15 @@ export class InterfaceController {
         let data = await this.state.api_data.works_data.get_work_data();
         if (data.status == "ok") {
             // set the deep link
-            $.address.value("get_work/" + this.state.selected_course + "/" + this.state.selected_creator + "/" + this.state.selected_work);
+            // TODO:
+            $.address.value(
+                "get_work/" +
+                    this.state.selected_course +
+                    "/" +
+                    this.state.selected_creator +
+                    "/" +
+                    this.state.selected_work
+            );
 
             // TODO:
             await this.build_html_file(data.data);
@@ -519,13 +565,18 @@ export class InterfaceController {
             let permissions_list = await this.state.api_data.works_data.get_admins_of_work();
             $("#replies").attr("isCurrentUserAdmin", false); // initially, reset to false
             for (let i = 0; i < permissions_list["admins"].length; i++) {
-                if (this.state.current_user.eppn == permissions_list["admins"][i]) {
+                if (
+                    this.state.current_user.eppn ==
+                    permissions_list["admins"][i]
+                ) {
                     $("#replies").attr("isCurrentUserAdmin", true);
                     break;
                 }
             }
         } else {
-            this.toast.create_toast("Error loading work. \n" + permissions_list.data);
+            this.toast.create_toast(
+                "Error loading work. \n" + permissions_list.data
+            );
 
             // work doesn't exist so load home
             $("#home").click();
@@ -552,35 +603,19 @@ export class InterfaceController {
         let titleAndTip = createWorkTitle(this.state.selected_work);
 
         let litDiv = $("<div/>", {
-            "id": "litDiv"
-        });
-
-        let metaChar = $("<meta/>", {
-            "charset": "utf-8"
-        });
-
-        let metaName = $("<meta/>", {
-            "name": "viewport",
-            "content": 'width=device-width, initial-scale=1.0'
-        });
-
-        let link = $("<link/>", {
-            rel: "stylesheet",
-            type: "text/css",
-            media: "only screen",
-            href: "css/style.css"
+            id: "litDiv",
+            // style: "",
         });
 
         let preText = $("<div/>", {
-            "id": "textSpace"
+            id: "textSpace",
         });
 
         preText.html(lit_data);
-        litDiv.append(metaChar, metaName, link, preText);
+        litDiv.append(preText);
         titleAndTip[0].prepend(titleAndTip[1]);
         $("#text").append(titleAndTip[0], litDiv);
         $("#text").append(footer);
-
 
         /**
          * TODO: Get the comment data/highlights for the currently selected work
