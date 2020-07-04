@@ -6,7 +6,6 @@ import {
     APIHandler,
     Data,
     Toast,
-    // Address,
     Shibboleth,
     QueryString,
 } from "./Modules/_ModuleLoader.js";
@@ -28,7 +27,6 @@ import {
      * Address object must be created before any awaits.
      * Otherwise its event listeners do not fire off.
      */
-    // state.address = new Address({ state: state });
     state.query_string = new QueryString({ state: state });
 
     /**
