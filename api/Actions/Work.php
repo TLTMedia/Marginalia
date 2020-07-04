@@ -95,10 +95,15 @@ class CreateWork
         }
 
         /**
+         * Spaces in the work name break stuff.
+         */
+        $work = str_replace(" ", "_", $work);
+
+        /**
          * Create the user directory if it doesn't exist
          */
         if (!file_exists($this->path . $creator)) {
-            $this->recurse_copy($this->skeletonUser, $this->path . $creator);
+            $this->__recurse_copy($this->skeletonUser, $this->path . $creator);
         }
 
         $pathOfWork = $this->path . "" . $creator . "/works/" . $work;
@@ -143,7 +148,7 @@ class CreateWork
         $errorOutPath    = $pathOfWork . "/mammoth.error.txt";
 
         $execString = "/home1/tltsecure/.pyenv/versions/anaconda3-5.3.1/bin/python3 /home1/tltsecure/.pyenv/versions/anaconda3-5.3.1/bin/mammoth $tmpFilePath $destinationPath --style-map=$mammothStyle &> $errorOutPath";
-        echo $execString;
+        // echo $execString;
         system($execString);
 
         /**
@@ -151,7 +156,12 @@ class CreateWork
          */
         unlink($tmpFilePath);
 
-        $result = file_get_contents($errorOutPath);
+        try {
+            $result = file_get_contents($errorOutPath);
+        } catch (Exception $e) {
+            $result = "";
+        }
+
         // unlink("${tmpFilePath}.out.txt");
 
         /**
@@ -215,7 +225,7 @@ class CreateWork
         while (false !== ($file = readdir($dir))) {
             if ($file != '.' && $file != '..') {
                 if (is_dir($src . '/' . $file)) {
-                    $this->recurse_copy($src . '/' . $file, $dst . '/' . $file);
+                    $this->__recurse_copy($src . '/' . $file, $dst . '/' . $file);
                 } else {
                     copy($src . '/' . $file, $dst . '/' . $file);
                 }
