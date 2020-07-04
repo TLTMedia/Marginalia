@@ -41,22 +41,29 @@ init = async ({ state = state, ui = ui, api = api }) => {
     let page_current = path_current.split("/").pop();
     if (page_current == state.deep_link_page) {
         // Show the deep linked page
-        // First show the sub-menu
-        ui.show_sub_menu();
 
-        // Then hide the main cardbox
-        ui.hide_main_cardbox();
-
-        // Then set the selected creator and work of the work from the deep link
+        // Get the meta info from the query string
         let deep_linked_meta = state.query_string.get_meta_from_query();
-        state.selected_course = deep_linked_meta.course;
-        state.selected_creator = deep_linked_meta.creator;
-        state.selected_work = deep_linked_meta.work;
+        if (deep_linked_meta == null) {
+            // Just show the home page then
+            ui.show_home_page();
+        } else {
+            // First show the sub-menu
+            ui.show_sub_menu();
 
-        /**
-         * Used to be selectLit, renders the currently selected literature.
-         */
-        ui.render_literature();
+            // Then hide the main cardbox
+            ui.hide_main_cardbox();
+
+            // Then set the selected creator and work of the work from the deep link
+            state.selected_course = deep_linked_meta.course;
+            state.selected_creator = deep_linked_meta.creator;
+            state.selected_work = deep_linked_meta.work;
+
+            /**
+             * Used to be selectLit, renders the currently selected literature.
+             */
+            ui.render_literature();
+        }
     } else {
         // Just show the home page then
         ui.show_home_page();

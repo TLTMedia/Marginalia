@@ -47,7 +47,7 @@ export class QueryString {
 
         // Check if any of them were null
         if (course == null || creator == null || work == null) {
-            console.error(
+            console.warn(
                 "unable to parse query parameters when should of been able to"
             );
 
