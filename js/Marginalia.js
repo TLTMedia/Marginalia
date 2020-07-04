@@ -24,6 +24,11 @@ import {
     const state = {};
 
     /**
+     * The name of the deeplink html page
+     */
+    state.deep_link_page = "work.html";
+
+    /**
      * Address object must be created before any awaits.
      * Otherwise its event listeners do not fire off.
      */

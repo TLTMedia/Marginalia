@@ -32,4 +32,32 @@ export class QueryString {
 
         history.pushState(key_value_pairs, "", new_link);
     }
+
+    /**
+     * Get the course, creator, work from the current query string.
+     * Returns null on error
+     */
+    get_meta_from_query() {
+        let parse_url = new URL(window.location.href);
+
+        // Parse out the needed values
+        let course = parse_url.searchParams.get("course");
+        let creator = parse_url.searchParams.get("creator");
+        let work = parse_url.searchParams.get("work");
+
+        // Check if any of them were null
+        if (course == null || creator == null || work == null) {
+            console.error(
+                "unable to parse query parameters when should of been able to"
+            );
+
+            return null;
+        }
+
+        return {
+            course: course,
+            creator: creator,
+            work: work,
+        };
+    }
 }

@@ -37,38 +37,41 @@ init = async ({ state = state, ui = ui, api = api }) => {
     /**
      * Determine whether the first thing we load is "home" or a doc via deep link
      */
-    if (!state.hasOwnProperty("deep_link")) {
-        ui.show_home_page();
+    let path_current = window.location.pathname;
+    let page_current = path_current.split("/").pop();
+    if (page_current == state.deep_link_page) {
+        // Show the deep linked page
+        // First show the sub-menu
+        ui.show_sub_menu();
+
+        // Then hide the main cardbox
+        ui.hide_main_cardbox();
+
+        // Then set the selected creator and work of the work from the deep link
+        let deep_linked_meta = state.query_string.get_meta_from_query();
+        state.selected_course = deep_linked_meta.course;
+        state.selected_creator = deep_linked_meta.creator;
+        state.selected_work = deep_linked_meta.work;
+
+        /**
+         * Used to be selectLit, renders the currently selected literature.
+         */
+        ui.render_literature();
     } else {
-        if (state.deep_link.function == "show_work") {
-            // show the sub-menu
-            ui.show_sub_menu();
-
-            // hide the main cardbox
-            ui.hide_main_cardbox();
-
-            // set the selected creator and work of the work from the deep link
-            state.selected_course = decodeURI(state.deep_link.parameters[0]);
-            state.selected_creator = state.deep_link.parameters[1];
-            state.selected_work = decodeURI(state.deep_link.parameters[2]);
-
-            /**
-             * Used to be selectLit, renders the currently selected literature.
-             */
-            ui.render_literature();
-        } else if (state.deep_link.function == "show_home") {
-            ui.show_home_page();
-        }
+        // Just show the home page then
+        ui.show_home_page();
     }
 
     /**
      * Temporarily leave these functions at the bottom of init()
      */
-    $(window).on("resize", function () {
-        let stageWidth = $(window).width();
-        // $("#text-wrapper").css("height", $("#litDiv").height() + "px");
-        $("html").css("font-size", (stageWidth / 60) + "px");
-    }).trigger("resize");
+    $(window)
+        .on("resize", function () {
+            let stageWidth = $(window).width();
+            // $("#text-wrapper").css("height", $("#litDiv").height() + "px");
+            $("html").css("font-size", stageWidth / 60 + "px");
+        })
+        .trigger("resize");
 
     /**
      * Prompt if they want to leave the page when clicking on a link in the work
@@ -87,7 +90,7 @@ init = async ({ state = state, ui = ui, api = api }) => {
     /**
      * Global event necessary to facilitate highlighting, probably should be in its own events file...
      */
-    $(document).on("DOMNodeInserted", e => {
+    $(document).on("DOMNodeInserted", (e) => {
         const classes = $(e.target).attr("class");
         if (classes && classes.match(/^hl_/)) {
             $(e.target).addClass("commented-selection");
@@ -131,15 +134,15 @@ init = async ({ state = state, ui = ui, api = api }) => {
             multiple: true,
         });
     });
-}
+};
 
 function createWorkTitle(textChosen) {
     let workTitle = $("<div/>", {
-        id: "workTitle"
+        id: "workTitle",
     });
     let workTitleSpan = $("<span/>", {
         id: "workTitleSpan",
-        text: decodeURIComponent(textChosen)
+        text: decodeURIComponent(textChosen),
     });
     workTitle.append(workTitleSpan);
     //$("#text").append(workTitle);
@@ -149,97 +152,135 @@ function createWorkTitle(textChosen) {
 
 function createTips() {
     let tips = $("<div/>", {
-        id: "tips"
+        id: "tips",
     });
     let icon = $("<i/>", {
         class: "material-icons tipsIcon",
-        text: "help"
+        text: "help",
     });
     let text = $("<span/>", {
-        class: "tipsText"
+        class: "tipsText",
     });
-    text.html("<span style = 'color : #8B0000'>Red</span> comments with underline are unapproved comments.<span style = 'color : #FF4500'>Orange</span> comments are comments with unapproved reply in the thread.")
+    text.html(
+        "<span style = 'color : #8B0000'>Red</span> comments with underline are unapproved comments.<span style = 'color : #FF4500'>Orange</span> comments are comments with unapproved reply in the thread."
+    );
     tips.append(icon, text);
-    return tips
+    return tips;
     //workTitle.prepend(tips);
 }
 
 //call this function to enable the clickEvent on .commented-selection
 function allowClickOnComment(textChosen, selected_eppn) {
     //highlight on top of other's comment will bring them to the reply box
-    $(".commented-selection").off().on("click", function (evt) {
-        console.log(evt)
-        evt.stopPropagation();
-        data = {
-            "work": textChosen,
-            "author": selected_eppn,
-            "commentCreator": $(this).attr("creator"),
-            "commentId": $(this).attr("commentId"),
-            "commentType": $(this).attr("typeof"),
-            "evtPageX": evt.pageX,
-            "evtPageY": evt.pageY,
-            "evtClientY": evt.clientY
-        }
+    $(".commented-selection")
+        .off()
+        .on("click", function (evt) {
+            console.log(evt);
+            evt.stopPropagation();
+            data = {
+                work: textChosen,
+                author: selected_eppn,
+                commentCreator: $(this).attr("creator"),
+                commentId: $(this).attr("commentId"),
+                commentType: $(this).attr("typeof"),
+                evtPageX: evt.pageX,
+                evtPageY: evt.pageY,
+                evtClientY: evt.clientY,
+            };
 
-        let selectedRange = rangy.getSelection().getRangeAt(0).nativeRange;
-        let prevElementClass = evt.target.previousElementSibling.attributes.class.value;
-        let prevElementCommentId = evt.target.previousElementSibling.attributes.commentId.value;
-        let prevElement = $("." + prevElementClass + "[commentId = '" + prevElementCommentId + "']");
+            let selectedRange = rangy.getSelection().getRangeAt(0).nativeRange;
+            let prevElementClass =
+                evt.target.previousElementSibling.attributes.class.value;
+            let prevElementCommentId =
+                evt.target.previousElementSibling.attributes.commentId.value;
+            let prevElement = $(
+                "." +
+                    prevElementClass +
+                    "[commentId = '" +
+                    prevElementCommentId +
+                    "']"
+            );
 
-        let prev_curr_divs = {
-            "curr_startDiv": undefined,
-            "prev_endDiv": undefined,
-            "prev_startDiv": undefined
-        };
-        //prevElement is a startDiv (this will be curr_startDiv)
-        if (prevElement.hasClass("startDiv")) {
-            prev_curr_divs["curr_startDiv"] = prevElement;
-            prev_curr_divs["prev_endDiv"] = prevElement.prev();
-            prev_curr_divs["prev_startDiv"] = $(".startDiv" + "[commentId = '" + prev_curr_divs["prev_endDiv"].attr("commentId") + "']");
-        }
-        //prevElement is a endDiv (this will be prev_endDiv)
-        else {
-            prev_curr_divs["prev_endDiv"] = prevElement;
-            prev_curr_divs["prev_startDiv"] = $(".startDiv" + "[commentId = '" + prev_curr_divs["prev_endDiv"].attr("commentId") + "']");
-        }
-        console.log(prev_curr_divs)
-        let newTextIndex;
-        if (prev_curr_divs["curr_startDiv"] == undefined) {
-            newTextIndex = parseInt(selectedRange.endOffset) + parseInt(prev_curr_divs["prev_endDiv"].attr("endIndex"));
-        }
-        else {
-            newTextIndex = parseInt(selectedRange.endOffset) + parseInt(prev_curr_divs["curr_startDiv"].attr("startIndex"));
-        }
-        //clickOnComment(data);
-        console.log(newTextIndex)
-        clickOnCommentByIndex(newTextIndex, evt);
-    });
+            let prev_curr_divs = {
+                curr_startDiv: undefined,
+                prev_endDiv: undefined,
+                prev_startDiv: undefined,
+            };
+            //prevElement is a startDiv (this will be curr_startDiv)
+            if (prevElement.hasClass("startDiv")) {
+                prev_curr_divs["curr_startDiv"] = prevElement;
+                prev_curr_divs["prev_endDiv"] = prevElement.prev();
+                prev_curr_divs["prev_startDiv"] = $(
+                    ".startDiv" +
+                        "[commentId = '" +
+                        prev_curr_divs["prev_endDiv"].attr("commentId") +
+                        "']"
+                );
+            }
+            //prevElement is a endDiv (this will be prev_endDiv)
+            else {
+                prev_curr_divs["prev_endDiv"] = prevElement;
+                prev_curr_divs["prev_startDiv"] = $(
+                    ".startDiv" +
+                        "[commentId = '" +
+                        prev_curr_divs["prev_endDiv"].attr("commentId") +
+                        "']"
+                );
+            }
+            console.log(prev_curr_divs);
+            let newTextIndex;
+            if (prev_curr_divs["curr_startDiv"] == undefined) {
+                newTextIndex =
+                    parseInt(selectedRange.endOffset) +
+                    parseInt(prev_curr_divs["prev_endDiv"].attr("endIndex"));
+            } else {
+                newTextIndex =
+                    parseInt(selectedRange.endOffset) +
+                    parseInt(
+                        prev_curr_divs["curr_startDiv"].attr("startIndex")
+                    );
+            }
+            //clickOnComment(data);
+            console.log(newTextIndex);
+            clickOnCommentByIndex(newTextIndex, evt);
+        });
 }
 
-function highlightText({startIndex, endIndex, commentType, eppn, hash, approved}){
+function highlightText({
+    startIndex,
+    endIndex,
+    commentType,
+    eppn,
+    hash,
+    approved,
+}) {
     let range = rangy.createRange();
-    range.selectCharacters(document.getElementById("textSpace"), startIndex, endIndex);
+    range.selectCharacters(
+        document.getElementById("textSpace"),
+        startIndex,
+        endIndex
+    );
     let area = rangy.createClassApplier("commented-selection", {
         useExistingElements: false,
         elementAttributes: {
-            "commentId": hash,
-            "creator": eppn,
-            "typeof": commentType,
-            "approved": approved
-        }
+            commentId: hash,
+            creator: eppn,
+            typeof: commentType,
+            approved: approved,
+        },
     });
     area.applyToRange(range);
     $("<param/>", {
-        class: 'startDiv',
+        class: "startDiv",
         commentId: hash,
         startIndex: startIndex,
-        colorId: 0
+        colorId: 0,
     }).insertBefore(".commented-selection" + "[commentId = '" + hash + "']");
     $("<param/>", {
-        class: 'endDiv',
+        class: "endDiv",
         commentId: hash,
         endIndex: endIndex,
-        colorId: 0
+        colorId: 0,
     }).insertAfter(".commented-selection" + "[commentId = '" + hash + "']");
 }
 
@@ -273,7 +314,9 @@ function isCurrentUserSelectedUser(selected_eppn, needNotification) {
         return true;
     } else {
         if (needNotification) {
-            launchToastNotifcation("You don't have permission to do this action");
+            launchToastNotifcation(
+                "You don't have permission to do this action"
+            );
         }
         return false;
     }
@@ -281,10 +324,10 @@ function isCurrentUserSelectedUser(selected_eppn, needNotification) {
 
 //HELPER FUNCTION: Make sure the dialog don't exceed the window
 function adjustDialogPosition(data, width, height, marginX, marginY) {
-    let newLeft = (data["evtPageX"] - marginX) + "px";
-    let newTop = (data["evtPageY"] + marginY) + "px";
+    let newLeft = data["evtPageX"] - marginX + "px";
+    let newTop = data["evtPageY"] + marginY + "px";
     if (data["evtClientY"] + (marginY + height) > $(window).height()) {
-        newTop = (data["evtPageY"] - (marginY + height)) + "px";
+        newTop = data["evtPageY"] - (marginY + height) + "px";
     }
 
     if (data["evtPageX"] + width > $(window).width()) {
@@ -311,11 +354,11 @@ function escapeHTMLPtag(text) {
 }
 
 //HELPER FUNCTION
-function escape_all_HTML_tag(text){
+function escape_all_HTML_tag(text) {
     let removePTag = text.replace(/<p>(.*)<\/p>/, ` $1\n`);
     let removePairTag = removePTag.replace(/<(\w+)>(.*)<\/\1>/, `$2`);
     let removeSingleTag = removePairTag.replace(/<\w+>/, ``);
-    console.log(removePTag,removePairTag,removeSingleTag)
+    console.log(removePTag, removePairTag, removeSingleTag);
     return removeSingleTag;
 }
 
@@ -334,21 +377,20 @@ function removeCommentContextMenu() {
 function filterMultipleComment(api_returned_data, type, commenter) {
     let returned_data = [];
     for (i in api_returned_data) {
-        let targetType = 0, targetCommenter = 0;
+        let targetType = 0,
+            targetCommenter = 0;
         if (type != "show-all-types") {
             if (api_returned_data[i]["commentType"].toLowerCase() == type) {
                 targetType = true;
             }
-        }
-        else {
+        } else {
             targetType = true;
         }
         if (commenter != "show-all-eppns") {
             if (api_returned_data[i]["eppn"].split("@")[0] == commenter) {
                 targetCommenter = true;
             }
-        }
-        else {
+        } else {
             targetCommenter = true;
         }
         if (targetType && targetCommenter) {
@@ -358,48 +400,74 @@ function filterMultipleComment(api_returned_data, type, commenter) {
     return returned_data;
 }
 
-
 /** TODO this function assumes there is an API that returns all the comments data from the index user clicked
-  * if there are more than two comments exist at that index, create a menu of comments (with type and creator)
-  *  if (comment.startIndex < textIndex <= comment.endIndex) return this comment
-  */
+ * if there are more than two comments exist at that index, create a menu of comments (with type and creator)
+ *  if (comment.startIndex < textIndex <= comment.endIndex) return this comment
+ */
 function clickOnCommentByIndex(textIndex, evt) {
     removeCommentContextMenu();
     $("#replies").parent().hide();
     data = {
-        "work": TMP_STATE.selected_work,
-        "creator": TMP_STATE.selected_creator,
-        "index": textIndex
+        work: TMP_STATE.selected_work,
+        creator: TMP_STATE.selected_creator,
+        index: textIndex,
     };
 
     API.request({
         endpoint: "comments_within_index",
         method: "GET",
-        data: data
+        data: data,
     }).then((api_returned_data) => {
-        console.log(api_returned_data)
+        console.log(api_returned_data);
         let targetComments = [];
         //api_returned_data include everytype, if the filter is seleceted we remove the different types
         if (TMP_STATE.filters != undefined) {
-            let targetType = TMP_STATE.filters.selected_comment_filter, targetCommenter = TMP_STATE.filters.selected_author_filter;
-            targetComments = filterMultipleComment(api_returned_data, targetType, targetCommenter);
-            console.log(targetComments)
-        }
-        else {
+            let targetType = TMP_STATE.filters.selected_comment_filter,
+                targetCommenter = TMP_STATE.filters.selected_author_filter;
+            targetComments = filterMultipleComment(
+                api_returned_data,
+                targetType,
+                targetCommenter
+            );
+            console.log(targetComments);
+        } else {
             targetComments = api_returned_data;
         }
         // more than one comment exist
         if (targetComments.length > 1) {
-            let selectedCommentId = evt.currentTarget.attributes.commentId.value;
+            let selectedCommentId =
+                evt.currentTarget.attributes.commentId.value;
             let comments = {};
             for (i in targetComments) {
-                name = targetComments[i]["eppn"] + " " + targetComments[i]["commentType"];
-                let colorId = $(".startDiv" + "[ commentId = " + targetComments[i]["hash"] + "]").attr("colorId");
-                let colorClass = { 0: "defaultColorComments", 1: "colorOneComments", 2: "colorTwoComments", 3: "colorThreeComments", 4: "colorFourComments" }
-                comments[targetComments[i]["hash"]] = { name: name, className: colorClass[colorId] }
+                name =
+                    targetComments[i]["eppn"] +
+                    " " +
+                    targetComments[i]["commentType"];
+                let colorId = $(
+                    ".startDiv" +
+                        "[ commentId = " +
+                        targetComments[i]["hash"] +
+                        "]"
+                ).attr("colorId");
+                let colorClass = {
+                    0: "defaultColorComments",
+                    1: "colorOneComments",
+                    2: "colorTwoComments",
+                    3: "colorThreeComments",
+                    4: "colorFourComments",
+                };
+                comments[targetComments[i]["hash"]] = {
+                    name: name,
+                    className: colorClass[colorId],
+                };
             }
             // add class to the clicked comment
-            $(".commented-selection" + "[commentId = " + selectedCommentId + "]").addClass("clicked_span btn btn-neutral");
+            $(
+                ".commented-selection" +
+                    "[commentId = " +
+                    selectedCommentId +
+                    "]"
+            ).addClass("clicked_span btn btn-neutral");
             $(".clicked_span").append("<span id = 'context_container'><span>");
             let contextMenu = $("#textSpace > p").contextMenu({
                 selector: ".clicked_span",
@@ -422,27 +490,31 @@ function clickOnCommentByIndex(textIndex, evt) {
                         creator: TMP_STATE.selected_creator, // this is the work author/creator
                         work: TMP_STATE.selected_work,
                         commenter: commenter,
-                        hash: key
+                        hash: key,
                     };
                     // data_for_replybox {work, author, commentCreator: eppn, commentId: hash, commentType: type, evtPagex, evtPagey, evtCliemtY}
                     let data_for_replybox = {
-                        "work": TMP_STATE.selected_work,
-                        "author": TMP_STATE.selected_creator,
-                        "commentCreator": commenter,
-                        "commentId": id,
-                        "commentType": type,
-                        "evtPageX": evt.pageX,
-                        "evtPageY": evt.pageY,
-                        "evtClientY": evt.clientY
-                    }
+                        work: TMP_STATE.selected_work,
+                        author: TMP_STATE.selected_creator,
+                        commentCreator: commenter,
+                        commentId: id,
+                        commentType: type,
+                        evtPageX: evt.pageX,
+                        evtPageY: evt.pageY,
+                        evtClientY: evt.clientY,
+                    };
                     console.log(comment_data, data_for_replybox);
 
                     (async () => {
-                        let resp = await TMP_STATE.api_data.comments_data.get_comment_chain(comment_data);
+                        let resp = await TMP_STATE.api_data.comments_data.get_comment_chain(
+                            comment_data
+                        );
                         readThreads(resp);
                     })();
                     removeCommentContextMenu();
-                    TMP_UI.replybox_controller.displayReplyBox(data_for_replybox);
+                    TMP_UI.replybox_controller.displayReplyBox(
+                        data_for_replybox
+                    );
                 },
                 items: comments,
             });
@@ -457,34 +529,41 @@ function clickOnCommentByIndex(textIndex, evt) {
                 creator: TMP_STATE.selected_creator, // this is the work author/creator
                 work: TMP_STATE.selected_work,
                 commenter: targetComments[0]["eppn"],
-                hash: targetComments[0]["hash"]
+                hash: targetComments[0]["hash"],
             };
             let data_for_replybox = {
-                "work": TMP_STATE.selected_work,
-                "author": TMP_STATE.selected_creator,
-                "commentCreator": targetComments[0]["eppn"],
-                "commentId": targetComments[0]["hash"],
-                "commentType": targetComments[0]["commentType"],
-                "evtPageX": evt.pageX,
-                "evtPageY": evt.pageY,
-                "evtClientY": evt.clientY
+                work: TMP_STATE.selected_work,
+                author: TMP_STATE.selected_creator,
+                commentCreator: targetComments[0]["eppn"],
+                commentId: targetComments[0]["hash"],
+                commentType: targetComments[0]["commentType"],
+                evtPageX: evt.pageX,
+                evtPageY: evt.pageY,
+                evtClientY: evt.clientY,
             };
 
             (async () => {
-                let resp = await TMP_STATE.api_data.comments_data.get_comment_chain(comment_data);
+                let resp = await TMP_STATE.api_data.comments_data.get_comment_chain(
+                    comment_data
+                );
                 readThreads(resp);
             })();
 
             TMP_UI.replybox_controller.displayReplyBox(data_for_replybox);
         }
-        $(window).on("click",()=>{
+        $(window).on("click", () => {
             removeCommentContextMenu();
         });
     });
 }
 
 //read the thread (threads is the reply array, parentId is the hash, parentReplyBox is the replyBox returned by the showReply())
-function readThreads(threads, work = TMP_STATE.selected_work, workCreator = TMP_STATE.selected_creator, parentId = null) {
+function readThreads(
+    threads,
+    work = TMP_STATE.selected_work,
+    workCreator = TMP_STATE.selected_creator,
+    parentId = null
+) {
     if (threads.length == 0) {
         return;
     } else {
@@ -496,12 +575,14 @@ function readThreads(threads, work = TMP_STATE.selected_work, workCreator = TMP_
                 lastName: threads[i].lastName,
                 public: threads[i].public,
                 type: threads[i].commentType,
-                commentText: btoa(unescape(encodeURIComponent(threads[i].commentText))),
+                commentText: btoa(
+                    unescape(encodeURIComponent(threads[i].commentText))
+                ),
                 hash: threads[i].hash,
                 approved: threads[i].approved,
                 parentId: parentId,
                 work: work,
-                workCreator: workCreator
+                workCreator: workCreator,
             };
 
             TMP_UI.replybox_controller.createReplies(dataForReplies);
@@ -516,10 +597,10 @@ function createCommentData() {
     let comments = $(".commented-selection");
     let commentData = [];
     for (var i = 0; i < comments.length; i++) {
-        let commentHash = comments[i]['attributes']['commentId']['value'];
+        let commentHash = comments[i]["attributes"]["commentId"]["value"];
         let c = {
-            hash: commentHash
-        }
+            hash: commentHash,
+        };
         let commentExist = false;
         for (var j = 0; j < commentData.length; j++) {
             if (commentData[j].hash == commentHash) {
@@ -538,7 +619,7 @@ function launchToastNotifcation(data) {
     let message = {
         message: data,
     };
-    let snackbarContainer = document.querySelector('.mdl-js-snackbar');
+    let snackbarContainer = document.querySelector(".mdl-js-snackbar");
     snackbarContainer.MaterialSnackbar.showSnackbar(message);
     snackbarContainer.MaterialSnackbar.showSnackbar(message);
 }
