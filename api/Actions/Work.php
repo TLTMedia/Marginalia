@@ -81,7 +81,7 @@ class CreateWork
     /**
      * Initialization function
      */
-    public function init($creator, $work, $privacy, $course, $firstName, $lastName, $tmpFilePath)
+    public function init($creator, $work, $privacy, $course, $firstName, $lastName, $tmpFilePath, $mammothStyle)
     {
         /**
          * These are being read in as strings when sent over formData.
@@ -106,7 +106,7 @@ class CreateWork
         if (file_exists($pathOfWork)) {
             return json_encode(array(
                 "status"  => "error",
-                "message" => "work already exists",
+                "message" => "you have a document with that name already. Try using a different name.",
             ));
         } else {
             if (!mkdir($pathOfWork, 0777, true)) {
@@ -124,23 +124,35 @@ class CreateWork
             if (!mkdir($pathOfWork . "/" . $directory, 0777, true)) {
                 return json_encode(array(
                     "status"  => "error",
-                    "message" => "unabled to create directory: " . $directory,
+                    "message" => "unable to create directory: " . $directory,
                 ));
             }
         }
+
+        /**
+         * Copy the uploaded file
+         */
+        copy($tmpFilePath, $pathOfWork . "/original.docx");
 
         /**
          * Creating the index.html file with Mammoth
          * NOTE: I'm specifying the python to execute mammoth with for a reason.
          * See: https://github.com/SBUtltmedia/Marginalia/issues/51
          */
-        $destinationPath = escapeshellarg($pathOfWork . "/index.html");
-        $execString      = "/home1/tltsecure/.pyenv/shims/python /home1/tltsecure/.local/bin/mammoth $tmpFilePath $destinationPath 2>${tmpFilePath}.out.txt";
+        $destinationPath = "\"" . $pathOfWork . "/index.html" . "\"";
+        $errorOutPath    = $pathOfWork . "/mammoth.error.txt";
+
+        $execString = "/home1/tltsecure/.pyenv/versions/anaconda3-5.3.1/bin/python3 /home1/tltsecure/.pyenv/versions/anaconda3-5.3.1/bin/mammoth $tmpFilePath $destinationPath --style-map=$mammothStyle &> $errorOutPath";
+        echo $execString;
         system($execString);
+
+        /**
+         * Shouldn't be necessary, but on this system it kinda is...
+         */
         unlink($tmpFilePath);
 
-        $result = file_get_contents("${tmpFilePath}.out.txt");
-        unlink("${tmpFilePath}.out.txt");
+        $result = file_get_contents($errorOutPath);
+        // unlink("${tmpFilePath}.out.txt");
 
         /**
          * Creating the default permissions.json file
@@ -151,6 +163,7 @@ class CreateWork
         $permissions->admins[]           = $creator;
         $permissions->creator_first_name = $firstName;
         $permissions->creator_last_name  = $lastName;
+
         file_put_contents($pathOfWork . "/permissions.json", json_encode($permissions));
 
         /**
@@ -178,6 +191,7 @@ class CreateWork
         return json_encode(array(
             "status"  => "ok",
             "message" => "successfully created work: " . $work,
+            "raw"     => "tmp location: " . $tmpFilePath,
         ));
 
         if ($result != "") {
@@ -197,6 +211,7 @@ class CreateWork
     {
         $dir = opendir($src);
         @mkdir($dst);
+
         while (false !== ($file = readdir($dir))) {
             if ($file != '.' && $file != '..') {
                 if (is_dir($src . '/' . $file)) {
@@ -206,6 +221,7 @@ class CreateWork
                 }
             }
         }
+
         closedir($dir);
     }
 }

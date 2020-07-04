@@ -20,10 +20,16 @@ RewriteRule ^(.*)$ https://apps.tlt.stonybrook.edu/marginalia/shibboleth/index.h
 DirectoryIndex index.html
 Redirect /marginalia/index.html https://apps.tlt.stonybrook.edu/marginalia/shibboleth/index.html
 
-RewriteCond $0#%{REQUEST_URI} ([^#]*)#(.*)\1$
-RewriteRule ^.*$ - [E=CWD:%2]
+# Removed as of July 2020 Deeplink rewrite
+# RewriteCond $0#%{REQUEST_URI} ([^#]*)#(.*)\1$
+# RewriteRule ^.*$ - [E=CWD:%2]
+# RewriteRule ^works/(.*)$ %{ENV:CWD}?work=$1 [R=301,NC,L]
 
-RewriteRule ^works/(.*)$ %{ENV:CWD}?work=$1 [R=301,NC,L]
+# Added as of July 2020 Deeplink rewrite
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^work.html$ /marginalia/index.htm [QSA,L]
+</IfModule>
 
 # Uncomment to display php errors in the log
 php_flag display_startup_errors on

@@ -1,33 +1,54 @@
 <?php
+
+/**
+ * Allow requests from any host
+ */
 header("Access-Control-Allow-Origin: *");
 
+/**
+ * Enable error reporting
+ */
 ini_set("display_errors", 1);
 ini_set("display_startup_errors", 1);
 error_reporting(E_ALL);
 
-// Necessary b/c of server PHP config
+/**
+ * Necessary b/c of server PHP config
+ */
 date_default_timezone_set("America/New_York");
 
 require "../vendor/autoload.php";
 require "../Common/Parameters.php";
 require "../Common/APIResponse.php";
 
-// Create the Object Variables
+/**
+ * Create the Object Variables
+ */
 $parameters  = new Parameters;
 $responseFmt = new APIResponse;
 
-// Define String Constants
+/**
+ * Define String Constants
+ */
 $PATH          = "../../users/";
 $PATH_COURSES  = "../../courses/";
 $SKELETON_PATH = "../../SKELETON_USER/";
 
-// Rereference Shibboleth Globals used
-// Provides a bit of code-space away from Shibboleth,
-// so that we can use other auth types in the future...
-// Relocates hard coded $_SERVER[...] vars in the code below to up top here.
+/**
+ * Mammoth Style Map File Path
+ */
+$MAMMOTH_STYLE = "../../mammoth_style.txt";
+
+/**
+ * Rereference Shibboleth Globals used
+ * Provides a bit of code-space away from Shibboleth,
+ * so that we can use other auth types in the future...
+ * Relocates hard coded $_SERVER[...] vars in the code below to up top here.
+ */
 $authUniqueId  = $_SERVER["eppn"];
 $authFirstName = $_SERVER["nickname"];
 $authLastName  = $_SERVER["sn"];
+
 /**
  * Prepare App
  */
@@ -59,7 +80,9 @@ $app->view->parserOptions = array(
 );
 $app->view->parserExtensions = array(new \Slim\Views\TwigExtension());
 
-// Define routes
+/**
+ * Default index page route
+ */
 $app->get("/", function () use ($app) {
     $app->log->info("Marginalia '/' route called");
     $app->render("index.html");
@@ -360,7 +383,7 @@ $app->post("/set_require_approval", function () use ($app, $PATH, $parameters, $
 /**
  * Create a new work
  */
-$app->post("/create_work", function () use ($app, $PATH, $PATH_COURSES, $SKELETON_PATH, $parameters, $authUniqueId, $authFirstName, $authLastName) {
+$app->post("/create_work", function () use ($app, $PATH, $PATH_COURSES, $SKELETON_PATH, $MAMMOTH_STYLE, $parameters, $authUniqueId, $authFirstName, $authLastName) {
     $data = $app->request->post();
     $parameters->paramCheck($data, array(
         "work", "privacy",
@@ -373,6 +396,7 @@ $app->post("/create_work", function () use ($app, $PATH, $PATH_COURSES, $SKELETO
             "status"  => "error",
             "message" => "no file appears to have been uploaded",
         ));
+
         exit;
     }
 
@@ -386,7 +410,8 @@ $app->post("/create_work", function () use ($app, $PATH, $PATH_COURSES, $SKELETO
         $data["course"],
         $authFirstName,
         $authLastName,
-        $tempFile
+        $tempFile,
+        $MAMMOTH_STYLE
     );
 });
 

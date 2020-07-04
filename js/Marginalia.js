@@ -1,7 +1,15 @@
 /**
  * Initialization of Marginalia scripts begin here
  */
-import { InterfaceController, APIHandler, Data, Toast, Address, Shibboleth } from './Modules/_ModuleLoader.js';
+import {
+    InterfaceController,
+    APIHandler,
+    Data,
+    Toast,
+    // Address,
+    Shibboleth,
+    QueryString,
+} from "./Modules/_ModuleLoader.js";
 
 (async () => {
     /**
@@ -15,11 +23,13 @@ import { InterfaceController, APIHandler, Data, Toast, Address, Shibboleth } fro
      * Our main state for Marginalia.
      */
     const state = {};
+
     /**
      * Address object must be created before any awaits.
      * Otherwise its event listeners do not fire off.
      */
-    state.address = new Address({ state: state });
+    // state.address = new Address({ state: state });
+    state.query_string = new QueryString({ state: state });
 
     /**
      * Create the Quill editor
@@ -33,21 +43,21 @@ import { InterfaceController, APIHandler, Data, Toast, Address, Shibboleth } fro
                 ["blockquote", "code-block"],
                 ["image"],
             ],
-        }
+        },
     });
 
     /**
      * Add a function to Quill - to get the raw HTML of the textarea.
      */
     Quill.prototype.getHTML = function () {
-        return this.container.querySelector('.ql-editor').innerHTML;
+        return this.container.querySelector(".ql-editor").innerHTML;
     };
 
     /**
      * Adds a function to Quill - to set the raw HTML of the textarea.
      */
     Quill.prototype.setHTML = function (html) {
-        this.container.querySelector('.ql-editor').innerHTML = html;
+        this.container.querySelector(".ql-editor").innerHTML = html;
     };
 
     /**
@@ -58,7 +68,7 @@ import { InterfaceController, APIHandler, Data, Toast, Address, Shibboleth } fro
     /**
      * Creates the API handler object which is responsible for dealing with all of Marginalia's API calls;
      * This object should only be used in "Data" Class/Objects
-     * 
+     *
      * ... now pass in toast so that we don't need to call the global launchToastNotification().
      * NOTE: this reference to `toast` is unconventional since all other references originate from InterfaceController.toast
      */

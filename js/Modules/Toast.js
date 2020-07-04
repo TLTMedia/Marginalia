@@ -27,7 +27,9 @@ export class Toast {
             type = this.TOAST_TYPES.SUCCESS;
         } else {
             type = this.TOAST_TYPES.INFO;
-            console.warn("Warning: Unknown specified api object response status");
+            console.warn(
+                "Warning: Unknown specified api object response status"
+            );
         }
 
         this.create_toast(message, type);
@@ -38,23 +40,24 @@ export class Toast {
      */
     create_toast(message, type = "info") {
         toastr.options = {
-            "closeButton": true,
-            "debug": false,
-            "newestOnTop": false,
-            "progressBar": false,
-            "positionClass": "toast-bottom-center",
+            closeButton: true,
+            debug: false,
+            newestOnTop: false,
+            progressBar: false,
+            positionClass: "toast-bottom-center",
             // "preventDuplicates": true,
-            "onclick": null,
-            "showDuration": "300",
-            "hideDuration": "1000",
-            "timeOut": "4000",
-            "extendedTimeOut": "1000",
-            "showEasing": "swing",
-            "hideEasing": "linear",
-            "showMethod": "fadeIn",
-            "hideMethod": "fadeOut"
+            onclick: null,
+            showDuration: "300",
+            hideDuration: "1000",
+            timeOut: "4000",
+            extendedTimeOut: "1000",
+            showEasing: "swing",
+            hideEasing: "linear",
+            showMethod: "fadeIn",
+            hideMethod: "fadeOut",
         };
 
+        message = message.charAt(0).toUpperCase() + message.slice(1);
         toastr[type](message);
     }
 }

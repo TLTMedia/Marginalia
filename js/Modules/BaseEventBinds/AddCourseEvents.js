@@ -76,7 +76,7 @@ export class AddCourseEvents {
                     this.ui.toast.create_toast(add_course_response);
                     this.ui.toast.create_toast("Add a literature to the new course to view it!");
                     $.modal.close();
-                    $("#home").click();
+                    $("#litadd").click();
                 }
             }
         });
