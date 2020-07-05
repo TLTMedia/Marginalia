@@ -1,5 +1,10 @@
 export class UploadEvents {
-    constructor({ state = state, ui = ui, courses_data = courses_data, works_data = works_data }) {
+    constructor({
+        state = state,
+        ui = ui,
+        courses_data = courses_data,
+        works_data = works_data,
+    }) {
         console.log("BaseEventBinds/UploadEvents Submodule Loaded");
 
         this.state = state;
@@ -23,9 +28,12 @@ export class UploadEvents {
                 let option = $("<li/>", {
                     class: "mdl-menu__item courseOptionForAddLit",
                     text: course_list[course],
-                    click: event => {
-                        this.state.selected_upload_course = event.currentTarget.textContent;
-                        $("#upload-for-course").html(this.state.selected_upload_course);
+                    click: (event) => {
+                        this.state.selected_upload_course =
+                            event.currentTarget.textContent;
+                        $("#upload-for-course").html(
+                            this.state.selected_upload_course
+                        );
                     },
                 });
 
@@ -69,7 +77,9 @@ export class UploadEvents {
             if ($("#addNameInput").val().length > 0) {
                 // don't do anything because the user already typed in a name and we don't want to overwrite it.
             } else {
-                $("#addNameInput").val(fileName.substr(0, fileName.lastIndexOf('.')) || fileName);
+                $("#addNameInput").val(
+                    fileName.substr(0, fileName.lastIndexOf(".")) || fileName
+                );
             }
         });
 
@@ -78,18 +88,32 @@ export class UploadEvents {
             let course = this.state.selected_upload_course;
 
             if (name == "" || name.length > 100) {
-                launchToastNotifcation("Please choose a file name no longer than 100 characters");
+                launchToastNotifcation(
+                    "Please choose a file name no longer than 100 characters"
+                );
             } else if (/^[\s]+$/.test(name)) {
                 launchToastNotifcation("Please choose a valid file name.");
             } else if (!/^[a-zA-Z0-9_\-\.\s]+$/.test(name)) {
-                launchToastNotifcation("Please choose a file name without special characters");
+                launchToastNotifcation(
+                    "Please choose a file name without special characters"
+                );
             } else if (course == undefined) {
-                launchToastNotifcation("Please select a course before you update your work");
+                launchToastNotifcation(
+                    "Please select a course before you update your work"
+                );
             } else {
                 let privacy = false;
-                if ($("input[name='privacy-options']:checked").val() == "private") {
+                if (
+                    $("input[name='privacy-options']:checked").val() ==
+                    "private"
+                ) {
                     privacy = true;
                 }
+
+                /**
+                 * Immediately close the modal, thus network lag doesn't affect anything necessarily
+                 */
+                $.modal.close();
 
                 let response = await this.works_data.upload_work({
                     work_name: name,
@@ -101,10 +125,29 @@ export class UploadEvents {
                 if (response.status == "ok") {
                     this.ui.toast.create_toast(response.message);
 
-                    /**
-                     * Creating the work was successful, hence close the upload modal.
-                     */
-                    $.modal.close();
+                    setTimeout(() => {
+                        let valid_pathname = window.location.pathname.replace(
+                            "index.html",
+                            "work.html"
+                        );
+
+                        valid_pathname = valid_pathname.replace(
+                            "index.htm",
+                            "work.html"
+                        );
+
+                        name = name.replace(" ", "_");
+
+                        window.location.href =
+                            window.location.origin +
+                            valid_pathname +
+                            "?course=" +
+                            course +
+                            "&creator=" +
+                            this.state.current_user.eppn +
+                            "&work=" +
+                            name;
+                    }, 1000);
                 } else {
                     this.ui.toast.create_toast(response.message);
                 }
