@@ -1,5 +1,11 @@
 export class SettingsEvents {
-    constructor({ state = state, ui = ui, courses_data = courses_data, works_data = works_data, comments_data = comments_data }) {
+    constructor({
+        state = state,
+        ui = ui,
+        courses_data = courses_data,
+        works_data = works_data,
+        comments_data = comments_data,
+    }) {
         console.log("BaseEventBinds/SettingsEvents Submodule Loaded");
 
         this.state = state;
@@ -16,107 +22,136 @@ export class SettingsEvents {
         /**
          * Settings button in the sub-menu
          */
-        $("#setting").off().on("click", async () => {
-            let work_admins = await this.works_data.get_admins_of_work();
+        $("#setting")
+            .off()
+            .on("click", async () => {
+                let work_admins = await this.works_data.get_admins_of_work();
 
-            if (!work_admins.admins.includes(this.state.current_user.eppn)) {
-                this.ui.toast.create_toast("You don't have permission to do this action.");
-            } else {
-                /**
-                 * Get the course creators
-                 * This gets the admins of a course
-                 */
-                let course_creators = await this.state.api_data.users_data.search_all_users(".");
-                this.ui.populate_whitelist(course_creators, work_admins.admins);
+                if (
+                    !work_admins.admins.includes(this.state.current_user.eppn)
+                ) {
+                    this.ui.toast.create_toast(
+                        "You don't have permission to do this action."
+                    );
+                } else {
+                    /**
+                     * Get the course creators
+                     * This gets the admins of a course
+                     */
+                    let course_creators = await this.state.api_data.users_data.search_all_users(
+                        "."
+                    );
+                    this.ui.populate_whitelist(
+                        course_creators,
+                        work_admins.admins
+                    );
 
-                /**
-                 * Show the settings modal.
-                 */
-                this.ui.show_settings();
-            }
-        });
+                    /**
+                     * Show the settings modal.
+                     */
+                    this.ui.show_settings();
+                }
+            });
 
         /**
          * Event handler for adding to the whitelist
          * TODO: not working? how do we originally see the whole list of users to begin with
          */
-        $(".select2-whitelist-select").on("select2:select", async event => {
-            let response = await this.state.api_data.works_data.add_work_permission(event.params.data.id);
+        $(".select2-whitelist-select").on("select2:select", async (event) => {
+            let response = await this.state.api_data.works_data.add_work_permission(
+                event.params.data.id
+            );
             this.ui.toast.create_toast(response);
         });
 
         /**
          * Event handler for removing from the whitelist
          */
-        $(".select2-whitelist-select").on("select2:unselecting", async event => {
-            /**
-             * Prevent de-selecting of the creator of the work
-             */
-            if (event.params.args.data.id == this.state.selected_creator) {
-                this.ui.toast.create_toast("You cannot remove the creator of the document.", "warning");
+        $(".select2-whitelist-select").on(
+            "select2:unselecting",
+            async (event) => {
+                /**
+                 * Prevent de-selecting of the creator of the work
+                 */
+                if (event.params.args.data.id == this.state.selected_creator) {
+                    this.ui.toast.create_toast(
+                        "You cannot remove the creator of the document.",
+                        "warning"
+                    );
 
-                event.preventDefault();
-                return;
+                    event.preventDefault();
+                    return;
+                }
+
+                /**
+                 * Should they be allowed to remove themselves from the admin list - if they aren't the course owned
+                 * Prevent de-selecting of yourself
+                 */
+                if (event.params.args.data.id == this.state.current_user.eppn) {
+                    this.ui.toast.create_toast(
+                        "You cannot remove yourself.",
+                        "warning"
+                    );
+
+                    event.preventDefault();
+                    return;
+                }
+
+                let response = await this.state.api_data.works_data.remove_work_permission(
+                    event.params.args.data.id
+                );
+                this.ui.toast.create_toast(response);
             }
-
-            /**
-             * Should they be allowed to remove themselves from the admin list - if they aren't the course owned
-             * Prevent de-selecting of yourself
-             */
-            if (event.params.args.data.id == this.state.current_user.eppn) {
-                this.ui.toast.create_toast("You cannot remove yourself.", "warning");
-
-                event.preventDefault();
-                return;
-            }
-
-            let response = await this.state.api_data.works_data.remove_work_permission(event.params.args.data.id);
-            this.ui.toast.create_toast(response);
-        });
+        );
 
         /**
          * Work Data button in the settings screen
          */
-        $(".settingDataButton").off().on("click", () => {
-            $("#workdata-modal").modal({
-                closeClass: 'icon-remove',
-                closeText: '!',
-                closeExisting: false,
+        $(".settingDataButton")
+            .off()
+            .on("click", () => {
+                $("#workdata-modal").modal({
+                    closeClass: "icon-remove",
+                    closeText: "!",
+                    closeExisting: false,
+                });
+
+                let tbody = $("#settingDataTable").find("tbody");
+                tbody.empty();
+
+                let isHeadCreated = $("#settingDataTable")
+                    .find("thead")
+                    .children().length;
+                if (isHeadCreated) {
+                    this.ui.settings_controller.create_data_table_body();
+                } else {
+                    this.ui.settings_controller.create_data_table_header();
+                    this.ui.settings_controller.create_data_table_body();
+                }
             });
-
-            let tbody = $("#settingDataTable").find("tbody");
-            tbody.empty();
-
-            let isHeadCreated = $("#settingDataTable").find("thead").children().length;
-            if (isHeadCreated) {
-                this.ui.settings_controller.create_data_table_body();
-            } else {
-                this.ui.settings_controller.create_data_table_header();
-                this.ui.settings_controller.create_data_table_body();
-            }
-        });
 
         /**
          * Delete Work button in the settings screen
          */
-        $(".deleteWorkButton").off().on("click", async () => {
-            if (confirm("Are you sure you want to delete the work " + this.state.selected_work + "?")) {
-                let res = await this.works_data.delete_work();
-                this.ui.toast.create_toast(res);
+        $(".deleteWorkButton")
+            .off()
+            .on("click", async () => {
+                if (
+                    confirm(
+                        "Are you sure you want to delete the work " +
+                            this.state.selected_work +
+                            "?"
+                    )
+                ) {
+                    let res = await this.works_data.delete_work();
+                    this.ui.toast.create_toast(res);
 
-                // close the currently highlighted (settings) modal b/c the work no longer exists
-                $.modal.close();
-
-                // hide the sub menu
-                this.ui.hide_sub_menu();
-
-                // hide the work
-                this.ui.hide_work_page();
-
-                // open the home page
-                this.ui.show_home_page();
-            }
-        });
+                    setTimeout(() => {
+                        window.location.href =
+                            window.location.origin + window.location.pathname;
+                    }, 1000);
+                }
+            });
     }
 
     /**
@@ -165,33 +200,39 @@ export class SettingsEvents {
         /**
          * Toggle the work privacy
          */
-        $("#privacySwitch").off().on("change", async () => {
-            let privacy;
+        $("#privacySwitch")
+            .off()
+            .on("change", async () => {
+                let privacy;
 
-            if ($("#privacySwitch")[0].checked) {
-                privacy = false;
-            } else {
-                privacy = true;
-            }
+                if ($("#privacySwitch")[0].checked) {
+                    privacy = false;
+                } else {
+                    privacy = true;
+                }
 
-            let response = await this.works_data.set_work_privacy(privacy);
-            this.ui.toast.create_toast(response);
-        });
+                let response = await this.works_data.set_work_privacy(privacy);
+                this.ui.toast.create_toast(response);
+            });
 
         /**
          * Toggle whether the work's comments require approval
          */
-        $("#commentsNeedApprovalSwitch").off().on("change", async () => {
-            let approval;
+        $("#commentsNeedApprovalSwitch")
+            .off()
+            .on("change", async () => {
+                let approval;
 
-            if ($("#commentsNeedApprovalSwitch")[0].checked) {
-                approval = true;
-            } else {
-                approval = false;
-            }
+                if ($("#commentsNeedApprovalSwitch")[0].checked) {
+                    approval = true;
+                } else {
+                    approval = false;
+                }
 
-            let response = await this.comments_data.set_comments_require_approval(approval);
-            this.ui.toast.create_toast(response);
-        });
+                let response = await this.comments_data.set_comments_require_approval(
+                    approval
+                );
+                this.ui.toast.create_toast(response);
+            });
     }
 }
