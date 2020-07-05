@@ -64,6 +64,7 @@ $app = new \Slim\Slim(array(
 $app->container->singleton("log", function () {
     $log = new \Monolog\Logger("Marginalia");
     $log->pushHandler(new \Monolog\Handler\StreamHandler("../logs/app.log", \Monolog\Logger::DEBUG));
+
     return $log;
 });
 
@@ -79,6 +80,62 @@ $app->view->parserOptions = array(
     "autoescape"       => true,
 );
 $app->view->parserExtensions = array(new \Slim\Views\TwigExtension());
+
+/**
+ * Tacky & Ugly... 404 Not found page
+ * AND...
+ * Checks whether the request comes from a request to work.html
+ */
+$app->notFound(function () use ($app, $PATH, $authUniqueId, $authFirstName, $authLastName) {
+    /**
+     * Check whether the request was actually looking for work deeplinking.
+     * READ MORE: https://github.com/TLTMedia/Marginalia/issues/38
+     */
+    if (preg_match("/^\/marginalia\/work\.html/", $_SERVER["REQUEST_URI"]) == 1) {
+        // Determine whether or not to handle LTI, or just do deeplinking request
+        if ($_SERVER['REQUEST_METHOD'] == "POST") {
+            // Handle LTI
+            require "../Actions/HandleLTI.php";
+            $lti = new HandleLTI($app->log, $PATH, $authUniqueId, $authFirstName, $authLastName);
+
+            // Attempt to initialize the user local lti session.
+            if (!$lti->initiateUserSessionLTI($_POST, $_GET)) {
+                $app->log->error("failed to initialize user lti session");
+            }
+        }
+
+        // Always show the index page (when matches work.html)
+        // Might be result of [GET] or [POST], regardless show this.
+        echo file_get_contents("../../index.htm");
+    } else {
+        echo "page not found - 404";
+    }
+});
+
+/**
+ * User may have not been logged into shibboleth.
+ * Partial edge case that happens for lti deeplinking.
+ */
+$app->get("/bb_lti_handler", function () use ($app) {
+    $app->redirect('../../work.html' . '?course=' . $_GET['course'] . '&creator=' . $_GET['creator'] . '&work=' . $_GET['work']);
+});
+
+/**
+ * Again edge case where user visits the post via blackboard but for
+ * some reason wasn't authenticated with Shibboleth.
+ */
+$app->post("/bb_lti_handler", function () use ($app, $PATH, $authUniqueId, $authFirstName, $authLastName) {
+    // Handle LTI
+    require "../Actions/HandleLTI.php";
+    $lti = new HandleLTI($app->log, $PATH, $authUniqueId, $authFirstName, $authLastName);
+
+    // Attempt to initialize the user local lti session.
+    if (!$lti->initiateUserSessionLTI($_POST, $_GET)) {
+        $app->log->error("failed to initialize user lti session edge case [post]");
+    }
+
+    $app->redirect('../../work.html' . '?course=' . $_GET['course'] . '&creator=' . $_GET['creator'] . '&work=' . $_GET['work']);
+});
 
 /**
  * Default index page route

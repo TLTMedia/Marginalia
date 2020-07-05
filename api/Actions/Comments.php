@@ -351,7 +351,21 @@ class Comments
             );
         }
 
+        /**
+         * Save the comment
+         */
         if (file_put_contents($newCommentPath . "/comment.json", json_encode($comment))) {
+            /**
+             * LTI: Record & save in users' lti file that they created a comment.
+             * TODO: Currently it gives the user a point regardless of whether the comment was approved or not.
+             */
+            require "../Actions/HandleLTI.php";
+            $lti = new HandleLTI($this->logger, $this->path, $commenterEppn, $commenterFirstName, $commenterLastName);
+
+            if (!$lti->addPoint($workAuthor, $workName, $commenterEppn)) {
+                $this->logger->warn("unable to add point for the current user");
+            }
+
             return json_encode(array(
                 "status"      => "ok",
                 "message"     => "comment saved",
@@ -361,7 +375,7 @@ class Comments
         } else {
             return json_encode(array(
                 "status"  => "error",
-                "message" => "unable to save comment",
+                "message" => "failed to save comment",
             ));
         }
     }

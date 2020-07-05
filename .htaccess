@@ -26,9 +26,13 @@ Redirect /marginalia/index.html https://apps.tlt.stonybrook.edu/marginalia/shibb
 # RewriteRule ^works/(.*)$ %{ENV:CWD}?work=$1 [R=301,NC,L]
 
 # Added as of July 2020 Deeplink rewrite
+# <IfModule mod_rewrite.c>
+#     RewriteEngine On
+#     RewriteRule ^work.html$ /marginalia/index.htm [QSA,L]
+# </IfModule>
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteRule ^work.html$ /marginalia/index.htm [QSA,L]
+    RewriteRule ^work.html(.*)$ /marginalia/api/public/bb_lti_handler [L]
 </IfModule>
 
 # Uncomment to display php errors in the log
