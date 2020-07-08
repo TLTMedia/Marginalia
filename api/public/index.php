@@ -117,7 +117,11 @@ $app->notFound(function () use ($app, $PATH, $authUniqueId, $authFirstName, $aut
  * Partial edge case that happens for lti deeplinking.
  */
 $app->get("/bb_lti_handler", function () use ($app) {
-    $app->redirect('../../work.html' . '?course=' . $_GET['course'] . '&creator=' . $_GET['creator'] . '&work=' . $_GET['work']);
+    if (!empty($_GET['course']) || !empty($_GET['creator']) || !empty($_GET['work'])) {
+        $app->redirect('../../work.html' . '?course=' . $_GET['course'] . '&creator=' . $_GET['creator'] . '&work=' . $_GET['work']);
+    } else {
+        $app->redirect('../../work.html');
+    }
 });
 
 /**
@@ -134,8 +138,11 @@ $app->post("/bb_lti_handler", function () use ($app, $PATH, $authUniqueId, $auth
         $app->log->error("failed to initialize user lti session edge case [post]");
     }
 
-    $app->redirect('../../work.html' . '?course=' . $_GET['course'] . '&creator=' . $_GET['creator'] . '&work=' . $_GET['work']);
-});
+    if (!empty($_GET['course']) || !empty($_GET['creator']) || !empty($_GET['work'])) {
+        $app->redirect('../../work.html' . '?course=' . $_GET['course'] . '&creator=' . $_GET['creator'] . '&work=' . $_GET['work']);
+    } else {
+        $app->redirect('../../work.html');
+    }});
 
 /**
  * Default index page route
@@ -446,8 +453,11 @@ $app->post("/create_work", function () use ($app, $PATH, $PATH_COURSES, $SKELETO
         "work", "privacy",
     ));
 
+    // var_dump($_FILES);
+
     try {
         $tempFile = $_FILES["file"]["tmp_name"];
+        $type     = $_FILES["file"]["type"];
     } catch (Exception $e) {
         echo json_encode(array(
             "status"  => "error",
@@ -460,16 +470,28 @@ $app->post("/create_work", function () use ($app, $PATH, $PATH_COURSES, $SKELETO
     require "../Actions/Work.php";
     $newWork = new CreateWork($PATH, $PATH_COURSES, $SKELETON_PATH);
 
-    echo $newWork->init(
-        $authUniqueId,
-        $data["work"],
-        $data["privacy"],
-        $data["course"],
-        $authFirstName,
-        $authLastName,
-        $tempFile,
-        $MAMMOTH_STYLE
-    );
+    if ($type == "application/pdf" || $type == "pdf") {
+        echo $newWork->initPdf(
+            $authUniqueId,
+            $data["work"],
+            $data["privacy"],
+            $data["course"],
+            $authFirstName,
+            $authLastName,
+            $tempFile
+        );
+    } else {
+        echo $newWork->init(
+            $authUniqueId,
+            $data["work"],
+            $data["privacy"],
+            $data["course"],
+            $authFirstName,
+            $authLastName,
+            $tempFile,
+            $MAMMOTH_STYLE
+        );
+    }
 });
 
 /**

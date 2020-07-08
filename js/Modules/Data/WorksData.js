@@ -8,7 +8,7 @@ export class WorksData {
 
     async get_selected_course_works(course, creator) {
         let works_list = this.api.request({
-            endpoint: 'get_works_of_course_creator',
+            endpoint: "get_works_of_course_creator",
             data: {
                 course: course,
                 creator: creator,
@@ -20,7 +20,7 @@ export class WorksData {
 
     async get_admins_of_work() {
         let admin_list = this.api.request({
-            endpoint: 'get_permissions_list',
+            endpoint: "get_permissions_list",
             data: {
                 eppn: this.state.selected_creator,
                 work: this.state.selected_work,
@@ -35,8 +35,8 @@ export class WorksData {
      */
     async add_work_permission(eppn_to_add) {
         let response = this.api.request({
-            endpoint: 'add_permission',
-            method: 'POST',
+            endpoint: "add_permission",
+            method: "POST",
             data: {
                 work: decodeURI(this.state.selected_work),
                 creator: this.state.selected_creator,
@@ -52,8 +52,8 @@ export class WorksData {
      */
     async remove_work_permission(eppn_to_remove) {
         let response = this.api.request({
-            endpoint: 'remove_permission',
-            method: 'POST',
+            endpoint: "remove_permission",
+            method: "POST",
             data: {
                 work: decodeURI(this.state.selected_work),
                 creator: this.state.selected_creator,
@@ -69,8 +69,8 @@ export class WorksData {
      */
     async delete_work() {
         let response = this.api.request({
-            endpoint: 'delete_work',
-            method: 'POST',
+            endpoint: "delete_work",
+            method: "POST",
             data: {
                 work: decodeURI(this.state.selected_work),
                 creator: this.state.selected_creator,
@@ -83,11 +83,16 @@ export class WorksData {
     /**
      * Upload a new work
      */
-    async upload_work({ work_name = work_name, course = course, privacy = privacy, data = data }) {
+    async upload_work({
+        work_name = work_name,
+        course = course,
+        privacy = privacy,
+        data = data,
+    }) {
         if (data.size > 2000000) {
             return {
                 status: "error",
-                message: "File too large to upload; try removing some images."
+                message: "File too large to upload (2M max)",
             };
         }
 
@@ -101,11 +106,11 @@ export class WorksData {
         form_data.append("file", data);
 
         let response = this.api.request({
-            endpoint: 'create_work',
-            method: 'POST',
+            endpoint: "create_work",
+            method: "POST",
             data: form_data,
-            dataType: 'form',
-            response_type: 'raw',
+            dataType: "form",
+            response_type: "raw",
         });
 
         return await response;
@@ -116,7 +121,7 @@ export class WorksData {
      */
     async get_work_privacy() {
         let privacy = this.api.request({
-            endpoint: 'is_public',
+            endpoint: "is_public",
             data: {
                 creator: this.state.selected_creator,
                 work: this.state.selected_work,
@@ -131,8 +136,8 @@ export class WorksData {
      */
     async set_work_privacy(privacy) {
         let response = this.api.request({
-            endpoint: 'set_privacy',
-            method: 'POST',
+            endpoint: "set_privacy",
+            method: "POST",
             data: {
                 creator: this.state.selected_creator,
                 work: this.state.selected_work,
@@ -148,12 +153,22 @@ export class WorksData {
      */
     async get_work_data() {
         let response = this.api.request({
-            endpoint: 'get_work',
+            endpoint: "get_work",
             data: {
                 eppn: this.state.selected_creator,
                 work: this.state.selected_work,
             },
-            response_type: 'raw',
+            response_type: "raw",
+        });
+
+        return await response;
+    }
+
+    async get_raw_work_data(file_path) {
+        let response = this.api.request({
+            endpoint: file_path,
+            response_type: "raw",
+            type_res: "text",
         });
 
         return await response;

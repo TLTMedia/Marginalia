@@ -553,6 +553,21 @@ export class InterfaceController {
                 },
             ];
 
+            if (data.data === undefined || data.data === null) {
+                let new_data = await this.state.api_data.works_data.get_raw_work_data(
+                    data.file
+                );
+
+                data.data = new_data.replaceAll("indexs.html", "work.html");
+
+                data.data = new_data.replaceAll(
+                    '<IMG src="../../',
+                    '<IMG src="' + window.location.origin + "/marginalia/"
+                );
+
+                // console.log(data.data.length);
+            }
+
             this.state.query_string.set_work_query(arr);
 
             // TODO:

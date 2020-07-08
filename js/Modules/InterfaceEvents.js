@@ -11,7 +11,9 @@ export class InterfaceEvents {
     async click_course_option(course) {
         this.state.selected_course = course;
 
-        let users = await this.data.users_data.get_selected_course_users(course);
+        let users = await this.data.users_data.get_selected_course_users(
+            course
+        );
 
         if (!this.ui.populate_users_dropdown(users)) {
             console.error("error while attempting to populate users dropdown");
@@ -25,7 +27,10 @@ export class InterfaceEvents {
     async click_user_option(creator) {
         this.state.selected_creator = creator;
 
-        let works = await this.data.works_data.get_selected_course_works(this.state.selected_course, creator);
+        let works = await this.data.works_data.get_selected_course_works(
+            this.state.selected_course,
+            creator
+        );
 
         if (!this.ui.populate_works_dropdown(works)) {
             console.error("error while attempting to populate works dropdown");
@@ -56,8 +61,8 @@ export class InterfaceEvents {
     bind_redirect_confirmation(specificElement) {
         $(specificElement).on("click", function (event) {
             //was called without element having .attr("href")
-            var elHref = $(specificElement).attr("href") || window.location.host;
-
+            var elHref =
+                $(specificElement).attr("href") || window.location.host;
 
             if (elHref.indexOf(window.location.host) !== -1) {
                 // console.log("do nothing is same host");
@@ -67,12 +72,18 @@ export class InterfaceEvents {
                 // console.log("do nothing is just hash placeholder tag");
             } else {
                 event.preventDefault();
-                let res = confirm("Are you sure you want to visit the URL:\n\n" + $(specificElement).attr("href"));
-                if (res) {
-                    window.location = elHref;
-                } else {
-                    return;
-                }
+
+                window.alert(
+                    "URL: " +
+                        $(specificElement).attr("href") +
+                        "\n\nFor security purposes, we cannot redirect you to the specified link."
+                );
+                // let res = confirm("Are you sure you want to visit the URL:\n\n" + $(specificElement).attr("href"));
+                // if (res) {
+                //     window.location = elHref;
+                // } else {
+                //     return;
+                // }
             }
         });
     }
@@ -83,7 +94,9 @@ export class InterfaceEvents {
 
         list.each((_, element) => {
             let user_name = $(element).html();
-            if (user_name.toUpperCase().indexOf(search_key.toUpperCase()) != -1) {
+            if (
+                user_name.toUpperCase().indexOf(search_key.toUpperCase()) != -1
+            ) {
                 $(element).show();
             } else {
                 $(element).hide();
@@ -97,7 +110,9 @@ export class InterfaceEvents {
 
         list.each((_, element) => {
             let work_name = $(element).html();
-            if (work_name.toUpperCase().indexOf(search_key.toUpperCase()) != -1) {
+            if (
+                work_name.toUpperCase().indexOf(search_key.toUpperCase()) != -1
+            ) {
                 $(element).show();
             } else {
                 $(element).hide();

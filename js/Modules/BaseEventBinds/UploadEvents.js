@@ -136,7 +136,7 @@ export class UploadEvents {
                             "work.html"
                         );
 
-                        name = name.replace(" ", "_");
+                        name = name.replaceAll(" ", "_");
 
                         window.location.href =
                             window.location.origin +

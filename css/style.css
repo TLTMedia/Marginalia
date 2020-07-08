@@ -1874,8 +1874,12 @@ input[type="file"] {
     background-color: var(--bg-main-marginalia);
     position: absolute;
     top: 108px;
-    width: 595px;
-    left: calc(calc(100% / 2) - calc(595px / 2));
+    /* NOTE: 595px is better for uploaded .docx... while 830px is better for uploaded pdf... */
+    /* width: 595px; */
+    width: 830px;
+    /* NOTE: 595px is better for uploaded .docx... while 830px is better for uploaded pdf... */
+    /* left: calc(calc(100% / 2) - calc(595px / 2)); */
+    left: calc(calc(100% / 2) - calc(830px / 2));
 }
 
 .introjs-skipbutton {

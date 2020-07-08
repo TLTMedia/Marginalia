@@ -17,7 +17,7 @@ export class AddCourseEvents {
      * Preload
      */
     async preload() {
-        // First check if the user is the course admin
+        // First check if the user is a course admin
         let is_currentuser_admin = await this.courses_data.is_user_course_admin();
         if (is_currentuser_admin === "admin") {
             $("#courses-options").show();

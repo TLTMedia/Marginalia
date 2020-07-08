@@ -258,6 +258,7 @@ class Users
                     "admin"    => $permissions->userOnPermissionsList($pathOfWork, $currentEppn),
                     "privacy"  => "public",
                     "approval" => "needApproval",
+                    "file"     => $workIndex,
                 ));
             } else {
                 return json_encode(array(
@@ -266,6 +267,7 @@ class Users
                     "admin"    => $permissions->userOnPermissionsList($pathOfWork, $currentEppn),
                     "privacy"  => "public",
                     "approval" => "noApproval",
+                    "file"     => $workIndex,
                 ));
             }
         }
