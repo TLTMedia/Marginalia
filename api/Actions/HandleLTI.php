@@ -137,6 +137,9 @@ class HandleLTI
          * 2 / 5
          */
         $gradePercentage = $userLTI->totalComments / $userLTI->maxPoints;
+        if ($gradePercentage > 1.0) {
+            $gradePercentage = 1.0;
+        }
 
         // Send the grade to BlackBoard, & check if it was successful
         if (!$lti->isSuccessful($lti->sendGrade($dataFromPost->url, $dataFromPost->id, $gradePercentage))) {

@@ -94,6 +94,8 @@ $app->notFound(function () use ($app, $PATH, $authUniqueId, $authFirstName, $aut
     if (preg_match("/^\/marginalia\/work\.html/", $_SERVER["REQUEST_URI"]) == 1) {
         // Determine whether or not to handle LTI, or just do deeplinking request
         if ($_SERVER['REQUEST_METHOD'] == "POST") {
+            // var_dump($_POST);
+
             // Handle LTI
             require "../Actions/HandleLTI.php";
             $lti = new HandleLTI($app->log, $PATH, $authUniqueId, $authFirstName, $authLastName);

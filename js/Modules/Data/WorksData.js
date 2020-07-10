@@ -89,10 +89,10 @@ export class WorksData {
         privacy = privacy,
         data = data,
     }) {
-        if (data.size > 2000000) {
+        if (data.size > 2000000000) {
             return {
                 status: "error",
-                message: "File too large to upload (2M max)",
+                message: "File too large to upload (2000M max)",
             };
         }
 

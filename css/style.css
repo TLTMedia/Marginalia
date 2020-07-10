@@ -1882,6 +1882,18 @@ input[type="file"] {
     left: calc(calc(100% / 2) - calc(830px / 2));
 }
 
+#textSpace img {
+    /* 830px b/c of #text-wrapper width */
+    /* -50px, b/c padding around the contents of the page */
+    max-width: calc(830px - 50px);
+}
+
+#textSpace * {
+    /* 830px b/c of #text-wrapper width */
+    /* -50px, b/c padding around the contents of the page */
+    max-width: calc(830px - 50px);
+}
+
 .introjs-skipbutton {
     color: #000;
 }

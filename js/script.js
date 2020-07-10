@@ -196,10 +196,29 @@ function allowClickOnComment(textChosen, selected_eppn) {
             };
 
             let selectedRange = rangy.getSelection().getRangeAt(0).nativeRange;
-            let prevElementClass =
-                evt.target.previousElementSibling.attributes.class.value;
-            let prevElementCommentId =
-                evt.target.previousElementSibling.attributes.commentId.value;
+
+            let prevElementClass;
+            let prevElementCommentId;
+
+            // TODO:
+            if (evt.target.previousElementSibling.nodeName == "BR") {
+                prevElementClass =
+                    evt.target.previousElementSibling.previousElementSibling
+                        .previousElementSibling.attributes.class.value;
+                prevElementCommentId =
+                    evt.target.previousElementSibling.previousElementSibling
+                        .previousElementSibling.attributes.commentId.value;
+            } else {
+                prevElementClass =
+                    evt.target.previousElementSibling.attributes.class.value;
+                prevElementCommentId =
+                    evt.target.previousElementSibling.attributes.commentId
+                        .value;
+            }
+
+            console.log(prevElementClass);
+            console.log(prevElementCommentId);
+
             let prevElement = $(
                 "." +
                     prevElementClass +
