@@ -455,8 +455,6 @@ $app->post("/create_work", function () use ($app, $PATH, $PATH_COURSES, $SKELETO
         "work", "privacy",
     ));
 
-    // var_dump($_FILES);
-
     try {
         $tempFile = $_FILES["file"]["tmp_name"];
         $type     = $_FILES["file"]["type"];
@@ -473,17 +471,20 @@ $app->post("/create_work", function () use ($app, $PATH, $PATH_COURSES, $SKELETO
     $newWork = new CreateWork($PATH, $PATH_COURSES, $SKELETON_PATH);
 
     if ($type == "application/pdf" || $type == "pdf") {
-        echo $newWork->initPdf(
+        echo $newWork->init(
+            "PDF",
             $authUniqueId,
             $data["work"],
             $data["privacy"],
             $data["course"],
             $authFirstName,
             $authLastName,
-            $tempFile
+            $tempFile,
+            null
         );
-    } else {
+    } elseif ($type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
         echo $newWork->init(
+            "DOCX",
             $authUniqueId,
             $data["work"],
             $data["privacy"],
@@ -493,6 +494,23 @@ $app->post("/create_work", function () use ($app, $PATH, $PATH_COURSES, $SKELETO
             $tempFile,
             $MAMMOTH_STYLE
         );
+    } elseif ($type == "text/html" || $type == "html") {
+        echo $newWork->init(
+            "HTML",
+            $authUniqueId,
+            $data["work"],
+            $data["privacy"],
+            $data["course"],
+            $authFirstName,
+            $authLastName,
+            $tempFile,
+            null
+        );
+    } else {
+        echo json_encode(array(
+            "status"  => "error",
+            "message" => "invalid file mime-type has been uploaded",
+        ));
     }
 });
 

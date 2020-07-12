@@ -79,9 +79,9 @@ class CreateWork
     }
 
     /**
-     * PDF Initialization function
+     * General purpose initialization method that calls the private init functions.
      */
-    public function initPdf($creator, $work, $privacy, $course, $firstName, $lastName, $tmpFilePath)
+    public function init($type, $creator, $work, $privacy, $course, $firstName, $lastName, $tmpFilePath, $mammothStyle)
     {
         /**
          * These are being read in as strings when sent over formData.
@@ -134,6 +134,22 @@ class CreateWork
             }
         }
 
+        if ($type == "PDF") {
+            return $this->__initPdf($pathOfWork, $creator, $work, $privacy, $course, $firstName, $lastName, $tmpFilePath);
+        } elseif ($type == "DOCX") {
+            return $this->__initDocx($pathOfWork, $creator, $work, $privacy, $course, $firstName, $lastName, $tmpFilePath, $mammothStyle);
+        } elseif ($type == "HTML") {
+            return null;
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * PDF Initialization function
+     */
+    private function __initPdf($pathOfWork, $creator, $work, $privacy, $course, $firstName, $lastName, $tmpFilePath)
+    {
         /**
          * Copy the uploaded file
          */
@@ -176,8 +192,6 @@ class CreateWork
         }
 
         // Replace the links
-        // var_dump(file_get_contents($destinationPath));
-
         $newContents = str_replace('<IMG src="../../', '<IMG src="', file_get_contents($destinationPath));
         file_put_contents($destinationPath, $newContents);
 
@@ -240,59 +254,8 @@ class CreateWork
     /**
      * Initialization function
      */
-    public function init($creator, $work, $privacy, $course, $firstName, $lastName, $tmpFilePath, $mammothStyle)
+    private function __initDocx($pathOfWork, $creator, $work, $privacy, $course, $firstName, $lastName, $tmpFilePath, $mammothStyle)
     {
-        /**
-         * These are being read in as strings when sent over formData.
-         * & we need to flip them b/c of frontend-backend jargon differences.
-         * (public vs private vs privacy...)
-         */
-        if ($privacy == "true") {
-            $privacy = false;
-        } else {
-            $privacy = true;
-        }
-
-        /**
-         * Spaces in the work name break stuff.
-         */
-        $work = str_replace(" ", "_", $work);
-
-        /**
-         * Create the user directory if it doesn't exist
-         */
-        if (!file_exists($this->path . $creator)) {
-            $this->__recurse_copy($this->skeletonUser, $this->path . $creator);
-        }
-
-        $pathOfWork = $this->path . "" . $creator . "/works/" . $work;
-
-        if (file_exists($pathOfWork)) {
-            return json_encode(array(
-                "status"  => "error",
-                "message" => "you have a document with that name already. Try using a different name.",
-            ));
-        } else {
-            if (!mkdir($pathOfWork, 0777, true)) {
-                return json_encode(array(
-                    "status"  => "error",
-                    "message" => "unabled to create work",
-                ));
-            }
-        }
-
-        /**
-         * Creating the default directories for the new work
-         */
-        foreach ($this->directories as $directory) {
-            if (!mkdir($pathOfWork . "/" . $directory, 0777, true)) {
-                return json_encode(array(
-                    "status"  => "error",
-                    "message" => "unable to create directory: " . $directory,
-                ));
-            }
-        }
-
         /**
          * Copy the uploaded file
          */
@@ -320,8 +283,6 @@ class CreateWork
         } catch (Exception $e) {
             $result = "";
         }
-
-        // unlink("${tmpFilePath}.out.txt");
 
         /**
          * Creating the default permissions.json file
