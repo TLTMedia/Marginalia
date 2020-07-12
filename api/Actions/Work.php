@@ -139,14 +139,146 @@ class CreateWork
         } elseif ($type == "DOCX") {
             return $this->__initDocx($pathOfWork, $creator, $work, $privacy, $course, $firstName, $lastName, $tmpFilePath, $mammothStyle);
         } elseif ($type == "HTML") {
-            return null;
+            return $this->__initHtml($pathOfWork, $creator, $work, $privacy, $course, $firstName, $lastName, $tmpFilePath);
         } else {
             return null;
         }
     }
 
     /**
-     * PDF Initialization function
+     * HTML initialization function
+     */
+    private function __initHtml($pathOfWork, $creator, $work, $privacy, $course, $firstName, $lastName, $tmpFilePath)
+    {
+        /**
+         * Make a copy of the original uploaded file
+         */
+        copy($tmpFilePath, $pathOfWork . "/original.html");
+
+        /**
+         * Destination path of the file
+         */
+        $destinationPath = $pathOfWork . "/index.html";
+
+        /**
+         * Typically would have conversion script here, but since it's HTML already, we don't need to convert anything.
+         * All I need to do is remove any <script> tags and <style> tags
+         */
+        if (($html = file_get_contents($tmpFilePath)) == false) {
+            return json_encode(array(
+                "status"  => "error",
+                "message" => "unable to get contents of uploaded file from temp location",
+            ));
+        }
+
+        $dom = new DOMDocument();
+        $dom->loadHTML($html);
+        $scriptTag = $dom->getElementsByTagName('script');
+        $styleTag  = $dom->getElementsByTagName('style');
+        $linkTag   = $dom->getElementsByTagName('link');
+        $metaTag   = $dom->getElementsByTagName('meta');
+        $remove    = array();
+
+        /**
+         * Build list of script tags to remove
+         */
+        foreach ($scriptTag as $item) {
+            $remove[] = $item;
+        }
+
+        /**
+         * Build list of style tags to remove
+         */
+        foreach ($styleTag as $item) {
+            $remove[] = $item;
+        }
+
+        /**
+         * Build list of link tags to remove
+         */
+        foreach ($linkTag as $item) {
+            $remove[] = $item;
+        }
+
+        /**
+         * Build list of meta tags to remove
+         */
+        foreach ($metaTag as $item) {
+            $remove[] = $item;
+        }
+
+        /**
+         * Remove the compiled list of elements from the DOM
+         */
+        foreach ($remove as $item) {
+            $item->parentNode->removeChild($item);
+        }
+
+        $html = $dom->saveHTML();
+
+        /**
+         * Save the raw html to it's new destination location
+         */
+        if (file_put_contents($destinationPath, $html) == false) {
+            return json_encode(array(
+                "status"  => "error",
+                "message" => "unable to save contents of cleansed file to destination location",
+            ));
+        }
+
+        /**
+         * Shouldn't be necessary, but on this system it seems like it is...
+         */
+        unlink($tmpFilePath);
+
+        /**
+         * Creating the default permissions.json file
+         */
+        require 'Permissions.php';
+        $permissions                     = new DefaultPermissions();
+        $permissions->public             = $privacy;
+        $permissions->admins[]           = $creator;
+        $permissions->creator_first_name = $firstName;
+        $permissions->creator_last_name  = $lastName;
+
+        if (file_put_contents($pathOfWork . "/permissions.json", json_encode($permissions)) == false) {
+            return json_encode(array(
+                "status"  => "error",
+                "message" => "unable to save/create permissions.json file for newly created work",
+            ));
+        }
+
+        /**
+         * Delete the existing symlink if it exists
+         */
+        if (is_link($this->coursesPath . $course . "/" . $creator . "###" . $work)) {
+            if (!unlink($this->coursesPath . $course . "/" . $creator . "###" . $work)) {
+                return json_encode(array(
+                    "status"  => "error",
+                    "message" => "unable to remove old symlink",
+                ));
+            }
+        }
+
+        /**
+         * Create a symlink in the correct course directory
+         */
+        if (!symlink($pathOfWork, $this->coursesPath . $course . "/" . $creator . "###" . $work)) {
+            return json_encode(array(
+                "status"  => "error",
+                "message" => "unable to place the directory in the specified course",
+            ));
+        }
+
+        return json_encode(array(
+            "status"  => "ok",
+            "message" => "successfully created work: " . $work,
+            "raw"     => "tmp location: " . $tmpFilePath,
+        ));
+    }
+
+    /**
+     * PDF initialization function
      */
     private function __initPdf($pathOfWork, $creator, $work, $privacy, $course, $firstName, $lastName, $tmpFilePath)
     {
@@ -206,7 +338,7 @@ class CreateWork
          * Creating the default permissions.json file
          */
         require 'Permissions.php';
-        $permissions                     = new DefaultPermissions;
+        $permissions                     = new DefaultPermissions();
         $permissions->public             = $privacy;
         $permissions->admins[]           = $creator;
         $permissions->creator_first_name = $firstName;
@@ -219,7 +351,7 @@ class CreateWork
          */
         if (is_link($this->coursesPath . $course . "/" . $creator . "###" . $work)) {
             if (!unlink($this->coursesPath . $course . "/" . $creator . "###" . $work)) {
-                json_encode(array(
+                return json_encode(array(
                     "status"  => "error",
                     "message" => "unable to remove old symlink",
                 ));
@@ -230,7 +362,7 @@ class CreateWork
          * Create a symlink in the correct course directory
          */
         if (!symlink($pathOfWork, $this->coursesPath . $course . "/" . $creator . "###" . $work)) {
-            json_encode(array(
+            return json_encode(array(
                 "status"  => "error",
                 "message" => "unable to place the directory in the specified course",
             ));
@@ -242,6 +374,12 @@ class CreateWork
             "raw"     => "tmp location: " . $tmpFilePath,
         ));
 
+        /**
+         * TODO:
+         * NOTE: not reached on purpose...
+         * So this would be nice, but mammoth returns warnings that aren't breaking...
+         * and same with pdf2html returns warnings that aren't breaking either... So technically this is useless but would be nice.
+         */
         if ($result != "") {
             return json_encode(array(
                 "status"  => "error",
@@ -252,7 +390,7 @@ class CreateWork
     }
 
     /**
-     * Initialization function
+     * DOCX initialization function
      */
     private function __initDocx($pathOfWork, $creator, $work, $privacy, $course, $firstName, $lastName, $tmpFilePath, $mammothStyle)
     {
@@ -288,7 +426,7 @@ class CreateWork
          * Creating the default permissions.json file
          */
         require 'Permissions.php';
-        $permissions                     = new DefaultPermissions;
+        $permissions                     = new DefaultPermissions();
         $permissions->public             = $privacy;
         $permissions->admins[]           = $creator;
         $permissions->creator_first_name = $firstName;
@@ -301,7 +439,7 @@ class CreateWork
          */
         if (is_link($this->coursesPath . $course . "/" . $creator . "###" . $work)) {
             if (!unlink($this->coursesPath . $course . "/" . $creator . "###" . $work)) {
-                json_encode(array(
+                return json_encode(array(
                     "status"  => "error",
                     "message" => "unable to remove old symlink",
                 ));
@@ -312,7 +450,7 @@ class CreateWork
          * Create a symlink in the correct course directory
          */
         if (!symlink($pathOfWork, $this->coursesPath . $course . "/" . $creator . "###" . $work)) {
-            json_encode(array(
+            return json_encode(array(
                 "status"  => "error",
                 "message" => "unable to place the directory in the specified course",
             ));
@@ -324,6 +462,12 @@ class CreateWork
             "raw"     => "tmp location: " . $tmpFilePath,
         ));
 
+        /**
+         * TODO:
+         * NOTE: not reached on purpose...
+         * So this would be nice, but mammoth returns warnings that aren't breaking...
+         * and same with pdf2html returns warnings that aren't breaking either... So technically this is useless but would be nice.
+         */
         if ($result != "") {
             return json_encode(array(
                 "status"  => "error",
