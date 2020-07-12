@@ -197,25 +197,34 @@ function allowClickOnComment(textChosen, selected_eppn) {
 
             let selectedRange = rangy.getSelection().getRangeAt(0).nativeRange;
 
+            // TODO:
+            let previousElement = evt.target.previousElementSibling;
             let prevElementClass;
             let prevElementCommentId;
 
-            // TODO:
-            if (evt.target.previousElementSibling.nodeName == "BR") {
-                prevElementClass =
-                    evt.target.previousElementSibling.previousElementSibling
-                        .previousElementSibling.attributes.class.value;
-                prevElementCommentId =
-                    evt.target.previousElementSibling.previousElementSibling
-                        .previousElementSibling.attributes.commentId.value;
-            } else {
-                prevElementClass =
-                    evt.target.previousElementSibling.attributes.class.value;
-                prevElementCommentId =
-                    evt.target.previousElementSibling.attributes.commentId
-                        .value;
+            while (previousElement.nodeName == "BR") {
+                previousElement = previousElement.previousElementSibling;
             }
 
+            prevElementClass = previousElement.attributes.class.value;
+            prevElementCommentId = previousElement.attributes.commentId.value;
+
+            while (
+                prevElementClass != "startDiv" &&
+                prevElementClass != "endDiv"
+            ) {
+                previousElement = previousElement.previousElementSibling;
+
+                while (previousElement.nodeName == "BR") {
+                    previousElement = previousElement.previousElementSibling;
+                }
+
+                prevElementClass = previousElement.attributes.class.value;
+                prevElementCommentId =
+                    previousElement.attributes.commentId.value;
+            }
+
+            console.log(previousElement.nodeName);
             console.log(prevElementClass);
             console.log(prevElementCommentId);
 
@@ -232,6 +241,7 @@ function allowClickOnComment(textChosen, selected_eppn) {
                 prev_endDiv: undefined,
                 prev_startDiv: undefined,
             };
+
             //prevElement is a startDiv (this will be curr_startDiv)
             if (prevElement.hasClass("startDiv")) {
                 prev_curr_divs["curr_startDiv"] = prevElement;
@@ -253,6 +263,7 @@ function allowClickOnComment(textChosen, selected_eppn) {
                         "']"
                 );
             }
+
             console.log(prev_curr_divs);
             let newTextIndex;
             if (prev_curr_divs["curr_startDiv"] == undefined) {
@@ -402,9 +413,11 @@ function removeCommentContextMenu() {
 
 function filterMultipleComment(api_returned_data, type, commenter) {
     let returned_data = [];
+
     for (i in api_returned_data) {
         let targetType = 0,
             targetCommenter = 0;
+
         if (type != "show-all-types") {
             if (api_returned_data[i]["commentType"].toLowerCase() == type) {
                 targetType = true;
@@ -412,6 +425,7 @@ function filterMultipleComment(api_returned_data, type, commenter) {
         } else {
             targetType = true;
         }
+
         if (commenter != "show-all-eppns") {
             if (api_returned_data[i]["eppn"].split("@")[0] == commenter) {
                 targetCommenter = true;
@@ -419,6 +433,7 @@ function filterMultipleComment(api_returned_data, type, commenter) {
         } else {
             targetCommenter = true;
         }
+
         if (targetType && targetCommenter) {
             returned_data.push(api_returned_data[i]);
         }
@@ -426,13 +441,15 @@ function filterMultipleComment(api_returned_data, type, commenter) {
     return returned_data;
 }
 
-/** TODO this function assumes there is an API that returns all the comments data from the index user clicked
+/**
+ * TODO: this function assumes there is an API that returns all the comments data from the index user clicked
  * if there are more than two comments exist at that index, create a menu of comments (with type and creator)
  *  if (comment.startIndex < textIndex <= comment.endIndex) return this comment
  */
 function clickOnCommentByIndex(textIndex, evt) {
     removeCommentContextMenu();
     $("#replies").parent().hide();
+
     data = {
         work: TMP_STATE.selected_work,
         creator: TMP_STATE.selected_creator,
@@ -446,35 +463,42 @@ function clickOnCommentByIndex(textIndex, evt) {
     }).then((api_returned_data) => {
         console.log(api_returned_data);
         let targetComments = [];
+
         //api_returned_data include everytype, if the filter is seleceted we remove the different types
         if (TMP_STATE.filters != undefined) {
             let targetType = TMP_STATE.filters.selected_comment_filter,
                 targetCommenter = TMP_STATE.filters.selected_author_filter;
+
             targetComments = filterMultipleComment(
                 api_returned_data,
                 targetType,
                 targetCommenter
             );
+
             console.log(targetComments);
         } else {
             targetComments = api_returned_data;
         }
+
         // more than one comment exist
         if (targetComments.length > 1) {
             let selectedCommentId =
                 evt.currentTarget.attributes.commentId.value;
             let comments = {};
+
             for (i in targetComments) {
                 name =
                     targetComments[i]["eppn"] +
                     " " +
                     targetComments[i]["commentType"];
+
                 let colorId = $(
                     ".startDiv" +
                         "[ commentId = " +
                         targetComments[i]["hash"] +
                         "]"
                 ).attr("colorId");
+
                 let colorClass = {
                     0: "defaultColorComments",
                     1: "colorOneComments",
@@ -482,11 +506,13 @@ function clickOnCommentByIndex(textIndex, evt) {
                     3: "colorThreeComments",
                     4: "colorFourComments",
                 };
+
                 comments[targetComments[i]["hash"]] = {
                     name: name,
                     className: colorClass[colorId],
                 };
             }
+
             // add class to the clicked comment
             $(
                 ".commented-selection" +
@@ -494,8 +520,15 @@ function clickOnCommentByIndex(textIndex, evt) {
                     selectedCommentId +
                     "]"
             ).addClass("clicked_span btn btn-neutral");
+
             $(".clicked_span").append("<span id = 'context_container'><span>");
-            let contextMenu = $("#textSpace > p").contextMenu({
+
+            let contextMenuEle = $("#textSpace > p").first();
+            if (contextMenuEle.length == 0) {
+                contextMenuEle = $("#textSpace > span").first();
+            }
+
+            let contextMenu = contextMenuEle.contextMenu({
                 selector: ".clicked_span",
                 trigger: "left",
                 zIndex: 5,
@@ -505,12 +538,14 @@ function clickOnCommentByIndex(textIndex, evt) {
                     let commenter = optionName.split(" ")[0];
                     let id = key;
                     let type = optionName.split(" ")[1];
-                    console.log(id, commenter, type);
+
                     //declare TMP_STATE data first for later use
                     TMP_STATE.commentBox_data;
                     TMP_STATE.replyBox_data;
+
                     //TOCHECK old codes has this in it
                     $("#replies").empty();
+
                     //comment_data for get_comment_chain_API_request {creator, work, commenter, hash}
                     let comment_data = {
                         creator: TMP_STATE.selected_creator, // this is the work author/creator
@@ -518,6 +553,7 @@ function clickOnCommentByIndex(textIndex, evt) {
                         commenter: commenter,
                         hash: key,
                     };
+
                     // data_for_replybox {work, author, commentCreator: eppn, commentId: hash, commentType: type, evtPagex, evtPagey, evtCliemtY}
                     let data_for_replybox = {
                         work: TMP_STATE.selected_work,
@@ -529,34 +565,40 @@ function clickOnCommentByIndex(textIndex, evt) {
                         evtPageY: evt.pageY,
                         evtClientY: evt.clientY,
                     };
-                    console.log(comment_data, data_for_replybox);
 
                     (async () => {
                         let resp = await TMP_STATE.api_data.comments_data.get_comment_chain(
                             comment_data
                         );
+
                         readThreads(resp);
                     })();
+
                     removeCommentContextMenu();
+
                     TMP_UI.replybox_controller.displayReplyBox(
                         data_for_replybox
                     );
                 },
                 items: comments,
             });
+
             $("#context_container > *").show();
-        }
-        // only one comment exist
-        else {
+        } else {
+            // only one comment exist
+
             $("#replies").empty();
+
             TMP_STATE.commentBox_data;
             TMP_STATE.replyBox_data;
+
             let comment_data = {
                 creator: TMP_STATE.selected_creator, // this is the work author/creator
                 work: TMP_STATE.selected_work,
                 commenter: targetComments[0]["eppn"],
                 hash: targetComments[0]["hash"],
             };
+
             let data_for_replybox = {
                 work: TMP_STATE.selected_work,
                 author: TMP_STATE.selected_creator,
@@ -572,11 +614,13 @@ function clickOnCommentByIndex(textIndex, evt) {
                 let resp = await TMP_STATE.api_data.comments_data.get_comment_chain(
                     comment_data
                 );
+
                 readThreads(resp);
             })();
 
             TMP_UI.replybox_controller.displayReplyBox(data_for_replybox);
         }
+
         $(window).on("click", () => {
             removeCommentContextMenu();
         });
