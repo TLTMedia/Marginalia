@@ -329,10 +329,13 @@ export class InterfaceController {
      */
     append_work_dropdown(work) {
         const menu = $(this.class_constants.works_dropdown_menu);
+        let title = work;
+
+        title = title.replace(new RegExp("_", "g"), " ");
 
         const work_item = $("<option/>", {
             value: work,
-            text: work,
+            text: title,
         });
 
         menu.append(work_item);

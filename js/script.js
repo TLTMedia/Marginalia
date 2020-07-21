@@ -1,16 +1,37 @@
 /**
+ * READ ME:
+ * So once upon a time, some students at TLL starting developing this project.
+ * They did a lot of work... But all the javascript they did was in one big fat file 2,000+ lines long.
+ * They eventually quit and left this project half working.
+ *
+ * Then one day, Ilan Kleiman & David (Shih-Chuan) Lin were hired by Paul.
+ * The existing backend was 3-6 files each 3-10 lines long... We completely overhauled it to best our abilities.
+ * The frontend was a mess of 2,000+ lines that took forever to comprehend...
+ * (Protip: search through all the files for function names or html element id's and such to find it related calls.)
+ * Anyways, other than the below init() function, everything else in this file are remnants of the previous kids work.
+ * We (Ilan & David) refactored a shit load of code and added a ton more features... And we've even modified some of the existing code here.
+ * But the stuff that's here is mostly here because we never got around to refactoring it...
+ * These functions are "globally" scoped, thus they were called/needed by many other functions that we've now modularized...
+ * So, moving this stuff into modules isn't super straight forward since you gotta make sure the modularized code can access the functions later on.
+ * - Ilan, Tuesday, July 21st, 2020.
+ *
+ * PS: Why refactor it if it worked? Because it's globally scoped and that's not good (for many reasons).
+ * Also, b/c a lot of it didn't work, or didn't work the way we needed it to.
+ */
+
+/**
  * TODO: temporary global to hold our state in non-modularized deprecated functions that can't access state info.
  */
 var API;
 var TMP_STATE;
-//TODO TMP_UI will only be used for the filter update
+// TODO TMP_UI will only be used for the filter update
 var TMP_UI;
 
-/*
-  Hides the loading symbol
-  Loads the userdata obtained by the netID login
-  Loads the users folder and creates a button for each user
-*/
+/**
+ * Hides the loading symbol
+ * Loads the userdata obtained by the netID login
+ * Loads the users folder and creates a button for each user
+ */
 init = async ({ state = state, ui = ui, api = api }) => {
     /**
      * TODO: For legacy purposes...
@@ -147,10 +168,14 @@ function createWorkTitle(textChosen) {
     let workTitle = $("<div/>", {
         id: "workTitle",
     });
+
+    let title = decodeURIComponent(textChosen);
+
     let workTitleSpan = $("<span/>", {
         id: "workTitleSpan",
-        text: decodeURIComponent(textChosen),
+        text: title.replace(new RegExp("_", "g"), " "),
     });
+
     workTitle.append(workTitleSpan);
     //$("#text").append(workTitle);
     let tips = createTips();
