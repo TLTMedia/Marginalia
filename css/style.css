@@ -537,13 +537,16 @@ text[inputtype='inputFile'] {
 #textSpace {
     /* Width of a word document is approximately 595px */
     /* width: 595px; */
+    /*  */
     /* It was adding too many extra new lines, so I removed... */
     /* white-space: pre-line; */
     /* width: 60%; */
+    /*  */
     padding-top: 1%;
     padding-left: 1%;
     font-family: monospace;
     font-size: auto;
+    overflow: scroll;
 }
 
 #textSpace p {
