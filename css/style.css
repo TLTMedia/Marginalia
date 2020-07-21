@@ -1902,3 +1902,20 @@ input[type="file"] {
 #add-courses-admin-base {
     padding: 10px;
 }
+
+#writeDocText {
+    background-color: rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(0, 0, 0, 0.3);
+}
+
+#writeDocText {
+    width: 440px;
+}
+
+/* #writer-container {
+    width: 500px;
+    position: fixed;
+    top: 40%;
+    left: 50%;
+    z-index: 8;
+} */

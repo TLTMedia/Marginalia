@@ -455,20 +455,31 @@ $app->post("/create_work", function () use ($app, $PATH, $PATH_COURSES, $SKELETO
         "work", "privacy",
     ));
 
+    require "../Actions/Work.php";
+    $newWork = new CreateWork($PATH, $PATH_COURSES, $SKELETON_PATH);
+
     try {
         $tempFile = $_FILES["file"]["tmp_name"];
         $type     = $_FILES["file"]["type"];
     } catch (Exception $e) {
-        echo json_encode(array(
-            "status"  => "error",
-            "message" => "no file appears to have been uploaded",
-        ));
+
+        /**
+         * No file was uploaded, so instead treat it like it was raw text/html written & uploaded
+         */
+        echo $newWork->init(
+            "RAW",
+            $authUniqueId,
+            $data["work"],
+            $data["privacy"],
+            $data["course"],
+            $authFirstName,
+            $authLastName,
+            $data["file"],
+            null
+        );
 
         exit;
     }
-
-    require "../Actions/Work.php";
-    $newWork = new CreateWork($PATH, $PATH_COURSES, $SKELETON_PATH);
 
     if ($type == "application/pdf" || $type == "pdf") {
         echo $newWork->init(

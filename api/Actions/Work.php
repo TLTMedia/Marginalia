@@ -80,6 +80,9 @@ class CreateWork
 
     /**
      * General purpose initialization method that calls the private init functions.
+     *
+     * NOTE: $tmpFilePath is typically the path to the uploaded file.
+     * In the case of $type == "RAW", $tmpFilePath holds the actual contents of the work. (currently base64 encoded)
      */
     public function init($type, $creator, $work, $privacy, $course, $firstName, $lastName, $tmpFilePath, $mammothStyle)
     {
@@ -140,9 +143,143 @@ class CreateWork
             return $this->__initDocx($pathOfWork, $creator, $work, $privacy, $course, $firstName, $lastName, $tmpFilePath, $mammothStyle);
         } elseif ($type == "HTML") {
             return $this->__initHtml($pathOfWork, $creator, $work, $privacy, $course, $firstName, $lastName, $tmpFilePath);
+        } elseif ($type == "RAW") {
+            return $this->__initRaw($pathOfWork, $creator, $work, $privacy, $course, $firstName, $lastName, $tmpFilePath);
         } else {
             return null;
         }
+    }
+
+    /**
+     * HTML initialization function
+     */
+    private function __initRaw($pathOfWork, $creator, $work, $privacy, $course, $firstName, $lastName, $encodedRaw)
+    {
+        /**
+         * Decode the raw data
+         */
+        if (($rawData = base64_decode($encodedRaw)) == false) {
+            return json_encode(array(
+                "status"  => "error",
+                "message" => "unable to decode uploaded data",
+            ));
+        }
+
+        $decodedData = rawurldecode($rawData);
+
+        /**
+         * Write the contents to a file
+         */
+        if (file_put_contents($pathOfWork . "/original.html", $decodedData) == false) {
+            return json_encode(array(
+                "status"  => "error",
+                "message" => "unable to write data to original file for keeping",
+            ));
+        }
+
+        /**
+         * Destination path of the file
+         */
+        $destinationPath = $pathOfWork . "/index.html";
+
+        $dom = new DOMDocument();
+        $dom->loadHTML($decodedData);
+        $scriptTag = $dom->getElementsByTagName('script');
+        $styleTag  = $dom->getElementsByTagName('style');
+        $linkTag   = $dom->getElementsByTagName('link');
+        $metaTag   = $dom->getElementsByTagName('meta');
+        $remove    = array();
+
+        /**
+         * Build list of script tags to remove
+         */
+        foreach ($scriptTag as $item) {
+            $remove[] = $item;
+        }
+
+        /**
+         * Build list of style tags to remove
+         */
+        foreach ($styleTag as $item) {
+            $remove[] = $item;
+        }
+
+        /**
+         * Build list of link tags to remove
+         */
+        foreach ($linkTag as $item) {
+            $remove[] = $item;
+        }
+
+        /**
+         * Build list of meta tags to remove
+         */
+        foreach ($metaTag as $item) {
+            $remove[] = $item;
+        }
+
+        /**
+         * Remove the compiled list of elements from the DOM
+         */
+        foreach ($remove as $item) {
+            $item->parentNode->removeChild($item);
+        }
+
+        $html = $dom->saveHTML();
+
+        /**
+         * Save the raw html to it's new destination location
+         */
+        if (file_put_contents($destinationPath, $html) == false) {
+            return json_encode(array(
+                "status"  => "error",
+                "message" => "unable to save contents of cleansed file to destination location",
+            ));
+        }
+
+        /**
+         * Creating the default permissions.json file
+         */
+        require 'Permissions.php';
+        $permissions                     = new DefaultPermissions();
+        $permissions->public             = $privacy;
+        $permissions->admins[]           = $creator;
+        $permissions->creator_first_name = $firstName;
+        $permissions->creator_last_name  = $lastName;
+
+        if (file_put_contents($pathOfWork . "/permissions.json", json_encode($permissions)) == false) {
+            return json_encode(array(
+                "status"  => "error",
+                "message" => "unable to save/create permissions.json file for newly created work",
+            ));
+        }
+
+        /**
+         * Delete the existing symlink if it exists
+         */
+        if (is_link($this->coursesPath . $course . "/" . $creator . "###" . $work)) {
+            if (!unlink($this->coursesPath . $course . "/" . $creator . "###" . $work)) {
+                return json_encode(array(
+                    "status"  => "error",
+                    "message" => "unable to remove old symlink",
+                ));
+            }
+        }
+
+        /**
+         * Create a symlink in the correct course directory
+         */
+        if (!symlink($pathOfWork, $this->coursesPath . $course . "/" . $creator . "###" . $work)) {
+            return json_encode(array(
+                "status"  => "error",
+                "message" => "unable to place the directory in the specified course",
+            ));
+        }
+
+        return json_encode(array(
+            "status"  => "ok",
+            "message" => "successfully created work: " . $work,
+        ));
     }
 
     /**

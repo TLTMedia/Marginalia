@@ -42,6 +42,23 @@ export class MainMenuEvents {
             });
 
         /**
+         * Write literature button
+         */
+        $("#litwrite")
+            .off()
+            .on("click", async () => {
+                /**
+                 * Show the add-lit modal
+                 */
+                $("#write-lit-modal").modal({
+                    closeClass: "icon-remove",
+                    closeText: "!",
+                });
+
+                this.base_events.upload_events.preload_write();
+            });
+
+        /**
          * Show tutorial button
          */
         $("#tutorial")

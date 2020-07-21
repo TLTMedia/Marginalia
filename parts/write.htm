@@ -1,0 +1,92 @@
+<div id="writtenLitBase">
+    <div class="modal-header">Write a document</div>
+
+    <div class="nameContainer">
+        <span>Document Name: </span>
+        <div class="mdl-textfield mdl-js-textfield is-upgraded">
+            <input
+                id="addNameInput"
+                class="mdl-textfield__input"
+                type="text"
+                maxlength="100"
+            />
+            <label class="mdl-textfield__label" for="addNameInput"></label>
+        </div>
+
+        <br />
+    </div>
+
+    <div class="addLitCourseMenu">
+        <span id="addLitSelectedCourse">Course Section:</span>
+        <button
+            id="courseMenuButton"
+            class="smaller-upload-buttons input-custom-file mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored"
+        >
+            Pick Course
+            <!-- <input type="button" /> -->
+        </button>
+
+        <!-- <button id="courseMenuButton" class="mdl-button mdl-js-button mdl-button--icon">
+                <i class="material-icons">more_vert</i>
+            </button> -->
+        <ul
+            class="courseListForAddLit mdl-menu mdl-menu--bottom-left mdl-js-menu"
+            for="courseMenuButton"
+        ></ul>
+
+        <span id="upload-for-course"></span>
+    </div>
+
+    <div class="privateContainer">
+        Work Privacy:
+        <label
+            class="mdl-radio mdl-js-radio mdl-js-ripple-effect"
+            for="radio-is-public"
+        >
+            <input
+                type="radio"
+                id="radio-is-public"
+                class="mdl-radio__button"
+                name="privacy-options"
+                value="public"
+                checked
+            />
+            <span class="mdl-radio__label">Public</span>
+        </label>
+        <label
+            class="mdl-radio mdl-js-radio mdl-js-ripple-effect"
+            for="radio-is-private"
+        >
+            <input
+                type="radio"
+                id="radio-is-private"
+                class="mdl-radio__button"
+                name="privacy-options"
+                value="private"
+            />
+            <span class="mdl-radio__label">Private</span>
+        </label>
+
+        <br /><br />
+    </div>
+
+    <!-- <label
+        id="openWriterPage"
+        class="smaller-upload-buttons mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored"
+    >
+        Show Text Window
+    </label> -->
+
+    <!-- Page to have stuff written into -->
+    <div id="writer-container"></div>
+
+    <br /><br />
+
+    <label
+        id="addUploadButton"
+        class="smaller-upload-buttons mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored"
+    >
+        Upload
+    </label>
+    <br />
+</div>

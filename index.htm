@@ -134,12 +134,29 @@
                                     href="javascript:void(0);"
                                     >FAQ</a
                                 >
-                                <a
+                                <!-- <a
                                     class="mdl-navigation__link headerTab headerUpload"
                                     id="litadd"
                                     href="javascript:void(0);"
                                     >Add Document</a
+                                > -->
+                                <a
+                                    class="mdl-navigation__link headerTab headerUpload"
+                                    id="upload-options"
+                                    href="javascript:void(0);"
+                                    >Add Document</a
                                 >
+                                <ul
+                                    class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect"
+                                    for="upload-options"
+                                >
+                                    <li class="mdl-menu__item" id="litadd">
+                                        Upload a file
+                                    </li>
+                                    <li class="mdl-menu__item" id="litwrite">
+                                        Write document
+                                    </li>
+                                </ul>
                                 <!-- <a class="mdl-navigation__link headerTab headerUpload" id="courseadd">Add Course</a> -->
                                 <a
                                     class="mdl-navigation__link headerTab headerUpload"
@@ -310,6 +327,12 @@
                                 <div id="addLitBase"></div>
                             </div>
                             <!-- end add-lit-modal -->
+
+                            <!-- begin write-lit-modal -->
+                            <div id="write-lit-modal" class="modal">
+                                <div id="writeLitBase"></div>
+                            </div>
+                            <!-- end write-lit-modal -->
 
                             <!-- begin add-course-modal -->
                             <div id="add-course-modal" class="modal">
